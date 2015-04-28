@@ -1,0 +1,98 @@
+button:focus {
+	outline: 0 !important;
+}
+
+.clear {
+	clear: both;
+}
+
+.modal-content {
+	display: none;
+}
+
+.no_right_padding {
+	padding-right: 0;
+}
+
+.ajax-notice {
+	display: none;
+	margin-bottom: 10px;
+	text-align: center;
+}
+
+.starter-template {
+  padding: 0px 15px;
+  text-align: center;
+}
+
+.hidden {
+	display: none;
+}
+
+.inline-edit, .mass-actions {
+	display: none;
+}
+
+.modal {
+	position: absolute;
+}
+
+.modal-body {
+	overflow-y: scroll;
+	max-height: 500px;
+}
+
+.modal-content .select2-container {
+	width: 400px !important;
+}
+
+.modal-content .select2-container--default .select2-selection__choice {
+	background-color: #337ab7;
+	border: none;
+	color: #fff;
+}
+
+.modal-content .select2-container--default .select2-selection__choice .select2-selection__choice__remove {
+	color: #fff;
+}
+
+.modal-content .select2-container--default .select2-selection__choice .select2-selection__choice__remove:hover {
+	color: #d9534f;
+}
+
+.growl {
+	opacity: 1.0;
+	filter: alpha(opacity=100);
+	min-width: 200px;
+	min-height: 75px;
+}
+
+.growl.growl-error {
+	background: #d9534f;
+}
+
+.growl.growl-notice {
+	background: #5cb85c;
+}
+
+.growl.growl-warning {
+	background: #f0ad4e;
+}
+
+.title, .story, .buttons {
+	text-align: left;
+}
+
+.story, .buttons button {
+	font-size: 18px;
+}
+
+.story-row {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.level label {
+	font-weight: bold;
+	margin-right: 5px;
+}
