@@ -72,7 +72,7 @@
 					<div class="col-md-9">
 						<div class="story" data-bind="html: text"></div>
 					</div>
-					<div class="col-md-3 player-data" data-bind="if: $root.showPlayerData, css: { hidden: !$root.showPlayerData() }">
+					<div class="col-md-3 player-data" data-bind="css: { hidden: $data.hidePlayerData && $data.hidePlayerData == 1 }">
 						<div class="level">
 							<div class="stat-label">Level: </div><div class="value" data-bind="text: $root.player().data().level()"></div>
 							<div class="clear"></div>
@@ -87,13 +87,21 @@
 					<div class="col-md-3 location">Location: <span data-bind="text: $data.location || $root.location()"></span></div>
 					<div class="col-md-9"></div>
 				</div>
-				<!-- ko foreach: $data.buttons-->
+				<!-- ko foreach: $data.buttons -->
 				<div class="row buttons">
 					<div class="col-md-12 buttons" data-bind="foreach: $data">
 						<button type="button" class="btn btn-default" data-bind="click: $data.action, text: text"></button>
 					</div>
 				</div>
 				<!-- /ko -->
+			</div>
+
+			<div class="row" data-bind="css: { hidden: state.hideMap && state.hideMap == 1 }">
+				<div class="col-md-12">
+					<!--<table class="table" data-bind="html: $root.mapRenderHtml">
+					</table>-->
+					<canvas id="map" width="300" height="300"></canvas>
+				</div>
 			</div>
 
 		  </div>
@@ -103,21 +111,7 @@
 		<!-- Bootstrap core JavaScript
 		================================================== -->
 		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
-		<!--<script src="js/knockout-3.3.0.min.js"></script>-->
-		<script src="js/knockout-3.3.0.debug.js"></script>
-		<script src="js/knockout.mapping-latest.js"></script>
-		<!--<script src="js/typeahead-0.10.5.js"></script>-->
-		<script src="js/jquery-ui.min.js"></script>
-		<script src="js/jquery.caret.min.js"></script>
-		<script src="js/select2.min.js"></script>
-		<script src="js/jquery.growl.js"></script>
-		<script src="js/FileSaver.min.js"></script>
-
-		<!-- Other jQuery Plugins/Libraries -->
-
-		<script src="js/custom.js"></script>
+		<script src="js/require.js" data-main="js/main"></script>
 		<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 		<!--<script src="js/ie10-viewport-bug-workaround.js"></script>-->
 	</body>
