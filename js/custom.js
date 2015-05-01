@@ -6,65 +6,108 @@ var Game = function() {
 	var self = this;
 	
 	this.player = undefined;
-	this.stages = {
+	this.states = {
 		start: {
 			text: "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
 			buttons: [
-				{
-					text: "Let's bust outta here!",
-					action: function(){ self.setStage("d1"); }
-				},
-				/*{
-					text: "What is this?",
-					action: function(){ return self.showHelp.apply(this, arguments); }
-				}*/
-			]
+				[
+					{
+						text: "Let's bust outta here!",
+						action: function(){ self.setstate("d1"); }
+					},
+				],
+			],
+			location: "Unknown",
 		},
 		d1: {
 			text: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
 			buttons: [
-				{
-					text: "OH YEAH!!!",
-					action: function(){ self.setStage("d2"); }
-				},
-			]
+				[
+					{
+						text: "OH YEAH!!!",
+						action: function(){ self.setstate("d2"); }
+					},
+				],
+			],
+			location: "Unknown",
 		},
 		d2: {
 			text: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
 			buttons: [
-				{
-					text: "Continue",
-					action: function(){
-						self.initPlayer();
-						self.setStage("active", ".player-data");
-					}
-				},
-			]
+				[
+					{
+						text: "Continue",
+						action: function(){
+							self.initPlayer();
+							self.setstate("idle", function(){ self.showPlayerData(true); $(".player-data").fadeIn(); });
+						}
+					},
+				],
+			],
+			location: "Unknown",
 		},
-		active: {
+		idle: {
 			text: "<p>You decide to...</p>",
 			buttons: [
-				{
-					text: "Look for food",
-					action: function(){
-					}
-				},
-				{
-					text: "Check for predators",
-					action: function(){
-					}
-				},
-			]
+				[
+					{
+						text: "Look for food",
+						action: function(){
+						}
+					},
+					{
+						text: "Check for predators",
+						action: function(){
+						}
+					},
+				],
+				[
+					{
+						text: "Swim Left",
+						action: function(){
+							self.stageMap().movePlayerLeft();
+						}
+					},
+					{
+						text: "Swim Right",
+						action: function(){
+							self.stageMap().movePlayerRight();
+						}
+					},
+					{
+						text: "Swim Upstream",
+						action: function(){
+							self.stageMap().movePlayerUp();
+						}
+					},
+					{
+						text: "Swim Downstream",
+						action: function(){
+							self.stageMap().movePlayerDown();
+						}
+					},
+				]
+			],
+			location: "Midstream",
 		},
+	};
+
+	this.playerActions = {
+		checkForEnemies: function(){
+
+		},
+		checkForFood: function(){
+
+		}
 	};
 
 	this.initObservables = function(){
 		
 		self.showLoading = ko.observable(false);
-		self.currentStage = ko.observable("start");
-		self.stage = ko.computed(function(){
-			if(self.stages.hasOwnProperty(self.currentStage())){
-				return self.stages[self.currentStage()];				
+		self.currentstate = ko.observable("start");
+		self.state = ko.computed(function(){
+			if(self.states.hasOwnProperty(self.currentstate())){
+				return self.states[self.currentstate()];				
 			}
 			var no_slide =
 			{
@@ -80,30 +123,20 @@ var Game = function() {
 
 		});
 		self.player = ko.observable();
-		self.playerLevel = ko.observable();
-		self.playerHp = ko.observable();
-		self.playerEquipment = ko.observable();
-		self.playerAbilities = ko.observableArray();
-		self.playerInventory = ko.observableArray();
+		self.showPlayerData = ko.observable(false);
+		self.location = ko.observable();
+		self.stageMap = ko.observable(undefined);
 
 	}
 	
-	this.initPlayer = function(){
-		self.player(new Player());
-		self.playerLevel(self.player().level);
+	this.initPlayer = function(playerData){
+		self.player(new Player(playerData));
 	}
-	
-	this.setStage = function(stage, alsoShow){
-		$("#content-area").fadeOut(600, function(){
-			self.currentStage(stage);
-			$(this).fadeIn(undefined, function(){
-				$(alsoShow).removeClass("hidden").fadeIn();
-			});
-		});
-	}
-	
-	this.showHelp = function(stage, event){
-		console.log(arguments);
+
+	this.initGame = function(){
+		if(self.stageMap() == undefined){
+			self.stageMap(new Stage());
+		}
 	}
 
 	this.hideModal = function(viewModel, event){
@@ -111,57 +144,61 @@ var Game = function() {
 		$('#myModal').modal('hide');
 		$('#myModal .modal-content').hide();
 	}
-	
-	this.ajax = function(ajaxOpts){
-		
-		var completeCallback = ajaxOpts.complete;
-		ajaxOpts.complete = function(jqXHR, textStatus){
-			self.activeRequests( self.activeRequests() - 1 );
 
-			if(typeof completeCallback === 'function'){
-				completeCallback(jqXHR, textStatus);
-			}
-		}
-
-		var errorCallback = ajaxOpts.error;
-		ajaxOpts.error = function(jqXHR, textStatus, errorThrown){
-			self.activeRequests( self.activeRequests() - 1 );
-
-			var http_code = jqXHR.status,
-				http_code_text = jqXHR.statusText,
-				error_msg = jqXHR.responseText;
-			self.mostRecentAjaxFailure(http_code + ' ' + http_code_text + '. See console for details');
-			console.log(error_msg);
-
-			if(typeof errorCallback === 'function'){
-				errorCallback(jqXHR, textStatus, errorThrown);
-			}
-		}
-
-		self.activeRequests( self.activeRequests() + 1 );
-		$.ajax(ajaxOpts);
+	this.setstate = function(state, callback){
+		$("#content-area").fadeOut(600, function(){
+			self.currentstate(state);
+			$(this).fadeIn(undefined, function(){
+				if(typeof callback === 'function'){
+					callback();
+				}
+			});
+		});
 	}
 
-	/*this.debugLogDataStore = function(idx_start, idx_end){
-		if(idx_start === undefined && idx_end === undefined){
-			idx_start = 0;
-			idx_end = self.overviewDataStore().length - 1;
+	this.importData = function(){
+		$('#importSavedGame').click();
+	}
+
+	this.exportData = function(){
+
+		var exportData = self.getExportData();
+		var blob = new Blob([exportData], {type: "text/json;charset=utf-8"});
+		saveAs(blob, "export.json");
+
+	}
+
+	this.processFile = function(e){
+		var file = e.target.files[0];
+
+		var reader = new FileReader();
+		reader.onload = function(e){
+			var saveData = $.parseJSON(e.target.result);
+			self.initPlayer(saveData.player);
+			self.player(new Player(saveData.player));
+			self.showPlayerData(true);
+			self.currentstate(saveData.state);
 		}
-		idx_end = idx_end || idx_start;
+		reader.onerror = function(){
+			console.log(arguments);
+		}
 
-		var sliced = self.overviewDataStore.slice(idx_start, idx_end),
-			outputReadyList = Array();
-		$.each(sliced, function(idx, elem){
-			outputReadyList.push(ko.mapping.toJS(elem));
-		});
-		console.log(outputReadyList);
-	}*/
+		reader.readAsText(file);
+	}
 
-	this.mostRecentAjaxFailure = function(messageString){
+	this.getExportData = function(){
+		var exportObj = {
+			player: ko.mapping.toJS(self.player().data()),
+			state: self.currentstate(),
+		}
+		return JSON.stringify(exportObj);
+	}
+
+	this.failureMsg = function(messageString){
 		self.displayMessage(messageString, "error", "Oh no!", 8000);
 	}
 
-	this.mostRecentAjaxSuccess = function(messageString){
+	this.successMsg = function(messageString){
 		self.displayMessage(messageString, "notice", "Success");
 	}
 
@@ -169,9 +206,6 @@ var Game = function() {
 		type = type || "warning";
 
 		$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
-
-		//self.activeMessageType(type);
-		//self.activeMessage(messageString);
 	}
 
 	ko.bindingHandlers.showMessage = {
@@ -189,59 +223,200 @@ var Game = function() {
 	    }
 	};
 
-	this.messageTest = function(){
-		self.mostRecentAjaxSuccess("A Test Message");
-	}
 };
 
 var Player = function(playerData){
-	this.level = 1;
-	this.hp = 10;
-	this.inventory = Array();
-	this.equipment = {
-		headArmor : undefined,
-		finArmor : undefined,
-		bodyArmor : undefined,
-		tailArmor: undefined,
-		weapon : undefined,
-		shield : undefined,
-	};
-	this.abilities = Array();
+
+	//Init
+	var self = this;
+	playerData = playerData || {equipment: {}, skills: {}};
+
+	this.data = ko.observable({
+
+		level : ko.observable(playerData.level || 1),
+		hp : ko.observable(playerData.hp || 10),
+		inventory : ko.observableArray(playerData.inventory || Array()),
+		equipment : ko.observable({
+			headArmor : ko.observable(playerData.equipment.headArmor || undefined),
+			finArmor : ko.observable(playerData.equipment.finArmor || undefined),
+			bodyArmor : ko.observable(playerData.equipment.bodyArmor || undefined),
+			tailArmor: ko.observable(playerData.equipment.tailArmor || undefined),
+			weapon : ko.observable(playerData.equipment.weapon || undefined),
+			shield : ko.observable(playerData.equipment.shield || undefined),
+		}),
+		skills : ko.observable({
+			findEnemies: ko.observable(playerData.skills.findEnemies || 0),
+			findFood: ko.observable(playerData.skills.findFood || 0),
+		}),
+		abilities : ko.observableArray(playerData.abilities || Array()),
+
+	});
+	//End init
+
+	this.getData = function(){
+		return self.data();
+	}
 }
 
-var Response = function(responseData){
+var Item = function(data){
 
 	var self = this;
 
-	this.response = responseData;
+	this.name = data.name || "";
+	this.slotsRequired = data.slotsRequired || 0;
+}
 
-	this.isSuccess = function(){
-		return self.getStatus() == "success";
+var Weapon = function(data){
+
+	Item.call(this, data);
+
+	this.damageMin = data.damageMin || 0;
+	this.damageMax = data.damageMax || 1;
+}
+
+var Stage = function(genOpts, squareSize, playerPos){
+
+	var self = this;
+
+	$.extend(this.genOpts, {
+		percentEmpty : 50,
+		percentCombat : 50,
+		percentItem : 10,
+		percentEvent: 40,
+	}, (genOpts || {}));
+	this.squareSize = squareSize || 10;
+	this.playerPos = playerPos || [5, 5];
+
+	this.gridBounds = {
+		minX: 0,
+		maxX: self.squareSize,
+		minY: 0,
+		maxY: self.squareSize,
+	};
+
+	this.grid = Array();
+
+	this.setPlayerPos = function(x, y){
+		if(x == undefined || y == undefined){
+			return false;
+		}
+
+		if(x < this.gridBounds.minX || x > this.gridBounds.maxX || y < this.gridBounds.minY || y > this.gridBounds.maxY){
+			return false;
+		}
+
+		this.playerPos = [x,y];
+		return true;
 	}
 
-	this.isFail = function(){
-		return self.getStatus() == "fail";
+	this.getPlayerPos = function(axis){
+		if(axis){
+			if(axis == "x"){
+				return this.playerPos[0];
+			}else if(axis == "y"){
+				return this.playerPos[1];
+			}
+			return false;
+		}
+		return {
+			x: this.playerPos[0],
+			y: this.playerPos[1],
+		}
 	}
 
-	this.isError = function(){
-		return self.getStatus() == "error";
+	this.movePlayerLeft = function(numSquares){
+		return self.movePlayer("left", numSquares);
 	}
 
-	this.getStatus = function(){
-		return self.response.status;
+	this.movePlayerRight = function(numSquares){
+		return self.movePlayer("right", numSquares);
 	}
 
-	this.getErrorMsg = function(){
-		return self.response.message;
+	this.movePlayerUp = function(numSquares){
+		return self.movePlayer("up", numSquares);
 	}
 
-	this.getData = function(){
-		return self.response.data;
+	this.movePlayerDown = function(numSquares){
+		return self.movePlayer("down", numSquares);
 	}
 
-	this.getGameData = function(){
-		return self.getData()["games"];
+	this.movePlayer = function(direction, numSquares){
+		numSquares = numSquares || 1;
+
+		if(direction == undefined){
+			return false;
+		}
+
+		var targetX = self.getPlayerPos("x");
+		var targetY = self.getPlayerPos("y");
+
+		if(direction == "left" || direction == "right"){
+
+			if(direction == "left"){
+				targetX = self.playerPos[0] - numSquares;
+				targetX = (targetX >= this.gridBounds.minX) ? targetX : this.gridBounds.minX ;
+				
+			}else if(direction == "right"){
+				targetX = self.playerPos[0] + numSquares;
+				targetX = (targetX <= this.gridBounds.maxX) ? targetX : this.gridBounds.maxX ;
+			}
+
+		}else{
+
+			if(direction == "up"){
+				targetY = self.playerPos[1] - numSquares;
+				targetY = (targetY >= this.gridBounds.minY) ? targetY : this.gridBounds.minY ;
+			}else if(direction == "down"){
+				targetY = self.playerPos[1] + numSquares;
+				targetY = (targetY >= this.gridBounds.maxY) ? targetY : this.gridBounds.maxY ;
+			}
+
+		}
+
+		self.setPlayerPos(targetX, targetY);
+
+		return this.getPlayerPos();
 	}
+
+	this.getSquare = function(x, y){
+		if(x == undefined || y == undefined){
+			return false;
+		}
+		return self.grid[x][y];
+	}
+
+	this._generateGrid = function(){
+		for(x = self.gridBounds.minX; x <= self.gridBounds.maxX; x++){
+			for(y = self.gridBounds.minY; y <= self.gridBounds.maxY; y++){
+				if(self.grid[x] == undefined){
+					self.grid[x] = Array();
+				}
+				self.grid[x][y] = new GridSquare(x,y);
+			}
+		}
+	}
+
+	this._populateGrid = function(genOpts){
+
+	}
+
+}
+
+var GridSquare = function(x, y, type){
+
+	if(x == undefined || y == undefined){
+		return false;
+	}
+
+	var self = this;
+	this.x = x;
+	this.y = y;
+	this.type = type;
+
+	this.setType = function(type){
+		self.type = type;
+	}
+	
 }
 
 $(document).ready(function(){
@@ -249,18 +424,17 @@ $(document).ready(function(){
 	gameViewModel = new Game();
 	gameViewModel.initObservables();
 	ko.applyBindings(gameViewModel);
+	gameViewModel.initGame();
 	
+	$('#importSavedGame').change(function(e){
+		gameViewModel.processFile(e);
+	});
+
+	//Show our content now that everything's loaded
 	$("#content-area").removeClass("hidden");
-
-	//Initialize correct tab based on hash
-	//window.location.hash = window.location.hash || "home";
-
-	var hash = window.location.hash;
-	//gameViewModel.activeTab(hash.replace(/^#/, ''));
 	
 });
 
-$(window).on('hashchange', function(){
-	var hash = window.location.hash;
-	//gameViewModel.activeTab(hash.replace(/^#/, ''));
-});
+rand = function(min, max){
+	return Math.floor(Math.random() * (max - min)) + min;
+}

@@ -61,28 +61,43 @@
 
 			<div class="loading-indicator hidden" data-bind="visible: showLoading(), css: { hidden: false }" ><img src="img/ajax-loader.gif" /></div>
 
-			<div class="row">
-				<div class="col-md-12"><h2 class="title">Sturgeon Simulator</h2></div>
+			<div class="row header">
+				<div class="col-md-10"><h2 class="title">Sturgeon Simulator</h2></div>
+				<div class="col-md-1"><button type="button" class="btn btn-default" data-bind="click: importData">Import</button></div>
+				<div class="col-md-1"><button type="button" class="btn btn-default" data-bind="click: exportData">Export</button></div>
 			</div>
 			
-			<div id="content-area" class="hidden" data-bind="with: stage">
+			<div id="content-area" class="hidden" data-bind="with: state">
 				<div class="row story-row">
-					<div class="col-md-6">
+					<div class="col-md-9">
 						<div class="story" data-bind="html: text"></div>
 					</div>
-					<div class="col-md-6 player-data hidden">
-						<div data-bind="if: $root.playerLevel" class="level"><label>Level: </label><span data-bind="text: $root.playerLevel"></span></div>
+					<div class="col-md-3 player-data" data-bind="if: $root.showPlayerData, css: { hidden: !$root.showPlayerData() }">
+						<div class="level">
+							<div class="stat-label">Level: </div><div class="value" data-bind="text: $root.player().data().level()"></div>
+							<div class="clear"></div>
+						</div>
+						<div class="hp">
+							<div class="stat-label">HP: </div><div class="value" data-bind="text: $root.player().data().hp()"></div>
+							<div class="clear"></div>
+						</div>
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-md-12 buttons" data-bind="foreach: $data.buttons">
+					<div class="col-md-3 location">Location: <span data-bind="text: $data.location || $root.location()"></span></div>
+					<div class="col-md-9"></div>
+				</div>
+				<!-- ko foreach: $data.buttons-->
+				<div class="row buttons">
+					<div class="col-md-12 buttons" data-bind="foreach: $data">
 						<button type="button" class="btn btn-default" data-bind="click: $data.action, text: text"></button>
 					</div>
 				</div>
+				<!-- /ko -->
 			</div>
 
 		  </div>
-
+		  <input class="file-upload" type="file" name="Import Saved Game" id="importSavedGame" accept=".json" />
 		</div><!-- /.container -->
 
 		<!-- Bootstrap core JavaScript
@@ -95,10 +110,10 @@
 		<script src="js/knockout.mapping-latest.js"></script>
 		<!--<script src="js/typeahead-0.10.5.js"></script>-->
 		<script src="js/jquery-ui.min.js"></script>
-		<script src="js/bootstrap-datepicker.min.js"></script>
 		<script src="js/jquery.caret.min.js"></script>
 		<script src="js/select2.min.js"></script>
 		<script src="js/jquery.growl.js"></script>
+		<script src="js/FileSaver.min.js"></script>
 
 		<!-- Other jQuery Plugins/Libraries -->
 

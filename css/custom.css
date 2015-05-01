@@ -79,11 +79,15 @@ button:focus {
 	background: #f0ad4e;
 }
 
+.header button {
+	margin-top: 20px;
+}
+
 .title, .story, .buttons {
 	text-align: left;
 }
 
-.story, .buttons button {
+.story, .buttons button, .location {
 	font-size: 18px;
 }
 
@@ -92,7 +96,32 @@ button:focus {
 	margin-bottom: 20px;
 }
 
-.level label {
+.buttons {
+	margin-bottom: 5px;
+}
+
+.player-data > div > div.stat-label,
+.player-data > div > div.value {
+	float: left;
+	font-size: 14px;
+}
+
+.player-data > div > div.stat-label {
 	font-weight: bold;
-	margin-right: 5px;
+	text-align: right;
+	width: 50px;
+	padding-top: 2px;
+}
+
+.player-data > div > div.value {
+	margin-left: 5px;
+}
+
+.location {
+	text-align: left;
+	margin-bottom: 10px;
+}
+
+.file-upload {
+	visibility: hidden;
 }
