@@ -408,8 +408,35 @@ var Stage = function(genOpts, squareSize, playerPos){
 			3 , 4
 		*/
 		for(q=0; q < 4; q++){
+			
+			var numNonEmpty = 0;
 
 			var bounds = self._getQuadBounds(q);
+			
+			for(x = bounds.minX; x <= bounds.maxX; x++){
+				for(y = bounds.minY; y <= bounds.maxY; y++){
+					
+					var type = "empty";
+					
+					if(rand(0,99) < 50 && numNonEmpty <= genOpts.maxNonEmptyPerQuad){
+						
+/*
+		percentEmpty : 50,
+		percentCombat : 50,
+		percentItem : 10,
+		percentEvent: 40,
+		minNonEmptyPerQuad: 3,
+		maxNonEmptyPerQuad: 10,
+*/
+						
+						numNonEmpty++;
+					}
+					
+					
+					
+					self.grid[x][y].setType();
+				}
+			}
 
 		}
 	}
@@ -422,14 +449,19 @@ var Stage = function(genOpts, squareSize, playerPos){
 			minY : undefined,
 			maxY : undefined,
 		};
+		
+		var medX = Math.floor(this.gridBounds.maxX / 2);
+		var medY = Math.floor(this.gridBounds.maxY / 2);;
 
 		if( quadNum == 1 ){
 
 			if(self.bounds[1] == undefined){
+				
 				bounds.minX = this.gridBounds.minX;
+				bounds.maxX = medX;
 				bounds.minY = this.gridBounds.minY;
-				bounds.maxX = Math.floor(this.gridBounds.maxX / 2);
-				bounds.maxY = Math.floor(this.gridBounds.maxY / 2);
+				bounds.maxY = medY;
+				
 				self.bounds[1] = bounds;
 				return self.bounds[1];
 			}else{
@@ -437,14 +469,29 @@ var Stage = function(genOpts, squareSize, playerPos){
 			}
 
 		}else if( quadNum == 2 ){
-
+			
+			if(self.bounds[2] == undefined){
+				
+				bounds.minX = medX;
+				bounds.maxX = this.gridBounds.maxX;
+				bounds.minY = this.gridBounds.minY;
+				bounds.maxY = medY;
+				
+				self.bounds[2] = bounds;
+				return self.bounds[2];
+			}else{
+				return self.bounds[2];
+			}
+			
 		}else if( quadNum == 3 ){
 
 			if(self.bounds[3] == undefined){
-				bounds.minX = self._getQuadBounds(1).maxX + 1;
-				bounds.minY = self._getQuadBounds(1).maxY + 1;
-				bounds.maxX = Math.floor(this.gridBounds.maxX);
-				bounds.maxY = Math.floor(this.gridBounds.maxY);
+				
+				bounds.minX = this.gridBounds.minX;
+				bounds.maxX = medX;
+				bounds.minY = medY;
+				bounds.maxY = this.gridBounds.maxY;
+				
 				self.bounds[3] = bounds;
 				return self.bounds[3];
 			}else{
@@ -452,8 +499,22 @@ var Stage = function(genOpts, squareSize, playerPos){
 			}
 
 		}else if( quadNum == 4 ){
-
+			
+			if(self.bounds[4] == undefined){
+				
+				bounds.minX = medX;
+				bounds.maxX = this.gridBounds.maxX;
+				bounds.minY = medY;
+				bounds.maxY = this.gridBounds.maxY;
+				
+				self.bounds[4] = bounds;
+				return self.bounds[4];
+			}else{
+				return self.bounds[4];
+			}
 		}
+		
+		return false;
 
 	}
 
