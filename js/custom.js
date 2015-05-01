@@ -283,6 +283,8 @@ var Stage = function(genOpts, squareSize, playerPos){
 		percentCombat : 50,
 		percentItem : 10,
 		percentEvent: 40,
+		minNonEmptyPerQuad: 3,
+		maxNonEmptyPerQuad: 10,
 	}, (genOpts || {}));
 	this.squareSize = squareSize || 10;
 	this.playerPos = playerPos || [5, 5];
@@ -293,6 +295,8 @@ var Stage = function(genOpts, squareSize, playerPos){
 		minY: 0,
 		maxY: self.squareSize,
 	};
+
+	this.quadBounds = {};
 
 	this.grid = Array();
 
@@ -397,6 +401,59 @@ var Stage = function(genOpts, squareSize, playerPos){
 	}
 
 	this._populateGrid = function(genOpts){
+		//Generate things a quad at a time
+		/*
+			//Quad order is:
+			1 , 2
+			3 , 4
+		*/
+		for(q=0; q < 4; q++){
+
+			var bounds = self._getQuadBounds(q);
+
+		}
+	}
+
+	this._getQuadBounds = function(quadNum) {
+
+		var bounds = {
+			minX : undefined,
+			maxX : undefined,
+			minY : undefined,
+			maxY : undefined,
+		};
+
+		if( quadNum == 1 ){
+
+			if(self.bounds[1] == undefined){
+				bounds.minX = this.gridBounds.minX;
+				bounds.minY = this.gridBounds.minY;
+				bounds.maxX = Math.floor(this.gridBounds.maxX / 2);
+				bounds.maxY = Math.floor(this.gridBounds.maxY / 2);
+				self.bounds[1] = bounds;
+				return self.bounds[1];
+			}else{
+				return self.bounds[1];
+			}
+
+		}else if( quadNum == 2 ){
+
+		}else if( quadNum == 3 ){
+
+			if(self.bounds[3] == undefined){
+				bounds.minX = self._getQuadBounds(1).maxX + 1;
+				bounds.minY = self._getQuadBounds(1).maxY + 1;
+				bounds.maxX = Math.floor(this.gridBounds.maxX);
+				bounds.maxY = Math.floor(this.gridBounds.maxY);
+				self.bounds[3] = bounds;
+				return self.bounds[3];
+			}else{
+				return self.bounds[3];
+			}
+
+		}else if( quadNum == 4 ){
+
+		}
 
 	}
 
