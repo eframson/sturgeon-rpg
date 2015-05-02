@@ -81,7 +81,18 @@
 							<div class="stat-label">HP: </div><div class="value" data-bind="text: $root.player().data().hp()"></div>
 							<div class="clear"></div>
 						</div>
+						<div class="inventory" data-bind="if: $root.player().data().inventory().length > 0">
+							<div class="stat-label">Inventory: </div><div class="value"></div>
+							<div class="clear"></div>
+							<!-- ko foreach: $root.player().data().inventory() -->
+								<div class="stat-label"><div class="clear"></div></div><div class="value" data-bind="text: $data.name + ' (' + $data.qty() + ')'"></div>
+							<!-- /ko -->
+							<div class="clear"></div>
+						</div>
 					</div>
+				</div>
+				<div class="row last-action-message">
+					<div class="col-md-12"><span data-bind="text: $root.lastActionMessage()"></span></div>
 				</div>
 				<div class="row">
 					<div class="col-md-3 location">Location: <span data-bind="text: $data.location || $root.location()"></span></div>
@@ -90,7 +101,7 @@
 				<!-- ko foreach: $data.buttons -->
 				<div class="row buttons">
 					<div class="col-md-12 buttons" data-bind="foreach: $data">
-						<button type="button" class="btn btn-default" data-bind="click: $data.action, text: text"></button>
+						<button type="button" class="btn btn-default" data-bind="click: $data.action, text: (typeof text === 'function' ? text() : text ), css: (typeof css === 'function' ? css() : {} )"></button>
 					</div>
 				</div>
 				<!-- /ko -->
@@ -99,14 +110,14 @@
 			<div class="row map-container hidden" data-bind="css: { hidden: $root.state() && $root.state().hideMap }">
 				<div class="col-md-6 map-buttons">
 					<div class="up">
-						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerUp(); $root.drawMap(); }">Swim Upstream</button>
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.movePlayerUp(); $root.level().drawMap(); }">Swim Upstream</button>
 					</div>
 					<div>
-						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerLeft(); $root.drawMap(); }">Swim Left</button>
-						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerRight(); $root.drawMap(); }">Swim Right</button>
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.movePlayerLeft(); $root.level().drawMap(); }">Swim Left</button>
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.movePlayerRight(); $root.level().drawMap(); }">Swim Right</button>
 					</div>
 					<div class="down">
-						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerDown(); $root.drawMap(); }">Swim Downstream</button>
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.movePlayerDown(); $root.level().drawMap(); }">Swim Downstream</button>
 					</div>
 				</div>
 				<div class="col-md-6 map">

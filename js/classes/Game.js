@@ -3,9 +3,10 @@ define([
 	'knockout',
 	'classes/Player',
 	'classes/Level',
+	'classes/Item',
 
 	'Utils',
-], function($, ko, Player, Level){
+], function($, ko, Player, Level, Item){
 
 	var Game = function() {
 
@@ -60,20 +61,44 @@ define([
 					
 				},
 				afterRender : function(){
-					self.drawMap();
+					self.level().drawMap();
 				},
 				text: "<p>You decide to...</p>",
 				buttons: [
 					[
 						{
-							text: "Look for food",
+							text: function(){
+								var text = "Look for food";
+								if(self.player().data().skillCooldowns().findFood()){
+									text += " (cooldown: " + self.player().data().skillCooldowns().findFood() + ")";
+								}
+								return text;
+							},
 							action: function(){
-							}
+								self.playerActions.checkForFood();
+							},
+							css: function(){
+								return {
+									disabled : self.player().data().skillCooldowns().findFood() > 0
+								}
+							},
 						},
 						{
-							text: "Check for predators",
+							text: function(){
+								var text = "Check for predators";
+								if(self.player().data().skillCooldowns().findEnemies()){
+									text += " (cooldown: " + self.player().data().skillCooldowns().findEnemies() + ")";
+								}
+								return text;
+							},
 							action: function(){
-							}
+								self.playerActions.checkForEnemies();
+							},
+							css: function(){
+								return {
+									disabled : self.player().data().skillCooldowns().findEnemies() > 0
+								}
+							},
 						},
 					],
 				],
@@ -81,12 +106,26 @@ define([
 			},
 		};
 
+		this.defaultCooldown = 10;
 		this.playerActions = {
 			checkForEnemies: function(){
-
+				self.player().data().skillCooldowns().findEnemies(self.defaultCooldown);
+				self.level().scanNearPlayer( self.player().data().skills().findEnemies() );
+				self.player().data().skillProgress().findEnemies( self.player().data().skillProgress().findEnemies() + 1 );
+				self.lastActionMessage("You scan your surroundings using your fish-powers!");
 			},
 			checkForFood: function(){
 
+				self.player().data().skillCooldowns().findFood(self.defaultCooldown);
+				self.player().data().skillProgress().findFood( self.player().data().skillProgress().findFood() + 1 );
+				var message = "";
+				if(rand(0,9) < (self.player().data().skills().findFood() * 2)){
+					self.addFoodToPlayerInventory();
+					message = "You gracefully float to the bottom of the river and successfully scrounge up some fish biscuits using your kick-ass mouth feelers.";
+				}else{
+					message = "You try to delicately float to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
+				}
+				self.lastActionMessage(message);
 			}
 		};
 
@@ -103,18 +142,7 @@ define([
 			self.showPlayerData = ko.observable(false);
 			self.location = ko.observable();
 			self.level = ko.observable(undefined);
-			self.mapForRender = ko.observableArray();
-			self.mapRenderHtml = ko.computed(function(){
-				/*var html = '';
-				$.each(self.mapForRender(), function(row_num, row){
-					html+="<tr>";
-					$.each(row, function(col_num, cell){
-						html+="<td>" + cell.type + "</td>";
-					});
-					html+="</tr>";
-				});
-				return html;*/
-			});
+			self.lastActionMessage = ko.observable("");
 
 		}
 		
@@ -135,8 +163,8 @@ define([
 			}else{
 				level = new Level();
 				player = new Player();
-				//stateID = "start";
-				stateID = "idle";
+				stateID = "start";
+				//stateID = "idle";
 			}
 			self.level(level);
 			self.player(player);
@@ -151,6 +179,17 @@ define([
 			lvlData = lvlData || {};
 			self.level(new Level(lvlNum, lvlData));
 		}
+		
+		this.addFoodToPlayerInventory = function(){
+			var qty = self.player().data().skills().findFood();
+			var food = new Item({
+				id : 'biscuit_food',
+				name : "Fish Biscuits",
+				type : "food",
+				qty : qty,
+			});
+			self.player().addItemToInventory(food);
+		}
 
 		this.loadFromData = function(gameData){
 			if(gameData == undefined){
@@ -158,6 +197,44 @@ define([
 			}
 
 			self.initGame(gameData);
+		}
+		
+		this.movePlayerUp = function(){
+			self.movePlayer("up");
+		}
+		
+		this.movePlayerDown = function(){
+			self.movePlayer("down");
+		}
+		
+		this.movePlayerLeft = function(){
+			self.movePlayer("left");
+		}
+		
+		this.movePlayerRight = function(){
+			self.movePlayer("right");
+		}
+		
+		this.movePlayer = function(direction){
+			
+			var currentPos = self.level().getPlayerPos();
+			var newPos = self.level().movePlayer(direction, self.player().data().speed());
+			
+			if(currentPos.x != newPos.x || currentPos.y != newPos.y){
+				self.updateCooldowns();
+				self.player().data().skillProgress().speed( self.player().data().skillProgress().speed() + 1 );
+			}
+			self.lastActionMessage("");			
+			
+		}
+		
+		this.updateCooldowns = function(){
+			$.each(self.player().data().skillCooldowns(), function(skill, cooldown){
+				var cooldownValue = cooldown();
+				if(cooldownValue > 0){
+					cooldown(cooldownValue - 1);
+				}
+			});
 		}
 
 		this.hideModal = function(viewModel, event){
@@ -245,77 +322,6 @@ define([
 				level: self.currentLevel(),
 			}
 			return JSON.stringify(exportObj);
-		}
-
-		this.drawMap = function(){
-
-			//var $map = $("#map");
-			var canvas = document.getElementById("map-canvas");
-			var context = canvas.getContext("2d");
-			var totalWidth = canvas.width;
-			var totalHeight = canvas.height;
-
-			//Obviously hook these up better, derp
-			var squareWidth = Math.floor(totalWidth / (self.level().gridBounds.maxX + 1));
-			var squareHeight = Math.floor(totalHeight / (self.level().gridBounds.maxY + 1));
-
-			//RESET THE CANVAS EACH TIME
-			// Store the current transformation matrix
-			context.save();
-
-			// Use the identity matrix while clearing the canvas
-			context.setTransform(1, 0, 0, 1, 0, 0);
-			context.clearRect(0, 0, canvas.width, canvas.height);
-
-			// Restore the transform
-			context.restore();
-
-			var lightFill = '#658DA6';
-			var darkFill = '#436073';
-			var playerColor = '#D36600';
-			var playerPos = self.level().getPlayerPos();
-			
-			console.log(self.level().grid);
-
-			$.each(self.level().grid, function(row_num, row){
-
-				var odd_row = row_num % 2;
-
-				$.each(row, function(col_num, cell){
-
-					var fillStyle;
-
-					if(odd_row){
-
-						if(col_num % 2){
-							fillStyle = lightFill;
-						}else{
-							fillStyle = darkFill;
-						}
-						
-					}else{
-						if(col_num % 2){
-							fillStyle = darkFill;
-						}else{
-							fillStyle = lightFill;
-						}
-					}
-
-					context.fillStyle = fillStyle;
-					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
-
-				});
-			});
-
-			var midSquare = squareWidth / 2;
-			context.beginPath();
-	        var radius = midSquare; // Arc radius
-	        var startAngle = 0; // Starting point on circle
-	        var endAngle = Math.PI+(Math.PI*2)/2; // End point on circle
-	        context.fillStyle = playerColor;
-	        context.arc((playerPos.x * squareHeight) + midSquare, (playerPos.y * squareWidth) + midSquare, radius, startAngle, endAngle);
-	        context.fill();
-
 		}
 
 		self.init();

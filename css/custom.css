@@ -109,11 +109,15 @@ button:focus {
 .player-data > div > div.stat-label {
 	font-weight: bold;
 	text-align: right;
-	width: 50px;
+	width: 70px;
 }
 
 .player-data > div > div.value {
 	margin-left: 5px;
+}
+
+.last-action-message {
+	text-align: left;
 }
 
 .location {

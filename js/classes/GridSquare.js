@@ -5,7 +5,7 @@ define([
 	'Utils',
 ], function($, ko){
 
-	var GridSquare = function(x, y, type, isVisible){
+	var GridSquare = function(x, y, type, isVisible, isScanned){
 
 		if(x == undefined || y == undefined){
 			return false;
@@ -16,6 +16,7 @@ define([
 		this.y = y;
 		this.type = type;
 		this.isVisible = isVisible || false;
+		this.isScanned = isScanned || false;
 
 		this.setType = function(type){
 			self.type = type;
@@ -23,6 +24,10 @@ define([
 
 		this.setVisibility = function(isVisible){
 			this.isVisible = isVisible;
+		}
+		
+		this.setScanned = function(isScanned){
+			this.isScanned = isScanned;			
 		}
 		
 	}

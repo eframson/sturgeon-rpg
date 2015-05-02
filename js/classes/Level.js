@@ -6,7 +6,7 @@ define([
 	'Utils',
 ], function($, ko, GridSquare){
 
-	var Level = function(genOpts, numSquares, playerPos){
+	var Level = function(genOpts, numSquares, playerPos, levelNum, playerVision){
 
 		var self = this;
 
@@ -23,6 +23,8 @@ define([
 		}, (genOpts || {}));
 		this.numSquares = numSquares || 10;
 		this.playerPos = playerPos || [4, 4];
+		this.playerVision = playerVision || 1;
+		this.levelNum = levelNum || 1;
 
 		this.gridBounds = {
 			minX: 0,
@@ -120,10 +122,17 @@ define([
 			}
 
 			self.setPlayerPos(targetX, targetY);
+			
+			self._revealSquaresNearPlayer();
 
 			console.log(this.getPlayerPos());
 
 			return this.getPlayerPos();
+		}
+		
+		this.scanNearPlayer = function(scanDist){
+			self._revealSquaresNearPlayer(scanDist);
+			self.drawMap();
 		}
 
 		this.getSquare = function(x, y){
@@ -131,6 +140,146 @@ define([
 				return false;
 			}
 			return self.grid[x][y];
+		}
+		
+		this.drawMap = function(){
+
+			//var $map = $("#map");
+			var canvas = document.getElementById("map-canvas");
+			var context = canvas.getContext("2d");
+			var totalWidth = canvas.width;
+			var totalHeight = canvas.height;
+
+			//Obviously hook these up better, derp
+			var squareWidth = Math.floor(totalWidth / (self.gridBounds.maxX + 1));
+			var squareHeight = Math.floor(totalHeight / (self.gridBounds.maxY + 1));
+
+			//RESET THE CANVAS EACH TIME
+			// Store the current transformation matrix
+			context.save();
+
+			// Use the identity matrix while clearing the canvas
+			context.setTransform(1, 0, 0, 1, 0, 0);
+			context.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Restore the transform
+			context.restore();
+
+			var lightFill = '#658DA6';
+			var darkFill = '#436073';
+			var playerColor = '#D36600';
+			var combatColor = '#FF8585';
+			var itemColor = '#FFE240';
+			var eventColor = '#B92EFF';
+			var playerPos = self.getPlayerPos();
+			
+			console.log(self.grid);
+
+			$.each(self.grid, function(row_num, row){
+
+				var odd_row = row_num % 2;
+
+				$.each(row, function(col_num, cell){
+
+					var fillStyle = "#FFFFFF";
+					var square = self.getSquare(col_num, row_num);
+					
+					if(square.isScanned){
+						
+						if(square.type == "combat"){
+							fillStyle = combatColor;
+						}else if(square.type == "item"){
+							fillStyle = itemColor;
+						}else if(square.type == "event"){
+							fillStyle = eventColor;
+						}else{
+
+							if(odd_row){
+		
+								if(col_num % 2){
+									fillStyle = lightFill;
+								}else{
+									fillStyle = darkFill;
+								}
+								
+							}else{
+								if(col_num % 2){
+									fillStyle = darkFill;
+								}else{
+									fillStyle = lightFill;
+								}
+							}
+
+						}
+						
+					}else if(square.isVisible){
+
+						if(odd_row){
+	
+							if(col_num % 2){
+								fillStyle = lightFill;
+							}else{
+								fillStyle = darkFill;
+							}
+							
+						}else{
+							if(col_num % 2){
+								fillStyle = darkFill;
+							}else{
+								fillStyle = lightFill;
+							}
+						}
+						
+					}
+
+					context.fillStyle = fillStyle;
+					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
+
+				});
+			});
+
+			var midSquare = squareWidth / 2;
+			context.beginPath();
+	        var radius = midSquare; // Arc radius
+	        var startAngle = 0; // Starting point on circle
+	        var endAngle = Math.PI+(Math.PI*2)/2; // End point on circle
+	        context.fillStyle = playerColor;
+	        context.arc((playerPos.x * squareHeight) + midSquare, (playerPos.y * squareWidth) + midSquare, radius, startAngle, endAngle);
+	        context.fill();
+
+		}
+		
+		this.setPlayerVision = function(visionRange){
+			self.playerVision = visionRange;
+		}
+		
+		this._revealSquaresNearPlayer = function(scanDist){
+			scanDist = (scanDist) ? scanDist : 0 ;
+			var playerPos = self.getPlayerPos();
+			var startX = ( (playerPos.x - self.playerVision) >= self.gridBounds.minX ) ? playerPos.x - self.playerVision : self.gridBounds.minX ;
+			var startY = ( (playerPos.y - self.playerVision)  >= self.gridBounds.minY ) ? playerPos.y - self.playerVision : self.gridBounds.minY ;
+			var endX = ( (playerPos.x + self.playerVision) <= self.gridBounds.maxX ) ? playerPos.x + self.playerVision : self.gridBounds.maxX ;
+			var endY = ( (playerPos.y + self.playerVision)  <= self.gridBounds.maxY ) ? playerPos.y + self.playerVision : self.gridBounds.maxY ;
+			
+			for(r = startY; r <= endY; r++){
+				for(c = startX; c <= endX; c++){
+					self.getSquare(c, r).setVisibility(true);
+				}
+			}
+			
+			if(scanDist){
+				
+				startX = ( (playerPos.x - scanDist) >= self.gridBounds.minX ) ? playerPos.x - scanDist : self.gridBounds.minX ;
+				startY = ( (playerPos.y - scanDist)  >= self.gridBounds.minY ) ? playerPos.y - scanDist : self.gridBounds.minY ;
+				endX = ( (playerPos.x + scanDist) <= self.gridBounds.maxX ) ? playerPos.x + scanDist : self.gridBounds.maxX ;
+				endY = ( (playerPos.y + scanDist)  <= self.gridBounds.maxY ) ? playerPos.y + scanDist : self.gridBounds.maxY ;
+				
+				for(r = startY; r <= endY; r++){
+					for(c = startX; c <= endX; c++){
+						self.getSquare(c, r).setScanned(true);
+					}
+				}				
+			}
 		}
 
 		this._generateGrid = function(){
@@ -152,6 +301,7 @@ define([
 				3 , 4
 			*/
 			var genOpts = self.genOpts;
+			var playerPos = self.getPlayerPos();
 
 			for(q=1; q <= 4; q++){
 				
@@ -186,6 +336,10 @@ define([
 						}
 						
 						self.grid[x][y].setType(type);
+						
+						if( Math.abs(playerPos.x - x) <= 1 && Math.abs(playerPos.y - y) <= 1 ){
+							self.grid[x][y].setVisibility(true);							
+						}
 					}
 				}
 
