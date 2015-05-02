@@ -76,36 +76,6 @@ define([
 							}
 						},
 					],
-					[
-						{
-							text: "Swim Left",
-							action: function(){
-								self.level().movePlayerLeft();
-								self.drawMap();
-							}
-						},
-						{
-							text: "Swim Right",
-							action: function(){
-								self.level().movePlayerRight();
-								self.drawMap();
-							}
-						},
-						{
-							text: "Swim Upstream",
-							action: function(){
-								self.level().movePlayerUp();
-								self.drawMap();
-							}
-						},
-						{
-							text: "Swim Downstream",
-							action: function(){
-								self.level().movePlayerDown();
-								self.drawMap();
-							}
-						},
-					]
 				],
 				location: "Midstream",
 			},
@@ -165,7 +135,8 @@ define([
 			}else{
 				level = new Level();
 				player = new Player();
-				stateID = "start";
+				//stateID = "start";
+				stateID = "idle";
 			}
 			self.level(level);
 			self.player(player);
@@ -279,14 +250,14 @@ define([
 		this.drawMap = function(){
 
 			//var $map = $("#map");
-			var canvas = document.getElementById("map");
+			var canvas = document.getElementById("map-canvas");
 			var context = canvas.getContext("2d");
 			var totalWidth = canvas.width;
 			var totalHeight = canvas.height;
 
 			//Obviously hook these up better, derp
-			var squareWidth = Math.floor(totalWidth / self.level().gridBounds.maxX);
-			var squareHeight = Math.floor(totalHeight / self.level().gridBounds.maxY);
+			var squareWidth = Math.floor(totalWidth / (self.level().gridBounds.maxX + 1));
+			var squareHeight = Math.floor(totalHeight / (self.level().gridBounds.maxY + 1));
 
 			//RESET THE CANVAS EACH TIME
 			// Store the current transformation matrix
@@ -303,6 +274,8 @@ define([
 			var darkFill = '#436073';
 			var playerColor = '#D36600';
 			var playerPos = self.level().getPlayerPos();
+			
+			console.log(self.level().grid);
 
 			$.each(self.level().grid, function(row_num, row){
 
@@ -329,7 +302,7 @@ define([
 					}
 
 					context.fillStyle = fillStyle;
-					context.fillRect(row_num * squareWidth, col_num * squareHeight, squareWidth, squareHeight);
+					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
 
 				});
 			});
@@ -340,7 +313,7 @@ define([
 	        var startAngle = 0; // Starting point on circle
 	        var endAngle = Math.PI+(Math.PI*2)/2; // End point on circle
 	        context.fillStyle = playerColor;
-	        context.arc((playerPos.x * squareHeight) - midSquare, (playerPos.y * squareWidth) - midSquare, radius, startAngle, endAngle);
+	        context.arc((playerPos.x * squareHeight) + midSquare, (playerPos.y * squareWidth) + midSquare, radius, startAngle, endAngle);
 	        context.fill();
 
 		}

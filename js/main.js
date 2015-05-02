@@ -11,7 +11,8 @@ requirejs.config({
 		bootstrap : ["jquery"],
 		"jquery.caret.min" : ["jquery"],
 		"jquery.growl" : ["jquery"],
-	}
+	},
+	//urlArgs: "bust=" +  (new Date()).getTime(),
 });
 
 require([

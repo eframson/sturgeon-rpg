@@ -96,11 +96,21 @@
 				<!-- /ko -->
 			</div>
 
-			<div class="row" data-bind="css: { hidden: state.hideMap && state.hideMap == 1 }">
-				<div class="col-md-12">
-					<!--<table class="table" data-bind="html: $root.mapRenderHtml">
-					</table>-->
-					<canvas id="map" width="300" height="300"></canvas>
+			<div class="row map-container hidden" data-bind="css: { hidden: $root.state() && $root.state().hideMap }">
+				<div class="col-md-6 map-buttons">
+					<div class="up">
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerUp(); $root.drawMap(); }">Swim Upstream</button>
+					</div>
+					<div>
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerLeft(); $root.drawMap(); }">Swim Left</button>
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerRight(); $root.drawMap(); }">Swim Right</button>
+					</div>
+					<div class="down">
+						<button type="button" class="btn btn-default" data-bind="click: function(){ $root.level().movePlayerDown(); $root.drawMap(); }">Swim Downstream</button>
+					</div>
+				</div>
+				<div class="col-md-6 map">
+					<canvas id="map-canvas" width="300" height="300"></canvas>
 				</div>
 			</div>
 

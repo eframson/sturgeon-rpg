@@ -110,7 +110,6 @@ button:focus {
 	font-weight: bold;
 	text-align: right;
 	width: 50px;
-	padding-top: 2px;
 }
 
 .player-data > div > div.value {
@@ -120,6 +119,22 @@ button:focus {
 .location {
 	text-align: left;
 	margin-bottom: 10px;
+}
+
+.map-buttons {
+	text-align: right;
+}
+
+.map-container {
+	text-align: left;
+}
+
+.map-buttons .up button{
+	margin-right: 30px;
+}
+
+.map-buttons .down button {
+	margin-right: 24px;
 }
 
 .file-upload {

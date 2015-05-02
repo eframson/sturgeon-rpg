@@ -6,7 +6,7 @@ define([
 	'Utils',
 ], function($, ko, GridSquare){
 
-	var Level = function(genOpts, squareSize, playerPos){
+	var Level = function(genOpts, numSquares, playerPos){
 
 		var self = this;
 
@@ -21,14 +21,14 @@ define([
 			minNonEmptyPerQuad: 3,
 			maxNonEmptyPerQuad: 10,
 		}, (genOpts || {}));
-		this.squareSize = squareSize || 10;
-		this.playerPos = playerPos || [5, 5];
+		this.numSquares = numSquares || 10;
+		this.playerPos = playerPos || [4, 4];
 
 		this.gridBounds = {
 			minX: 0,
-			maxX: self.squareSize,
+			maxX: (self.numSquares - 1),
 			minY: 0,
-			maxY: self.squareSize,
+			maxY: (self.numSquares - 1),
 		};
 
 		this.quadBounds = {};
@@ -134,8 +134,8 @@ define([
 		}
 
 		this._generateGrid = function(){
-			for(x = self.gridBounds.minX; x < self.gridBounds.maxX; x++){
-				for(y = self.gridBounds.minY; y < self.gridBounds.maxY; y++){
+			for(x = self.gridBounds.minX; x <= self.gridBounds.maxX; x++){
+				for(y = self.gridBounds.minY; y <= self.gridBounds.maxY; y++){
 					if(self.grid[x] == undefined){
 						self.grid[x] = Array();
 					}
@@ -203,7 +203,7 @@ define([
 			};
 			
 			var medX = Math.floor(this.gridBounds.maxX / 2);
-			var medY = Math.floor(this.gridBounds.maxY / 2);;
+			var medY = Math.floor(this.gridBounds.maxY / 2);
 
 			if( quadNum == 1 ){
 
