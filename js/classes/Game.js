@@ -11,7 +11,7 @@ define([
 	var Game = function() {
 
 		var self = this;
-		
+
 		this.player = undefined;
 		this.states = {
 			start: {
@@ -58,7 +58,7 @@ define([
 			},
 			idle: {
 				beforeChange: function(){
-					
+
 				},
 				afterRender : function(){
 					self.level().drawMap();
@@ -135,7 +135,7 @@ define([
 		}
 
 		this.initObservables = function(){
-			
+
 			self.showLoading = ko.observable(false);
 			self.state = ko.observable();
 			self.player = ko.observable();
@@ -145,7 +145,7 @@ define([
 			self.lastActionMessage = ko.observable("");
 
 		}
-		
+
 		this.initPlayer = function(playerData){
 			self.player(new Player(playerData));
 		}
@@ -179,7 +179,7 @@ define([
 			lvlData = lvlData || {};
 			self.level(new Level(lvlNum, lvlData));
 		}
-		
+
 		this.addFoodToPlayerInventory = function(){
 			var qty = self.player().data().skills().findFood();
 			var food = new Item({
@@ -198,36 +198,36 @@ define([
 
 			self.initGame(gameData);
 		}
-		
+
 		this.movePlayerUp = function(){
 			self.movePlayer("up");
 		}
-		
+
 		this.movePlayerDown = function(){
 			self.movePlayer("down");
 		}
-		
+
 		this.movePlayerLeft = function(){
 			self.movePlayer("left");
 		}
-		
+
 		this.movePlayerRight = function(){
 			self.movePlayer("right");
 		}
-		
+
 		this.movePlayer = function(direction){
-			
+
 			var currentPos = self.level().getPlayerPos();
 			var newPos = self.level().movePlayer(direction, self.player().data().speed());
-			
+
 			if(currentPos.x != newPos.x || currentPos.y != newPos.y){
 				self.updateCooldowns();
 				self.player().data().skillProgress().speed( self.player().data().skillProgress().speed() + 1 );
 			}
-			self.lastActionMessage("");			
-			
+			self.lastActionMessage("");
+
 		}
-		
+
 		this.updateCooldowns = function(){
 			$.each(self.player().data().skillCooldowns(), function(skill, cooldown){
 				var cooldownValue = cooldown();
@@ -319,7 +319,7 @@ define([
 			var exportObj = {
 				player : ko.mapping.toJS(self.player().data()),
 				state : self.state(),
-				level: self.currentLevel(),
+				level: self.level(),
 			}
 			return JSON.stringify(exportObj);
 		}

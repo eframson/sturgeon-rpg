@@ -11,10 +11,10 @@
 
 		<!-- Bootstrap -->
 		<link href="css/bootstrap.min.css" rel="stylesheet">
-		
+
 		<!-- Bootstrap theme -->
 		<link href="css/bootstrap-theme.min.css" rel="stylesheet">
-		
+
 		<!-- jQuery UI -->
 		<link href="css/jquery-ui.min.css" rel="stylesheet">
 		<!--<link href="css/jquery-ui.structure.min.css" rel="stylesheet">-->
@@ -25,7 +25,7 @@
 
 		<!-- jQuery Growl -->
 		<link href="css/jquery.growl.css" rel="stylesheet">
-				
+
 		<!-- Theme customizations -->
 		<link href="css/custom.css" rel="stylesheet">
 
@@ -63,10 +63,30 @@
 
 			<div class="row header">
 				<div class="col-md-10"><h2 class="title">Sturgeon Simulator</h2></div>
-				<div class="col-md-1"><button type="button" class="btn btn-default" data-bind="click: importData">Import</button></div>
-				<div class="col-md-1"><button type="button" class="btn btn-default" data-bind="click: exportData">Export</button></div>
+				<div class="col-md-1"><button type="button" class="btn btn-default" data-bind="click: importData">Load</button></div>
+				<div class="col-md-1"><button type="button" class="btn btn-default" data-bind="click: exportData">Save</button></div>
 			</div>
-			
+
+			<div class="row stats">
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+				<div class="col-md-1"></div>
+			</div>
+
+			<div class="row">
+				<div class="col-md-6 state-container hidden"></div>
+				<div class="col-md-6 map-container hidden"></div>
+			</div>
+
 			<div id="content-area" class="hidden" data-bind="with: state">
 				<div class="row story-row">
 					<div class="col-md-9">

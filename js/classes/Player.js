@@ -40,8 +40,8 @@ define([
 				findEnemies : ko.observable(playerData.skillProgress.findEnemies || 0),
 				findFood: ko.observable(playerData.skillProgress.findFood || 0),
 				speed: ko.observable(playerData.skillProgress.speed || 0),
-				
-			}),			
+
+			}),
 			abilities : ko.observableArray(playerData.abilities || Array()),
 			speed : ko.observable(playerData.level || 1),
 
@@ -58,35 +58,40 @@ define([
 			}
 			console.log(playerData);
 		}
-		
+
 		this.addItemToInventory = function(itemToAdd){
 			if(itemToAdd == undefined || itemToAdd.constructor != Item){
 				return false;
 			}
-			
+
 			if(itemToAdd.slotsRequired > (self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied()) ){
 				return false;
 			}
-			
+
 			if(itemToAdd.stackable){
 
+				var foundMatch = false;
 				$.each(self.data().inventory(), function(idx, item){
 					if(item.id == itemToAdd.id ){
-						item.qty( item.qty() + itemToAdd.qty );
+						item.qty( item.qty() + itemToAdd.qty() );
+						foundMatch = true;
+						return false; //break out early
 					}
 				});
-				
-				self.data().inventory.push(itemToAdd);
-				self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
-				
+
+				if(!foundMatch){
+					self.data().inventory.push(itemToAdd);
+					self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
+				}
+
 			}else{
 				self.data().inventory.push(itemToAdd);
 				self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
 			}
-			
+
 			return true;
 
-			
+
 			//inventory
 			//inventoryMaxSlots
 			//inventorySlotsOccupied
