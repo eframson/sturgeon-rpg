@@ -10,43 +10,52 @@ define([
 
 		//Init
 		var self = this;
-		playerData = playerData || {equipment: {}, skills: {}, skillCooldowns : {}, skillProgress : {}};
+		playerData = playerData || {equipment: {}, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array() };
 
-		this.data = ko.observable({
+		this.init = function(playerData){
 
-			level : ko.observable(playerData.level || 1),
-			hp : ko.observable(playerData.hp || 10),
-			inventory : ko.observableArray(playerData.inventory || Array()),
-			inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 5),
-			inventorySlotsOccupied : ko.observable(playerData.inventorySlotsOccupied || 0),
-			equipment : ko.observable({
-				headArmor : ko.observable(playerData.equipment.headArmor || undefined),
-				finArmor : ko.observable(playerData.equipment.finArmor || undefined),
-				bodyArmor : ko.observable(playerData.equipment.bodyArmor || undefined),
-				tailArmor: ko.observable(playerData.equipment.tailArmor || undefined),
-				weapon : ko.observable(playerData.equipment.weapon || undefined),
-				shield : ko.observable(playerData.equipment.shield || undefined),
-			}),
-			skills : ko.observable({
-				scanSquares : ko.observable(playerData.skills.scanSquares || 2),
-				findFood : ko.observable(playerData.skills.findFood || 20),
-				visionRange : ko.observable(playerData.skills.visionRange || 1),
-			}),
-			skillCooldowns : ko.observable({
-				scanSquares : ko.observable(playerData.skillCooldowns.scanSquares || 0),
-				findFood : ko.observable(playerData.skillCooldowns.findFood || 0),
-			}),
-			skillProgress : ko.observable({
-				scanSquares : ko.observable(playerData.skillProgress.scanSquares || 0),
-				findFood : ko.observable(playerData.skillProgress.findFood || 0),
-				speed : ko.observable(playerData.skillProgress.speed || 0),
+			self.data = ko.observable({
 
-			}),
-			abilities : ko.observableArray(playerData.abilities || Array()),
-			speed : ko.observable(playerData.level || 1),
+				level : ko.observable(playerData.level || 1),
+				hp : ko.observable(playerData.hp || 10),
+				armor : ko.observable(playerData.armor || 0),
+				inventory : ko.observableArray(Array()),
+				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 5),
+				inventorySlotsOccupied : ko.observable(playerData.inventorySlotsOccupied || 0),
+				equipment : ko.observable({
+					headArmor : ko.observable(playerData.equipment.headArmor || undefined),
+					finArmor : ko.observable(playerData.equipment.finArmor || undefined),
+					bodyArmor : ko.observable(playerData.equipment.bodyArmor || undefined),
+					tailArmor: ko.observable(playerData.equipment.tailArmor || undefined),
+					weapon : ko.observable(playerData.equipment.weapon || undefined),
+					shield : ko.observable(playerData.equipment.shield || undefined),
+				}),
+				skills : ko.observable({
+					scanSquares : ko.observable(playerData.skills.scanSquares || 2),
+					findFood : ko.observable(playerData.skills.findFood || 20),
+					visionRange : ko.observable(playerData.skills.visionRange || 1),
+				}),
+				skillCooldowns : ko.observable({
+					scanSquares : ko.observable(playerData.skillCooldowns.scanSquares || 0),
+					findFood : ko.observable(playerData.skillCooldowns.findFood || 0),
+				}),
+				skillProgress : ko.observable({
+					scanSquares : ko.observable(playerData.skillProgress.scanSquares || 0),
+					findFood : ko.observable(playerData.skillProgress.findFood || 0),
+					speed : ko.observable(playerData.skillProgress.speed || 0),
 
-		});
-		//End init
+				}),
+				abilities : ko.observableArray(playerData.abilities || Array()),
+				speed : ko.observable(playerData.level || 1),
+
+			});
+
+			var itemArray = Array();
+			for(i = 0; i < playerData.inventory.length; i++){
+				itemArray.push( new Item(playerData.inventory[i]) );
+			}
+			self.data().inventory(itemArray);
+		}
 
 		this.getData = function(){
 			return self.data();
@@ -114,6 +123,48 @@ define([
 			//inventoryMaxSlots
 			//inventorySlotsOccupied
 		}
+
+		this.itemTest = function(){
+
+			var food = new Item({
+				id : 'biscuit_food',
+				name : "Fish Biscuits",
+				type : "food",
+				qty : 1,
+			});
+
+			self.addItemToInventory(food);
+
+			var moreFood = new Item({
+				id : 'biscuit_food',
+				name : "Fish Biscuits",
+				type : "food",
+				qty : 3,
+			});
+
+			self.addItemToInventory(moreFood);
+
+			var someItem = new Item({
+				id : 'rock',
+				name : "Rocks",
+				type : "misc",
+				qty : 1,
+			});
+
+			self.addItemToInventory(someItem);
+
+			var someOtherItem = new Item({
+				id : 'dirt',
+				name : "Dirt",
+				type : "misc",
+				qty : 4,
+			});
+
+			self.addItemToInventory(someOtherItem);
+
+		}
+
+		self.init(playerData);
 	}
 
 	return Player;

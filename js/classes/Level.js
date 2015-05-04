@@ -11,50 +11,61 @@ define([
 		var self = this;
 		
 		if(levelData == undefined){
-			levelData = { genOpts : {} };
+			levelData = { genOpts : {}, grid : Array() };
 		}
 
-		this.genOpts = {};
-		$.extend(this.genOpts, {
-			genPercents : {
-				50 : "combat",
-				10 : "item",
-				40 : "event",
-			},
-			percentEmpty : 50,
-			minNonEmptyPerQuad: 3,
-			maxNonEmptyPerQuad: 10,
-		}, (levelData.genOpts || {}));
-		this.numSquares = levelData.numSquares || 10;
-		this.playerPos = levelData.playerPos || [4, 4];
-		this.levelNum = levelData.levelNum || 1;
-		this.gridBounds = levelData.gridBounds || {
-			minX: 0,
-			maxX: (self.numSquares - 1),
-			minY: 0,
-			maxY: (self.numSquares - 1),
-		};
-		this.quadBounds = levelData.quadBounds || {};
-		this.grid = levelData.grid || Array();
-		this.nextLevelID = ko.observable( levelData.nextLevelID || undefined );
-		this.prevLevelID = ko.observable( levelData.prevLevelID || undefined );
-		this.isActive = ko.observable(levelData.isActive || false);
-		this.levelID = ko.observable(levelData.levelID || "lvl_" + (new Date().getTime()) );
-		this.hasGenerated = levelData.hasGenerated || false;
+		if(levelData.grid == undefined){
+			levelData.grid = Array();
+		}
 		
-		this.init = function(){
+		this.init = function(levelData){
+
+			self.genOpts = {};
+			$.extend(self.genOpts, {
+				genPercents : {
+					50 : "combat",
+					10 : "item",
+					40 : "event",
+				},
+				percentEmpty : 50,
+				minNonEmptyPerQuad: 3,
+				maxNonEmptyPerQuad: 10,
+			}, (levelData.genOpts || {}));
+			self.numSquares = levelData.numSquares || 10;
+			self.playerPos = levelData.playerPos || [4, 4];
+			self.levelNum = levelData.levelNum || 1;
+			self.gridBounds = levelData.gridBounds || {
+				minX: 0,
+				maxX: (self.numSquares - 1),
+				minY: 0,
+				maxY: (self.numSquares - 1),
+			};
+			self.quadBounds = levelData.quadBounds || {};
+			self.grid = Array();
+			self.nextLevelID = ko.observable( levelData.nextLevelID || undefined );
+			self.prevLevelID = ko.observable( levelData.prevLevelID || undefined );
+			self.isActive = ko.observable(levelData.isActive || false);
+			self.levelID = ko.observable(levelData.levelID || "lvl_" + (new Date().getTime()) );
+			self.hasGenerated = levelData.hasGenerated || false;
+
+			var gridArray = Array();
+			for(y = 0; y < levelData.grid.length; y++){
+				for(x = 0; x < levelData.grid[y].length; x++){
+
+					if(gridArray[y] == undefined){
+						gridArray[y] = Array();
+					}
+
+					gridArray[y].push( new GridSquare(levelData.grid[y][x]) );
+				}
+			}
+			self.grid = gridArray;
+
 			if(!self.hasGenerated){
 				self._generateGrid();
 				self._populateGrid();
 				self.hasGenerated = true;
 			}
-		}
-
-		this.loadFromData = function(levelData){
-			if(levelData == undefined){
-				return false;
-			}
-			console.log(levelData);
 		}
 
 		this.setPlayerPos = function(x, y){
@@ -264,6 +275,9 @@ define([
 			var startY = ( (playerPos.y - radius)  >= self.gridBounds.minY ) ? playerPos.y - radius : self.gridBounds.minY ;
 			var endX = ( (playerPos.x + radius) <= self.gridBounds.maxX ) ? playerPos.x + radius : self.gridBounds.maxX ;
 			var endY = ( (playerPos.y + radius)  <= self.gridBounds.maxY ) ? playerPos.y + radius : self.gridBounds.maxY ;
+
+			var c,
+				r;
 			
 			for(r = startY; r <= endY; r++){
 				for(c = startX; c <= endX; c++){
@@ -438,7 +452,7 @@ define([
 			return exportObj;
 		}
 		
-		this.init();
+		this.init(levelData);
 
 	}
 

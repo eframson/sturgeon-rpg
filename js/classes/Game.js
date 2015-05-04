@@ -159,6 +159,7 @@ define([
 			self.location = ko.observable();
 			self.levels = ko.observableArray(Array());
 			self.lastActionMessage = ko.observable("");
+			self.visibleSection = ko.observable("content-area");
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -177,7 +178,7 @@ define([
 		}
 
 		this.initGame = function(gameData){
-			console.log(gameData);
+
 			var level;
 			var player;
 			var stateID;
@@ -191,6 +192,7 @@ define([
 				self.levels(levelArray);
 				player = new Player(gameData.player);
 				stateID = gameData.stateID;
+				self.visibleSection(gameData.visibleSection);
 			}else{
 				player = new Player();
 				level = new Level({isActive : true});
@@ -198,6 +200,15 @@ define([
 				self.levels.push(level);
 				//stateID = "idle";
 			}
+
+			$.each(["content-area","inventory-equipment","event-area"], function(idx, elem){
+				if(elem != self.visibleSection()){
+					$("#" + elem).hide();
+				}else{
+					$("#" + elem).show();
+				}
+			});
+
 			self.player(player);
 			self.stateID(stateID);
 			self.setState(stateID);
@@ -277,7 +288,18 @@ define([
 		}
 		
 		this.toggleInventory = function(){
-			console.log("Show inventory as modal, possibly?");
+			self.visibleSection("inventory-equipment");
+			$("#content-area").fadeOut(300, function(){
+				$("#inventory-equipment").fadeIn(300);
+			});
+		}
+
+		this.showContentArea = function(){
+			self.visibleSection("content-area");
+			$("#event-area").fadeOut(300);
+			$("#inventory-equipment").fadeOut(300, function(){
+				$("#content-area").fadeIn(300);
+			});
 		}
 
 		this.hideModal = function(viewModel, event){
@@ -348,16 +370,19 @@ define([
 		this.processFile = function(e){
 			var file = e.target.files[0];
 
-			var reader = new FileReader();
-			reader.onload = function(e){
-				var saveData = $.parseJSON(e.target.result);
-				self.loadFromData(saveData);
-			}
-			reader.onerror = function(){
-				console.log(arguments);
-			}
+			if(file){
 
-			reader.readAsText(file);
+				var reader = new FileReader();
+				reader.onload = function(e){
+					var saveData = $.parseJSON(e.target.result);
+					self.loadFromData(saveData);
+				}
+				reader.onerror = function(){
+					console.log(arguments);
+				}
+
+				reader.readAsText(file);
+			}
 		}
 
 		this.getExportData = function(){

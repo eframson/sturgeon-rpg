@@ -127,6 +127,7 @@ button:focus {
 
 #content-area .state-container {
 	padding-top: 15px;
+	padding-bottom: 15px;
 	text-align: left;
 	background-color: #F0ECE6;
 }
@@ -238,6 +239,46 @@ button:focus {
 	height: 304px;
 	margin-left: 0px;
 	border: #6e6e73 2px solid;
+}
+
+#inventory-equipment,
+#event-area {
+	display: none;
+}
+
+#inventory-equipment .back {
+	margin-top: 20px;
+}
+
+#inventory-equipment .back .col-md-12 {
+	padding-left: 0;
+}
+
+#inventory-equipment {
+	text-align: left;
+}
+
+#inventory-equipment .header .equipment-header {
+	padding-left: 10px;
+}
+
+#inventory-equipment .col-md-6 {
+	padding-left: 0;
+}
+
+#inventory-equipment .inventory {
+	background-color: #F0ECE6;
+}
+
+#inventory-equipment .equipment .equipment-spacer {
+	width: 10px;
+	height: 200px;
+	float: left;
+}
+
+#inventory-equipment .equipment .equipment-inner-container {
+	background-color: #E7E6F0;
+	float: left;
 }
 
 .file-upload {

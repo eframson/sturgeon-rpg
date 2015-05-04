@@ -122,36 +122,48 @@
 						</div>
 						<div class="clear"></div>
 					</div>
-					
 				</div>
+
 			</div>
 			
-			
-			
+			<div class="" id="inventory-equipment">
 
-			<div class="hidden" data-bind="with: state">
-				<div class="row story-row">
-					<div class="col-md-3 player-data" data-bind="css: { hidden: $data.hidePlayerData && $data.hidePlayerData == 1 }">
-						<div class="level">
-							<div class="stat-label">Level: </div><div class="value" data-bind="text: $root.player().data().level()"></div>
-							<div class="clear"></div>
-						</div>
-						<div class="hp">
-							<div class="stat-label">HP: </div><div class="value" data-bind="text: $root.player().data().hp()"></div>
-							<div class="clear"></div>
-						</div>
-						<div class="inventory" data-bind="if: $root.player().data().inventory().length > 0">
-							<div class="stat-label">Inventory: </div><div class="value"></div>
-							<div class="clear"></div>
-							<!-- ko foreach: $root.player().data().inventory() -->
-								<div class="stat-label"><div class="clear"></div></div><div class="value" data-bind="text: $data.name + ' (' + $data.qty() + ')'"></div>
-							<!-- /ko -->
-							<div class="clear"></div>
-						</div>
+				<div class="row back">
+					<div class="col-md-12">
+						<button class="btn btn-default" type="button" data-bind="click: showContentArea"><span>Back</span></button>
 					</div>
 				</div>
 
+				<div class="row header">
+					<div class="col-md-6 inventory-header"><h3>Inventory</h3></div>
+					<div class="col-md-6 equipment-header"><h3>Equipment</h3></div>
+				</div>
+
+				<div class="row">
+					<div class="col-md-6 inventory">
+						<!-- ko foreach: $root.player().data().inventory() -->
+						<div class="line">
+							<span class="item" data-bind="text: $data.name"></span>
+							<span class="qty" data-bind="text: $data.qty()"></span>
+						</div>
+						<!-- /ko -->
+					</div>
+					<div class="col-md-6 equipment">
+
+						<div class="equipment-spacer"></div>
+						
+						<div class="equipment-inner-container">Some test content here</div>
+
+					</div>
+				</div>
 			</div>
+
+			<div id="event-area">
+				<div class="row">
+					<div class="col-md-12">Lorem Ipsum...</div>
+				</div>
+			</div>
+			
 
 		  </div>
 		  <input class="file-upload" type="file" name="Import Saved Game" id="importSavedGame" accept=".json" />
