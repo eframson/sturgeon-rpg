@@ -101,22 +101,26 @@
 					<div class="clear"></div>
 				</div>
 				
-				<div class="col-md-1"></div>
-				
-				<div class="col-md-5 map-container" data-bind="css: { hidden: state() && typeof state().hideMap === 'function' && state().hideMap() }">
+				<div class="col-md-6 map-container" data-bind="css: { hidden: state() && typeof state().hideMap === 'function' && state().hideMap() }">
 					
-					<div class="map-buttons">
-						<div class="map-button-cluster">
-							<button type="button" class="btn btn-default up" data-bind="click: $root.movePlayerUp">Swim Upstream</button>
-							<div class="mid-buttons">
-								<button type="button" class="btn btn-default left" data-bind="click: $root.movePlayerLeft">Swim Left</button>
-								<button type="button" class="btn btn-default right" data-bind="click: $root.movePlayerRight">Swim Right</button>
+					<div class="map-spacer"></div>
+					
+					<div class="map-inner-container">
+						
+						<div class="map-buttons">
+							<div class="map-button-cluster">
+								<button type="button" class="btn btn-default up" data-bind="click: $root.movePlayerUp">Swim Upstream</button>
+								<div class="mid-buttons">
+									<button type="button" class="btn btn-default left" data-bind="click: $root.movePlayerLeft">Swim Left</button>
+									<button type="button" class="btn btn-default right" data-bind="click: $root.movePlayerRight">Swim Right</button>
+								</div>
+								<button type="button" class="btn btn-default down" data-bind="click: $root.movePlayerDown">Swim Downstream</button>
 							</div>
-							<button type="button" class="btn btn-default down" data-bind="click: $root.movePlayerDown">Swim Downstream</button>
 						</div>
-					</div>
-					<div class="map">
-						<canvas id="map-canvas" width="250" height="250"></canvas>
+						<div class="map">
+							<canvas id="map-canvas" width="300" height="300"></canvas>
+						</div>
+						<div class="clear"></div>
 					</div>
 					
 				</div>
