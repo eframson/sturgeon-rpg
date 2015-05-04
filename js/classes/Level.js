@@ -183,7 +183,7 @@ define([
 
 				$.each(row, function(col_num, cell){
 
-					var fillStyle = "#FFFFFF";
+					var fillStyle = "#EDEEF7";
 					var square = self.getSquare(col_num, row_num);
 					
 					if( square.isDone ){

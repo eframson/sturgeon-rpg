@@ -25,6 +25,7 @@ define([
 				location: "Unknown",
 				hidePlayerData: true,
 				hideMap: ko.observable(true),
+				hidePlayerStats: ko.observable(true),
 			},
 			d1: {
 				beforeText: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
@@ -37,6 +38,7 @@ define([
 				location: "Unknown",
 				hidePlayerData: true,
 				hideMap: ko.observable(true),
+				hidePlayerStats: ko.observable(true),
 			},
 			d2: {
 				beforeText: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
@@ -49,6 +51,7 @@ define([
 				location: "Unknown",
 				hidePlayerData: true,
 				hideMap: ko.observable(true),
+				hidePlayerStats: ko.observable(true),
 			},
 			idle: {
 				beforeChange: function(){
@@ -91,6 +94,16 @@ define([
 							return {
 								disabled : self.player().data().skillCooldowns().scanSquares() > 0
 							}
+						},
+					},
+					{
+						text: function(){
+							var text = "Check Inventory";
+							text += " (" + self.player().data().inventorySlotsOccupied() + "/" + self.player().data().inventoryMaxSlots() + ")";
+							return text;
+						},
+						action: function(){
+							self.toggleInventory();
 						},
 					},
 				]),
@@ -261,6 +274,10 @@ define([
 					cooldown(cooldownValue - 1);
 				}
 			});
+		}
+		
+		this.toggleInventory = function(){
+			console.log("Show inventory as modal, possibly?");
 		}
 
 		this.hideModal = function(viewModel, event){

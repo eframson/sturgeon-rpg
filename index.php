@@ -67,19 +67,19 @@
 				<div class="col-md-1"><button type="button" class="btn btn-default" data-bind="click: exportData">Save</button></div>
 			</div>
 
-			<div class="row stats">
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
-				<div class="col-md-1"></div>
+			<div class="row player-stats hidden" data-bind="css: { hidden: state() && typeof state().hidePlayerStats === 'function' && state().hidePlayerStats() }">
+				<div class="col-md-1"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().data().level()"></span></div>
+				<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp()"></span></div>
+				<div class="col-md-1"><span class="stat-label">Stat03</span><span class="stat-value">Stat03</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat04</span><span class="stat-value">Stat04</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat05</span><span class="stat-value">Stat05</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat06</span><span class="stat-value">Stat06</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat07</span><span class="stat-value">Stat07</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat08</span><span class="stat-value">Stat08</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat09</span><span class="stat-value">Stat09</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat10</span><span class="stat-value">Stat10</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat11</span><span class="stat-value">Stat11</span></div>
+				<div class="col-md-1"><span class="stat-label">Stat12</span><span class="stat-value">Stat12</span></div>
 			</div>
 
 			<div class="row hidden" id="content-area">
@@ -101,7 +101,9 @@
 					<div class="clear"></div>
 				</div>
 				
-				<div class="col-md-6 map-container" data-bind="css: { hidden: state() && typeof state().hideMap === 'function' && state().hideMap() }">
+				<div class="col-md-1"></div>
+				
+				<div class="col-md-5 map-container" data-bind="css: { hidden: state() && typeof state().hideMap === 'function' && state().hideMap() }">
 					
 					<div class="map-buttons">
 						<div class="map-button-cluster">
@@ -114,7 +116,7 @@
 						</div>
 					</div>
 					<div class="map">
-						<canvas id="map-canvas" width="300" height="300"></canvas>
+						<canvas id="map-canvas" width="250" height="250"></canvas>
 					</div>
 					
 				</div>

@@ -87,6 +87,35 @@ button:focus {
 	text-align: left;
 }
 
+.player-stats {
+	margin-top: 10px;
+	padding: 10px;
+	background-color: #ECECEC;
+}
+
+.player-stats .stat-label,
+.player-stats .stat-value {
+	width: 40px;
+	text-align: left;
+}
+
+.player-stats .stat-label {
+	font-weight: bold;
+}
+
+.player-stats .stat-value {
+	margin-left: 5px;
+}
+
+.player-stats .col-md-1 {
+	padding: 0;
+	text-align: left;
+}
+
+#content-area {
+	margin-top: 10px;
+}
+
 .story, .buttons button, .location {
 	font-size: 18px;
 }
@@ -97,7 +126,14 @@ button:focus {
 }
 
 #content-area .state-container {
+	padding-top: 15px;
 	text-align: left;
+	background-color: #F0ECE6;
+}
+
+#content-area .state-controls {
+	overflow: auto;
+	margin-top: 20px;
 }
 
 #content-area .state-controls .state-button {
@@ -134,13 +170,21 @@ button:focus {
 	margin-left: 5px;
 }
 
+.location {
+	text-align: left;
+	margin-top: 10px;
+}
+
 .last-action-message {
+	margin-top: 10px;
 	text-align: left;
 }
 
-.location {
-	text-align: left;
-	margin-bottom: 10px;
+.map-container {
+	/*background-color: #DEDDED;*/
+	background-color: #E7E6F0;
+	padding: 15px 10px 15px 0;
+	/*margin-left: 10px;*/
 }
 
 .map-container .map-buttons,
@@ -149,11 +193,11 @@ button:focus {
 }
 
 .map-container .map-buttons {
-	width: 220px;
+	width: 210px;
 }
 
 .map-container .map-buttons .map-button-cluster {
-	margin-top: 100px;
+	margin-top: 80px;
 }
 
 .map-container .map-buttons .map-button-cluster button {
@@ -176,8 +220,10 @@ button:focus {
 }
 
 .map-container .map {
-	width: 300px;
-	margin-left: 20px;
+	width: 254px;
+	height: 254px;
+	margin-left: 0px;
+	border: #6e6e73 2px solid;
 }
 
 .file-upload {
