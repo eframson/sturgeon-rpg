@@ -17,6 +17,21 @@ define([
 		this.slotsRequired = data.slotsRequired || 1;
 		this.stackable = data.stackable || true;
 		this.qty = ko.observable(data.qty || 1);
+		
+		this.getExportData = function(){
+			
+			var exportObj = {};
+			
+			for(prop in self){
+				if ( typeof self[prop] !== 'function' ){
+					exportObj[prop] = self[prop];
+				}else if (ko.isObservable(self[prop])) {
+					exportObj[prop] = self[prop]();
+				}
+			}
+			
+			return exportObj;
+		}
 	}
 
 	return Item;

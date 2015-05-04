@@ -1,4 +1,5 @@
 var game = undefined;
+var ko_global = undefined;
 
 requirejs.config({
 	baseUrl : 'js',
@@ -19,16 +20,20 @@ require([
 	'jquery',
 	'knockout',
 	'classes/Game',
+	'knockout.mapping-latest',
 
 	'bootstrap',
-	'knockout.mapping-latest',
 	'jquery-ui.min',
 	'jquery.caret.min',
 	'select2.min',
 	'jquery.growl',
 	'FileSaver.min',
 	'Utils',
-], function($, ko, Game){
+], function($, ko, Game, mapping){
+	
+	ko_global = ko;
+	ko_global.maping = mapping;
+	ko.mapping = mapping;
 
 	$(document).ready(function(){
 

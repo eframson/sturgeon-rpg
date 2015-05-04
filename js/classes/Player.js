@@ -28,18 +28,18 @@ define([
 				shield : ko.observable(playerData.equipment.shield || undefined),
 			}),
 			skills : ko.observable({
-				findEnemies: ko.observable(playerData.skills.findEnemies || 1),
-				findFood: ko.observable(playerData.skills.findFood || 1),
-				visionRange: ko.observable(playerData.skills.visionRange || 1),
+				scanSquares : ko.observable(playerData.skills.scanSquares || 2),
+				findFood : ko.observable(playerData.skills.findFood || 20),
+				visionRange : ko.observable(playerData.skills.visionRange || 1),
 			}),
 			skillCooldowns : ko.observable({
-				findEnemies : ko.observable(playerData.skillCooldowns.findEnemies || 0),
-				findFood: ko.observable(playerData.skillCooldowns.findFood || 0),
+				scanSquares : ko.observable(playerData.skillCooldowns.scanSquares || 0),
+				findFood : ko.observable(playerData.skillCooldowns.findFood || 0),
 			}),
 			skillProgress : ko.observable({
-				findEnemies : ko.observable(playerData.skillProgress.findEnemies || 0),
-				findFood: ko.observable(playerData.skillProgress.findFood || 0),
-				speed: ko.observable(playerData.skillProgress.speed || 0),
+				scanSquares : ko.observable(playerData.skillProgress.scanSquares || 0),
+				findFood : ko.observable(playerData.skillProgress.findFood || 0),
+				speed : ko.observable(playerData.skillProgress.speed || 0),
 
 			}),
 			abilities : ko.observableArray(playerData.abilities || Array()),
@@ -50,6 +50,24 @@ define([
 
 		this.getData = function(){
 			return self.data();
+		}
+		
+		this.getExportData = function(){
+			
+			var exportObj = {};
+			
+			for (prop in self.data()){
+				if(prop != "inventory"){
+					exportObj[prop] = self.data()[prop];
+				}
+			}
+
+			exportObj.inventory = Array();			
+			$.each( self.data().inventory(), function(idx, elem){
+				exportObj.inventory.push( elem.getExportData() );
+			});
+			
+			return ko.mapping.toJS( exportObj );
 		}
 
 		this.loadFromData = function(playerData){

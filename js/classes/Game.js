@@ -15,46 +15,40 @@ define([
 		this.player = undefined;
 		this.states = {
 			start: {
-				text: "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
+				beforeText: "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
 				buttons: [
-					[
-						{
-							text: "Let's bust outta here!",
-							action: function(){ self.setState("d1"); }
-						},
-					],
+					{
+						text: "Let's bust outta here!",
+						action: function(){ self.setState("d1"); }
+					},
 				],
 				location: "Unknown",
 				hidePlayerData: true,
-				hideMap: true,
+				hideMap: ko.observable(true),
 			},
 			d1: {
-				text: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
+				beforeText: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
 				buttons: [
-					[
-						{
-							text: "OH YEAH!!!",
-							action: function(){ self.setState("d2"); }
-						},
-					],
+					{
+						text: "OH YEAH!!!",
+						action: function(){ self.setState("d2"); }
+					},
 				],
 				location: "Unknown",
 				hidePlayerData: true,
-				hideMap: true,
+				hideMap: ko.observable(true),
 			},
 			d2: {
-				text: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
+				beforeText: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
 				buttons: [
-					[
-						{
-							text: "Continue",
-							action: function(){ self.setState("idle"); }
-						},
-					],
+					{
+						text: "Continue",
+						action: function(){ self.setState("idle"); }
+					},
 				],
 				location: "Unknown",
 				hidePlayerData: true,
-				hideMap: true,
+				hideMap: ko.observable(true),
 			},
 			idle: {
 				beforeChange: function(){
@@ -63,68 +57,76 @@ define([
 				afterRender : function(){
 					self.level().drawMap();
 				},
-				text: "<p>You decide to...</p>",
-				buttons: [
-					[
-						{
-							text: function(){
-								var text = "Look for food";
-								if(self.player().data().skillCooldowns().findFood()){
-									text += " (cooldown: " + self.player().data().skillCooldowns().findFood() + ")";
-								}
-								return text;
-							},
-							action: function(){
-								self.playerActions.checkForFood();
-							},
-							css: function(){
-								return {
-									disabled : self.player().data().skillCooldowns().findFood() > 0
-								}
-							},
+				beforeText: "<p>You decide to...</p>",
+				buttons: ko.observableArray([
+					{
+						text: function(){
+							var text = "Scrounge for food";
+							if(self.player().data().skillCooldowns().findFood()){
+								text += " (" + self.player().data().skillCooldowns().findFood() + ")";
+							}
+							return text;
 						},
-						{
-							text: function(){
-								var text = "Check for predators";
-								if(self.player().data().skillCooldowns().findEnemies()){
-									text += " (cooldown: " + self.player().data().skillCooldowns().findEnemies() + ")";
-								}
-								return text;
-							},
-							action: function(){
-								self.playerActions.checkForEnemies();
-							},
-							css: function(){
-								return {
-									disabled : self.player().data().skillCooldowns().findEnemies() > 0
-								}
-							},
+						action: function(){
+							self.playerActions.findFood();
 						},
-					],
-				],
+						css: function(){
+							return {
+								disabled : self.player().data().skillCooldowns().findFood() > 0
+							}
+						},
+					},
+					{
+						text: function(){
+							var text = "Scan surroundings";
+							if(self.player().data().skillCooldowns().scanSquares()){
+								text += " (" + self.player().data().skillCooldowns().scanSquares() + ")";
+							}
+							return text;
+						},
+						action: function(){
+							self.playerActions.scanSquares();
+						},
+						css: function(){
+							return {
+								disabled : self.player().data().skillCooldowns().scanSquares() > 0
+							}
+						},
+					},
+				]),
 				location: "Midstream",
 			},
 		};
 
+		this.tempFoodFindBonus = 0;
 		this.defaultCooldown = 10;
 		this.playerActions = {
-			checkForEnemies: function(){
-				self.player().data().skillCooldowns().findEnemies(self.defaultCooldown);
-				self.level().scanNearPlayer( self.player().data().skills().findEnemies() );
-				self.player().data().skillProgress().findEnemies( self.player().data().skillProgress().findEnemies() + 1 );
+			scanSquares: function(){
+				self.player().data().skillCooldowns().scanSquares(self.defaultCooldown);
+				self.level().scanSquaresNearPlayer( self.player().data().skills().scanSquares() );
+				self.level().drawMap();
+				self.player().data().skillProgress().scanSquares( self.player().data().skillProgress().scanSquares() + 1 );
 				self.lastActionMessage("You scan your surroundings using your fish-powers!");
 			},
-			checkForFood: function(){
+			findFood: function(){
 
 				self.player().data().skillCooldowns().findFood(self.defaultCooldown);
 				self.player().data().skillProgress().findFood( self.player().data().skillProgress().findFood() + 1 );
 				var message = "";
-				if(rand(0,9) < (self.player().data().skills().findFood() * 2)){
+				
+				var percentages = {};
+				var findPercent = self.player().data().skills().findFood() + self.tempFoodFindBonus;
+				percentages[findPercent] = function(){
 					self.addFoodToPlayerInventory();
 					message = "You gracefully float to the bottom of the river and successfully scrounge up some fish biscuits using your kick-ass mouth feelers.";
-				}else{
+					self.tempFoodFindBonus = 0;
+				};
+				doBasedOnPercent(percentages,
+				function(){
 					message = "You try to delicately float to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
-				}
+					self.tempFoodFindBonus += 2;
+				});
+				
 				self.lastActionMessage(message);
 			}
 		};
@@ -137,47 +139,58 @@ define([
 		this.initObservables = function(){
 
 			self.showLoading = ko.observable(false);
-			self.state = ko.observable();
+			self.stateID = ko.observable();
+			self.state = ko.observable(undefined);
 			self.player = ko.observable();
 			self.showPlayerData = ko.observable(false);
 			self.location = ko.observable();
-			self.level = ko.observable(undefined);
+			self.levels = ko.observableArray(Array());
 			self.lastActionMessage = ko.observable("");
 
-		}
+			self.level = ko.computed(function(){
+				if(self.levels() && self.levels().length > 0){
 
-		this.initPlayer = function(playerData){
-			self.player(new Player(playerData));
+					for(i=0; i < self.levels().length; i++){
+						var thisLevel = self.levels()[i];
+						if (thisLevel.isActive()){
+							return thisLevel;
+						}
+					}
+	
+				}else{
+					return undefined;
+				}
+			}, self);
 		}
 
 		this.initGame = function(gameData){
-
+			console.log(gameData);
 			var level;
 			var player;
 			var stateID;
 
 			if(gameData != undefined){
-				level = new Level(gameData.level);
+				
+				var levelArray = Array();
+				for(i = 0; i < gameData.levels.length; i++){
+					levelArray.push( new Level(gameData.levels[i]) );
+				}
+				self.levels(levelArray);
 				player = new Player(gameData.player);
 				stateID = gameData.stateID;
 			}else{
-				level = new Level();
 				player = new Player();
+				level = new Level({isActive : true});
 				stateID = "start";
+				self.levels.push(level);
 				//stateID = "idle";
 			}
-			self.level(level);
 			self.player(player);
+			self.stateID(stateID);
 			self.setState(stateID);
-
-			self.level()._generateGrid();
-			self.level()._populateGrid();
-		}
-
-		this.initLevel = function(lvlNum, lvlData){
-			lvlNum = lvlNum || 1;
-			lvlData = lvlData || {};
-			self.level(new Level(lvlNum, lvlData));
+			
+			self.level().revealSquaresNearPlayer(player.data().skills().visionRange());
+			self.level().drawMap();
 		}
 
 		this.addFoodToPlayerInventory = function(){
@@ -220,11 +233,24 @@ define([
 			var currentPos = self.level().getPlayerPos();
 			var newPos = self.level().movePlayer(direction, self.player().data().speed());
 
+			self.lastActionMessage("");
 			if(currentPos.x != newPos.x || currentPos.y != newPos.y){
 				self.updateCooldowns();
 				self.player().data().skillProgress().speed( self.player().data().skillProgress().speed() + 1 );
+				
+				self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				self.level().drawMap();
+				
+				var square = self.level().getSquare(newPos.x, newPos.y);
+				
+				if(square.notEmpty){
+
+					square.setDone(true);
+					self.level().drawMap();
+					
+				}
+
 			}
-			self.lastActionMessage("");
 
 		}
 
@@ -244,6 +270,8 @@ define([
 		}
 
 		this.setState = function(stateID, extraCallback){
+			
+			self.stateID(stateID);
 
 			var no_slide =
 			{
@@ -317,10 +345,17 @@ define([
 
 		this.getExportData = function(){
 			var exportObj = {
-				player : ko.mapping.toJS(self.player().data()),
-				state : self.state(),
-				level: self.level(),
+				player : self.player().getExportData(),
+				stateID : self.stateID(),
+				levels : Array(),
 			}
+			
+			for(i=0; i < self.levels().length; i++){
+				var thisLevel = self.levels()[i];
+				
+				exportObj.levels.push(thisLevel.getExportData());
+			}
+			
 			return JSON.stringify(exportObj);
 		}
 

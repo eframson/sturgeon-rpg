@@ -6,9 +6,13 @@ define([
 	'Utils',
 ], function($, ko, GridSquare){
 
-	var Level = function(genOpts, numSquares, playerPos, levelNum, playerVision){
+	var Level = function(levelData){
 
 		var self = this;
+		
+		if(levelData == undefined){
+			levelData = { genOpts : {} };
+		}
 
 		this.genOpts = {};
 		$.extend(this.genOpts, {
@@ -20,22 +24,31 @@ define([
 			percentEmpty : 50,
 			minNonEmptyPerQuad: 3,
 			maxNonEmptyPerQuad: 10,
-		}, (genOpts || {}));
-		this.numSquares = numSquares || 10;
-		this.playerPos = playerPos || [4, 4];
-		this.playerVision = playerVision || 1;
-		this.levelNum = levelNum || 1;
-
-		this.gridBounds = {
+		}, (levelData.genOpts || {}));
+		this.numSquares = levelData.numSquares || 10;
+		this.playerPos = levelData.playerPos || [4, 4];
+		this.levelNum = levelData.levelNum || 1;
+		this.gridBounds = levelData.gridBounds || {
 			minX: 0,
 			maxX: (self.numSquares - 1),
 			minY: 0,
 			maxY: (self.numSquares - 1),
 		};
-
-		this.quadBounds = {};
-
-		this.grid = Array();
+		this.quadBounds = levelData.quadBounds || {};
+		this.grid = levelData.grid || Array();
+		this.nextLevelID = ko.observable( levelData.nextLevelID || undefined );
+		this.prevLevelID = ko.observable( levelData.prevLevelID || undefined );
+		this.isActive = ko.observable(levelData.isActive || false);
+		this.levelID = ko.observable(levelData.levelID || "lvl_" + (new Date().getTime()) );
+		this.hasGenerated = levelData.hasGenerated || false;
+		
+		this.init = function(){
+			if(!self.hasGenerated){
+				self._generateGrid();
+				self._populateGrid();
+				self.hasGenerated = true;
+			}
+		}
 
 		this.loadFromData = function(levelData){
 			if(levelData == undefined){
@@ -122,17 +135,8 @@ define([
 			}
 
 			self.setPlayerPos(targetX, targetY);
-			
-			self._revealSquaresNearPlayer();
-
-			console.log(this.getPlayerPos());
 
 			return this.getPlayerPos();
-		}
-		
-		this.scanNearPlayer = function(scanDist){
-			self._revealSquaresNearPlayer(scanDist);
-			self.drawMap();
 		}
 
 		this.getSquare = function(x, y){
@@ -172,8 +176,6 @@ define([
 			var itemColor = '#FFE240';
 			var eventColor = '#B92EFF';
 			var playerPos = self.getPlayerPos();
-			
-			console.log(self.grid);
 
 			$.each(self.grid, function(row_num, row){
 
@@ -184,16 +186,14 @@ define([
 					var fillStyle = "#FFFFFF";
 					var square = self.getSquare(col_num, row_num);
 					
-					if(square.isScanned){
+					if( square.isDone ){
 						
-						if(square.type == "combat"){
-							fillStyle = combatColor;
-						}else if(square.type == "item"){
-							fillStyle = itemColor;
-						}else if(square.type == "event"){
-							fillStyle = eventColor;
-						}else{
-
+						fillStyle = "#7A7A7A";
+						
+					}else{
+						
+						if(square.isVisible){
+	
 							if(odd_row){
 		
 								if(col_num % 2){
@@ -209,28 +209,22 @@ define([
 									fillStyle = lightFill;
 								}
 							}
-
+							
 						}
 						
-					}else if(square.isVisible){
-
-						if(odd_row){
-	
-							if(col_num % 2){
-								fillStyle = lightFill;
-							}else{
-								fillStyle = darkFill;
+						if(square.isScanned){
+							
+							if(square.type == "combat"){
+								fillStyle = combatColor;
+							}else if(square.type == "item"){
+								fillStyle = itemColor;
+							}else if(square.type == "event"){
+								fillStyle = eventColor;
 							}
 							
-						}else{
-							if(col_num % 2){
-								fillStyle = darkFill;
-							}else{
-								fillStyle = lightFill;
-							}
 						}
 						
-					}
+					}					
 
 					context.fillStyle = fillStyle;
 					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
@@ -249,36 +243,37 @@ define([
 
 		}
 		
-		this.setPlayerVision = function(visionRange){
-			self.playerVision = visionRange;
+		this.showSquaresNearPlayer = function(radius){
+			self._revealSquaresNearPlayer(radius, "vision");
 		}
 		
-		this._revealSquaresNearPlayer = function(scanDist){
-			scanDist = (scanDist) ? scanDist : 0 ;
+		this.scanSquaresNearPlayer = function(radius){
+			self._revealSquaresNearPlayer(radius, "scan");
+		}
+		
+		this.revealSquaresNearPlayer = function(radius){
+			self._revealSquaresNearPlayer(radius, "all");
+		}
+		
+		this._revealSquaresNearPlayer = function(radius, type){
+			radius = radius || 1;
+			type = type || "all";
+
 			var playerPos = self.getPlayerPos();
-			var startX = ( (playerPos.x - self.playerVision) >= self.gridBounds.minX ) ? playerPos.x - self.playerVision : self.gridBounds.minX ;
-			var startY = ( (playerPos.y - self.playerVision)  >= self.gridBounds.minY ) ? playerPos.y - self.playerVision : self.gridBounds.minY ;
-			var endX = ( (playerPos.x + self.playerVision) <= self.gridBounds.maxX ) ? playerPos.x + self.playerVision : self.gridBounds.maxX ;
-			var endY = ( (playerPos.y + self.playerVision)  <= self.gridBounds.maxY ) ? playerPos.y + self.playerVision : self.gridBounds.maxY ;
+			var startX = ( (playerPos.x - radius) >= self.gridBounds.minX ) ? playerPos.x - radius : self.gridBounds.minX ;
+			var startY = ( (playerPos.y - radius)  >= self.gridBounds.minY ) ? playerPos.y - radius : self.gridBounds.minY ;
+			var endX = ( (playerPos.x + radius) <= self.gridBounds.maxX ) ? playerPos.x + radius : self.gridBounds.maxX ;
+			var endY = ( (playerPos.y + radius)  <= self.gridBounds.maxY ) ? playerPos.y + radius : self.gridBounds.maxY ;
 			
 			for(r = startY; r <= endY; r++){
 				for(c = startX; c <= endX; c++){
-					self.getSquare(c, r).setVisibility(true);
-				}
-			}
-			
-			if(scanDist){
-				
-				startX = ( (playerPos.x - scanDist) >= self.gridBounds.minX ) ? playerPos.x - scanDist : self.gridBounds.minX ;
-				startY = ( (playerPos.y - scanDist)  >= self.gridBounds.minY ) ? playerPos.y - scanDist : self.gridBounds.minY ;
-				endX = ( (playerPos.x + scanDist) <= self.gridBounds.maxX ) ? playerPos.x + scanDist : self.gridBounds.maxX ;
-				endY = ( (playerPos.y + scanDist)  <= self.gridBounds.maxY ) ? playerPos.y + scanDist : self.gridBounds.maxY ;
-				
-				for(r = startY; r <= endY; r++){
-					for(c = startX; c <= endX; c++){
+					if(type == "vision" || type == "all" ){
+						self.getSquare(c, r).setVisibility(true);
+					}
+					if( type == "scan" || type == "all" ){
 						self.getSquare(c, r).setScanned(true);
 					}
-				}				
+				}
 			}
 		}
 
@@ -288,7 +283,7 @@ define([
 					if(self.grid[x] == undefined){
 						self.grid[x] = Array();
 					}
-					self.grid[x][y] = new GridSquare(x,y);
+					self.grid[x][y] = new GridSquare({x : x, y : y});
 				}
 			}
 		}
@@ -315,7 +310,7 @@ define([
 						var type = "empty";
 						var cumePercent = 0;
 						
-						if(rand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad){
+						if(rand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
 
 							var randSquareType = rand(0,99);
 
@@ -325,6 +320,7 @@ define([
 								cumePercent += parseInt(idx);
 								
 								if(randSquareType < cumePercent){
+									self.grid[x][y].notEmpty = true;
 									type = elem;
 									//Break out of our each loop early
 									return false;
@@ -336,10 +332,6 @@ define([
 						}
 						
 						self.grid[x][y].setType(type);
-						
-						if( Math.abs(playerPos.x - x) <= 1 && Math.abs(playerPos.y - y) <= 1 ){
-							self.grid[x][y].setVisibility(true);							
-						}
 					}
 				}
 
@@ -415,6 +407,38 @@ define([
 			return false;
 
 		}
+		
+		this.getExportData = function(){
+			
+			var exportObj = ko.mapping.toJS({
+				playerPos : self.playerPos,
+				levelNum : self.levelNum,
+				gridBounds : self.gridBounds,
+				quadBounds : self.quadBounds,
+				nextLevelID : self.nextLevelID,
+				prevLevelID : self.prevLevelID,
+				isActive : self.isActive,
+				levelID : self.levelID,
+				hasGenerated : self.hasGenerated,
+			});
+			
+			var exportGrid = Array();
+			
+			for(row = 0; row < self.grid.length; row++){
+				for(col = 0; col < self.grid[row].length; col++){
+					if(exportGrid[row] == undefined){
+						exportGrid[row] = Array();
+					}
+					exportGrid[row][col] = self.grid[row][col].getExportData();
+				}
+			}
+			
+			exportObj.grid = exportGrid;
+			
+			return exportObj;
+		}
+		
+		this.init();
 
 	}
 

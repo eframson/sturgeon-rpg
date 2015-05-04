@@ -96,6 +96,24 @@ button:focus {
 	margin-bottom: 20px;
 }
 
+#content-area .state-container {
+	text-align: left;
+}
+
+#content-area .state-controls .state-button {
+	width: 175px;
+	margin-left: 5px;
+	float: left;
+}
+
+#content-area .state-controls .state-button:first-child {
+	margin-left: 0;
+}
+
+#content-area .state-controls .state-button button {
+	width: 100%;
+}
+
 .buttons {
 	margin-bottom: 5px;
 }
@@ -125,20 +143,41 @@ button:focus {
 	margin-bottom: 10px;
 }
 
-.map-buttons {
-	text-align: right;
+.map-container .map-buttons,
+.map-container .map {
+	float: left;
 }
 
-.map-container {
-	text-align: left;
+.map-container .map-buttons {
+	width: 220px;
 }
 
-.map-buttons .up button{
-	margin-right: 30px;
+.map-container .map-buttons .map-button-cluster {
+	margin-top: 100px;
 }
 
-.map-buttons .down button {
-	margin-right: 24px;
+.map-container .map-buttons .map-button-cluster button {
+	display: inline-block;
+}
+
+.map-container .map-buttons .map-button-cluster button.up,
+.map-container .map-buttons .map-button-cluster button.down {
+	margin: auto;
+	width: 140px;
+}
+
+.map-container .map-buttons .map-button-cluster button.left .mid-buttons {
+	margin: auto;
+}
+
+.map-container .map-buttons .map-button-cluster button.left,
+.map-container .map-buttons .map-button-cluster button.right {
+	width: 100px;
+}
+
+.map-container .map {
+	width: 300px;
+	margin-left: 20px;
 }
 
 .file-upload {
