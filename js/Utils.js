@@ -27,11 +27,13 @@ define([
 		var rand = Math.floor(Math.random() * 100);
 		var percentOffset = 0;
 		
-		console.log(rand);
-		
 		for(i = 0; i < percents.length; i++){
 			if( rand < (percents[i] + percentOffset) ){
-				return percentageActions[percents[i]]();
+				if(typeof percentageActions[percents[i]] === 'function'){
+					return percentageActions[percents[i]]();
+				}else{
+					return percentageActions[percents[i]];
+				}
 			}else{
 				percentOffset += percents[i];
 			}

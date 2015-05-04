@@ -28,12 +28,14 @@ define([
 					40 : "event",
 				},
 				percentEmpty : 50,
-				minNonEmptyPerQuad: 3,
+				minNonEmptyPerQuad: 3, //Not currently used
 				maxNonEmptyPerQuad: 10,
+				quadsWithPotentialExits: [1, 2],
+				quadsWithPotentialEntrances: [3, 4],
 			}, (levelData.genOpts || {}));
 			self.numSquares = levelData.numSquares || 10;
 			self.playerPos = levelData.playerPos || [4, 4];
-			self.levelNum = levelData.levelNum || 1;
+			self.levelNum = ko.observable(levelData.levelNum || 1);
 			self.gridBounds = levelData.gridBounds || {
 				minX: 0,
 				maxX: (self.numSquares - 1),
@@ -47,6 +49,8 @@ define([
 			self.isActive = ko.observable(levelData.isActive || false);
 			self.levelID = ko.observable(levelData.levelID || "lvl_" + (new Date().getTime()) );
 			self.hasGenerated = levelData.hasGenerated || false;
+			self.entranceSquare = ko.observableArray(levelData.entranceSquare || []);
+			self.exitSquare = ko.observableArray(levelData.exitSquare || []);
 
 			var gridArray = Array();
 			for(y = 0; y < levelData.grid.length; y++){
@@ -186,6 +190,9 @@ define([
 			var combatColor = '#FF8585';
 			var itemColor = '#FFE240';
 			var eventColor = '#B92EFF';
+			var exitColor = '#FFD095';
+			var entranceColor = '#FF0000';
+			var text = "";
 			var playerPos = self.getPlayerPos();
 
 			$.each(self.grid, function(row_num, row){
@@ -195,6 +202,7 @@ define([
 				$.each(row, function(col_num, cell){
 
 					var fillStyle = "#EDEEF7";
+					var fontStyle = false;
 					var square = self.getSquare(col_num, row_num);
 					
 					if( square.isDone ){
@@ -231,14 +239,32 @@ define([
 								fillStyle = itemColor;
 							}else if(square.type == "event"){
 								fillStyle = eventColor;
+							}else if(square.type == "exit"){
+								fillStyle = "#000000";
+								fontStyle = "#FFFFFF";
+								text = "↑";
+							}else if(square.type == "entrance"){
+								fillStyle = "#FFFFFF";
+								fontStyle = "#000000";
+								text = "↓";
 							}
 							
 						}
 						
-					}					
+					}
 
 					context.fillStyle = fillStyle;
 					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
+					if( square.type == "entrance" || square.type == "exit"){
+						context.fillStyle = fontStyle;
+						context.font = "26px serif";
+						context.fillText(text, col_num * squareWidth + (squareWidth / 5), (row_num * squareHeight) + (squareHeight / 2) + (squareHeight / 4));
+					}
+
+					/*if( square.type == "entrance" || square.type == "exit"){
+						//context.fillText("FOO", col_num * squareWidth, row_num * squareHeight);
+					}*/
+					
 
 				});
 			});
@@ -311,6 +337,9 @@ define([
 			*/
 			var genOpts = self.genOpts;
 			var playerPos = self.getPlayerPos();
+			var potentialExits = Array(),
+				potentialEntrances = Array(),
+				q;
 
 			for(q=1; q <= 4; q++){
 				
@@ -326,27 +355,43 @@ define([
 						
 						if(rand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
 
-							var randSquareType = rand(0,99);
-
 							//This *should* automatically put the percentages in the correct (ASC) order
-							$.each(genOpts.genPercents, function(idx, elem){
-
-								cumePercent += parseInt(idx);
-								
-								if(randSquareType < cumePercent){
-									self.grid[x][y].notEmpty = true;
-									type = elem;
-									//Break out of our each loop early
-									return false;
-								}
-
-							});
+							var type = doBasedOnPercent(genOpts.genPercents);
+							
+							self.grid[x][y].notEmpty = true;
 							
 							numNonEmpty++;
+						}else{
+							if( genOpts.quadsWithPotentialExits.indexOf(q) != -1 ){
+								potentialExits.push([x, y]);
+							}else if( genOpts.quadsWithPotentialEntrances.indexOf(q) != -1 ){
+								potentialEntrances.push([x, y]);
+							}
 						}
 						
 						self.grid[x][y].setType(type);
 					}
+				}
+
+				var squareIdx,
+					squarePos;
+				//Place an entrance and exit, if applicable
+				if(genOpts.quadsWithPotentialExits.length > 0 && self.exitSquare().length == 0 && potentialExits.length > 0){
+
+					squareIdx = rand(0, potentialExits.length);
+					squarePos = potentialExits[squareIdx];
+					self.grid[ squarePos[0] ][ squarePos[1] ].setType("exit");
+					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
+					self.exitSquare([ squarePos[0], squarePos[1] ]);
+				}
+
+				if(genOpts.quadsWithPotentialEntrances.length > 0 && self.entranceSquare().length == 0 && potentialEntrances.length > 0){
+
+					squareIdx = rand(0, potentialEntrances.length);
+					squarePos = potentialEntrances[squareIdx];
+					self.grid[ squarePos[0] ][ squarePos[1] ].setType("entrance");
+					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
+					self.entranceSquare([ squarePos[0], squarePos[1] ]);
 				}
 
 			}
@@ -421,6 +466,38 @@ define([
 			return false;
 
 		}
+
+		this.generateNextLevel = function(levelData){
+
+			if( levelData == undefined || levelData.levelNum == undefined ){
+				levelData = { levelNum : (self.levelNum() + 1) };
+			}
+
+			if(self.nextLevelID() == undefined){
+				var newLevel = new Level(levelData);
+				newLevel.prevLevelID(self.levelID());
+				self.nextLevelID(newLevel.levelID());
+				return newLevel;
+			}
+			return false;
+
+		}
+
+		this.generatePrevLevel = function(levelData){
+
+			if( levelData == undefined || levelData.levelNum == undefined ){
+				levelData = { levelNum : (self.levelNum() - 1) };
+			}
+
+			if(self.prevLevelID() == undefined){
+				var newLevel = new Level(levelData);
+				newLevel.nextLevelID(self.levelID());
+				self.prevLevelID(newLevel.levelID());
+				return newLevel;
+			}
+			return false;
+
+		}
 		
 		this.getExportData = function(){
 			
@@ -450,6 +527,11 @@ define([
 			exportObj.grid = exportGrid;
 			
 			return exportObj;
+		}
+
+		this.revealMap = function(){
+			self.revealSquaresNearPlayer(50);
+			self.drawMap();
 		}
 		
 		this.init(levelData);

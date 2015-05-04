@@ -108,6 +108,7 @@
 					<div class="map-inner-container">
 						
 						<div class="map-buttons">
+							<div class="map-level-num"><strong>Level: </strong><span data-bind="text: $root.level().levelNum()"></span></div>
 							<div class="map-button-cluster">
 								<button type="button" class="btn btn-default up" data-bind="click: $root.movePlayerUp">Swim Upstream</button>
 								<div class="mid-buttons">
@@ -135,22 +136,28 @@
 				</div>
 
 				<div class="row header">
-					<div class="col-md-6 inventory-header"><h3>Inventory</h3></div>
-					<div class="col-md-6 equipment-header"><h3>Equipment</h3></div>
+					<div class="col-md-5 inventory-header"><h3>Inventory</h3></div>
+					<div class="col-md-3"></div>
+					<div class="col-md-4 equipment-header"><h3>Equipment</h3></div>
 				</div>
 
 				<div class="row">
-					<div class="col-md-6 inventory">
+					<div class="col-md-5 inventory">
 						<!-- ko foreach: $root.player().data().inventory() -->
-						<div class="line">
+						<div class="line" data-bind="click: $root.setAsActiveDescItem">
 							<span class="item" data-bind="text: $data.name"></span>
 							<span class="qty" data-bind="text: $data.qty()"></span>
 						</div>
 						<!-- /ko -->
 					</div>
-					<div class="col-md-6 equipment">
+					<div class="col-md-3 item-desc">
+						<!-- ko if: currentDescItem().desc() != "" -->
+						<div class="desc" data-bind="text: currentDescItem().desc()"></div>
+						<!-- /ko -->
+					</div>
+					<div class="col-md-4 equipment">
 
-						<div class="equipment-spacer"></div>
+						<!-- <div class="equipment-spacer"></div> -->
 						
 						<div class="equipment-inner-container">Some test content here</div>
 

@@ -198,6 +198,10 @@ button:focus {
 	margin-right: 15px;
 }
 
+.map-container .map-level-num {
+	text-align: left;
+}
+
 .map-container .map-buttons .map-button-cluster {
 	margin-top: 100px;
 }
@@ -262,12 +266,37 @@ button:focus {
 	padding-left: 10px;
 }
 
-#inventory-equipment .col-md-6 {
+#inventory-equipment .header .inventory-header {
 	padding-left: 0;
 }
 
 #inventory-equipment .inventory {
 	background-color: #F0ECE6;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+#inventory-equipment .inventory .line {
+	padding: 5px 10px 5px 10px;
+	cursor: pointer;
+}
+
+#inventory-equipment .inventory .line:hover {
+	background-color: #EDC78E;
+}
+
+#inventory-equipment .inventory .line:active {
+	background-color: #F6D8AC;
+}
+
+#inventory-equipment .inventory .qty {
+	float: right;
+	clear: both;
+}
+
+#inventory-equipment .item-desc .desc{
+	padding: 5px 10px 5px 10px;
+	background-color: #ECECEC;
 }
 
 #inventory-equipment .equipment .equipment-spacer {

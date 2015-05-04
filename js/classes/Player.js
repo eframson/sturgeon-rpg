@@ -79,13 +79,6 @@ define([
 			return ko.mapping.toJS( exportObj );
 		}
 
-		this.loadFromData = function(playerData){
-			if(playerData == undefined){
-				return false;
-			}
-			console.log(playerData);
-		}
-
 		this.addItemToInventory = function(itemToAdd){
 			if(itemToAdd == undefined || itemToAdd.constructor != Item){
 				return false;
@@ -117,11 +110,49 @@ define([
 			}
 
 			return true;
+		}
 
+		this.removeItemFromInventory = function(itemID, qty){
 
-			//inventory
-			//inventoryMaxSlots
-			//inventorySlotsOccupied
+			var item = self.getInventoryItemByID(itemID);
+
+			if(!item){
+				return false;
+			}
+
+			var existingQty = item.qty();
+
+			if( qty == undefined || qty && (qty == "all" || qty > existingQty) ){
+				self.data().inventory().remove(item);
+			}else{
+				item.qty( existingQty - qty );
+			}
+		}
+
+		this.setInventoryItemQty = function(itemOrItemID, qty){
+
+			if(!itemOrItemID || typeof qty != "number"){
+				return false;
+			}
+
+			//There's probably a better way to check for this...
+			if(typeof itemOrItemID != "object"){
+				itemOrItemID = self.getInventoryItemByID(itemID);
+			}
+
+			itemOrItemID.qty(qty);
+
+		}
+
+		this.getInventoryItemByID = function(itemID){
+
+			for(i = 0; i < self.data().inventory().length; i++){
+				if( itemID == self.data().inventory()[i].id ){
+					return self.data().inventory()[i];
+				}
+			}
+			return false;
+
 		}
 
 		this.itemTest = function(){

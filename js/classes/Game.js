@@ -160,6 +160,13 @@ define([
 			self.levels = ko.observableArray(Array());
 			self.lastActionMessage = ko.observable("");
 			self.visibleSection = ko.observable("content-area");
+			self.currentDescItem = ko.observable({
+				desc : ko.observable(""),
+				canEquip : ko.observable(false),
+				canUnEquip : ko.observable(false),
+				canUse : ko.observable(false),
+				canDrop : ko.observable(false),
+			});
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -195,8 +202,8 @@ define([
 				self.visibleSection(gameData.visibleSection);
 			}else{
 				player = new Player();
-				level = new Level({isActive : true});
-				stateID = "start";
+				level = new Level({ genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
+				stateID = "idle";
 				self.levels.push(level);
 				//stateID = "idle";
 			}
@@ -208,6 +215,12 @@ define([
 					$("#" + elem).show();
 				}
 			});
+
+			var newLevel = self.level().generateNextLevel();
+
+			if( newLevel ){
+				self.levels.push(newLevel);
+			}
 
 			self.player(player);
 			self.stateID(stateID);
@@ -255,7 +268,7 @@ define([
 		this.movePlayer = function(direction){
 
 			var currentPos = self.level().getPlayerPos();
-			var newPos = self.level().movePlayer(direction, self.player().data().speed());
+			var newPos = self.level().movePlayer(direction, 1);
 
 			self.lastActionMessage("");
 			if(currentPos.x != newPos.x || currentPos.y != newPos.y){
@@ -269,7 +282,12 @@ define([
 				
 				if(square.notEmpty){
 
-					square.setDone(true);
+					self.handleSquareAction(square);
+
+					if(square.type != "exit" && square.type != "entrance"){
+						square.setDone(true);
+					}
+
 					self.level().drawMap();
 					
 				}
@@ -288,6 +306,7 @@ define([
 		}
 		
 		this.toggleInventory = function(){
+			game.player().itemTest();
 			self.visibleSection("inventory-equipment");
 			$("#content-area").fadeOut(300, function(){
 				$("#inventory-equipment").fadeIn(300);
@@ -353,6 +372,109 @@ define([
 
 				});
 			});
+		}
+
+		this.handleSquareAction = function(square){
+			var type = square.type;
+
+			if(type == "combat"){
+
+			}else if(type == "item"){
+
+				var possibleItemTypes = {
+					50 : "gold",
+					40 : "misc",
+					10 : "gear",
+				};
+
+				var itemType = doBasedOnPercent(possibleItemTypes);
+
+				if(itemType == "gold"){
+
+				}else if(itemType == "misc"){
+
+				}else if(itemType == "gear"){
+
+				}
+
+			}else if(type == "event"){
+				
+			}else if(type == "exit"){
+
+				if(self.level().nextLevelID() == undefined){
+
+					var newLevel = self.level().generateNextLevel();
+
+					if( newLevel ){
+						self.levels.push(newLevel);
+					}
+
+				}
+
+				var nextLevel = self.getLevelById( self.level().nextLevelID() );
+				var currentLevel = self.level();
+
+				$(".map-inner-container").fadeOut(400, function(){
+					nextLevel.isActive(true);
+					currentLevel.isActive(false);
+					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
+					nextLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
+					nextLevel.drawMap();
+
+					$(this).fadeIn(400);
+				});
+				
+				
+			}else if(type == "entrance"){
+
+				//This is unlikely, but we'd better account for it just to be safe
+				if(self.level().prevLevelID() == undefined){
+
+					var newLevel = self.level().generatePrevLevel();
+
+					if( newLevel ){
+						self.levels.push(newLevel);
+					}
+
+				}
+
+				var prevLevel = self.getLevelById( self.level().prevLevelID() );
+				var currentLevel = self.level();
+
+				$(".map-inner-container").fadeOut(400, function(){
+					prevLevel.isActive(true);
+					currentLevel.isActive(false);
+					prevLevel.setPlayerPos( prevLevel.entranceSquare()[0], prevLevel.entranceSquare()[1] );
+					prevLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
+					prevLevel.drawMap();
+
+					$(this).fadeIn(400);
+				});
+				
+			}else{
+				//Do nothing
+			}
+		}
+
+		this.setAsActiveDescItem = function(item, event){
+
+			self.currentDescItem().desc(item.name);
+
+			/*self.currentDescItem().desc();
+			self.currentDescItem().canEquip();
+			self.currentDescItem().canUnEquip();
+			self.currentDescItem().canUse();
+			self.currentDescItem().canDrop();*/
+
+		}
+
+		this.getLevelById = function(id){
+			for(i = 0; i < self.levels().length; i++){
+				if( id == self.levels()[i].levelID() ){
+					return self.levels()[i];
+				}
+			}
+			return false;
 		}
 
 		this.importData = function(){
