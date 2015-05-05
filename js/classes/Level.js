@@ -353,7 +353,7 @@ define([
 						var type = "empty";
 						var cumePercent = 0;
 						
-						if(rand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
+						if(doRand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
 
 							//This *should* automatically put the percentages in the correct (ASC) order
 							var type = doBasedOnPercent(genOpts.genPercents);
@@ -378,7 +378,7 @@ define([
 				//Place an entrance and exit, if applicable
 				if(genOpts.quadsWithPotentialExits.length > 0 && self.exitSquare().length == 0 && potentialExits.length > 0){
 
-					squareIdx = rand(0, potentialExits.length);
+					squareIdx = doRand(0, potentialExits.length);
 					squarePos = potentialExits[squareIdx];
 					self.grid[ squarePos[0] ][ squarePos[1] ].setType("exit");
 					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
@@ -387,7 +387,7 @@ define([
 
 				if(genOpts.quadsWithPotentialEntrances.length > 0 && self.entranceSquare().length == 0 && potentialEntrances.length > 0){
 
-					squareIdx = rand(0, potentialEntrances.length);
+					squareIdx = doRand(0, potentialEntrances.length);
 					squarePos = potentialEntrances[squareIdx];
 					self.grid[ squarePos[0] ][ squarePos[1] ].setType("entrance");
 					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;

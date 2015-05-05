@@ -322,6 +322,7 @@ define([
 			$("#inventory-equipment").fadeOut(300, function(){
 				$("#content-area").fadeIn(300);
 			});
+			self._resetActiveDescItem();
 		}
 
 		this.hideModal = function(viewModel, event){
@@ -405,7 +406,7 @@ define([
 					itemToAdd.stackable = 1;
 					itemToAdd.desc = "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.";
 					
-					//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 1000
+					//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 2000
 					var goldSize = doBasedOnPercent({
 						1 : "hoard",
 						9 : "large",
@@ -416,13 +417,13 @@ define([
 					var goldAmt = 0;
 					
 					if( goldSize == "small" ){
-						goldAmt = rand(80, 121);
+						goldAmt = doRand(80, 121);
 					}else if( goldSize == "medium" ){
-						goldAmt = rand(160, 241);
+						goldAmt = doRand(160, 241);
 					}else if( goldSize == "large" ){
-						goldAmt = rand(320, 481);
+						goldAmt = doRand(320, 481);
 					}else if( goldSize == "hoard" ){
-						goldAmt = 1000;
+						goldAmt = 2000;
 					}
 					
 					itemToAdd.qty = goldAmt;
@@ -445,7 +446,7 @@ define([
 						itemToAdd.stackable = 1;
 						itemToAdd.desc = "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...";
 						
-						itemToAdd.qty = rand(1,26);
+						itemToAdd.qty = doRand(1,26);
 						
 					}else if( miscType == "weapon" ){
 						
@@ -456,7 +457,7 @@ define([
 						itemToAdd.stackable = 1;
 						itemToAdd.desc = "Scraps of leather, iron, steel. Formerly part of someone's weapon. Maybe you could use it to make your own weapons better...";
 						
-						itemToAdd.qty = rand(1,26);
+						itemToAdd.qty = doRand(1,26);
 						
 					}else if( miscType == "stone" ){
 

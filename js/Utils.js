@@ -3,7 +3,7 @@ define([
 ], function($){
 
 	//Returns number between min (inclusive) and max (exclusive)
-	rand = function(min, max){
+	doRand = function(min, max){
 		return Math.floor(Math.random() * (max - min)) + min;
 	}
 	
@@ -24,7 +24,7 @@ define([
 			return false;
 		}
 		
-		var rand = Math.floor(Math.random() * 100);
+		var rand = doRand(1,101);
 		var percentOffset = 0;
 		
 		for(i = 0; i < percents.length; i++){
