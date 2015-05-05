@@ -87,26 +87,26 @@ define([
 			if(itemToAdd.slotsRequired > (self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied()) ){
 				return false;
 			}
+			
+			var existingItem = false;
 
 			if(itemToAdd.stackable){
-
-				var foundMatch = false;
-				$.each(self.data().inventory(), function(idx, item){
-					if(item.id == itemToAdd.id ){
-						item.qty( item.qty() + itemToAdd.qty() );
-						foundMatch = true;
-						return false; //break out early
-					}
-				});
-
-				if(!foundMatch){
-					self.data().inventory.push(itemToAdd);
+				
+				var existingItem = self.getInventoryItemByID(itemToAdd.id);
+				
+				if(existingItem){
+					existingItem.qty( existingItem.qty() + itemToAdd.qty() );
+				}
+			}
+			
+			if(!existingItem){
+			
+				self.data().inventory.push(itemToAdd);
+				
+				if( itemToAdd.id != "gold" ){
 					self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
 				}
 
-			}else{
-				self.data().inventory.push(itemToAdd);
-				self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
 			}
 
 			return true;
@@ -122,10 +122,13 @@ define([
 
 			var existingQty = item.qty();
 
-			if( qty == undefined || qty && (qty == "all" || qty > existingQty) ){
-				self.data().inventory().remove(item);
+			if( qty == undefined || qty && (qty == "all" || qty >= existingQty) ){
+				self.data().inventory.remove(item);
+				self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() - 1 );
+				return 0;
 			}else{
 				item.qty( existingQty - qty );
+				return item.qty();
 			}
 		}
 
@@ -161,6 +164,7 @@ define([
 				id : 'biscuit_food',
 				name : "Fish Biscuits",
 				type : "food",
+				desc : "Fish Biscuits are small, compacted squares of delicious berries, bugs, bacon, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"",
 				qty : 1,
 			});
 

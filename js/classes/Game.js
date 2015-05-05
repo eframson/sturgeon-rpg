@@ -4,9 +4,10 @@ define([
 	'classes/Player',
 	'classes/Level',
 	'classes/Item',
+	'classes/Weapon',
 
 	'Utils',
-], function($, ko, Player, Level, Item){
+], function($, ko, Player, Level, Item, Weapon){
 
 	var Game = function() {
 
@@ -135,7 +136,8 @@ define([
 					self.tempFoodFindBonus = 0;
 				};
 				doBasedOnPercent(percentages,
-				function(){
+				function(rand){
+					//console.log("rand: " + rand + " ; temp bonus: " + self.tempFoodFindBonus + " ; findPercent: " + findPercent);
 					message = "You try to delicately float to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
 					self.tempFoodFindBonus += 2;
 				});
@@ -161,11 +163,12 @@ define([
 			self.lastActionMessage = ko.observable("");
 			self.visibleSection = ko.observable("content-area");
 			self.currentDescItem = ko.observable({
+				id : ko.observable(""),
 				desc : ko.observable(""),
-				canEquip : ko.observable(false),
-				canUnEquip : ko.observable(false),
-				canUse : ko.observable(false),
-				canDrop : ko.observable(false),
+				canEquip : ko.observable(0),
+				canUnEquip : ko.observable(0),
+				canUse : ko.observable(0),
+				canDrop : ko.observable(0),
 			});
 
 			self.level = ko.computed(function(){
@@ -235,7 +238,8 @@ define([
 			var food = new Item({
 				id : 'biscuit_food',
 				name : "Fish Biscuits",
-				type : "food",
+				type : "consumables",
+				desc : "Fish Biscuits are small, compacted squares of delicious berries, bugs, bacon, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly. Do not consume while pregnant.",
 				qty : qty,
 			});
 			self.player().addItemToInventory(food);
@@ -280,17 +284,16 @@ define([
 				
 				var square = self.level().getSquare(newPos.x, newPos.y);
 				
-				if(square.notEmpty){
+				if(square.notEmpty && square.isDone == false){
 
 					self.handleSquareAction(square);
 
 					if(square.type != "exit" && square.type != "entrance"){
 						square.setDone(true);
 					}
-
-					self.level().drawMap();
-					
 				}
+				
+				self.level().drawMap();
 
 			}
 
@@ -306,7 +309,7 @@ define([
 		}
 		
 		this.toggleInventory = function(){
-			game.player().itemTest();
+			//game.player().itemTest();
 			self.visibleSection("inventory-equipment");
 			$("#content-area").fadeOut(300, function(){
 				$("#inventory-equipment").fadeIn(300);
@@ -380,6 +383,10 @@ define([
 			if(type == "combat"){
 
 			}else if(type == "item"){
+				
+				var itemClass = "item";
+				
+				var itemToAdd = {};
 
 				var possibleItemTypes = {
 					50 : "gold",
@@ -390,14 +397,138 @@ define([
 				var itemType = doBasedOnPercent(possibleItemTypes);
 
 				if(itemType == "gold"){
+										
+					itemToAdd.id = "gold";
+					itemToAdd.name = "Gold Pieces (GP)";
+					itemToAdd.type = "currency";
+					itemToAdd.slotsRequired = 0;
+					itemToAdd.stackable = 1;
+					itemToAdd.desc = "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.";
+					
+					//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 1000
+					var goldSize = doBasedOnPercent({
+						1 : "hoard",
+						9 : "large",
+						30 : "medium",
+						60 : "small"
+					});
+					
+					var goldAmt = 0;
+					
+					if( goldSize == "small" ){
+						goldAmt = rand(80, 121);
+					}else if( goldSize == "medium" ){
+						goldAmt = rand(160, 241);
+					}else if( goldSize == "large" ){
+						goldAmt = rand(320, 481);
+					}else if( goldSize == "hoard" ){
+						goldAmt = 1000;
+					}
+					
+					itemToAdd.qty = goldAmt;
 
 				}else if(itemType == "misc"){
+					
+					//41% armor scraps, 39% weapon scraps, 20% stone of reset
+					var miscType = doBasedOnPercent({
+						20 : "stone",
+						39 : "weapon",
+						41 : "armor",
+					});
+					
+					if( miscType == "armor" ){
+						
+						itemToAdd.id = "armor_scraps";
+						itemToAdd.name = "Armor Scraps";
+						itemToAdd.type = "crafting";
+						itemToAdd.slotsRequired = 1;
+						itemToAdd.stackable = 1;
+						itemToAdd.desc = "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...";
+						
+						itemToAdd.qty = rand(1,26);
+						
+					}else if( miscType == "weapon" ){
+						
+						itemToAdd.id = "weapon_scraps";
+						itemToAdd.name = "Weapon Scraps";
+						itemToAdd.type = "crafting";
+						itemToAdd.slotsRequired = 1;
+						itemToAdd.stackable = 1;
+						itemToAdd.desc = "Scraps of leather, iron, steel. Formerly part of someone's weapon. Maybe you could use it to make your own weapons better...";
+						
+						itemToAdd.qty = rand(1,26);
+						
+					}else if( miscType == "stone" ){
+
+						itemToAdd.id = "reset_stone";
+						itemToAdd.name = "Reset Stone";
+						itemToAdd.type = "consumables";
+						itemToAdd.slotsRequired = 1;
+						itemToAdd.stackable = 1;
+						itemToAdd.desc = "A stone imbued with magical energies. It has the power to regenerate the current dungeon level, letting you experience a brand new set of events, search for new treasures, and fight new monsters.";
+						itemToAdd.qty = 1;
+
+					}
 
 				}else if(itemType == "gear"){
-
+					
+					var gearType = doBasedOnPercent({
+						51 : "armor",
+						49 : "weapon"
+					});
+					
+					//Eventually these will be randomized, but let's keep it simple for now...
+					if( gearType == "armor" ){
+						
+						itemToAdd.id = "body_armor_01";
+						itemToAdd.name = "Leather Armor";
+						itemToAdd.type = "armor";
+						itemToAdd.slotsRequired = 1;
+						itemToAdd.stackable = 0;
+						itemToAdd.desc = "A set of leather armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.";
+						itemToAdd.qty = 1;
+						
+					}else if( gearType == "weapon" ){
+						
+						itemClass = "weapon";
+						
+						itemToAdd.id = "melee_weapon_01";
+						itemToAdd.name = "Razor-sharp Dagger";
+						itemToAdd.type = "weapon";
+						itemToAdd.slotsRequired = 1;
+						itemToAdd.stackable = 0;
+						itemToAdd.desc = "A shiny dagger. You could fillet someone with this. +3 DMG when equipped.";
+						itemToAdd.qty = 1;
+						
+					}
+					
 				}
+				
+				var newItem;
+				
+				if(itemClass == "item"){
+					newItem = new Item(itemToAdd);
+				}else if(itemClass == "weapon"){
+					newItem = new Weapon(itemToAdd);
+				}
+				
+				var container = doBasedOnPercent({
+					25 : "a crate sealed tightly with tar",
+					24 : "an upturned canoe concealing a pocket of air",
+					28 : "a waterproof oilskin bag",
+					23 : "a crevice between two large rocks",
+				});
+				
+				self.lastActionMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name);
+				
+				self.player().addItemToInventory(newItem);
 
 			}else if(type == "event"){
+				
+				//30% trader
+				//40% skill increase
+				//10% stat increase
+				//20% cooldowns reset
 				
 			}else if(type == "exit"){
 
@@ -444,7 +575,7 @@ define([
 				$(".map-inner-container").fadeOut(400, function(){
 					prevLevel.isActive(true);
 					currentLevel.isActive(false);
-					prevLevel.setPlayerPos( prevLevel.entranceSquare()[0], prevLevel.entranceSquare()[1] );
+					prevLevel.setPlayerPos( prevLevel.exitSquare()[0], prevLevel.exitSquare()[1] );
 					prevLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
 					prevLevel.drawMap();
 
@@ -455,17 +586,68 @@ define([
 				//Do nothing
 			}
 		}
+		
+		this._resetActiveDescItem = function(){
+
+			self.currentDescItem().desc("");
+			self.currentDescItem().id("");
+			self.currentDescItem().canUse(0);
+			self.currentDescItem().canEquip(0);
+			self.currentDescItem().canDrop(0);
+			self.currentDescItem().canUnEquip(0);
+			
+		}
 
 		this.setAsActiveDescItem = function(item, event){
+			
+			//Reset stuff first
+			self._resetActiveDescItem();
 
-			self.currentDescItem().desc(item.name);
+			self.currentDescItem().id(item.id);
+			self.currentDescItem().desc(item.desc);
+			
+			var type = item.type;
+			if( type == "consumables" ){
+				self.currentDescItem().canUse(1);
+			}else if ( type == "armor" || type == "weapon" ){
+				self.currentDescItem().canEquip(1);				
+			}
+			
+			if( type != "currency" ){
+				self.currentDescItem().canDrop(1);				
+			}
 
-			/*self.currentDescItem().desc();
-			self.currentDescItem().canEquip();
-			self.currentDescItem().canUnEquip();
-			self.currentDescItem().canUse();
-			self.currentDescItem().canDrop();*/
+			//self.currentDescItem().canUnEquip(1);
 
+
+		}
+		
+		this.equipDescItem = function(item, event){
+			
+		}
+		
+		this.unEquipDescItem = function(item, event){
+			
+		}
+		
+		this.useDescItem = function(item, event){
+			
+		}
+		
+		this.dropDescItem = function(item, event){
+			var itemId = self.currentDescItem().id();
+			
+			var numLeft = self.player().removeItemFromInventory(itemId, 1);
+			if( numLeft == 0 ){
+				self._resetActiveDescItem();
+			}
+		}
+		
+		this.dropAllDescItem = function(item, event){
+			var itemId = self.currentDescItem().id();
+			
+			self.player().removeItemFromInventory(itemId);
+			self._resetActiveDescItem();
 		}
 
 		this.getLevelById = function(id){

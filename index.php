@@ -136,13 +136,18 @@
 				</div>
 
 				<div class="row header">
-					<div class="col-md-5 inventory-header"><h3>Inventory</h3></div>
+					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="text: $root.player().data().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
 					<div class="col-md-3"></div>
 					<div class="col-md-4 equipment-header"><h3>Equipment</h3></div>
 				</div>
 
 				<div class="row">
 					<div class="col-md-5 inventory">
+						<!-- ko if: $root.player().data().inventory().length == 0 -->
+						<div class="line empty">
+							<span class="item">Your inventory is empty</span>
+						</div>
+						<!-- /ko -->
 						<!-- ko foreach: $root.player().data().inventory() -->
 						<div class="line" data-bind="click: $root.setAsActiveDescItem">
 							<span class="item" data-bind="text: $data.name"></span>
@@ -151,9 +156,15 @@
 						<!-- /ko -->
 					</div>
 					<div class="col-md-3 item-desc">
-						<!-- ko if: currentDescItem().desc() != "" -->
-						<div class="desc" data-bind="text: currentDescItem().desc()"></div>
-						<!-- /ko -->
+
+						<div class="inner" data-bind="css: { hidden: currentDescItem().desc() == '' }">
+							<div class="desc" data-bind="html: currentDescItem().desc()"></div>
+							<button class="btn btn-default inventory-control" data-bind="click: equipDescItem, css: { hidden: currentDescItem().canEquip() != 1 }">Equip</button>
+							<button class="btn btn-default inventory-control" data-bind="click: unEquipDescItem, css: { hidden: currentDescItem().canUnEquip() != 1 }">Un-Equip</button>
+							<button class="btn btn-default inventory-control" data-bind="click: useDescItem, css: { hidden: currentDescItem().canUse() != 1 }">Use</button>
+							<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop 1x</button>
+							<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop All</button>
+						</div>
 					</div>
 					<div class="col-md-4 equipment">
 

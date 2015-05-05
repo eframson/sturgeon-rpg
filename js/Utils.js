@@ -30,7 +30,7 @@ define([
 		for(i = 0; i < percents.length; i++){
 			if( rand < (percents[i] + percentOffset) ){
 				if(typeof percentageActions[percents[i]] === 'function'){
-					return percentageActions[percents[i]]();
+					return percentageActions[percents[i]](rand);
 				}else{
 					return percentageActions[percents[i]];
 				}
@@ -40,7 +40,7 @@ define([
 		}
 		
 		if(finallyAction && typeof finallyAction === 'function'){
-			return finallyAction();
+			return finallyAction(rand);
 		}
 		
 		//lolwut?

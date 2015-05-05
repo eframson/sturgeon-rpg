@@ -263,7 +263,7 @@ button:focus {
 }
 
 #inventory-equipment .header .equipment-header {
-	padding-left: 10px;
+	padding-left: 0px;
 }
 
 #inventory-equipment .header .inventory-header {
@@ -278,14 +278,17 @@ button:focus {
 
 #inventory-equipment .inventory .line {
 	padding: 5px 10px 5px 10px;
+}
+
+#inventory-equipment .inventory .line:not(.empty) {
 	cursor: pointer;
 }
 
-#inventory-equipment .inventory .line:hover {
+#inventory-equipment .inventory .line:not(.empty):hover {
 	background-color: #EDC78E;
 }
 
-#inventory-equipment .inventory .line:active {
+#inventory-equipment .inventory .line:not(.empty):active {
 	background-color: #F6D8AC;
 }
 
@@ -294,9 +297,19 @@ button:focus {
 	clear: both;
 }
 
-#inventory-equipment .item-desc .desc{
-	padding: 5px 10px 5px 10px;
+#inventory-equipment .item-desc .inner{
 	background-color: #ECECEC;
+	padding: 5px 10px 5px 10px;
+	margin: 0;
+}
+
+#inventory-equipment .item-desc button.inventory-control {
+	width: 115px;
+	margin-top: 10px;
+}
+
+#inventory-equipment .equipment {
+	padding-left: 0px;
 }
 
 #inventory-equipment .equipment .equipment-spacer {
@@ -308,6 +321,7 @@ button:focus {
 #inventory-equipment .equipment .equipment-inner-container {
 	background-color: #E7E6F0;
 	float: left;
+	padding: 10px;
 }
 
 .file-upload {

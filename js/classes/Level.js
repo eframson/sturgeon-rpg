@@ -24,8 +24,8 @@ define([
 			$.extend(self.genOpts, {
 				genPercents : {
 					50 : "combat",
-					10 : "item",
-					40 : "event",
+					20 : "item",
+					30 : "event",
 				},
 				percentEmpty : 50,
 				minNonEmptyPerQuad: 3, //Not currently used
