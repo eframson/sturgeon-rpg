@@ -47,6 +47,7 @@ define([
 				}),
 				abilities : ko.observableArray(playerData.abilities || Array()),
 				speed : ko.observable(playerData.level || 1),
+				gp : ko.observable(playerData.gp || 0),
 
 			});
 
@@ -55,6 +56,10 @@ define([
 				itemArray.push( new Item(playerData.inventory[i]) );
 			}
 			self.data().inventory(itemArray);
+
+			this.hasInventorySpace = ko.computed(function(){
+				return ( (self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied()) > 0);
+			});
 		}
 
 		this.getData = function(){
@@ -96,6 +101,10 @@ define([
 				
 				if(existingItem){
 					existingItem.qty( existingItem.qty() + itemToAdd.qty() );
+
+					if( itemToAdd.id == "gold" ){
+						self.data().gp(existingItem.qty());
+					}
 				}
 			}
 			
@@ -105,6 +114,8 @@ define([
 				
 				if( itemToAdd.id != "gold" ){
 					self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
+				}else{
+					self.data().gp(itemToAdd.qty());
 				}
 
 			}

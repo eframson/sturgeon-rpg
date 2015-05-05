@@ -47,6 +47,21 @@ require([
 		//Show our content now that everything's loaded
 		$("#content-area").removeClass("hidden");
 		
+		$(document).keydown(function(e){
+			if( game.arrowKeysControlPlayerPos() ){
+
+				if(e.keyCode == 37){
+					game.movePlayerLeft();
+				}else if(e.keyCode == 38){
+					game.movePlayerUp();
+				}else if(e.keyCode == 39){
+					game.movePlayerRight();
+				} else if(e.keyCode == 40){
+					game.movePlayerDown();
+				}
+
+			}
+		});
 	});
 
 });

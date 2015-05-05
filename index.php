@@ -79,25 +79,29 @@
 				<div class="col-md-1"><span class="stat-label">Stat09</span><span class="stat-value">Stat09</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat10</span><span class="stat-value">Stat10</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat11</span><span class="stat-value">Stat11</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat12</span><span class="stat-value">Stat12</span></div>
+				<div class="col-md-1"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().data().gp()"></span></div>
 			</div>
 
 			<div class="row hidden" id="content-area">
 				
 				<div class="col-md-6 state-container">
-					<div class="state-before-text" data-bind="html: state().beforeText"></div>
-					<div class="clear"></div>
-					<div class="state-controls" data-bind="foreach: ( typeof state().buttons === 'function' ? state().buttons() : state().buttons )">
-						<div class="state-button">
-							<button type="button" class="btn btn-default" data-bind="click: $data.action, text: (typeof text === 'function' ? text() : text ), css: (typeof css === 'function' ? css() : {} )"></button>
+					<div class="state-info">
+						<div class="state-before-text" data-bind="html: state().beforeText"></div>
+						<div class="clear"></div>
+						<div class="state-controls" data-bind="foreach: ( typeof state().buttons === 'function' ? state().buttons() : state().buttons )">
+							<div class="state-button">
+								<button type="button" class="btn btn-default" data-bind="click: $data.action, text: (typeof text === 'function' ? text() : text ), css: (typeof css === 'function' ? css() : {} )"></button>
+							</div>
 						</div>
+						<div class="clear"></div>
+						<div class="state-after-text" data-bind="html: state().afterText"></div>
+						<div class="clear"></div>
+						<div class="location">Location: <span data-bind="text: location() || state().location"></span></div>
+						<div class="clear"></div>
 					</div>
-					<div class="clear"></div>
-					<div class="state-after-text" data-bind="html: state().afterText"></div>
-					<div class="clear"></div>
-					<div class="location">Location: <span data-bind="text: location() || state().location"></span></div>
-					<div class="clear"></div>
-					<div class="last-action-message" data-bind="text: lastActionMessage()"></div>
+					<div class="message-log" data-bind="foreach: logMessages()">
+						<p data-bind="html: $data.text, css: $data.cssClass"></p>
+					</div>
 					<div class="clear"></div>
 				</div>
 				
@@ -116,6 +120,9 @@
 									<button type="button" class="btn btn-default right" data-bind="click: $root.movePlayerRight">Swim Right</button>
 								</div>
 								<button type="button" class="btn btn-default down" data-bind="click: $root.movePlayerDown">Swim Downstream</button>
+							</div>
+							<div class="arrow-keys-checkbox">
+								<input type="checkbox" data-bind="checked: arrowKeysControlPlayerPos" />Arrow keys control player movement
 							</div>
 						</div>
 						<div class="map">
@@ -136,9 +143,10 @@
 				</div>
 
 				<div class="row header">
-					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="text: $root.player().data().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
+					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="css: { danger: $root.player().data().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }, text: $root.player().data().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
 					<div class="col-md-3"></div>
-					<div class="col-md-4 equipment-header"><h3>Equipment</h3></div>
+					<div class="col-md-4 equipment-header" data-bind="if: showInventoryEquipment()"><h3>Equipment</h3></div>
+					<div class="col-md-4 container-ui-header" data-bind="if: showContainerScreen()"><h3>Container</h3></div>
 				</div>
 
 				<div class="row">
@@ -149,7 +157,7 @@
 						</div>
 						<!-- /ko -->
 						<!-- ko foreach: $root.player().data().inventory() -->
-						<div class="line" data-bind="click: $root.setAsActiveDescItem">
+						<div class="line" data-bind="click: $root.setInventoryItemAsActiveDescItem">
 							<span class="item" data-bind="text: $data.name"></span>
 							<span class="qty" data-bind="text: $data.qty()"></span>
 						</div>
@@ -162,15 +170,28 @@
 							<button class="btn btn-default inventory-control" data-bind="click: equipDescItem, css: { hidden: currentDescItem().canEquip() != 1 }">Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: unEquipDescItem, css: { hidden: currentDescItem().canUnEquip() != 1 }">Un-Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: useDescItem, css: { hidden: currentDescItem().canUse() != 1 }">Use</button>
-							<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop 1x</button>
-							<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop All</button>
+							<span data-bind="css: { hidden: currentContainer().length > 0 }">
+								<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Put 1x &gt;&gt;</button>
+								<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Put All &gt;&gt;</button>
+							</span>
+							<span data-bind="css: { hidden: currentContainer().length == 0 }">
+								<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop 1x</button>
+								<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop All</button>
+							</span>
 						</div>
 					</div>
-					<div class="col-md-4 equipment">
+
+					<div class="col-md-4 equipment" data-bind="css: { hidden: showInventoryEquipment() == 0 }" >
 
 						<!-- <div class="equipment-spacer"></div> -->
 						
 						<div class="equipment-inner-container">Some test content here</div>
+
+					</div>
+
+					<div class="col-md-4 container-ui" data-bind="css: { hidden: showContainerScreen() == 0 }" >
+						
+						<div class="container-ui-inner-container">Some other test content here</div>
 
 					</div>
 				</div>

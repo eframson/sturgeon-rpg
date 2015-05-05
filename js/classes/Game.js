@@ -120,7 +120,7 @@ define([
 				self.level().scanSquaresNearPlayer( self.player().data().skills().scanSquares() );
 				self.level().drawMap();
 				self.player().data().skillProgress().scanSquares( self.player().data().skillProgress().scanSquares() + 1 );
-				self.lastActionMessage("You scan your surroundings using your fish-powers!");
+				self.logMessage("You scan your surroundings using your fish-powers!");
 			},
 			findFood: function(){
 
@@ -142,7 +142,7 @@ define([
 					self.tempFoodFindBonus += 2;
 				});
 				
-				self.lastActionMessage(message);
+				self.logMessage(message);
 			}
 		};
 
@@ -160,7 +160,7 @@ define([
 			self.showPlayerData = ko.observable(false);
 			self.location = ko.observable();
 			self.levels = ko.observableArray(Array());
-			self.lastActionMessage = ko.observable("");
+			self.logMessages = ko.observableArray();
 			self.visibleSection = ko.observable("content-area");
 			self.currentDescItem = ko.observable({
 				id : ko.observable(""),
@@ -169,7 +169,13 @@ define([
 				canUnEquip : ko.observable(0),
 				canUse : ko.observable(0),
 				canDrop : ko.observable(0),
+				moveDirection : ko.observable("right"),
 			});
+			self.arrowKeysControlPlayerPos = ko.observable(true);
+			self.showInventoryEquipment = ko.observable(true);
+			self.showContainerScreen = ko.observable(false);
+			self.freezeMovement = ko.observable(false);
+			self.currentContainer = ko.observableArray([]);
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -272,28 +278,32 @@ define([
 		this.movePlayer = function(direction){
 
 			var currentPos = self.level().getPlayerPos();
-			var newPos = self.level().movePlayer(direction, 1);
 
-			self.lastActionMessage("");
-			if(currentPos.x != newPos.x || currentPos.y != newPos.y){
-				self.updateCooldowns();
-				self.player().data().skillProgress().speed( self.player().data().skillProgress().speed() + 1 );
-				
-				self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
-				self.level().drawMap();
-				
-				var square = self.level().getSquare(newPos.x, newPos.y);
-				
-				if(square.notEmpty && square.isDone == false){
+			if(!self.freezeMovement()){
 
-					self.handleSquareAction(square);
+				var newPos = self.level().movePlayer(direction, 1);
 
-					if(square.type != "exit" && square.type != "entrance"){
-						square.setDone(true);
+				if(currentPos.x != newPos.x || currentPos.y != newPos.y){
+					self.updateCooldowns();
+					self.player().data().skillProgress().speed( self.player().data().skillProgress().speed() + 1 );
+					
+					self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
+					self.level().drawMap();
+					
+					var square = self.level().getSquare(newPos.x, newPos.y);
+					
+					if(square.notEmpty && square.isDone == false){
+
+						self.handleSquareAction(square);
+
+						if(square.type != "exit" && square.type != "entrance"){
+							square.setDone(true);
+						}
 					}
+					
+					self.level().drawMap();
+
 				}
-				
-				self.level().drawMap();
 
 			}
 
@@ -320,6 +330,7 @@ define([
 			self.visibleSection("content-area");
 			$("#event-area").fadeOut(300);
 			$("#inventory-equipment").fadeOut(300, function(){
+				$("#inventory-equipment").find(".line").removeClass("selected");
 				$("#content-area").fadeIn(300);
 			});
 			self._resetActiveDescItem();
@@ -388,6 +399,8 @@ define([
 				var itemClass = "item";
 				
 				var itemToAdd = {};
+
+				var canAdd = true;
 
 				var possibleItemTypes = {
 					50 : "gold",
@@ -519,10 +532,24 @@ define([
 					28 : "a waterproof oilskin bag",
 					23 : "a crevice between two large rocks",
 				});
-				
-				self.lastActionMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name);
-				
-				self.player().addItemToInventory(newItem);
+
+				if( self.player().getInventoryItemByID(newItem.id) ){
+
+					if(self.player().hasInventorySpace() || newItem.id == "gold"){
+						self.player().addItemToInventory(newItem);
+					}else{
+						canAdd = false;
+					}
+
+				}else{
+					self.player().addItemToInventory(newItem);
+				}
+
+				if(canAdd){
+					self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
+				}else{
+					self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name + ", but did not have room for it in your inventory", "item");
+				}
 
 			}else if(type == "event"){
 				
@@ -532,6 +559,8 @@ define([
 				//20% cooldowns reset
 				
 			}else if(type == "exit"){
+
+				self.freezeMovement(true);
 
 				if(self.level().nextLevelID() == undefined){
 
@@ -553,11 +582,15 @@ define([
 					nextLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
 					nextLevel.drawMap();
 
-					$(this).fadeIn(400);
+					$(this).fadeIn(400, function(){
+						self.freezeMovement(false);
+					});
 				});
 				
 				
 			}else if(type == "entrance"){
+
+				self.freezeMovement(true);
 
 				//This is unlikely, but we'd better account for it just to be safe
 				if(self.level().prevLevelID() == undefined){
@@ -580,7 +613,9 @@ define([
 					prevLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
 					prevLevel.drawMap();
 
-					$(this).fadeIn(400);
+					$(this).fadeIn(400, function(){
+						self.freezeMovement(false);
+					});
 				});
 				
 			}else{
@@ -596,10 +631,25 @@ define([
 			self.currentDescItem().canEquip(0);
 			self.currentDescItem().canDrop(0);
 			self.currentDescItem().canUnEquip(0);
+			self.currentDescItem().moveDirection("right");
 			
 		}
 
-		this.setAsActiveDescItem = function(item, event){
+		this.setContainerItemAsActiveDescItem = function(item, e){
+			self.setAsActiveDescItem("left", item, e);
+		}
+
+		this.setInventoryItemAsActiveDescItem = function(item, e){
+			self.setAsActiveDescItem("right", item, e);
+		}
+
+		this.setAsActiveDescItem = function(moveDirection, item, e){
+
+			var elem = e.target,
+				$elem = $(elem);
+
+			$elem.parent().children().removeClass("selected");
+			$elem.addClass("selected");
 			
 			//Reset stuff first
 			self._resetActiveDescItem();
@@ -617,6 +667,8 @@ define([
 			if( type != "currency" ){
 				self.currentDescItem().canDrop(1);				
 			}
+
+			self.currentDescItem().moveDirection(moveDirection);
 
 			//self.currentDescItem().canUnEquip(1);
 
@@ -649,6 +701,20 @@ define([
 			
 			self.player().removeItemFromInventory(itemId);
 			self._resetActiveDescItem();
+		}
+
+		this.showEquipmentOrContainer = function(toShow){
+			if( toShow == "equipment" ){
+				self.showContainerScreen(false);
+				self.showInventoryEquipment(true);
+			}else{
+				self.showInventoryEquipment(false);
+				self.showContainerScreen(true);
+			}
+		}
+
+		this.logMessage = function(msgText, cssClass){
+			self.logMessages.unshift( {text: msgText, cssClass: cssClass || "info"} );
 		}
 
 		this.getLevelById = function(id){

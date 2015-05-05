@@ -126,10 +126,14 @@ button:focus {
 }
 
 #content-area .state-container {
-	padding-top: 15px;
-	padding-bottom: 15px;
+	padding: 0;
 	text-align: left;
-	background-color: #F0ECE6;
+}
+
+#content-area .state-container .state-info {
+	padding: 15px;
+	text-align: left;
+	background-color: #F0ECE6;	
 }
 
 #content-area .state-controls {
@@ -149,6 +153,29 @@ button:focus {
 
 #content-area .state-controls .state-button button {
 	width: 100%;
+}
+
+#content-area .message-log {
+	margin-top: 15px;
+	padding: 15px;
+	background-color: #ECECEC;
+	width: 570px;
+	overflow-y: scroll;
+	height: 185px;
+}
+
+#content-area .message-log:after {
+  content  : "";
+  position : absolute;
+  z-index  : 1;
+  bottom   : 0;
+  left     : 0;
+  pointer-events   : none;
+  background-image : linear-gradient(to bottom, 
+                    rgba(255,255,255, 0), 
+                    rgba(255,255,255, 1) 90%);
+  width    : 100%;
+  height   : 20px;
 }
 
 .buttons {
@@ -225,6 +252,15 @@ button:focus {
 	width: 100px;
 }
 
+.map-container .map-buttons .arrow-keys-checkbox {
+	text-align: left;
+	margin-top: 40px;
+}
+
+.map-container .map-buttons .arrow-keys-checkbox input{
+	margin-right: 5px;
+}
+
 .map-container .map-spacer {
 	width: 10px;
 	height: 200px;
@@ -270,29 +306,37 @@ button:focus {
 	padding-left: 0;
 }
 
-#inventory-equipment .inventory {
+#inventory-equipment .inventory,
+#inventory-equipment .container-ui {
 	background-color: #F0ECE6;
 	padding-left: 0;
 	padding-right: 0;
 }
 
-#inventory-equipment .inventory .line {
+#inventory-equipment .inventory .line,
+#inventory-equipment .container-ui .line {
 	padding: 5px 10px 5px 10px;
 }
 
-#inventory-equipment .inventory .line:not(.empty) {
+#inventory-equipment .inventory .line:not(.empty),
+#inventory-equipment .container-ui .line:not(.empty){
 	cursor: pointer;
 }
 
-#inventory-equipment .inventory .line:not(.empty):hover {
+#inventory-equipment .inventory .line:not(.empty):hover,
+#inventory-equipment .inventory .line:not(.empty).selected,
+#inventory-equipment .container-ui .line:not(.empty):hover,
+#inventory-equipment .container-ui .line:not(.empty).selected {
 	background-color: #EDC78E;
 }
 
-#inventory-equipment .inventory .line:not(.empty):active {
+#inventory-equipment .inventory .line:not(.empty):active,
+#inventory-equipment .container-ui .line:not(.empty):active {
 	background-color: #F6D8AC;
 }
 
-#inventory-equipment .inventory .qty {
+#inventory-equipment .inventory .qty,
+#inventory-equipment .container-ui .qty {
 	float: right;
 	clear: both;
 }
