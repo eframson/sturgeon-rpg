@@ -20,7 +20,7 @@ define([
 				hp : ko.observable(playerData.hp || 10),
 				armor : ko.observable(playerData.armor || 0),
 				inventory : ko.observableArray(Array()),
-				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 5),
+				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 1),
 				inventorySlotsOccupied : ko.observable(playerData.inventorySlotsOccupied || 0),
 				equipment : ko.observable({
 					headArmor : ko.observable(playerData.equipment.headArmor || undefined),
@@ -65,22 +65,22 @@ define([
 		this.getData = function(){
 			return self.data();
 		}
-		
+
 		this.getExportData = function(){
-			
+
 			var exportObj = {};
-			
+
 			for (prop in self.data()){
 				if(prop != "inventory"){
 					exportObj[prop] = self.data()[prop];
 				}
 			}
 
-			exportObj.inventory = Array();			
+			exportObj.inventory = Array();
 			$.each( self.data().inventory(), function(idx, elem){
 				exportObj.inventory.push( elem.getExportData() );
 			});
-			
+
 			return ko.mapping.toJS( exportObj );
 		}
 
@@ -92,13 +92,13 @@ define([
 			if(itemToAdd.slotsRequired > (self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied()) ){
 				return false;
 			}
-			
+
 			var existingItem = false;
 
 			if(itemToAdd.stackable){
-				
+
 				var existingItem = self.getInventoryItemByID(itemToAdd.id);
-				
+
 				if(existingItem){
 					existingItem.qty( existingItem.qty() + itemToAdd.qty() );
 
@@ -107,11 +107,11 @@ define([
 					}
 				}
 			}
-			
+
 			if(!existingItem){
-			
+
 				self.data().inventory.push(itemToAdd);
-				
+
 				if( itemToAdd.id != "gold" ){
 					self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
 				}else{
