@@ -83,7 +83,7 @@
 			</div>
 
 			<div class="row hidden" id="content-area">
-				
+
 				<div class="col-md-6 state-container">
 					<div class="state-info">
 						<div class="state-before-text" data-bind="html: state().beforeText"></div>
@@ -104,13 +104,13 @@
 					</div>
 					<div class="clear"></div>
 				</div>
-				
+
 				<div class="col-md-6 map-container" data-bind="css: { hidden: state() && typeof state().hideMap === 'function' && state().hideMap() }">
-					
+
 					<div class="map-spacer"></div>
-					
+
 					<div class="map-inner-container">
-						
+
 						<div class="map-buttons">
 							<div class="map-level-num"><strong>Level: </strong><span data-bind="text: $root.level().levelNum()"></span></div>
 							<div class="map-button-cluster">
@@ -133,20 +133,20 @@
 				</div>
 
 			</div>
-			
+
 			<div class="" id="inventory-equipment">
 
 				<div class="row back">
 					<div class="col-md-12">
-						<button class="btn btn-default" type="button" data-bind="click: showContentArea"><span>Back</span></button>
+						<button class="btn btn-default" type="button" data-bind="click: showContentArea, css: { disabled: $root.player().data().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }"><span>Back</span></button>
 					</div>
 				</div>
 
 				<div class="row header">
 					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="css: { danger: $root.player().data().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }, text: $root.player().data().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
 					<div class="col-md-3"></div>
-					<div class="col-md-4 equipment-header" data-bind="if: showInventoryEquipment()"><h3>Equipment</h3></div>
-					<div class="col-md-4 container-ui-header" data-bind="if: showContainerScreen()"><h3>Container</h3></div>
+					<div class="col-md-4 equipment-header" data-bind="css: { hidden: !showInventoryEquipment() }"><h3>Equipment</h3></div>
+					<div class="col-md-4 container-ui-header" data-bind="css: { hidden: !showContainerScreen() }"><h3>Container</h3></div>
 				</div>
 
 				<div class="row">
@@ -170,11 +170,11 @@
 							<button class="btn btn-default inventory-control" data-bind="click: equipDescItem, css: { hidden: currentDescItem().canEquip() != 1 }">Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: unEquipDescItem, css: { hidden: currentDescItem().canUnEquip() != 1 }">Un-Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: useDescItem, css: { hidden: currentDescItem().canUse() != 1 }">Use</button>
-							<span data-bind="css: { hidden: currentContainer().length > 0 }">
-								<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Put 1x &gt;&gt;</button>
-								<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Put All &gt;&gt;</button>
-							</span>
 							<span data-bind="css: { hidden: currentContainer().length == 0 }">
+								<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }, html: ( currentDescItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
+								<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1}, html: ( currentDescItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>
+							</span>
+							<span data-bind="css: { hidden: currentContainer().length > 0 }">
 								<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop 1x</button>
 								<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop All</button>
 							</span>
@@ -184,14 +184,19 @@
 					<div class="col-md-4 equipment" data-bind="css: { hidden: showInventoryEquipment() == 0 }" >
 
 						<!-- <div class="equipment-spacer"></div> -->
-						
+
 						<div class="equipment-inner-container">Some test content here</div>
 
 					</div>
 
 					<div class="col-md-4 container-ui" data-bind="css: { hidden: showContainerScreen() == 0 }" >
-						
-						<div class="container-ui-inner-container">Some other test content here</div>
+
+						<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
+							<div class="line" data-bind="click: $root.setContainerItemAsActiveDescItem">
+								<span class="item" data-bind="text: $data.name"></span>
+								<span class="qty" data-bind="text: $data.qty()"></span>
+							</div>
+						</div>
 
 					</div>
 				</div>
@@ -202,7 +207,7 @@
 					<div class="col-md-12">Lorem Ipsum...</div>
 				</div>
 			</div>
-			
+
 
 		  </div>
 		  <input class="file-upload" type="file" name="Import Saved Game" id="importSavedGame" accept=".json" />
