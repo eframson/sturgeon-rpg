@@ -1,0 +1,139 @@
+{
+	"items" : {
+
+		"consumables" : {
+
+			"biscuit_food" : {
+				"id" : "biscuit_food",
+				"name" : "Fish Biscuits",
+				"type" : "consumables",
+				"desc" : "Restores all HP when consumed. Fish Biscuits are small, compact wafers made of delicious wild berries, soy protein, bacon fat, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly before eating. Do not consume while pregnant. Consult your doctor before use. Fish Biscuits cannot be used as a tourniquet.",
+				"slotsRequired" : 1,
+				"stackable" : 1
+			},
+
+			"reset_stone" : {
+				"id" : "reset_stone",
+				"name" : "Level Reset Stone",
+				"type" : "consumables",
+				"desc" : "A stone imbued with magical energies. It has the power to re-randomize the current dungeon level, letting you experience a brand new set of events, search for new treasures, and fight new monsters.",
+				"slotsRequired" : 1,
+				"stackable" : 0
+			}
+
+		},
+
+		"currency" : {
+
+			"gold" : {
+				"id" : "gold",
+				"name" : "Gold Pieces (GP)",
+				"type" : "currency",
+				"desc" : "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.",
+				"slotsRequired" : 0,
+				"stackable" : 1
+			}
+
+		},
+
+		"crafting" : {
+
+			"weapon_scraps" : {
+				"id" : "weapon_scraps",
+				"name" : "Weapon Scraps",
+				"type" : "crafting",
+				"desc" : "Scraps of leather, iron, steel. Formerly part of someone's weapon. Maybe you could use it to make your own weapons better...",
+				"slotsRequired" : 1,
+				"stackable" : 1
+			},
+			"armor_scraps" : {
+				"id" : "armor_scraps",
+				"name" : "Armor Scraps",
+				"type" : "crafting",
+				"desc" : "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...",
+				"slotsRequired" : 1,
+				"stackable" : 1
+			}
+
+		},
+
+		"weapon" : {
+
+			"melee_weapon_01" : {
+				"id" : "melee_weapon_01",
+				"name" : "Razor Sharp Dagger",
+				"type" : "weapon",
+				"desc" : "A shiny dagger. You could fillet someone with this. Careful not to cut yourself on the blade. +3 DMG when equipped.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"dmgMin" : 3,
+				"dmgMax" : 3,
+				"handsRequired" : 1
+			},
+			"melee_weapon_02" : {
+				"id" : "melee_weapon_02",
+				"name" : "Short Sword",
+				"type" : "weapon",
+				"desc" : "It's like a dagger, but longer. +4-6 DMG when equipped. STAB ALL THE THINGS.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"dmgMin" : 4,
+				"dmgMax" : 6,
+				"handsRequired" : 1
+			},
+			"melee_weapon_03" : {
+				"id" : "melee_weapon_03",
+				"name" : "Greatsword",
+				"type" : "weapon",
+				"desc" : "A very large sword. Requires both fins to wield. Good news, though: it does +7-12 DMG when equipped. Enjoy your murder spree!",
+				"slotsRequired" : 2,
+				"stackable" : 0,
+				"dmgMin" : 7,
+				"dmgMax" : 12,
+				"handsRequired" : 2
+			}
+
+		},
+
+		"armor" : {
+
+			"body_armor_01" : {
+				"id" : "body_armor_01",
+				"name" : "Leather Armor",
+				"type" : "armor",
+				"desc" : "A set of leather armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 3,
+				"armorSlot" : "body"
+			},
+
+			"body_armor_02" : {
+				"id" : "body_armor_02",
+				"name" : "Leather Helm",
+				"type" : "armor",
+				"desc" : "A round helm made out of leather. With some difficulty, you can adapt it to the shape of your head. +3 Armor when worn.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 3,
+				"armorSlot" : "head"
+			}
+
+		},
+
+		"shield" : {
+
+			"shield_01" : {
+				"id" : "shield_01",
+				"name" : "Hide Shield",
+				"type" : "shield",
+				"desc" : "A deer hide wrapped around a frame of fish bones. You're not really sure how a deer got underwater, but you're grateful for the +5 Armor it provides when equipped.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 5,
+				"handsRequired" : 1
+			}
+
+		}
+	}
+}
