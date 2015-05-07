@@ -68,7 +68,8 @@ define([
 
 		ko.observableArray.fn.addItem = function(itemToAdd, extraCanAddCheck, afterAddCallback){
 
-			if(itemToAdd == undefined || !(itemToAdd instanceof Item) ){
+			//instanceof doesn't work with the way I'm (currently) doing class inheritance, so for now this is the next best thing
+			if(itemToAdd == undefined || typeof itemToAdd != "object" ){
 				return false;
 			}
 

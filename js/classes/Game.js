@@ -652,6 +652,10 @@ define([
 			self._setAsActiveItem({ moveDirection : "right" }, item, e);
 		}
 
+		this.setEquipmentItemAsActiveItem = function(item, e){
+			self._setAsActiveItem({ moveDirection : "left" }, item, e);
+		}
+
 		this._setAsActiveItem = function(opts, item, e){
 
 			opts = opts || {};
@@ -683,7 +687,14 @@ define([
 		}
 
 		this.equipActiveItem = function(item, event){
+			var itemToEquipId = self.activeItem().id(),
+				item = self.player().data().inventory.getItemByID(itemToEquipId);
 
+			if(item.type == "weapon"){
+				self.player().equipWeapon(item);
+			}
+
+			self.player().data().inventory.removeItem(item);
 		}
 
 		this.unEquipActiveItem = function(item, event){
@@ -900,7 +911,7 @@ define([
 
 			var itemData = {};
 
-			var itemData = self.getAvailableItemById("biscuit_food", "consumables", 1);
+			/*var itemData = self.getAvailableItemById("biscuit_food", "consumables", 1);
 			if(itemData){
 				self.player().addItemToInventory( new Item(itemData) );
 
@@ -923,6 +934,12 @@ define([
 
 			if(itemOne && itemTwo){
 				self.showContainerWithContents([itemOne, itemTwo]);
+			}*/
+
+			var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
+			console.log(itemData);
+			if(itemData){
+				self.player().addItemToInventory( new Weapon(itemData) );
 			}
 		}
 

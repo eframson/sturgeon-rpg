@@ -3,15 +3,17 @@ define([
 	'knockout',
 	'classes/ItemCollection',
 	'classes/Item',
+	'classes/Armor',
+	'classes/Weapon',
 
 	'Utils',
-], function($, ko, ItemCollection, Item){
+], function($, ko, ItemCollection, Item, Armor, Weapon){
 
 	var Player = function(playerData){
 
 		//Init
 		var self = this;
-		playerData = playerData || {equipment: {}, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array() };
+		playerData = playerData || {equipment: { armor: {}, }, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array() };
 
 		this.init = function(playerData){
 
@@ -24,10 +26,16 @@ define([
 				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 1),
 				inventorySlotsOccupied : ko.observable(playerData.inventorySlotsOccupied || 0),
 				equipment : ko.observable({
-					headArmor : ko.observable(playerData.equipment.headArmor || undefined),
-					finArmor : ko.observable(playerData.equipment.finArmor || undefined),
-					bodyArmor : ko.observable(playerData.equipment.bodyArmor || undefined),
-					tailArmor: ko.observable(playerData.equipment.tailArmor || undefined),
+
+					armor : ko.observable({
+
+						head : ko.observable(playerData.equipment.armor.head || undefined),
+						fin : ko.observable(playerData.equipment.armor.fin || undefined),
+						body : ko.observable(playerData.equipment.armor.body || undefined),
+						tail: ko.observable(playerData.equipment.armor.tail || undefined),
+
+					}),
+					
 					weapon : ko.observable(playerData.equipment.weapon || undefined),
 					shield : ko.observable(playerData.equipment.shield || undefined),
 				}),
@@ -65,28 +73,6 @@ define([
 			this.hasInventorySpace = ko.computed(function(){
 				return ( self.inventorySlotsAvailable() > 0 );
 			});
-		}
-
-		this.getData = function(){
-			return self.data();
-		}
-
-		this.getExportData = function(){
-
-			var exportObj = {};
-
-			for (prop in self.data()){
-				if(prop != "inventory"){
-					exportObj[prop] = self.data()[prop];
-				}
-			}
-
-			exportObj.inventory = Array();
-			$.each( self.data().inventory(), function(idx, elem){
-				exportObj.inventory.push( elem.getExportData() );
-			});
-
-			return ko.mapping.toJS( exportObj );
 		}
 
 		this.addItemToInventory = function(itemToAdd){
@@ -136,45 +122,62 @@ define([
 
 		}
 
-		this.itemTest = function(){
+		this.getEquippedArmorBySlot = function(slot){
+			return self._getArmorSlot(slot)();
+		}
 
-			var food = new Item({
-				id : 'biscuit_food',
-				name : "Fish Biscuits",
-				type : "food",
-				desc : "Fish Biscuits are small, compacted squares of delicious berries, bugs, bacon, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"",
-				qty : 1,
+		this.getEquippedWeapon = function(slot){
+			return self._getWeaponSlot()();
+		}
+
+		this.getEquippedShield = function(slot){
+			return self._getShieldSlot()();
+		}
+
+		this.equipArmorInSlot = function(slot, item){
+			self._getArmorSlot(slot)(item);
+		}
+
+		this.equipWeapon = function(item){
+			self._getWeaponSlot()(item);
+		}
+
+		this.equipShield = function(item){
+			self._getShieldSlot()(item);
+		}
+
+		this.equipArmorInSlot = function(slot, item){
+			self._getArmorSlot(slot)(item);
+		}
+
+		this._getArmorSlot = function(slot){
+			return self.data().equipment().armor()[slot];
+		}
+
+		this._getWeaponSlot = function(){
+			return self.data().equipment().weapon;
+		}
+
+		this._getShieldSlot = function(){
+			return self.data().equipment().shield;
+		}
+
+		this.getExportData = function(){
+
+			var exportObj = {};
+
+			for (prop in self.data()){
+				if(prop != "inventory"){
+					exportObj[prop] = self.data()[prop];
+				}
+			}
+
+			exportObj.inventory = Array();
+			$.each( self.data().inventory(), function(idx, elem){
+				exportObj.inventory.push( elem.getExportData() );
 			});
 
-			self.addItemToInventory(food);
-
-			var moreFood = new Item({
-				id : 'biscuit_food',
-				name : "Fish Biscuits",
-				type : "food",
-				qty : 3,
-			});
-
-			self.addItemToInventory(moreFood);
-
-			var someItem = new Item({
-				id : 'rock',
-				name : "Rocks",
-				type : "misc",
-				qty : 1,
-			});
-
-			self.addItemToInventory(someItem);
-
-			var someOtherItem = new Item({
-				id : 'dirt',
-				name : "Dirt",
-				type : "misc",
-				qty : 4,
-			});
-
-			self.addItemToInventory(someOtherItem);
-
+			return ko.mapping.toJS( exportObj );
 		}
 
 		self.init(playerData);

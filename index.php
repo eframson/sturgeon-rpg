@@ -185,7 +185,12 @@
 
 						<!-- <div class="equipment-spacer"></div> -->
 
-						<div class="equipment-inner-container">Some test content here</div>
+						<div class="equipment-inner-container"></div>
+
+						<div class="line" data-bind="click: $root.setEquipmentItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'left' }, if: $root.player().data().equipment().weapon() != undefined">
+							<span class="item" data-bind="text: $root.player().data().equipment().weapon().name"></span>
+							<span class="qty"></span>
+						</div>
 
 					</div>
 
