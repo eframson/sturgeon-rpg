@@ -3,7 +3,7 @@ define([
 	'knockout',
 ], function($, ko){
 
-	var Item = function(data){
+	function Item(data){
 		
 		if(data == undefined || data.type == undefined || data.name == undefined || data.id == undefined){
 			return false;
@@ -38,6 +38,8 @@ define([
 			return new Item(ko.mapping.toJS(self));
 		}
 	}
+
+	Item.prototype.constructor = Item;
 
 	return Item;
 

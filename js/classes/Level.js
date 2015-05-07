@@ -6,7 +6,7 @@ define([
 	'Utils',
 ], function($, ko, GridSquare){
 
-	var Level = function(levelData){
+	function Level(levelData){
 
 		var self = this;
 		
@@ -537,6 +537,8 @@ define([
 		this.init(levelData);
 
 	}
+
+	Level.prototype.constructor = Level;
 
 	return Level;
 });

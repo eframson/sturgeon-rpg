@@ -4,7 +4,7 @@ define([
 	'classes/Item'
 ], function($, ko, Item){
 
-	var ItemCollection = function(items){
+	function ItemCollection(items){
 		
 		var self = this;
 
@@ -68,8 +68,7 @@ define([
 
 		ko.observableArray.fn.addItem = function(itemToAdd, extraCanAddCheck, afterAddCallback){
 
-			//instanceof doesn't work with the way I'm (currently) doing class inheritance, so for now this is the next best thing
-			if(itemToAdd == undefined || typeof itemToAdd != "object" ){
+			if(itemToAdd == undefined || !(itemToAdd instanceof Item) ){
 				return false;
 			}
 
@@ -112,6 +111,7 @@ define([
 
 	}
 
+	ItemCollection.prototype.constructor = ItemCollection;
 
 	return ItemCollection;
 

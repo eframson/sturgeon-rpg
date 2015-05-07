@@ -9,7 +9,7 @@ define([
 	'Utils',
 ], function($, ko, ItemCollection, Item, Armor, Weapon){
 
-	var Player = function(playerData){
+	function Player(playerData){
 
 		//Init
 		var self = this;
@@ -182,6 +182,8 @@ define([
 
 		self.init(playerData);
 	}
+
+	Player.prototype.constructor = Player;
 
 	return Player;
 

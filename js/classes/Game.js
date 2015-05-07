@@ -12,7 +12,7 @@ define([
 	'Utils',
 ], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, itemDataFile) {
 
-	var Game = function() {
+	function Game() {
 
 		var self = this;
 
@@ -332,6 +332,7 @@ define([
 			$("#event-area").fadeOut(300);
 			$("#inventory-equipment").fadeOut(300, function(){
 				self.currentContainer.removeAll();
+				self.showEquipmentOrContainer("equipment");
 				$("#content-area").fadeIn(300);
 				self.freezeMovement(false);
 			});
@@ -695,6 +696,7 @@ define([
 			}
 
 			self.player().data().inventory.removeItem(item);
+			self._resetActiveItem();
 		}
 
 		this.unEquipActiveItem = function(item, event){
@@ -946,6 +948,8 @@ define([
 		self.init();
 
 	};
+
+	Game.prototype.constructor = Game;
 
 	return Game;
 
