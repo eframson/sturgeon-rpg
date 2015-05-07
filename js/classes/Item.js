@@ -33,6 +33,10 @@ define([
 			
 			return exportObj;
 		}
+
+		this.clone = function(){
+			return new Item(ko.mapping.toJS(self));
+		}
 	}
 
 	return Item;

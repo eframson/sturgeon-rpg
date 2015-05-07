@@ -298,12 +298,10 @@ button:focus {
 	text-align: left;
 }
 
-#inventory-equipment .header .equipment-header {
-	padding-left: 0px;
-}
-
+#inventory-equipment .header .equipment-header,
+#inventory-equipment .header .container-ui-header,
 #inventory-equipment .header .inventory-header {
-	padding-left: 0;
+	padding-left: 0px;
 }
 
 #inventory-equipment .inventory,
@@ -366,6 +364,10 @@ button:focus {
 	background-color: #E7E6F0;
 	float: left;
 	padding: 10px;
+}
+
+#inventory-equipment .danger {
+	color: #FF0000;
 }
 
 .file-upload {

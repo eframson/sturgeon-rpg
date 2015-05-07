@@ -5,13 +5,17 @@ define([
 	'classes/Level',
 	'classes/Item',
 	'classes/Weapon',
+	'classes/ItemCollection',
+	'json!data/items.json',
 
 	'Utils',
-], function($, ko, Player, Level, Item, Weapon){
+], function($, ko, Player, Level, Item, Weapon, ItemCollection, itemDataFile) {
 
 	var Game = function() {
 
 		var self = this;
+
+		this.itemDataFile = itemDataFile;
 
 		this.player = undefined;
 		this.states = {
@@ -120,7 +124,7 @@ define([
 				self.level().scanSquaresNearPlayer( self.player().data().skills().scanSquares() );
 				self.level().drawMap();
 				self.player().data().skillProgress().scanSquares( self.player().data().skillProgress().scanSquares() + 1 );
-				self.logMessage("You scan your surroundings using your fish-powers!");
+				self.logMessage("By holding very still and concentrating, you are able to thoroughly survey your surroundings.");
 			},
 			findFood: function(){
 
@@ -138,7 +142,7 @@ define([
 				doBasedOnPercent(percentages,
 				function(rand){
 					//console.log("rand: " + rand + " ; temp bonus: " + self.tempFoodFindBonus + " ; findPercent: " + findPercent);
-					message = "You try to delicately float to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
+					message = "You attempt to smoothly swim to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
 					self.tempFoodFindBonus += 2;
 				});
 
@@ -162,7 +166,7 @@ define([
 			self.levels = ko.observableArray(Array());
 			self.logMessages = ko.observableArray();
 			self.visibleSection = ko.observable("content-area");
-			self.currentDescItem = ko.observable({
+			self.activeItem = ko.observable({
 				id : ko.observable(""),
 				desc : ko.observable(""),
 				canEquip : ko.observable(0),
@@ -175,7 +179,7 @@ define([
 			self.showInventoryEquipment = ko.observable(true);
 			self.showContainerScreen = ko.observable(false);
 			self.freezeMovement = ko.observable(false);
-			self.currentContainer = ko.observableArray([]);
+			self.currentContainer = new ItemCollection(Array());
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -245,7 +249,7 @@ define([
 				id : 'biscuit_food',
 				name : "Fish Biscuits",
 				type : "consumables",
-				desc : "Fish Biscuits are small, compacted squares of delicious berries, bugs, bacon, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly. Do not consume while pregnant.",
+				desc : "Restores all HP when consumed. Fish Biscuits are small, compact wafers made of delicious wild berries, soy protein, bacon fat, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly before eating. Do not consume while pregnant. Consult your doctor before use. Fish Biscuits cannot be used as a tourniquet.",
 				qty : qty,
 			});
 			self.player().addItemToInventory(food);
@@ -331,10 +335,9 @@ define([
 			$("#event-area").fadeOut(300);
 			$("#inventory-equipment").fadeOut(300, function(){
 				self.currentContainer.removeAll();
-				$("#inventory-equipment").find(".line").removeClass("selected");
 				$("#content-area").fadeIn(300);
 			});
-			self._resetActiveDescItem();
+			self._resetActiveItem();
 		}
 
 		this.hideModal = function(viewModel, event){
@@ -390,338 +393,422 @@ define([
 			});
 		}
 
+		this.showContainerWithContents = function(itemArray){
+			
+			itemArray == itemArray || [];
+
+			self.currentContainer(itemArray);
+			self.showEquipmentOrContainer("container");
+
+			self.toggleInventory();
+		}
+
+		this.squareItemAction = function(){
+
+			var itemClass = "item";
+
+			var itemToAdd = {};
+
+			var canAdd = true;
+
+			var possibleItemTypes = {
+				50 : "gold",
+				40 : "misc",
+				10 : "gear",
+			};
+
+			var itemType = doBasedOnPercent(possibleItemTypes);
+
+			if(itemType == "gold"){
+
+				itemToAdd.id = "gold";
+				itemToAdd.name = "Gold Pieces (GP)";
+				itemToAdd.type = "currency";
+				itemToAdd.slotsRequired = 0;
+				itemToAdd.stackable = 1;
+				itemToAdd.desc = "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.";
+
+				//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 2000
+				var goldSize = doBasedOnPercent({
+					1 : "hoard",
+					9 : "large",
+					30 : "medium",
+					60 : "small"
+				});
+
+				var goldAmt = 0;
+
+				if( goldSize == "small" ){
+					goldAmt = doRand(80, 121);
+				}else if( goldSize == "medium" ){
+					goldAmt = doRand(160, 241);
+				}else if( goldSize == "large" ){
+					goldAmt = doRand(320, 481);
+				}else if( goldSize == "hoard" ){
+					goldAmt = 2000;
+				}
+
+				itemToAdd.qty = goldAmt;
+
+			}else if(itemType == "misc"){
+
+				//41% armor scraps, 39% weapon scraps, 20% stone of reset
+				var miscType = doBasedOnPercent({
+					20 : "stone",
+					39 : "weapon",
+					41 : "armor",
+				});
+
+				if( miscType == "armor" ){
+
+					itemToAdd.id = "armor_scraps";
+					itemToAdd.name = "Armor Scraps";
+					itemToAdd.type = "crafting";
+					itemToAdd.slotsRequired = 1;
+					itemToAdd.stackable = 1;
+					itemToAdd.desc = "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...";
+
+					itemToAdd.qty = doRand(1,26);
+
+				}else if( miscType == "weapon" ){
+
+					itemToAdd.id = "weapon_scraps";
+					itemToAdd.name = "Weapon Scraps";
+					itemToAdd.type = "crafting";
+					itemToAdd.slotsRequired = 1;
+					itemToAdd.stackable = 1;
+					itemToAdd.desc = "Scraps of leather, iron, steel. Formerly part of someone's weapon. Maybe you could use it to make your own weapons better...";
+
+					itemToAdd.qty = doRand(1,26);
+
+				}else if( miscType == "stone" ){
+
+					itemToAdd.id = "reset_stone";
+					itemToAdd.name = "Reset Stone";
+					itemToAdd.type = "consumables";
+					itemToAdd.slotsRequired = 1;
+					itemToAdd.stackable = 1;
+					itemToAdd.desc = "A stone imbued with magical energies. It has the power to regenerate the current dungeon level, letting you experience a brand new set of events, search for new treasures, and fight new monsters.";
+					itemToAdd.qty = 1;
+
+				}
+
+			}else if(itemType == "gear"){
+
+				var gearType = doBasedOnPercent({
+					51 : "armor",
+					49 : "weapon"
+				});
+
+				//Eventually these will be randomized, but let's keep it simple for now...
+				if( gearType == "armor" ){
+
+					itemToAdd.id = "body_armor_01";
+					itemToAdd.name = "Leather Armor";
+					itemToAdd.type = "armor";
+					itemToAdd.slotsRequired = 1;
+					itemToAdd.stackable = 0;
+					itemToAdd.desc = "A set of leather armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.";
+					itemToAdd.qty = 1;
+
+				}else if( gearType == "weapon" ){
+
+					itemClass = "weapon";
+
+					itemToAdd.id = "melee_weapon_01";
+					itemToAdd.name = "Razor-sharp Dagger";
+					itemToAdd.type = "weapon";
+					itemToAdd.slotsRequired = 1;
+					itemToAdd.stackable = 0;
+					itemToAdd.desc = "A shiny dagger. You could fillet someone with this. +3 DMG when equipped.";
+					itemToAdd.qty = 1;
+
+				}
+
+			}
+
+			var newItem;
+
+			if(itemClass == "item"){
+				newItem = new Item(itemToAdd);
+			}else if(itemClass == "weapon"){
+				newItem = new Weapon(itemToAdd);
+			}
+
+			var container = doBasedOnPercent({
+				25 : "a crate sealed tightly with tar",
+				24 : "an upturned canoe concealing a pocket of air",
+				28 : "a waterproof oilskin bag",
+				23 : "a crevice between two large rocks",
+			});
+
+			var itemQtyInInventory = self.player().addItemToInventory(newItem);
+
+			if(itemQtyInInventory != false){
+
+				if(newItem.id == "gold"){
+					self.player().data().gp(itemQtyInInventory);
+				}
+
+				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
+			}else{
+
+				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name + ", but your inventory is currently full", "item");
+				self.showContainerWithContents([newItem]);
+
+			}
+		}
+
+		this.squareCombatAction = function(){
+			console.log("trigger a combat action");
+		}
+
+		this.squareEventAction = function(){
+			//30% trader
+			//40% skill increase
+			//10% stat increase
+			//20% cooldowns reset
+			console.log("trigger an event action");
+		}
+
+		this.squareExitAction = function(){
+
+			self.freezeMovement(true);
+
+			if(self.level().nextLevelID() == undefined){
+
+				var newLevel = self.level().generateNextLevel();
+
+				if( newLevel ){
+					self.levels.push(newLevel);
+				}
+
+			}
+
+			var nextLevel = self.getLevelById( self.level().nextLevelID() );
+			var currentLevel = self.level();
+
+			$(".map-inner-container").fadeOut(400, function(){
+				nextLevel.isActive(true);
+				currentLevel.isActive(false);
+				nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
+				nextLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				nextLevel.drawMap();
+
+				$(this).fadeIn(400, function(){
+					self.freezeMovement(false);
+				});
+			});
+
+		}
+
+		this.squareEntranceAction = function(){
+			
+			self.freezeMovement(true);
+
+			//This is unlikely, but we'd better account for it just to be safe
+			if(self.level().prevLevelID() == undefined){
+
+				var newLevel = self.level().generatePrevLevel();
+
+				if( newLevel ){
+					self.levels.push(newLevel);
+				}
+
+			}
+
+			var prevLevel = self.getLevelById( self.level().prevLevelID() );
+			var currentLevel = self.level();
+
+			$(".map-inner-container").fadeOut(400, function(){
+				prevLevel.isActive(true);
+				currentLevel.isActive(false);
+				prevLevel.setPlayerPos( prevLevel.exitSquare()[0], prevLevel.exitSquare()[1] );
+				prevLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				prevLevel.drawMap();
+
+				$(this).fadeIn(400, function(){
+					self.freezeMovement(false);
+				});
+			});
+		}
+
 		this.handleSquareAction = function(square){
 			var type = square.type;
 
 			if(type == "combat"){
 
+				self.squareCombatAction();
+
 			}else if(type == "item"){
 
-				var itemClass = "item";
-
-				var itemToAdd = {};
-
-				var canAdd = true;
-
-				var possibleItemTypes = {
-					50 : "gold",
-					40 : "misc",
-					10 : "gear",
-				};
-
-				var itemType = doBasedOnPercent(possibleItemTypes);
-
-				if(itemType == "gold"){
-
-					itemToAdd.id = "gold";
-					itemToAdd.name = "Gold Pieces (GP)";
-					itemToAdd.type = "currency";
-					itemToAdd.slotsRequired = 0;
-					itemToAdd.stackable = 1;
-					itemToAdd.desc = "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.";
-
-					//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 2000
-					var goldSize = doBasedOnPercent({
-						1 : "hoard",
-						9 : "large",
-						30 : "medium",
-						60 : "small"
-					});
-
-					var goldAmt = 0;
-
-					if( goldSize == "small" ){
-						goldAmt = doRand(80, 121);
-					}else if( goldSize == "medium" ){
-						goldAmt = doRand(160, 241);
-					}else if( goldSize == "large" ){
-						goldAmt = doRand(320, 481);
-					}else if( goldSize == "hoard" ){
-						goldAmt = 2000;
-					}
-
-					itemToAdd.qty = goldAmt;
-
-				}else if(itemType == "misc"){
-
-					//41% armor scraps, 39% weapon scraps, 20% stone of reset
-					var miscType = doBasedOnPercent({
-						20 : "stone",
-						39 : "weapon",
-						41 : "armor",
-					});
-
-					if( miscType == "armor" ){
-
-						itemToAdd.id = "armor_scraps";
-						itemToAdd.name = "Armor Scraps";
-						itemToAdd.type = "crafting";
-						itemToAdd.slotsRequired = 1;
-						itemToAdd.stackable = 1;
-						itemToAdd.desc = "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...";
-
-						itemToAdd.qty = doRand(1,26);
-
-					}else if( miscType == "weapon" ){
-
-						itemToAdd.id = "weapon_scraps";
-						itemToAdd.name = "Weapon Scraps";
-						itemToAdd.type = "crafting";
-						itemToAdd.slotsRequired = 1;
-						itemToAdd.stackable = 1;
-						itemToAdd.desc = "Scraps of leather, iron, steel. Formerly part of someone's weapon. Maybe you could use it to make your own weapons better...";
-
-						itemToAdd.qty = doRand(1,26);
-
-					}else if( miscType == "stone" ){
-
-						itemToAdd.id = "reset_stone";
-						itemToAdd.name = "Reset Stone";
-						itemToAdd.type = "consumables";
-						itemToAdd.slotsRequired = 1;
-						itemToAdd.stackable = 1;
-						itemToAdd.desc = "A stone imbued with magical energies. It has the power to regenerate the current dungeon level, letting you experience a brand new set of events, search for new treasures, and fight new monsters.";
-						itemToAdd.qty = 1;
-
-					}
-
-				}else if(itemType == "gear"){
-
-					var gearType = doBasedOnPercent({
-						51 : "armor",
-						49 : "weapon"
-					});
-
-					//Eventually these will be randomized, but let's keep it simple for now...
-					if( gearType == "armor" ){
-
-						itemToAdd.id = "body_armor_01";
-						itemToAdd.name = "Leather Armor";
-						itemToAdd.type = "armor";
-						itemToAdd.slotsRequired = 1;
-						itemToAdd.stackable = 0;
-						itemToAdd.desc = "A set of leather armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.";
-						itemToAdd.qty = 1;
-
-					}else if( gearType == "weapon" ){
-
-						itemClass = "weapon";
-
-						itemToAdd.id = "melee_weapon_01";
-						itemToAdd.name = "Razor-sharp Dagger";
-						itemToAdd.type = "weapon";
-						itemToAdd.slotsRequired = 1;
-						itemToAdd.stackable = 0;
-						itemToAdd.desc = "A shiny dagger. You could fillet someone with this. +3 DMG when equipped.";
-						itemToAdd.qty = 1;
-
-					}
-
-				}
-
-				var newItem;
-
-				if(itemClass == "item"){
-					newItem = new Item(itemToAdd);
-				}else if(itemClass == "weapon"){
-					newItem = new Weapon(itemToAdd);
-				}
-
-				var container = doBasedOnPercent({
-					25 : "a crate sealed tightly with tar",
-					24 : "an upturned canoe concealing a pocket of air",
-					28 : "a waterproof oilskin bag",
-					23 : "a crevice between two large rocks",
-				});
-
-				if(self.player().hasInventorySpace() || newItem.id == "gold"){
-					self.player().addItemToInventory(newItem);
-				}else{
-					canAdd = false;
-				}
-
-				if(canAdd){
-					self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
-				}else{
-
-					self.currentContainer.push(newItem);
-					self.showEquipmentOrContainer();
-
-					self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name + ", but your inventory is currently full", "item");
-
-					self.toggleInventory();
-				}
+				self.squareItemAction();
 
 			}else if(type == "event"){
 
-				//30% trader
-				//40% skill increase
-				//10% stat increase
-				//20% cooldowns reset
+				self.squareEventAction();
 
 			}else if(type == "exit"){
 
-				self.freezeMovement(true);
-
-				if(self.level().nextLevelID() == undefined){
-
-					var newLevel = self.level().generateNextLevel();
-
-					if( newLevel ){
-						self.levels.push(newLevel);
-					}
-
-				}
-
-				var nextLevel = self.getLevelById( self.level().nextLevelID() );
-				var currentLevel = self.level();
-
-				$(".map-inner-container").fadeOut(400, function(){
-					nextLevel.isActive(true);
-					currentLevel.isActive(false);
-					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
-					nextLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
-					nextLevel.drawMap();
-
-					$(this).fadeIn(400, function(){
-						self.freezeMovement(false);
-					});
-				});
-
+				self.squareExitAction();
 
 			}else if(type == "entrance"){
 
-				self.freezeMovement(true);
-
-				//This is unlikely, but we'd better account for it just to be safe
-				if(self.level().prevLevelID() == undefined){
-
-					var newLevel = self.level().generatePrevLevel();
-
-					if( newLevel ){
-						self.levels.push(newLevel);
-					}
-
-				}
-
-				var prevLevel = self.getLevelById( self.level().prevLevelID() );
-				var currentLevel = self.level();
-
-				$(".map-inner-container").fadeOut(400, function(){
-					prevLevel.isActive(true);
-					currentLevel.isActive(false);
-					prevLevel.setPlayerPos( prevLevel.exitSquare()[0], prevLevel.exitSquare()[1] );
-					prevLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
-					prevLevel.drawMap();
-
-					$(this).fadeIn(400, function(){
-						self.freezeMovement(false);
-					});
-				});
+				self.squareEntranceAction();
 
 			}else{
 				//Do nothing
 			}
 		}
 
-		this._resetActiveDescItem = function(){
+		this._resetActiveItem = function(){
 
-			self.currentDescItem().desc("");
-			self.currentDescItem().id("");
-			self.currentDescItem().canUse(0);
-			self.currentDescItem().canEquip(0);
-			self.currentDescItem().canDrop(0);
-			self.currentDescItem().canUnEquip(0);
-			self.currentDescItem().moveDirection("right");
+			self.activeItem().desc("");
+			self.activeItem().id("");
+			self.activeItem().canUse(0);
+			self.activeItem().canEquip(0);
+			self.activeItem().canDrop(0);
+			self.activeItem().canUnEquip(0);
+			self.activeItem().moveDirection("right");
 
 		}
 
-		this.setContainerItemAsActiveDescItem = function(item, e){
-			self.setAsActiveDescItem("left", item, e);
+		this.setContainerItemAsActiveItem = function(item, e){
+			self._setAsActiveItem("left", item, e);
 		}
 
-		this.setInventoryItemAsActiveDescItem = function(item, e){
-			self.setAsActiveDescItem("right", item, e);
+		this.setInventoryItemAsActiveItem = function(item, e){
+			self._setAsActiveItem("right", item, e);
 		}
 
-		this.setAsActiveDescItem = function(moveDirection, item, e){
-
-			var elem = e.target,
-				$elem = $(elem);
-
-			$("#inventory-equipment").find("div.line").removeClass("selected");
-			$elem.addClass("selected");
+		this._setAsActiveItem = function(moveDirection, item, e){
 
 			//Reset stuff first
-			self._resetActiveDescItem();
+			self._resetActiveItem();
 
-			self.currentDescItem().id(item.id);
-			self.currentDescItem().desc(item.desc);
+			self.activeItem().id(item.id);
+			self.activeItem().desc(item.desc);
 
 			var type = item.type;
 			if( type == "consumables" ){
-				self.currentDescItem().canUse(1);
+				self.activeItem().canUse(1);
 			}else if ( type == "armor" || type == "weapon" ){
-				self.currentDescItem().canEquip(1);
+				self.activeItem().canEquip(1);
 			}
 
 			if( type != "currency" ){
-				self.currentDescItem().canDrop(1);
+				self.activeItem().canDrop(1);
 			}
 
-			self.currentDescItem().moveDirection(moveDirection);
+			self.activeItem().moveDirection(moveDirection);
 
-			//self.currentDescItem().canUnEquip(1);
+			//self.activeItem().canUnEquip(1);
 
-
-		}
-
-		this.equipDescItem = function(item, event){
 
 		}
 
-		this.unEquipDescItem = function(item, event){
+		this.equipActiveItem = function(item, event){
 
 		}
 
-		this.useDescItem = function(item, event){
+		this.unEquipActiveItem = function(item, event){
 
 		}
 
-		this.dropDescItem = function(item, event, qty){
-			var itemId = self.currentDescItem().id();
-			qty = qty || 1;
+		this.useActiveItem = function(item, event){
 
-			if( self.currentContainer().length > 0 ){
-				if( self.currentDescItem().moveDirection() == "right" ){
-					console.log("Move it into the container");
-				}else if(self.currentDescItem().moveDirection() == "left"){
-					console.log("Move it into the player's inventory");
-					//Get the qty to move
-					//Add the qty to the inventory
-					//Decrease the qty in the container by the same amount
-					//If item is totally gone from the container, unset the currentDescItem
+		}
+
+		this._dropActiveItem = function(item, event, qty){
+
+			var itemToMoveId = self.activeItem().id(),
+				existingItem = undefined,
+				newItem = undefined,
+				moveFrom = "inventory",
+				moveTo = false,
+				srcCollection = undefined,
+				tarCollection = undefined;
+
+			//Do we have an active container?
+			if(self.showContainerScreen()){
+
+				srcCollection = self.player().data().inventory;
+
+				//Are we moving from inventory -> container OR container -> inventory?
+				if(self.activeItem().moveDirection() == "right"){
+					
+					moveTo = "container";
+
+					tarCollection = self.currentContainer;
+
+				}else{
+
+					moveFrom = "container";
+					moveTo = "inventory";
+
+					srcCollection = self.currentContainer;
+					tarCollection = self.player().data().inventory;
 				}
+			}
+
+			//Get the existing item we want to "move"
+			existingItem = srcCollection.getItemByID(itemToMoveId);
+			//Clone it so we're not writing to the same object from two different places
+			newItem = existingItem.clone();
+			//Set the right qty on the object we want to add
+			if(qty == undefined || qty == "all"){
+				newItem.qty(existingItem.qty());
 			}else{
-				var numLeft = self.player().removeItemFromInventory(itemId, qty);
-				if( numLeft == 0 ){
-					self._resetActiveDescItem();
+				newItem.qty(qty);
+			}
+			
+
+			//Remove the object from the source
+			var srcNumLeft = srcCollection.removeItem(existingItem, qty);
+
+			if(moveFrom == "container" && moveTo == "inventory"){
+
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
+
+				//Add to inventory
+				tarCollection.addItem(newItem, undefined, function(){
+					self.player().data().inventorySlotsOccupied( self.player().data().inventorySlotsOccupied() + newItem.slotsRequired );
+				});
+
+			}else if ( moveFrom == "inventory" ){
+
+				if(srcNumLeft == 0){
+					self.player().data().inventorySlotsOccupied( self.player().data().inventorySlotsOccupied() - newItem.slotsRequired );
+					self._resetActiveItem();
+				}
+
+				if(moveTo){
+					//Add to container
+					tarCollection.addItem(newItem);
 				}
 			}
+
 		}
 
-		this.dropAllDescItem = function(item, event){
-			var itemId = self.currentDescItem().id();
+		this.dropActiveItem = function(item, event){
 
-			self.player().removeItemFromInventory(itemId);
-			self._resetActiveDescItem();
+			self._dropActiveItem(item, event, 1);
+
+		}
+
+		this.dropAllActiveItem = function(item, event){
+			
+			self._dropActiveItem(item, event, "all");
+
 		}
 
 		this.showEquipmentOrContainer = function(toShow){
 			if( toShow == "equipment" ){
 				self.showContainerScreen(false);
 				self.showInventoryEquipment(true);
-			}else{
+			}else if (toShow == "container"){
 				self.showInventoryEquipment(false);
 				self.showContainerScreen(true);
 			}
@@ -784,6 +871,66 @@ define([
 			}
 
 			return JSON.stringify(exportObj);
+		}
+
+		this.itemTest = function(){
+
+			var food = new Item({
+				id : 'biscuit_food',
+				name : "Fish Biscuits",
+				type : "food",
+				desc : "Fish Biscuits are small, compacted squares of delicious berries, bugs, bacon, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"",
+				qty : 1,
+			});
+
+			self.player().addItemToInventory(food);
+
+			var moreFood = new Item({
+				id : 'biscuit_food',
+				name : "Fish Biscuits",
+				type : "food",
+				qty : 3,
+			});
+
+			self.player().addItemToInventory(moreFood);
+
+			var someItem = new Item({
+				id : 'rock',
+				name : "Rocks",
+				type : "misc",
+				qty : 1,
+			});
+
+			self.player().addItemToInventory(someItem);
+
+			var someOtherItem = new Item({
+				id : 'dirt',
+				name : "Dirt",
+				type : "misc",
+				qty : 4,
+			});
+
+			self.player().addItemToInventory(someOtherItem);
+
+			var itemOne = {},
+				itemTwo = {};
+			itemOne.id = "armor_scraps";
+			itemOne.name = "Armor Scraps";
+			itemOne.type = "crafting";
+			itemOne.slotsRequired = 1;
+			itemOne.stackable = 1;
+			itemOne.desc = "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...";
+			itemOne.qty = doRand(1,26);
+
+			itemTwo.id = "body_armor_01";
+			itemTwo.name = "Leather Armor";
+			itemTwo.type = "armor";
+			itemTwo.slotsRequired = 1;
+			itemTwo.stackable = 0;
+			itemTwo.desc = "A set of leather armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.";
+			itemTwo.qty = 1;
+
+			self.showContainerWithContents([new Item(itemOne), new Item(itemTwo)]);
 		}
 
 		self.init();

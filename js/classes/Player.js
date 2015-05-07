@@ -1,10 +1,11 @@
 define([
 	'jquery',
 	'knockout',
+	'classes/ItemCollection',
 	'classes/Item',
 
 	'Utils',
-], function($, ko, Item){
+], function($, ko, ItemCollection, Item){
 
 	var Player = function(playerData){
 
@@ -19,7 +20,7 @@ define([
 				level : ko.observable(playerData.level || 1),
 				hp : ko.observable(playerData.hp || 10),
 				armor : ko.observable(playerData.armor || 0),
-				inventory : ko.observableArray(Array()),
+				inventory : new ItemCollection(Array()),
 				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 1),
 				inventorySlotsOccupied : ko.observable(playerData.inventorySlotsOccupied || 0),
 				equipment : ko.observable({
@@ -58,7 +59,11 @@ define([
 			self.data().inventory(itemArray);
 
 			this.hasInventorySpace = ko.computed(function(){
-				return ( (self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied()) > 0);
+				return ( self.inventorySlotsAvailable > 0 );
+			});
+
+			this.inventorySlotsAvailable = ko.computed(function(){
+				return self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied();
 			});
 		}
 
@@ -85,87 +90,48 @@ define([
 		}
 
 		this.addItemToInventory = function(itemToAdd){
-			if(itemToAdd == undefined || itemToAdd.constructor != Item){
-				return false;
-			}
 
-			if(itemToAdd.slotsRequired > (self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied()) ){
-				return false;
-			}
-
-			var existingItem = false;
-
-			if(itemToAdd.stackable){
-
-				var existingItem = self.getInventoryItemByID(itemToAdd.id);
-
-				if(existingItem){
-					existingItem.qty( existingItem.qty() + itemToAdd.qty() );
-
-					if( itemToAdd.id == "gold" ){
-						self.data().gp(existingItem.qty());
+			var numInInventory = self.data().inventory.addItem(
+				itemToAdd,
+				function(){
+					if( !self.hasInventorySpace() ){
+						return false;
+					}
+					return true;
+				},
+				function(){
+					if(itemToAdd.id != "gold"){
+						self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
 					}
 				}
-			}
+			);
 
-			if(!existingItem){
-
-				self.data().inventory.push(itemToAdd);
-
-				if( itemToAdd.id != "gold" ){
-					self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
-				}else{
-					self.data().gp(itemToAdd.qty());
-				}
-
-			}
-
-			return true;
+			return numInInventory;
 		}
 
 		this.removeItemFromInventory = function(itemID, qty){
 
-			var item = self.getInventoryItemByID(itemID);
+			var existingItem = self.getInventoryItemByID(itemID),
+				slotsRequired = existingItem.slotsRequired;
 
-			if(!item){
-				return false;
-			}
-
-			var existingQty = item.qty();
-
-			if( qty == undefined || qty && (qty == "all" || qty >= existingQty) ){
-				self.data().inventory.remove(item);
-				self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() - 1 );
-				return 0;
-			}else{
-				item.qty( existingQty - qty );
-				return item.qty();
+			var numLeft = self.data().inventory.removeItem(itemID, qty);
+				
+			if(numLeft === 0){
+				self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() - slotsRequired );
+			}else if( numLeft == false ){
+				console.log("could not remove item");
 			}
 		}
 
 		this.setInventoryItemQty = function(itemOrItemID, qty){
 
-			if(!itemOrItemID || typeof qty != "number"){
-				return false;
-			}
-
-			//There's probably a better way to check for this...
-			if(typeof itemOrItemID != "object"){
-				itemOrItemID = self.getInventoryItemByID(itemID);
-			}
-
-			itemOrItemID.qty(qty);
+			return self.data().inventory.setItemQty(itemOrItemID, qty);
 
 		}
 
 		this.getInventoryItemByID = function(itemID){
 
-			for(i = 0; i < self.data().inventory().length; i++){
-				if( itemID == self.data().inventory()[i].id ){
-					return self.data().inventory()[i];
-				}
-			}
-			return false;
+			return self.data().inventory.getItemByID(itemID);
 
 		}
 

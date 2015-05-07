@@ -157,7 +157,7 @@
 						</div>
 						<!-- /ko -->
 						<!-- ko foreach: $root.player().data().inventory() -->
-						<div class="line" data-bind="click: $root.setInventoryItemAsActiveDescItem">
+						<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id }">
 							<span class="item" data-bind="text: $data.name"></span>
 							<span class="qty" data-bind="text: $data.qty()"></span>
 						</div>
@@ -165,18 +165,18 @@
 					</div>
 					<div class="col-md-3 item-desc">
 
-						<div class="inner" data-bind="css: { hidden: currentDescItem().desc() == '' }">
-							<div class="desc" data-bind="html: currentDescItem().desc()"></div>
-							<button class="btn btn-default inventory-control" data-bind="click: equipDescItem, css: { hidden: currentDescItem().canEquip() != 1 }">Equip</button>
-							<button class="btn btn-default inventory-control" data-bind="click: unEquipDescItem, css: { hidden: currentDescItem().canUnEquip() != 1 }">Un-Equip</button>
-							<button class="btn btn-default inventory-control" data-bind="click: useDescItem, css: { hidden: currentDescItem().canUse() != 1 }">Use</button>
-							<span data-bind="css: { hidden: currentContainer().length == 0 }">
-								<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }, html: ( currentDescItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
-								<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1}, html: ( currentDescItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>
+						<div class="inner" data-bind="css: { hidden: activeItem().desc() == '' }">
+							<div class="desc" data-bind="html: activeItem().desc()"></div>
+							<button class="btn btn-default inventory-control" data-bind="click: equipActiveItem, css: { hidden: activeItem().canEquip() != 1 }">Equip</button>
+							<button class="btn btn-default inventory-control" data-bind="click: unEquipActiveItem, css: { hidden: activeItem().canUnEquip() != 1 }">Un-Equip</button>
+							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canUse() != 1 }">Use</button>
+							<span data-bind="css: { hidden: showContainerScreen() == 0 }">
+								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }, html: ( activeItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
+								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1}, html: ( activeItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>
 							</span>
-							<span data-bind="css: { hidden: currentContainer().length > 0 }">
-								<button class="btn btn-default inventory-control" data-bind="click: dropDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop 1x</button>
-								<button class="btn btn-default inventory-control" data-bind="click: dropAllDescItem, css: { hidden: currentDescItem().canDrop() != 1 }">Drop All</button>
+							<span data-bind="css: { hidden: showContainerScreen() }">
+								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop 1x</button>
+								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop All</button>
 							</span>
 						</div>
 					</div>
@@ -191,8 +191,14 @@
 
 					<div class="col-md-4 container-ui" data-bind="css: { hidden: showContainerScreen() == 0 }" >
 
+						<!-- ko if: $root.currentContainer().length == 0 -->
+						<div class="line empty">
+							<span class="item">The container is empty</span>
+						</div>
+						<!-- /ko -->
+
 						<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
-							<div class="line" data-bind="click: $root.setContainerItemAsActiveDescItem">
+							<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id }">
 								<span class="item" data-bind="text: $data.name"></span>
 								<span class="qty" data-bind="text: $data.qty()"></span>
 							</div>

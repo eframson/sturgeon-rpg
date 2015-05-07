@@ -7,6 +7,8 @@ requirejs.config({
 		knockout : 'knockout-3.3.0.min',
 		jquery : 'jquery-2.1.3.min',
 		bootstrap : 'bootstrap.min',
+		text : 'text',
+		json : 'json',
 	},
 	shim : {
 		bootstrap : ["jquery"],
