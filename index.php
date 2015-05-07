@@ -157,7 +157,7 @@
 						</div>
 						<!-- /ko -->
 						<!-- ko foreach: $root.player().data().inventory() -->
-						<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id }">
+						<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'right' }">
 							<span class="item" data-bind="text: $data.name"></span>
 							<span class="qty" data-bind="text: $data.qty()"></span>
 						</div>
@@ -198,7 +198,7 @@
 						<!-- /ko -->
 
 						<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
-							<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id }">
+							<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'left' }">
 								<span class="item" data-bind="text: $data.name"></span>
 								<span class="qty" data-bind="text: $data.qty()"></span>
 							</div>

@@ -12,30 +12,54 @@ define([
 		if(percentageActions == undefined){
 			return false;
 		}
-		percents = $.map(Object.keys(percentageActions), function(elem, idx){ return parseInt(elem); });
+
+		var discretePercents = Object.keys(percentageActions);
+		var percents = Array();
+
+		for(i = 0; i < discretePercents.length; i++){
+
+			if( percentageActions[discretePercents[i]].constructor == Array ){
+
+				for(j=0; j < percentageActions[discretePercents[i]].length; j++){
+					percents.push(discretePercents[i]);
+				}
+
+			}else{
+				percents.push(discretePercents[i]);
+			}
+
+		}
+
 		percents.sort();
-		
-		var totalPercent = 0;;
-		for(i = 0; i < percents.length; i++){
-			totalPercent += percents[i];
-		}
-		
-		if(totalPercent > 100){
-			return false;
-		}
 		
 		var rand = doRand(1,101);
 		var percentOffset = 0;
 		
 		for(i = 0; i < percents.length; i++){
-			if( rand <= (percents[i] + percentOffset) ){
-				if(typeof percentageActions[percents[i]] === 'function'){
-					return percentageActions[percents[i]](rand);
-				}else{
-					return percentageActions[percents[i]];
+
+			var targetPercentage = percents[i];
+			var addToPercentOffset = targetPercentage;
+
+			if( (rand - percentOffset) <= percents[i] ){
+
+				var chosenAction = percentageActions[percents[i]];
+
+				if( chosenAction.constructor == Array ){
+
+					var numPossibilities = chosenAction.length;
+					var whichPossibilityIndex = doRand(0,numPossibilities);
+					chosenAction = chosenAction[whichPossibilityIndex];
+
 				}
+
+				if(typeof chosenAction === 'function'){
+					return chosenAction(rand);
+				}else{
+					return chosenAction;
+				}
+
 			}else{
-				percentOffset += percents[i];
+				percentOffset += addToPercentOffset;
 			}
 		}
 		
@@ -44,6 +68,11 @@ define([
 		}
 		
 		//lolwut?
+		console.log(rand + " did not match");
+		console.log("percentageActions:");
+		console.log(percentageActions);
+		console.log("percents:");
+		console.log(percents);
 		return false;
 	}
 	

@@ -33,7 +33,7 @@ define([
 				}),
 				skills : ko.observable({
 					scanSquares : ko.observable(playerData.skills.scanSquares || 2),
-					findFood : ko.observable(playerData.skills.findFood || 20),
+					findFood : ko.observable(playerData.skills.findFood || 100),
 					visionRange : ko.observable(playerData.skills.visionRange || 1),
 				}),
 				skillCooldowns : ko.observable({
@@ -95,7 +95,7 @@ define([
 				itemToAdd,
 				function(){
 					var hasSpace = self.hasInventorySpace();
-					if( !hasSpace ){
+					if( !hasSpace && itemToAdd.id != "gold"){
 						return false;
 					}
 					return true;

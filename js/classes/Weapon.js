@@ -8,8 +8,9 @@ define([
 
 		Item.call(this, data);
 
-		this.damageMin = data.damageMin || 0;
-		this.damageMax = data.damageMax || 1;
+		this.dmgMin = data.dmgMin || 0;
+		this.dmgMax = data.dmgMax || 1;
+		this.handsRequired = data.handsRequired || 1;
 	}
 
 	return Weapon;

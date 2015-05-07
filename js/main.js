@@ -52,14 +52,18 @@ require([
 		$(document).keydown(function(e){
 			if( game.arrowKeysControlPlayerPos() ){
 
-				if(e.keyCode == 37){
-					game.movePlayerLeft();
-				}else if(e.keyCode == 38){
-					game.movePlayerUp();
-				}else if(e.keyCode == 39){
-					game.movePlayerRight();
-				} else if(e.keyCode == 40){
-					game.movePlayerDown();
+				if( e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40){
+
+					if(e.keyCode == 37){
+						game.movePlayerLeft();
+					}else if(e.keyCode == 38){
+						game.movePlayerUp();
+					}else if(e.keyCode == 39){
+						game.movePlayerRight();
+					} else if(e.keyCode == 40){
+						game.movePlayerDown();
+					}
+
 				}
 
 			}
