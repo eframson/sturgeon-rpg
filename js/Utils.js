@@ -28,7 +28,7 @@ define([
 		var percentOffset = 0;
 		
 		for(i = 0; i < percents.length; i++){
-			if( rand < (percents[i] + percentOffset) ){
+			if( rand <= (percents[i] + percentOffset) ){
 				if(typeof percentageActions[percents[i]] === 'function'){
 					return percentageActions[percents[i]](rand);
 				}else{

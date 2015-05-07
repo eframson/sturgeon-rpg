@@ -544,7 +544,7 @@ define([
 
 			var itemQtyInInventory = self.player().addItemToInventory(newItem);
 
-			if(itemQtyInInventory != false){
+			if(itemQtyInInventory != false && itemQtyInInventory > 0){
 
 				if(newItem.id == "gold"){
 					self.player().data().gp(itemQtyInInventory);

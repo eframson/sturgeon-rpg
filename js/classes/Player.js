@@ -58,12 +58,12 @@ define([
 			}
 			self.data().inventory(itemArray);
 
-			this.hasInventorySpace = ko.computed(function(){
-				return ( self.inventorySlotsAvailable > 0 );
-			});
-
 			this.inventorySlotsAvailable = ko.computed(function(){
 				return self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied();
+			});
+
+			this.hasInventorySpace = ko.computed(function(){
+				return ( self.inventorySlotsAvailable() > 0 );
 			});
 		}
 
@@ -94,7 +94,8 @@ define([
 			var numInInventory = self.data().inventory.addItem(
 				itemToAdd,
 				function(){
-					if( !self.hasInventorySpace() ){
+					var hasSpace = self.hasInventorySpace();
+					if( !hasSpace ){
 						return false;
 					}
 					return true;

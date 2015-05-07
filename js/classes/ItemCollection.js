@@ -68,7 +68,7 @@ define([
 
 		ko.observableArray.fn.addItem = function(itemToAdd, extraCanAddCheck, afterAddCallback){
 
-			if(itemToAdd == undefined || itemToAdd.constructor != Item){
+			if(itemToAdd == undefined || !(itemToAdd instanceof Item) ){
 				return false;
 			}
 
@@ -80,7 +80,8 @@ define([
 			if(!existingItem || !itemToAdd.stackable){
 
 				if(extraCanAddCheck && typeof extraCanAddCheck === 'function'){
-					canAdd = extraCanAddCheck() || true;
+					canAdd = extraCanAddCheck();
+					canAdd = (canAdd == undefined) ? true : canAdd;
 				}
 			}
 
