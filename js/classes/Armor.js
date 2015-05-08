@@ -20,6 +20,7 @@ define([
 		this.init();
 	}
 
+	Armor.prototype = Object.create(Item.prototype);
 	Armor.prototype.constructor = Armor;
 
 	return Armor;

@@ -108,8 +108,8 @@
 				"armorSlot" : "body"
 			},
 
-			"body_armor_02" : {
-				"id" : "body_armor_02",
+			"head_armor_01" : {
+				"id" : "head_armor_01",
 				"name" : "Leather Helm",
 				"type" : "armor",
 				"desc" : "A round helm made out of leather. With some difficulty, you can adapt it to the shape of your head. +3 Armor when worn.",
@@ -131,7 +131,7 @@
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorValue" : 5,
-				"handsRequired" : 1
+				"armorSlot" : "shield"
 			}
 
 		}

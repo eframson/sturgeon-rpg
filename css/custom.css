@@ -1,5 +1,5 @@
 button:focus {
-	outline: 0 !important;
+	outline: none !important;
 }
 
 .clear {
@@ -282,7 +282,9 @@ button:focus {
 }
 
 #inventory-equipment,
-#event-area {
+#event-area,
+#combat-area,
+#full-screen-notice {
 	display: none;
 }
 
@@ -339,16 +341,34 @@ button:focus {
 	background-color: #EDC78E;
 }
 
+#inventory-equipment .equipment .line:not(.empty):hover,
+#inventory-equipment .equipment .line:not(.empty).selected {
+	background-color: #C5C2DB;
+}
+
 #inventory-equipment .inventory .line:not(.empty):active,
 #inventory-equipment .container-ui .line:not(.empty):active {
 	background-color: #F6D8AC;
 }
 
+#inventory-equipment .equipment .line:not(.empty):active {
+	background-color: #9389EB;
+}
+
 #inventory-equipment .inventory .qty,
-#inventory-equipment .container-ui .qty,
-#inventory-equipment .equipment .qty {
+#inventory-equipment .container-ui .qty {
 	float: right;
 	clear: both;
+}
+
+#inventory-equipment .equipment .slot {
+	display: inline-block;
+	font-weight: bold;
+	width: 90px;
+}
+
+#inventory-equipment .equipment .item {
+	display: inline-block;
 }
 
 #inventory-equipment .item-desc .inner{
@@ -368,6 +388,33 @@ button:focus {
 
 #inventory-equipment .danger {
 	color: #FF0000;
+}
+
+
+#combat-area {
+	margin-top: 40px;
+	text-align: left;
+}
+
+#combat-area .notice-text {
+	margin-bottom: 20px;
+}
+
+#combat-area .notice-button {
+	
+}
+
+
+#full-screen-notice {
+	margin-top: 40px;
+}
+
+#full-screen-notice .notice-text {
+	margin-bottom: 20px;
+}
+
+#full-screen-notice .notice-button {
+	
 }
 
 .file-upload {

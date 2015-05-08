@@ -15,7 +15,7 @@ define([
 		this.name = data.name;
 		this.type = data.type;
 		this.slotsRequired = data.slotsRequired || 1;
-		this.stackable = data.stackable || true;
+		this.stackable = ( data.stackable != undefined ) ? data.stackable : true;
 		this.qty = ko.observable(data.qty || 1);
 		this.desc = data.desc || data.name;
 		

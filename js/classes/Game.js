@@ -7,10 +7,11 @@ define([
 	'classes/Weapon',
 	'classes/Armor',
 	'classes/ItemCollection',
+	'classes/Monster',
 	'json!data/items.json',
 
 	'Utils',
-], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, itemDataFile) {
+], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, Monster, itemDataFile) {
 
 	function Game() {
 
@@ -29,7 +30,6 @@ define([
 					},
 				],
 				location: "Unknown",
-				hidePlayerData: true,
 				hideMap: ko.observable(true),
 				hidePlayerStats: ko.observable(true),
 			},
@@ -42,7 +42,6 @@ define([
 					},
 				],
 				location: "Unknown",
-				hidePlayerData: true,
 				hideMap: ko.observable(true),
 				hidePlayerStats: ko.observable(true),
 			},
@@ -55,7 +54,6 @@ define([
 					},
 				],
 				location: "Unknown",
-				hidePlayerData: true,
 				hideMap: ko.observable(true),
 				hidePlayerStats: ko.observable(true),
 			},
@@ -150,6 +148,7 @@ define([
 				self.logMessage(message);
 			}
 		};
+		this.fullScreenNoticeContinueAction;
 
 		this.init = function(){
 			self.initObservables();
@@ -175,12 +174,14 @@ define([
 				canUse : ko.observable(0),
 				canDrop : ko.observable(0),
 				moveDirection : ko.observable("right"),
+				actualItem : ko.observable(undefined),
 			});
 			self.arrowKeysControlPlayerPos = ko.observable(true);
-			self.showInventoryEquipment = ko.observable(true);
-			self.showContainerScreen = ko.observable(false);
+			self.currentInventoryRightSide = ko.observable("equipment");
 			self.freezeMovement = ko.observable(false);
 			self.currentContainer = new ItemCollection(Array());
+			self.fullScreenNotice = ko.observable(undefined);
+			self.currentEnemy = ko.observable(undefined);
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -222,7 +223,7 @@ define([
 				//stateID = "idle";
 			}
 
-			$.each(["content-area","inventory-equipment","event-area"], function(idx, elem){
+			$.each(["content-area","inventory-equipment","event-area","full-screen-notice","combat-area"], function(idx, elem){
 				if(elem != self.visibleSection()){
 					$("#" + elem).hide();
 				}else{
@@ -321,6 +322,7 @@ define([
 
 		this.toggleInventory = function(){
 			//game.player().itemTest();
+			self.freezeMovement(true);
 			self.visibleSection("inventory-equipment");
 			$("#content-area").fadeOut(300, function(){
 				$("#inventory-equipment").fadeIn(300);
@@ -332,11 +334,59 @@ define([
 			$("#event-area").fadeOut(300);
 			$("#inventory-equipment").fadeOut(300, function(){
 				self.currentContainer.removeAll();
-				self.showEquipmentOrContainer("equipment");
+				self.currentInventoryRightSide("equipment");
 				$("#content-area").fadeIn(300);
 				self.freezeMovement(false);
 			});
 			self._resetActiveItem();
+		}
+
+		this.showCombatMessage = function(msg, action){
+			self.visibleSection("full-screen-notice");
+			$("#content-area").fadeOut(300, function(){
+				self.fullScreenNotice(msg);
+				self.fullScreenNoticeContinueAction = action;
+				$("#full-screen-notice").fadeIn(300);
+			});
+		}
+
+		this.startCombat = function(){
+
+			//Initialize a monster
+			self.currentEnemy(new Monster());
+
+			self.visibleSection("combat-area");
+			$("#full-screen-notice").fadeOut(300, function(){
+				$("#combat-area").fadeIn(300);
+			});
+		}
+
+		this.lootEnemy = function(){
+			self.freezeMovement(true);
+
+			itemArray == itemArray || [];
+
+			self.currentContainer(itemArray);
+			self.currentInventoryRightSide("container");
+
+			self.visibleSection("inventory-equipment");
+			$("#combat-area").fadeOut(300, function(){
+				$("#inventory-equipment").fadeIn(300);
+			});
+		}
+
+		this.leaveCombat = function(){
+			self.visibleSection("content-area");
+			$("#combat-area").fadeOut(300, function(){
+				$("#content-area").fadeIn(300);
+				self.freezeMovement(false);
+			});
+		}
+
+		this.fullScreenNoticeContinue = function(){
+			if(typeof self.fullScreenNoticeContinueAction === 'function'){
+				self.fullScreenNoticeContinueAction();
+			}
 		}
 
 		this.hideModal = function(viewModel, event){
@@ -397,7 +447,7 @@ define([
 			itemArray == itemArray || [];
 
 			self.currentContainer(itemArray);
-			self.showEquipmentOrContainer("container");
+			self.currentInventoryRightSide("container");
 
 			self.toggleInventory();
 		}
@@ -413,9 +463,9 @@ define([
 			var canAdd = true;
 
 			var possibleItemTypes = {
-				50 : "gold",
-				40 : "misc",
-				10 : "gear",
+				//50 : "gold",
+				100 : "misc",
+				//10 : "gear",
 			};
 
 			var itemType = doBasedOnPercent(possibleItemTypes);
@@ -448,11 +498,11 @@ define([
 
 				//41% armor scraps, 39% weapon scraps, 20% stone of reset
 				var miscType = doBasedOnPercent({
-					20 : "stone",
-					40 : [
-						"weapon",
-						"armor",
-					]
+					100 : "stone",
+					//40 : [
+					//	"weapon",
+					//	"armor",
+					//]
 				});
 
 				if( miscType == "armor" ){
@@ -532,7 +582,25 @@ define([
 		}
 
 		this.squareCombatAction = function(){
+			self.freezeMovement(true);
 			console.log("trigger a combat action");
+
+			//Generate "enemy appears" message
+			var enemyMsg = doBasedOnPercent({
+				25 : [
+					"Suddenly, swimming out of the murky depths, a foe appears!",
+					"A shadow looms over you. You turn around swiftly; it's an enemy!",
+					"An enemy swims up to you, and attacks!",
+					"You charge headfirst into an enemy!",
+				]
+			});
+
+			self.showCombatMessage(enemyMsg, function(){
+				self.startCombat();
+			});
+
+			//Show our "pop-up", describing the enemy
+
 		}
 
 		this.squareEventAction = function(){
@@ -642,6 +710,7 @@ define([
 			self.activeItem().canDrop(0);
 			self.activeItem().canUnEquip(0);
 			self.activeItem().moveDirection("right");
+			self.activeItem().actualItem(undefined);
 
 		}
 
@@ -653,8 +722,10 @@ define([
 			self._setAsActiveItem({ moveDirection : "right" }, item, e);
 		}
 
-		this.setEquipmentItemAsActiveItem = function(item, e){
-			self._setAsActiveItem({ moveDirection : "left" }, item, e);
+		this.setEquipmentItemAsActiveItem = function(item){
+			if( !$.isEmptyObject(item) ){
+				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
+			}
 		}
 
 		this._setAsActiveItem = function(opts, item, e){
@@ -671,43 +742,66 @@ define([
 			var type = item.type;
 			if( ( self.currentContainer().length == 0 && type == "consumables") || (opts.canUse && opts.canUse == 1) ){
 				self.activeItem().canUse(1);
-			}else if ( (self.currentContainer().length == 0 && (type == "armor" || type == "weapon")) || (opts.canEquip && opts.canEquip == 1) ){
+			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "right" && (type == "armor" || type == "weapon")) || (opts.canEquip && opts.canEquip == 1) ){
 				//For now, if a container is open, we just plain can't equip stuff
 				self.activeItem().canEquip(1);
+			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "left" && (type == "armor" || type == "weapon")) || (opts.canUnEquip && opts.canUnEquip == 1) ){
+				self.activeItem().canUnEquip(1);
 			}
 
-			if( type != "currency" ){
+			if( (opts.moveDirection == "left" && self.currentInventoryRightSide() == "equipment") || (opts.canDrop && opts.canDrop == 0) ){
+				self.activeItem().canDrop(0);
+			}else if( type != "currency" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
 			}
 
 			self.activeItem().moveDirection(opts.moveDirection);
+
+			self.activeItem().actualItem(item);
 
 			//self.activeItem().canUnEquip(1);
 
 
 		}
 
-		this.equipActiveItem = function(item, event){
-			var itemToEquipId = self.activeItem().id(),
-				item = self.player().data().inventory.getItemByID(itemToEquipId);
+		this.equipActiveItem = function(game, event){
+
+			var item = self.activeItem().actualItem();
 
 			if(item.type == "weapon"){
 				self.player().equipWeapon(item);
+			}else if(item.type == "shield"){
+				self.player().equipShield(item);
+			}else if(item.type == "armor"){
+				self.player().equipArmor(item);
 			}
 
 			self.player().data().inventory.removeItem(item);
 			self._resetActiveItem();
 		}
 
-		this.unEquipActiveItem = function(item, event){
+		this.unEquipActiveItem = function(game, event){
+
+			var item = self.activeItem().actualItem();
+
+			if(item.type == "weapon"){
+				self.player().unEquipWeapon(item);
+			}else if(item.type == "shield"){
+				self.player().unEquipShield(item);
+			}else if(item.type == "armor"){
+				self.player().unEquipArmor(item);
+			}
+
+			self.player().data().inventory.addItem(item);
+			self._resetActiveItem();
 
 		}
 
-		this.useActiveItem = function(item, event){
+		this.useActiveItem = function(game, event){
 
 		}
 
-		this._dropActiveItem = function(item, event, qty){
+		this._dropActiveItem = function(game, event, qty){
 
 			var itemToMoveId = self.activeItem().id(),
 				existingItem = undefined,
@@ -717,10 +811,10 @@ define([
 				srcCollection = undefined,
 				tarCollection = undefined;
 
-			//Do we have an active container?
-			if(self.showContainerScreen()){
+			srcCollection = self.player().data().inventory;
 
-				srcCollection = self.player().data().inventory;
+			//Do we have an active container?
+			if(self.currentInventoryRightSide() == 'container'){				
 
 				//Are we moving from inventory -> container OR container -> inventory?
 				if(self.activeItem().moveDirection() == "right"){
@@ -780,9 +874,9 @@ define([
 
 		}
 
-		this.dropActiveItem = function(item, event){
+		this.dropActiveItem = function(game, event){
 
-			self._dropActiveItem(item, event, 1);
+			self._dropActiveItem(game, event, 1);
 
 		}
 
@@ -790,16 +884,6 @@ define([
 			
 			self._dropActiveItem(item, event, "all");
 
-		}
-
-		this.showEquipmentOrContainer = function(toShow){
-			if( toShow == "equipment" ){
-				self.showContainerScreen(false);
-				self.showInventoryEquipment(true);
-			}else if (toShow == "container"){
-				self.showInventoryEquipment(false);
-				self.showContainerScreen(true);
-			}
 		}
 
 		this.logMessage = function(msgText, cssClass){
@@ -939,9 +1023,15 @@ define([
 			}*/
 
 			var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
-			console.log(itemData);
+			//console.log(itemData);
 			if(itemData){
 				self.player().addItemToInventory( new Weapon(itemData) );
+			}
+
+			itemData = self.getAvailableItemById("body_armor_01", "armor", 1);
+			//console.log(itemData);
+			if(itemData){
+				self.player().data().inventory.addItem( new Armor(itemData) );
 			}
 		}
 

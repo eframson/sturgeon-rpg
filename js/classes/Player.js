@@ -21,7 +21,6 @@ define([
 
 				level : ko.observable(playerData.level || 1),
 				hp : ko.observable(playerData.hp || 10),
-				armor : ko.observable(playerData.armor || 0),
 				inventory : new ItemCollection(Array()),
 				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 1),
 				inventorySlotsOccupied : ko.observable(playerData.inventorySlotsOccupied || 0),
@@ -29,15 +28,15 @@ define([
 
 					armor : ko.observable({
 
-						head : ko.observable(playerData.equipment.armor.head || undefined),
-						fin : ko.observable(playerData.equipment.armor.fin || undefined),
-						body : ko.observable(playerData.equipment.armor.body || undefined),
-						tail: ko.observable(playerData.equipment.armor.tail || undefined),
+						head : ko.observable(playerData.equipment.armor.head || {}),
+						fin : ko.observable(playerData.equipment.armor.fin || {}),
+						body : ko.observable(playerData.equipment.armor.body || {}),
+						tail: ko.observable(playerData.equipment.armor.tail || {}),
 
 					}),
 					
-					weapon : ko.observable(playerData.equipment.weapon || undefined),
-					shield : ko.observable(playerData.equipment.shield || undefined),
+					weapon : ko.observable(playerData.equipment.weapon || {}),
+					shield : ko.observable(playerData.equipment.shield || {}),
 				}),
 				skills : ko.observable({
 					scanSquares : ko.observable(playerData.skills.scanSquares || 2),
@@ -55,8 +54,10 @@ define([
 
 				}),
 				abilities : ko.observableArray(playerData.abilities || Array()),
-				speed : ko.observable(playerData.level || 1),
+				speed : ko.observable(playerData.speed || 2),
 				gp : ko.observable(playerData.gp || 0),
+				baseMinDmg : ko.observable(playerData.baseMinDmg || 1),
+				baseMaxDmg : ko.observable(playerData.baseMaxDmg || 2),
 
 			});
 
@@ -72,6 +73,44 @@ define([
 
 			this.hasInventorySpace = ko.computed(function(){
 				return ( self.inventorySlotsAvailable() > 0 );
+			});
+
+			this.minDmg = ko.computed(function(){
+				//Eventually let's add STR to this value
+				var minDmg = self.data().baseMinDmg();
+				if( !isEmptyObject(self.data().equipment().weapon()) ){
+					minDmg += self.data().equipment().weapon().dmgMin;
+				}
+				return minDmg;
+			});
+
+			this.maxDmg = ko.computed(function(){
+				//Eventually let's add STR to this value
+				var maxDmg = self.data().baseMaxDmg();
+				if( !isEmptyObject(self.data().equipment().weapon()) ){
+					maxDmg += self.data().equipment().weapon().dmgMax;
+				}
+				return maxDmg;
+			});
+
+			this.totalArmor = ko.computed(function(){
+				var armorValue = 0; //Eventually when DEX is implemented, use that as base AC
+
+				var armorSlots = self.data().equipment().armor();
+
+				for(slot in armorSlots){
+
+					if( !isEmptyObject( armorSlots[slot]() ) ){
+						armorValue += armorSlots[slot]().armorValue;
+					}
+
+				}
+
+				if( !isEmptyObject(self.data().equipment().shield()) ){
+					armorValue += self.data().equipment().shield().armorValue;
+				}
+
+				return armorValue;
 			});
 		}
 
@@ -134,10 +173,6 @@ define([
 			return self._getShieldSlot()();
 		}
 
-		this.equipArmorInSlot = function(slot, item){
-			self._getArmorSlot(slot)(item);
-		}
-
 		this.equipWeapon = function(item){
 			self._getWeaponSlot()(item);
 		}
@@ -146,8 +181,28 @@ define([
 			self._getShieldSlot()(item);
 		}
 
+		this.equipArmor = function(item){
+			self.equipArmorInSlot(item.armorSlot,item);
+		}
+
 		this.equipArmorInSlot = function(slot, item){
 			self._getArmorSlot(slot)(item);
+		}
+
+		this.unEquipWeapon = function(item){
+			self._getWeaponSlot()({});
+		}
+
+		this.unEquipShield = function(item){
+			self._getShieldSlot()({});
+		}
+
+		this.unEquipArmor = function(item){
+			self.equipArmorInSlot(item.armorSlot,{});
+		}
+
+		this.unEquipArmorInSlot = function(slot, item){
+			self._getArmorSlot(slot)({});
 		}
 
 		this._getArmorSlot = function(slot){

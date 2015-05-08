@@ -68,6 +68,10 @@ require([
 
 			}
 		});
+
+		$("button.btn").click(function(){
+			this.blur();
+		});
 	});
 
 });

@@ -339,8 +339,14 @@ define([
 			var playerPos = self.getPlayerPos();
 			var potentialExits = Array(),
 				potentialEntrances = Array(),
-				q;
+				q,
+				entranceQuadNum,
+				exitQuadNum;
 
+			//Choose one quad or the other off-the-bat, and then randomize its position inside that
+			entranceQuadNum = ( genOpts.quadsWithPotentialEntrances.length > 0 ) ? genOpts.quadsWithPotentialEntrances[doRand(0, genOpts.quadsWithPotentialEntrances.length)] : 0;
+			exitQuadNum = ( genOpts.quadsWithPotentialExits.length > 0 ) ? genOpts.quadsWithPotentialExits[doRand(0, genOpts.quadsWithPotentialExits.length)] : 0;
+			
 			for(q=1; q <= 4; q++){
 				
 				var numNonEmpty = 0;
@@ -362,9 +368,9 @@ define([
 							
 							numNonEmpty++;
 						}else{
-							if( genOpts.quadsWithPotentialExits.indexOf(q) != -1 ){
+							if( exitQuadNum == q ){
 								potentialExits.push([x, y]);
-							}else if( genOpts.quadsWithPotentialEntrances.indexOf(q) != -1 ){
+							}else if( entranceQuadNum == q ){
 								potentialEntrances.push([x, y]);
 							}
 						}

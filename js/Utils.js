@@ -89,5 +89,25 @@ define([
 	
 		$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
 	}
+
+	getExportDataFromObject = function(obj){
+
+		var exportObj = {};
+		
+		for(prop in obj){
+			if ( typeof obj[prop] !== 'function' ){
+				exportObj[prop] = obj[prop];
+			}else if (ko.isObservable(obj[prop])) {
+				exportObj[prop] = obj[prop]();
+			}
+		}
+		
+		return exportObj;
+
+	}
+
+	isEmptyObject = function(obj){
+		return Object.keys(obj).length === 0;
+	}
 	
 });

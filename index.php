@@ -70,6 +70,8 @@
 			<div class="row player-stats hidden" data-bind="css: { hidden: state() && typeof state().hidePlayerStats === 'function' && state().hidePlayerStats() }">
 				<div class="col-md-1"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().data().level()"></span></div>
 				<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp()"></span></div>
+				<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
+				<div class="col-md-1"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg()"></span></div>
 				<div class="col-md-1"><span class="stat-label">Stat03</span><span class="stat-value">Stat03</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat04</span><span class="stat-value">Stat04</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat05</span><span class="stat-value">Stat05</span></div>
@@ -77,8 +79,6 @@
 				<div class="col-md-1"><span class="stat-label">Stat07</span><span class="stat-value">Stat07</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat08</span><span class="stat-value">Stat08</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat09</span><span class="stat-value">Stat09</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat10</span><span class="stat-value">Stat10</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat11</span><span class="stat-value">Stat11</span></div>
 				<div class="col-md-1"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().data().gp()"></span></div>
 			</div>
 
@@ -145,8 +145,8 @@
 				<div class="row header">
 					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="css: { danger: $root.player().data().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }, text: $root.player().data().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
 					<div class="col-md-3"></div>
-					<div class="col-md-4 equipment-header" data-bind="css: { hidden: !showInventoryEquipment() }"><h3>Equipment</h3></div>
-					<div class="col-md-4 container-ui-header" data-bind="css: { hidden: !showContainerScreen() }"><h3>Container</h3></div>
+					<div class="col-md-4 equipment-header" data-bind="css: { hidden: currentInventoryRightSide() != 'equipment' }"><h3>Equipment</h3></div>
+					<div class="col-md-4 container-ui-header" data-bind="css: { hidden: currentInventoryRightSide() != 'container' }"><h3>Container</h3></div>
 				</div>
 
 				<div class="row">
@@ -167,36 +167,61 @@
 
 						<div class="inner" data-bind="css: { hidden: activeItem().desc() == '' }">
 							<div class="desc" data-bind="html: activeItem().desc()"></div>
-							<button class="btn btn-default inventory-control" data-bind="click: equipActiveItem, css: { hidden: activeItem().canEquip() != 1 }">Equip</button>
-							<button class="btn btn-default inventory-control" data-bind="click: unEquipActiveItem, css: { hidden: activeItem().canUnEquip() != 1 }">Un-Equip</button>
-							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canUse() != 1 }">Use</button>
-							<span data-bind="css: { hidden: showContainerScreen() == 0 }">
+							<button class="btn btn-default inventory-control" data-bind="click: equipActiveItem, css: { hidden: activeItem().canEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Equip</button>
+							<button class="btn btn-default inventory-control" data-bind="click: unEquipActiveItem, css: { hidden: activeItem().canUnEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Un-Equip</button>
+							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canUse() != 1 || currentInventoryRightSide() == 'container' }">Use</button>
+							<span data-bind="css: { hidden: currentInventoryRightSide() != 'container'}">
 								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }, html: ( activeItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
 								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1}, html: ( activeItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>
 							</span>
-							<span data-bind="css: { hidden: showContainerScreen() }">
+							<span data-bind="css: { hidden: currentInventoryRightSide() == 'container' }">
 								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop 1x</button>
 								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop All</button>
 							</span>
 						</div>
 					</div>
 
-					<div class="col-md-4 equipment" data-bind="css: { hidden: showInventoryEquipment() == 0 }" >
+					<div class="col-md-4 equipment" data-bind="css: { hidden: currentInventoryRightSide() != 'equipment' }" >
 
 						<!-- <div class="equipment-spacer"></div> -->
 
 						<div class="equipment-inner-container">
 
-							<div class="line" data-bind="click: $root.setEquipmentItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'left' }, if: $root.player().data().equipment().weapon() != undefined">
-								<span class="item" data-bind="text: $root.player().data().equipment().weapon().name"></span>
-								<span class="qty"></span>
+							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().head() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().armor().head().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().head().name) == undefined }">
+								<span class="slot">Head Armor:</span>
+								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().head().name) || 'None'"></span>
+							</div>
+
+							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().fin() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().armor().fin().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().fin().name) == undefined }">
+								<span class="slot">Fin Armor:</span>
+								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().fin().name) || 'None'"></span>
+							</div>
+
+							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().body() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().armor().body().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().body().name) == undefined }">
+								<span class="slot">Body Armor:</span>
+								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().body().name) || 'None'"></span>
+							</div>
+
+							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().tail() ) }, css: { selected: $root.activeItem().id()== ko.unwrap($root.player().data().equipment().armor().tail().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().tail().name) == undefined }">
+								<span class="slot">Tail Armor:</span>
+								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().tail().name) || 'None'"></span>
+							</div>
+
+							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().weapon() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().weapon().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().weapon().name) == undefined }">
+								<span class="slot">Weapon:</span>
+								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().weapon().name) || 'None'"></span>
+							</div>
+
+							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().shield() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().shield().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().shield().name) == undefined }">
+								<span class="slot">Shield:</span>
+								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().shield().name) || 'None'"></span>
 							</div>
 
 						</div>
 
 					</div>
 
-					<div class="col-md-4 container-ui" data-bind="css: { hidden: showContainerScreen() == 0 }" >
+					<div class="col-md-4 container-ui" data-bind="css: { hidden: currentInventoryRightSide() != 'container' }" >
 
 						<!-- ko if: $root.currentContainer().length == 0 -->
 						<div class="line empty">
@@ -217,10 +242,31 @@
 
 			<div id="event-area">
 				<div class="row">
-					<div class="col-md-12">Lorem Ipsum...</div>
+					<div class="col-md-12 intro">Lorem Ipsum...</div>
 				</div>
 			</div>
 
+			<div id="combat-area">
+				<div class="row">
+					<div class="col-md-6 player">Player</div>
+					<div class="col-md-6 enemy">Enemy</div>
+				</div>
+				<div class="row buttons">
+					<div class="col-md-12 player">
+						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || $root.currentEnemy().hp() > 1 }, click: $root.lootEnemy">Loot</button>
+						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || $root.currentEnemy().hp() > 1 }, click: $root.leaveCombat">Leave</button>
+					</div>
+				</div>
+			</div>
+
+			<div id="full-screen-notice">
+				<div class="row notice-text">
+					<div class="col-md-12" data-bind="text: fullScreenNotice()"></div>
+				</div>
+				<div class="row notice-button">
+					<div class="col-md-12"><button type="button" class="btn btn-default" data-bind="click: fullScreenNoticeContinue">Continue</button></div>
+				</div>
+			</div>
 
 		  </div>
 		  <input class="file-upload" type="file" name="Import Saved Game" id="importSavedGame" accept=".json" />
