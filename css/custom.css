@@ -305,19 +305,30 @@ button:focus {
 }
 
 #inventory-equipment .inventory,
-#inventory-equipment .container-ui {
-	background-color: #F0ECE6;
+#inventory-equipment .container-ui,
+#inventory-equipment .equipment {
 	padding-left: 0;
 	padding-right: 0;
 }
 
+#inventory-equipment .inventory,
+#inventory-equipment .container-ui {
+	background-color: #F0ECE6;
+}
+
+#inventory-equipment .equipment {
+	background-color: #E7E6F0;
+}
+
 #inventory-equipment .inventory .line,
-#inventory-equipment .container-ui .line {
+#inventory-equipment .container-ui .line,
+#inventory-equipment .equipment .line {
 	padding: 5px 10px 5px 10px;
 }
 
 #inventory-equipment .inventory .line:not(.empty),
-#inventory-equipment .container-ui .line:not(.empty){
+#inventory-equipment .container-ui .line:not(.empty),
+#inventory-equipment .equipment .line:not(.empty){
 	cursor: pointer;
 }
 
@@ -334,7 +345,8 @@ button:focus {
 }
 
 #inventory-equipment .inventory .qty,
-#inventory-equipment .container-ui .qty {
+#inventory-equipment .container-ui .qty,
+#inventory-equipment .equipment .qty {
 	float: right;
 	clear: both;
 }
@@ -352,18 +364,6 @@ button:focus {
 
 #inventory-equipment .equipment {
 	padding-left: 0px;
-}
-
-#inventory-equipment .equipment .equipment-spacer {
-	width: 10px;
-	height: 200px;
-	float: left;
-}
-
-#inventory-equipment .equipment .equipment-inner-container {
-	background-color: #E7E6F0;
-	float: left;
-	padding: 10px;
 }
 
 #inventory-equipment .danger {
