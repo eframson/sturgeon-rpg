@@ -261,10 +261,16 @@
 								<span class="stat">HP:</span>
 								<span class="value" data-bind="text: $root.player().data().hp()"></span>
 							</div>
+							<div class="line">
+								<span class="stat">Speed:</span>
+								<span class="value" data-bind="text: $root.player().data().speed()"></span>
+							</div>
 							
 						</div>
 						<div class="buttons">
-							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy().isDead() }, click: $root.doCombatRound">Attack!</button>
+							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy().isDead() }, click: $root.playerAttacks">Attack!</button>
+							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
+							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
 						</div>
 					</div>
 					<div class="col-md-6 enemy">
@@ -275,15 +281,13 @@
 								<span class="stat">HP:</span>
 								<span class="value" data-bind="text: $root.currentEnemy().hp()"></span>
 							</div>
+							<div class="line">
+								<span class="stat">Speed:</span>
+								<span class="value" data-bind="text: $root.currentEnemy().speed()"></span>
+							</div>
 							
 						</div>
 						<div class="desc" data-bind="text: $root.currentEnemy().desc()"></div>
-					</div>
-				</div>
-				<div class="row buttons">
-					<div class="col-md-12 player">
-						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
-						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
 					</div>
 				</div>
 				<div class="row log">

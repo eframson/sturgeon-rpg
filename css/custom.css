@@ -419,6 +419,15 @@ button:focus {
 	display: inline-block;
 }
 
+#combat-area .player,
+#combat-area .enemy {
+	width: 570px;
+	height: 120px;
+}
+
+#combat-area .player .buttons {
+	margin-top: 10px;
+}
 
 #full-screen-notice {
 	margin-top: 40px;

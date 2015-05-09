@@ -149,6 +149,7 @@ define([
 			}
 		};
 		this.fullScreenNoticeContinueAction;
+		this._goesFirst;
 
 		this.init = function(){
 			self.initObservables();
@@ -341,6 +342,14 @@ define([
 			});
 			self._resetActiveItem();
 		}
+		
+		self.showDamage = function(which){
+			if(which == "enemy"){
+				$("#combat-area .enemy").effect("highlight", { color: "#FF3939" }, 800);
+			}else if(which == "player"){
+				$("#combat-area .player").effect("highlight", { color: "#FF3939" }, 800);
+			}
+		}
 
 		this.showCombatMessage = function(msg, action){
 			self.visibleSection("full-screen-notice");
@@ -355,6 +364,8 @@ define([
 
 			//Initialize a monster
 			self.currentEnemy(new Monster());
+			//Reset our "goes first" tracker
+			self._goesFirst = undefined
 
 			self.visibleSection("combat-area");
 			$("#full-screen-notice").fadeOut(300, function(){
@@ -362,17 +373,37 @@ define([
 			});
 		}
 		
-		this.doCombatRound = function(){
+		this.getGoesFirst = function(){
 			
-			var goesFirst = "";
-			
-			if( self.player().data().speed() > self.currentEnemy().speed() ){
-				goesFirst = "player";
-			}else if( self.player().data().speed() < self.currentEnemy().speed() ){
-				goesFirst = "enemy";
-			}else{
-				goesFirst = (doRand(0,2) == 1) ? "enemy" : "player" ;
+			if( self._goesFirst == undefined ){
+
+				var goesFirst;
+	
+				if( self.player().data().speed() > self.currentEnemy().speed() ){
+					goesFirst = "player";
+				}else if( self.player().data().speed() < self.currentEnemy().speed() ){
+					goesFirst = "enemy";
+				}else{
+					goesFirst = (doRand(0,2) == 1) ? "enemy" : "player" ;
+				}
+				
+				self._goesFirst = goesFirst;
 			}
+			
+			return self._goesFirst;
+
+		}
+		
+		this.playerAttacks = function(game, event){
+			self.doCombatRound();
+		}
+		
+		this.doCombatRound = function(playerAttacks, enemyAttacks){
+			
+			playerAttacks = ( playerAttacks != undefined ) ? playerAttacks : true ;
+			enemyAttacks = ( enemyAttacks != undefined) ? enemyAttacks : true ;
+			
+			var goesFirst = self.getGoesFirst();
 			
 			var playerDmg = self.player().doAttack();
 			var enemyDmg = self.currentEnemy().doAttack();
@@ -380,20 +411,29 @@ define([
 			var enemyDidDmg = false;
 			
 			if( goesFirst == "player" ){
-				self.currentEnemy().takeDmg(playerDmg);
-				playerDidDmg = true;
 				
-				if(!self.currentEnemy().isDead()){
+				if( playerAttacks ){
+					self.currentEnemy().takeDmg(playerDmg);
+					self.showDamage("enemy");
+					playerDidDmg = true;
+				}
+				
+				if(!self.currentEnemy().isDead() && enemyAttacks){
 					self.player().takeDmg(enemyDmg);
+					self.showDamage("player");
 					enemyDidDmg = true;
 				}
 			}else{
 
-				self.player().takeDmg(enemyDmg);
-				enemyDidDmg = true;				
+				if( enemyAttacks ){
+					self.player().takeDmg(enemyDmg);
+					self.showDamage("player");
+					enemyDidDmg = true;
+				}
 				
-				if(!self.player().isDead()){
+				if(!self.player().isDead() && playerAttacks){
 					self.currentEnemy().takeDmg(playerDmg);
+					self.showDamage("enemy");
 					playerDidDmg = true;
 				}
 				
@@ -661,6 +701,9 @@ define([
 
 			self.showCombatMessage(enemyMsg, function(){
 				self.startCombat();
+				/*if( self.getGoesFirst() == "enemy" ){
+					self.doCombatRound(false, true);
+				}*/
 			});
 
 			//Show our "pop-up", describing the enemy
