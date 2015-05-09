@@ -32,13 +32,20 @@ define([
 				self.armor( Math.round(self.armor() + (self.armor() * coefficient)) );
 				self.speed( Math.round(self.speed() + (self.speed() * coefficient)) );
 				self.minDmg( Math.round(self.minDmg() + (self.minDmg() * coefficient)) );
-				self.maxDmg( Math.round(self.hp() + (self.maxDmg() * coefficient)) );
+				self.maxDmg( Math.round(self.maxDmg() + (self.maxDmg() * coefficient)) );
 
 			}
+			
+			self.isDead = ko.computed(function(){
+				return self.hp() < 1;
+			});
 		}
 
 		this.doAttack = function(){
-			return doRand( self.minDmg(), (self.maxDmg() + 1) );
+			var minDmg = self.minDmg();
+			var maxDmg = self.maxDmg();
+			var rand = doRand( minDmg, (maxDmg + 1) );
+			return rand;
 		}
 
 		this.takeDmg = function(dmg){

@@ -1,6 +1,7 @@
 define([
 	'jquery',
-], function($){
+	'knockout',
+], function($, ko){
 
 	//Returns number between min (inclusive) and max (exclusive)
 	doRand = function(min, max){
@@ -108,6 +109,17 @@ define([
 
 	isEmptyObject = function(obj){
 		return Object.keys(obj).length === 0;
+	}
+	
+	cloneObject = function(obj){
+		
+		var newItemData = ko.mapping.toJS(obj);
+		
+		var className = Object.getPrototypeOf(obj);
+		
+		var newObj = new className.constructor(newItemData);
+		
+		return newObj;
 	}
 	
 });

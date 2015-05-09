@@ -66,7 +66,7 @@
 				"desc" : "A shiny dagger. You could fillet someone with this. Careful not to cut yourself on the blade. +3 DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
-				"dmgMin" : 3,
+				"dmgMin" : 2,
 				"dmgMax" : 3,
 				"handsRequired" : 1
 			},

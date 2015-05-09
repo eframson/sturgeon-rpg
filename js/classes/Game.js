@@ -103,7 +103,7 @@ define([
 					{
 						text: function(){
 							var text = "Check Inventory";
-							text += " (" + self.player().data().inventorySlotsOccupied() + "/" + self.player().data().inventoryMaxSlots() + ")";
+							text += " (" + self.player().inventorySlotsOccupied() + "/" + self.player().data().inventoryMaxSlots() + ")";
 							return text;
 						},
 						action: function(){
@@ -134,8 +134,8 @@ define([
 				var percentages = {};
 				var findPercent = self.player().data().skills().findFood() + self.tempFoodFindBonus;
 				percentages[findPercent] = function(){
-					self.addFoodToPlayerInventory();
-					message = "You gracefully float to the bottom of the river and successfully scrounge up some fish biscuits using your kick-ass mouth feelers.";
+					var qty = self.addFoodToPlayerInventory();
+					message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " fish biscuits using your kick-ass mouth feelers.";
 					self.tempFoodFindBonus = 0;
 				};
 				doBasedOnPercent(percentages,
@@ -246,11 +246,12 @@ define([
 		}
 
 		this.addFoodToPlayerInventory = function(){
-			var qty = self.player().data().skills().findFood();
+			var qty = Math.ceil(self.player().data().skills().findFood() / 10);
 			var itemData = self.getAvailableItemById("biscuit_food", "consumables", qty);
 			if(itemData){
 				self.player().addItemToInventory( new Item(itemData) );
 			}
+			return qty;
 		}
 
 		this.loadFromData = function(gameData){
@@ -360,13 +361,60 @@ define([
 				$("#combat-area").fadeIn(300);
 			});
 		}
+		
+		this.doCombatRound = function(){
+			
+			var goesFirst = "";
+			
+			if( self.player().data().speed() > self.currentEnemy().speed() ){
+				goesFirst = "player";
+			}else if( self.player().data().speed() < self.currentEnemy().speed() ){
+				goesFirst = "enemy";
+			}else{
+				goesFirst = (doRand(0,2) == 1) ? "enemy" : "player" ;
+			}
+			
+			var playerDmg = self.player().doAttack();
+			var enemyDmg = self.currentEnemy().doAttack();
+			var playerDidDmg = false;
+			var enemyDidDmg = false;
+			
+			if( goesFirst == "player" ){
+				self.currentEnemy().takeDmg(playerDmg);
+				playerDidDmg = true;
+				
+				if(!self.currentEnemy().isDead()){
+					self.player().takeDmg(enemyDmg);
+					enemyDidDmg = true;
+				}
+			}else{
+
+				self.player().takeDmg(enemyDmg);
+				enemyDidDmg = true;				
+				
+				if(!self.player().isDead()){
+					self.currentEnemy().takeDmg(playerDmg);
+					playerDidDmg = true;
+				}
+				
+			}
+			
+			if(playerDidDmg){
+				self.logMessage("You strike the enemy for " + playerDmg + " points of damage!", "combat");
+			}
+			if(enemyDidDmg){
+				self.logMessage("The enemy strikes you for " + enemyDmg + " points of damage!", "combat");				
+			}
+			if(self.currentEnemy().isDead()){
+				self.logMessage("You defeated the enemy! You gain (TBD) amount of XP!", "combat");
+			}
+			
+		}
 
 		this.lootEnemy = function(){
 			self.freezeMovement(true);
 
-			itemArray == itemArray || [];
-
-			self.currentContainer(itemArray);
+			self.currentContainer([self.generateRandomLootItem()]);
 			self.currentInventoryRightSide("container");
 
 			self.visibleSection("inventory-equipment");
@@ -456,6 +504,35 @@ define([
 
 			self.freezeMovement(true);
 
+			var newItem = self.generateRandomLootItem();
+
+			var container = doBasedOnPercent({
+				25 : [
+					"a crate sealed tightly with tar",
+					"an upturned canoe concealing a pocket of air",
+					"a waterproof oilskin bag",
+					"a crevice between two large rocks",
+				]
+			});
+
+			var itemQtyInInventory = self.player().addItemToInventory(newItem);
+
+			if(itemQtyInInventory != false && itemQtyInInventory > 0){
+
+				if(newItem.id == "gold"){
+					self.player().data().gp(itemQtyInInventory);
+				}
+
+				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
+				self.freezeMovement(false);
+			}else{
+				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name + ", but your inventory is currently full", "item");
+				self.showContainerWithContents([newItem]);
+			}
+		}
+		
+		this.generateRandomLootItem = function(){
+
 			var itemClass = "item";
 
 			var itemToAdd = {};
@@ -463,9 +540,9 @@ define([
 			var canAdd = true;
 
 			var possibleItemTypes = {
-				//50 : "gold",
-				100 : "misc",
-				//10 : "gear",
+				50 : "gold",
+				40 : "misc",
+				10 : "gear",
 			};
 
 			var itemType = doBasedOnPercent(possibleItemTypes);
@@ -498,11 +575,14 @@ define([
 
 				//41% armor scraps, 39% weapon scraps, 20% stone of reset
 				var miscType = doBasedOnPercent({
-					100 : "stone",
-					//40 : [
-					//	"weapon",
-					//	"armor",
-					//]
+					20 : [
+						"stone",
+						"food",
+					],
+					30 : [
+						"weapon",
+						"armor",
+					]
 				});
 
 				if( miscType == "armor" ){
@@ -517,6 +597,8 @@ define([
 
 					itemToAdd = self.getAvailableItemById("reset_stone", "consumables", 1);
 
+				}else if( miscType == "food" ){
+					itemToAdd = self.getAvailableItemById("biscuit_food", "consumables", 1);
 				}
 
 			}else if(itemType == "gear"){
@@ -555,30 +637,9 @@ define([
 			}else if(itemClass == "armor"){
 				newItem = new Armor(itemToAdd);
 			}
+			
+			return newItem;
 
-			var container = doBasedOnPercent({
-				25 : [
-					"a crate sealed tightly with tar",
-					"an upturned canoe concealing a pocket of air",
-					"a waterproof oilskin bag",
-					"a crevice between two large rocks",
-				]
-			});
-
-			var itemQtyInInventory = self.player().addItemToInventory(newItem);
-
-			if(itemQtyInInventory != false && itemQtyInInventory > 0){
-
-				if(newItem.id == "gold"){
-					self.player().data().gp(itemQtyInInventory);
-				}
-
-				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
-				self.freezeMovement(false);
-			}else{
-				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name + ", but your inventory is currently full", "item");
-				self.showContainerWithContents([newItem]);
-			}
 		}
 
 		this.squareCombatAction = function(){
@@ -594,6 +655,9 @@ define([
 					"You charge headfirst into an enemy!",
 				]
 			});
+			
+			self.logMessage(enemyMsg, "combat");
+			self.freezeMovement(false);
 
 			self.showCombatMessage(enemyMsg, function(){
 				self.startCombat();
@@ -751,6 +815,8 @@ define([
 
 			if( (opts.moveDirection == "left" && self.currentInventoryRightSide() == "equipment") || (opts.canDrop && opts.canDrop == 0) ){
 				self.activeItem().canDrop(0);
+			}else if( opts.moveDirection == "left" && self.currentInventoryRightSide() == "container" || (opts.canDrop && opts.canDrop == 1) ){
+				self.activeItem().canDrop(1);				
 			}else if( type != "currency" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
 			}
@@ -799,6 +865,16 @@ define([
 
 		this.useActiveItem = function(game, event){
 
+			var item = self.activeItem().actualItem();
+			
+			if(item.id == "biscuit_food" ){
+				
+				self._dropActiveItem(game, event, 1);
+				
+				self.player().data().hp( self.player().data().maxHp() );
+				self.logMessage("Eating some fish biscuits restored you to full HP!", "player");
+			}
+
 		}
 
 		this._dropActiveItem = function(game, event, qty){
@@ -836,7 +912,7 @@ define([
 			//Get the existing item we want to "move"
 			existingItem = srcCollection.getItemByID(itemToMoveId);
 			//Clone it so we're not writing to the same object from two different places
-			newItem = existingItem.clone();
+			newItem = cloneObject(existingItem);
 			//Set the right qty on the object we want to add
 			if(qty == undefined || qty == "all"){
 				newItem.qty(existingItem.qty());
@@ -855,14 +931,11 @@ define([
 				}
 
 				//Add to inventory
-				tarCollection.addItem(newItem, undefined, function(){
-					self.player().data().inventorySlotsOccupied( self.player().data().inventorySlotsOccupied() + newItem.slotsRequired );
-				});
+				tarCollection.addItem(newItem);
 
 			}else if ( moveFrom == "inventory" ){
 
 				if(srcNumLeft == 0){
-					self.player().data().inventorySlotsOccupied( self.player().data().inventorySlotsOccupied() - newItem.slotsRequired );
 					self._resetActiveItem();
 				}
 
@@ -1021,18 +1094,24 @@ define([
 			if(itemOne && itemTwo){
 				self.showContainerWithContents([itemOne, itemTwo]);
 			}*/
-
+			
 			var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
-			//console.log(itemData);
+			if(itemData){
+				var weap = new Weapon(itemData);
+			}
+			self.showContainerWithContents([weap]);
+
+			/*
+				var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
 			if(itemData){
 				self.player().addItemToInventory( new Weapon(itemData) );
 			}
 
 			itemData = self.getAvailableItemById("body_armor_01", "armor", 1);
-			//console.log(itemData);
 			if(itemData){
 				self.player().data().inventory.addItem( new Armor(itemData) );
 			}
+			*/
 		}
 
 		self.init();

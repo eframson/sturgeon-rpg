@@ -87,7 +87,7 @@ define([
 
 			if(canAdd){
 
-				if(existingItem){
+				if(existingItem && itemToAdd.stackable){
 					newQty = existingItem.qty() + itemToAdd.qty();
 					existingItem.qty(newQty);
 				}else{

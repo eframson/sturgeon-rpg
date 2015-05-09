@@ -69,7 +69,7 @@
 
 			<div class="row player-stats hidden" data-bind="css: { hidden: state() && typeof state().hidePlayerStats === 'function' && state().hidePlayerStats() }">
 				<div class="col-md-1"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().data().level()"></span></div>
-				<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp()"></span></div>
+				<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp() + '/' + player().data().maxHp()"></span></div>
 				<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
 				<div class="col-md-1"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg()"></span></div>
 				<div class="col-md-1"><span class="stat-label">Stat03</span><span class="stat-value">Stat03</span></div>
@@ -138,12 +138,12 @@
 
 				<div class="row back">
 					<div class="col-md-12">
-						<button class="btn btn-default" type="button" data-bind="click: showContentArea, css: { disabled: $root.player().data().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }"><span>Back</span></button>
+						<button class="btn btn-default" type="button" data-bind="click: showContentArea, css: { disabled: $root.player().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }"><span>Back</span></button>
 					</div>
 				</div>
 
 				<div class="row header">
-					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="css: { danger: $root.player().data().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }, text: $root.player().data().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
+					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="css: { danger: $root.player().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }, text: $root.player().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
 					<div class="col-md-3"></div>
 					<div class="col-md-4 equipment-header" data-bind="css: { hidden: currentInventoryRightSide() != 'equipment' }"><h3>Equipment</h3></div>
 					<div class="col-md-4 container-ui-header" data-bind="css: { hidden: currentInventoryRightSide() != 'container' }"><h3>Container</h3></div>
@@ -151,17 +151,22 @@
 
 				<div class="row">
 					<div class="col-md-5 inventory">
-						<!-- ko if: $root.player().data().inventory().length == 0 -->
-						<div class="line empty">
-							<span class="item">Your inventory is empty</span>
+						<div class="lines">
+							<!-- ko if: $root.player().data().inventory().length == 0 -->
+							<div class="line empty">
+								<span class="item">Your inventory is empty</span>
+							</div>
+							<!-- /ko -->
+							<!-- ko foreach: $root.player().data().inventory() -->
+							<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'right', hidden : $data.id == 'gold' }">
+								<span class="item" data-bind="text: $data.name"></span>
+								<span class="qty" data-bind="text: $data.qty()"></span>
+							</div>
+							<!-- /ko -->
 						</div>
-						<!-- /ko -->
-						<!-- ko foreach: $root.player().data().inventory() -->
-						<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'right' }">
-							<span class="item" data-bind="text: $data.name"></span>
-							<span class="qty" data-bind="text: $data.qty()"></span>
+						<div class="message-log" data-bind="foreach: logMessages()">
+							<p data-bind="html: $data.text, css: $data.cssClass"></p>
 						</div>
-						<!-- /ko -->
 					</div>
 					<div class="col-md-3 item-desc">
 
@@ -246,15 +251,46 @@
 				</div>
 			</div>
 
-			<div id="combat-area">
+			<div id="combat-area" data-bind="if: $root.currentEnemy() != undefined">
 				<div class="row">
-					<div class="col-md-6 player">Player</div>
-					<div class="col-md-6 enemy">Enemy</div>
+					<div class="col-md-6 player">
+						<div class="header">You</div>
+						<div class="lines">
+							
+							<div class="line">
+								<span class="stat">HP:</span>
+								<span class="value" data-bind="text: $root.player().data().hp()"></span>
+							</div>
+							
+						</div>
+						<div class="buttons">
+							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy().isDead() }, click: $root.doCombatRound">Attack!</button>
+						</div>
+					</div>
+					<div class="col-md-6 enemy">
+						<div class="header" data-bind="text: $root.currentEnemy().name()"></div>
+						<div class="lines">
+							
+							<div class="line">
+								<span class="stat">HP:</span>
+								<span class="value" data-bind="text: $root.currentEnemy().hp()"></span>
+							</div>
+							
+						</div>
+						<div class="desc" data-bind="text: $root.currentEnemy().desc()"></div>
+					</div>
 				</div>
 				<div class="row buttons">
 					<div class="col-md-12 player">
-						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || $root.currentEnemy().hp() > 1 }, click: $root.lootEnemy">Loot</button>
-						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || $root.currentEnemy().hp() > 1 }, click: $root.leaveCombat">Leave</button>
+						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
+						<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
+					</div>
+				</div>
+				<div class="row log">
+					<div class="col-md-12">
+						<div class="message-log" data-bind="foreach: logMessages()">
+							<p data-bind="html: $data.text, css: $data.cssClass"></p>
+						</div>
 					</div>
 				</div>
 			</div>

@@ -155,7 +155,7 @@ button:focus {
 	width: 100%;
 }
 
-#content-area .message-log {
+.message-log {
 	margin-top: 15px;
 	padding: 15px;
 	background-color: #ECECEC;
@@ -164,7 +164,7 @@ button:focus {
 	height: 185px;
 }
 
-#content-area .message-log:after {
+.message-log:after {
   content  : "";
   position : absolute;
   z-index  : 1;
@@ -176,6 +176,10 @@ button:focus {
                     rgba(255,255,255, 1) 90%);
   width    : 100%;
   height   : 20px;
+}
+
+#inventory-equipment .inventory .message-log {
+	width: 475px;	
 }
 
 .buttons {
@@ -313,7 +317,7 @@ button:focus {
 	padding-right: 0;
 }
 
-#inventory-equipment .inventory,
+#inventory-equipment .inventory .lines,
 #inventory-equipment .container-ui {
 	background-color: #F0ECE6;
 }
@@ -400,8 +404,19 @@ button:focus {
 	margin-bottom: 20px;
 }
 
-#combat-area .notice-button {
-	
+#combat-area .header {
+	font-size: 20px;
+	font-weight: bold;
+}
+
+#combat-area .stat {
+	display: inline-block;
+	font-weight: bold;
+	width: 90px;
+}
+
+#combat-area .value {
+	display: inline-block;
 }
 
 

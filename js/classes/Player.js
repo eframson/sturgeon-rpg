@@ -21,9 +21,9 @@ define([
 
 				level : ko.observable(playerData.level || 1),
 				hp : ko.observable(playerData.hp || 10),
+				maxHp : ko.observable(playerData.maxHp || 10),
 				inventory : new ItemCollection(Array()),
-				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 1),
-				inventorySlotsOccupied : ko.observable(playerData.inventorySlotsOccupied || 0),
+				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 4),
 				equipment : ko.observable({
 
 					armor : ko.observable({
@@ -40,7 +40,7 @@ define([
 				}),
 				skills : ko.observable({
 					scanSquares : ko.observable(playerData.skills.scanSquares || 2),
-					findFood : ko.observable(playerData.skills.findFood || 100),
+					findFood : ko.observable(playerData.skills.findFood || 20),
 					visionRange : ko.observable(playerData.skills.visionRange || 1),
 				}),
 				skillCooldowns : ko.observable({
@@ -66,9 +66,17 @@ define([
 				itemArray.push( new Item(playerData.inventory[i]) );
 			}
 			self.data().inventory(itemArray);
+			
+			this.inventorySlotsOccupied = ko.computed(function(){
+				var slotsOccupied = 0;
+				for(i=0; i < self.data().inventory().length; i++){
+					slotsOccupied += self.data().inventory()[i].slotsRequired;
+				}
+				return slotsOccupied;
+			});
 
 			this.inventorySlotsAvailable = ko.computed(function(){
-				return self.data().inventoryMaxSlots() - self.data().inventorySlotsOccupied();
+				return self.data().inventoryMaxSlots() - self.inventorySlotsOccupied();
 			});
 
 			this.hasInventorySpace = ko.computed(function(){
@@ -112,6 +120,10 @@ define([
 
 				return armorValue;
 			});
+			
+			self.isDead = ko.computed(function(){
+				return self.data().hp() < 1;
+			});
 		}
 
 		this.addItemToInventory = function(itemToAdd){
@@ -124,11 +136,6 @@ define([
 						return false;
 					}
 					return true;
-				},
-				function(){
-					if(itemToAdd.id != "gold"){
-						self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() + itemToAdd.slotsRequired );
-					}
 				}
 			);
 
@@ -142,9 +149,7 @@ define([
 
 			var numLeft = self.data().inventory.removeItem(itemID, qty);
 				
-			if(numLeft === 0){
-				self.data().inventorySlotsOccupied( self.data().inventorySlotsOccupied() - slotsRequired );
-			}else if( numLeft == false ){
+			if( numLeft == false ){
 				console.log("could not remove item");
 			}
 		}
@@ -215,6 +220,16 @@ define([
 
 		this._getShieldSlot = function(){
 			return self.data().equipment().shield;
+		}
+		
+		this.doAttack = function(){
+			return doRand( self.minDmg(), (self.maxDmg() + 1) );
+		}
+		
+		this.takeDmg = function(dmg){
+			dmg = ( dmg - self.totalArmor() < 1 ) ? 1 : dmg - self.totalArmor() ;
+			self.data().hp( self.data().hp() - dmg );
+			return self.data().hp();
 		}
 
 		this.getExportData = function(){
