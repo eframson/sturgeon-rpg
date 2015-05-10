@@ -306,13 +306,15 @@ button:focus {
 
 #inventory-equipment .header .equipment-header,
 #inventory-equipment .header .container-ui-header,
-#inventory-equipment .header .inventory-header {
+#inventory-equipment .header .inventory-header,
+#inventory-equipment .merchant .merchant-header {
 	padding-left: 0px;
 }
 
 #inventory-equipment .inventory,
 #inventory-equipment .container-ui,
-#inventory-equipment .equipment {
+#inventory-equipment .equipment,
+#inventory-equipment .merchant {
 	padding-left: 0;
 	padding-right: 0;
 }

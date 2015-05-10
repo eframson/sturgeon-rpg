@@ -9,15 +9,17 @@ define([
 	'classes/ItemCollection',
 	'classes/Monster',
 	'json!data/items.json',
+	'json!data/monsters.json',
 
 	'Utils',
-], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, Monster, itemDataFile) {
+], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, Monster, itemDataFile, monsterDataFile) {
 
 	function Game() {
 
 		var self = this;
 
 		this.itemDataFile = itemDataFile;
+		this.monsterDataFile = monsterDataFile;
 
 		this.player = undefined;
 		this.states = {
@@ -174,6 +176,8 @@ define([
 				canUnEquip : ko.observable(0),
 				canUse : ko.observable(0),
 				canDrop : ko.observable(0),
+				canSell : ko.observable(0),
+				canBuy : ko.observable(0),
 				moveDirection : ko.observable("right"),
 				actualItem : ko.observable(undefined),
 			});
@@ -345,9 +349,9 @@ define([
 		
 		self.showDamage = function(which){
 			if(which == "enemy"){
-				$("#combat-area .enemy").effect("highlight", { color: "#FF3939" }, 800);
+				$("#combat-area .enemy").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
 			}else if(which == "player"){
-				$("#combat-area .player").effect("highlight", { color: "#FF3939" }, 800);
+				$("#combat-area .player").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
 			}
 		}
 
@@ -363,9 +367,18 @@ define([
 		this.startCombat = function(){
 
 			//Initialize a monster
-			self.currentEnemy(new Monster());
+			var newMonsterID = doBasedOnPercent({
+				25 : [
+					"monster_01",
+					"monster_02",
+					"monster_03",
+					"monster_04",
+				]
+			});
+			
+			self.currentEnemy(new Monster( self.getMonsterById(newMonsterID) ));
 			//Reset our "goes first" tracker
-			self._goesFirst = undefined
+			self._goesFirst = undefined;
 
 			self.visibleSection("combat-area");
 			$("#full-screen-notice").fadeOut(300, function(){
@@ -581,8 +594,10 @@ define([
 
 			var possibleItemTypes = {
 				50 : "gold",
-				40 : "misc",
-				10 : "gear",
+				25 : [
+					"misc",
+					"gear",
+				]
 			};
 
 			var itemType = doBasedOnPercent(possibleItemTypes);
@@ -647,7 +662,7 @@ define([
 					50 : [
 						"armor",
 						"weapon",
-					]
+					],
 					
 				});
 
@@ -655,14 +670,65 @@ define([
 				if( gearType == "armor" ){
 
 					itemClass = "armor";
+					
+					var armorId;
+					
+					if(self.level().levelNum() < 5){
 
-					itemToAdd = self.getAvailableItemById("body_armor_01", "armor", 1);
+						armorId = doBasedOnPercent({
+							25 : [
+								"body_armor_01",
+								"head_armor_01",
+								"shield_01",
+								"tail_armor_01",
+							],
+						});
+						
+					}else if( self.level().levelNum() > 5 ){
+						armorId = doBasedOnPercent({
+							25 : [
+								"body_armor_02",
+								"head_armor_02",
+								"shield_02",
+								"fin_armor_01",
+							],
+						});
+					}
+					
+					if(armorId == "shield_01" || armorId == "shield_02"){
+						itemClass = "shield";
+						itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
+					}else{
+						itemToAdd = self.getAvailableItemById(armorId, "armor", 1);
+					}
 
 				}else if( gearType == "weapon" ){
 
 					itemClass = "weapon";
+					
+					
+					
+					var weaponId;
+					
+					if(self.level().levelNum() < 5){
 
-					itemToAdd = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
+						weaponId = doBasedOnPercent({
+							50 : [
+								"melee_weapon_01",
+								"melee_weapon_02",
+							],
+						});
+						
+					}else if( self.level().levelNum() > 5 ){
+						weaponId = doBasedOnPercent({
+							50 : [
+								"melee_weapon_03",
+								"melee_weapon_04",
+							],
+						});
+					}					
+
+					itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
 				}
 
@@ -674,7 +740,7 @@ define([
 				newItem = new Item(itemToAdd);
 			}else if(itemClass == "weapon"){
 				newItem = new Weapon(itemToAdd);
-			}else if(itemClass == "armor"){
+			}else if(itemClass == "armor" || itemClass == "shield"){
 				newItem = new Armor(itemToAdd);
 			}
 			
@@ -697,7 +763,6 @@ define([
 			});
 			
 			self.logMessage(enemyMsg, "combat");
-			self.freezeMovement(false);
 
 			self.showCombatMessage(enemyMsg, function(){
 				self.startCombat();
@@ -815,6 +880,8 @@ define([
 			self.activeItem().canUse(0);
 			self.activeItem().canEquip(0);
 			self.activeItem().canDrop(0);
+			self.activeItem().canSell(0);
+			self.activeItem().canBuy(0);
 			self.activeItem().canUnEquip(0);
 			self.activeItem().moveDirection("right");
 			self.activeItem().actualItem(undefined);
@@ -1107,6 +1174,15 @@ define([
 
 		this.getAvailableItemTypes = function(){
 			return Object.keys(self.itemDataFile.items);
+		}
+		
+		this.getMonsterById = function(monsterId){
+			var monsterIDs = Object.keys(self.monsterDataFile);
+			for(i=0; i < monsterIDs.length; i++){
+				if(monsterIDs[i] == monsterId){
+					return self.monsterDataFile[monsterIDs[i]];
+				}
+			}
 		}
 
 		this.itemTest = function(){

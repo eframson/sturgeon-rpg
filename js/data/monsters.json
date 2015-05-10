@@ -1,0 +1,61 @@
+{
+	"monster_01" : {
+		"id" : "monster_01",
+		"name" : "Angry Guppy",
+		"desc" : "A guppy that woke up on the wrong side of the bed this morning.",
+		"level" : 1,
+		"hp" : 5,
+		"armor" : 0,
+		"speed" : 1,
+		"minDmg" : 1,
+		"maxDmg" : 2
+	},
+	
+	"monster_02" : {
+		"id" : "monster_02",
+		"name" : "Bad-Tempered Crawdad",
+		"desc" : "Has tattoos on his shell indicating he's a member of the 'Big Bad Daddy' gang. He also has one depicting a scantily-clad salmon. What an unsavory character!",
+		"level" : 1,
+		"hp" : 6,
+		"armor" : 0,
+		"speed" : 1,
+		"minDmg" : 1,
+		"maxDmg" : 2
+	},
+	
+	"monster_03" : {
+		"id" : "monster_03",
+		"name" : "Freshwater Sea Cucumber",
+		"desc" : "Sea cucumbers serve a useful role in the marine ecosystem as they help recycle nutrients, breaking down detritus and other organic matter after which bacteria can continue the degradation process. They are also quick with a blade. Watch out!",
+		"level" : 1,
+		"hp" : 4,
+		"armor" : 0,
+		"speed" : 1,
+		"minDmg" : 1,
+		"maxDmg" : 1
+	},
+	
+	"monster_04" : {
+		"id" : "monster_04",
+		"name" : "Juvenille Flagtail",
+		"desc" : "Looks like he just finished spray-painting graffiti on an elderly fish's dorsal fin. Dang kids and their punk rock music. If you had a lawn, he would surely not be welcome on it.",
+		"level" : 1,
+		"hp" : 5,
+		"armor" : 0,
+		"speed" : 1,
+		"minDmg" : 1,
+		"maxDmg" : 2
+	},
+
+	"monster_05" : {
+		"id" : "monster_05",
+		"name" : "Scurvy Sea Dog",
+		"desc" : "You thought this was just a thing that pirates said. Nope! It's real, and it's currently fighting you.",
+		"level" : 2,
+		"hp" : 10,
+		"armor" : 1,
+		"speed" : 2,
+		"minDmg" : 2,
+		"maxDmg" : 4
+	}
+}

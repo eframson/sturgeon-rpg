@@ -18,6 +18,7 @@ define([
 		this.stackable = ( data.stackable != undefined ) ? data.stackable : true;
 		this.qty = ko.observable(data.qty || 1);
 		this.desc = data.desc || data.name;
+		this.buyValue = data.buyValue || 0;
 		
 		this.getExportData = function(){
 			

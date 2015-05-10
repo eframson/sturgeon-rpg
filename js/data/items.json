@@ -9,7 +9,8 @@
 				"type" : "consumables",
 				"desc" : "Restores all HP when consumed. Fish Biscuits are small, compact wafers made of delicious wild berries, soy protein, bacon fat, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly before eating. Do not consume while pregnant. Consult your doctor before use. Fish Biscuits cannot be used as a tourniquet.",
 				"slotsRequired" : 1,
-				"stackable" : 1
+				"stackable" : 1,
+				"buyValue" : 10
 			},
 
 			"reset_stone" : {
@@ -18,7 +19,8 @@
 				"type" : "consumables",
 				"desc" : "A stone imbued with magical energies. It has the power to re-randomize the current dungeon level, letting you experience a brand new set of events, search for new treasures, and fight new monsters.",
 				"slotsRequired" : 1,
-				"stackable" : 0
+				"stackable" : 0,
+				"buyValue" : 500
 			}
 
 		},
@@ -44,7 +46,8 @@
 				"type" : "crafting",
 				"desc" : "Scraps of leather, iron, steel. Formerly part of someone's weapon. Maybe you could use it to make your own weapons better...",
 				"slotsRequired" : 1,
-				"stackable" : 1
+				"stackable" : 1,
+				"buyValue" : 25
 			},
 			"armor_scraps" : {
 				"id" : "armor_scraps",
@@ -52,7 +55,8 @@
 				"type" : "crafting",
 				"desc" : "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...",
 				"slotsRequired" : 1,
-				"stackable" : 1
+				"stackable" : 1,
+				"buyValue" : 25
 			}
 
 		},
@@ -61,62 +65,136 @@
 
 			"melee_weapon_01" : {
 				"id" : "melee_weapon_01",
-				"name" : "Razor Sharp Dagger",
+				"name" : "Crude Shiv (1H)",
+				"type" : "weapon",
+				"desc" : "A sharpened piece of fish bone. Clearly whoever made this was significantly luckier than whomever it came from. +1-2 DMG when equipped ",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"dmgMin" : 1,
+				"dmgMax" : 2,
+				"handsRequired" : 1,
+				"buyValue" : 500
+			},
+			"melee_weapon_02" : {
+				"id" : "melee_weapon_02",
+				"name" : "Razor Sharp Dagger (1H)",
 				"type" : "weapon",
 				"desc" : "A shiny dagger. You could fillet someone with this. Careful not to cut yourself on the blade. +3 DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"dmgMin" : 2,
 				"dmgMax" : 3,
-				"handsRequired" : 1
+				"handsRequired" : 1,
+				"buyValue" : 800
 			},
-			"melee_weapon_02" : {
-				"id" : "melee_weapon_02",
-				"name" : "Short Sword",
+			"melee_weapon_03" : {
+				"id" : "melee_weapon_03",
+				"name" : "Short Sword (1H)",
 				"type" : "weapon",
 				"desc" : "It's like a dagger, but longer. +4-6 DMG when equipped. STAB ALL THE THINGS.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"dmgMin" : 4,
 				"dmgMax" : 6,
-				"handsRequired" : 1
+				"handsRequired" : 1,
+				"buyValue" : 1000
 			},
-			"melee_weapon_03" : {
-				"id" : "melee_weapon_03",
-				"name" : "Greatsword",
+			"melee_weapon_04" : {
+				"id" : "melee_weapon_04",
+				"name" : "Greatsword (2H)",
 				"type" : "weapon",
 				"desc" : "A very large sword. Requires both fins to wield. Good news, though: it does +7-12 DMG when equipped. Enjoy your murder spree!",
 				"slotsRequired" : 2,
 				"stackable" : 0,
 				"dmgMin" : 7,
 				"dmgMax" : 12,
-				"handsRequired" : 2
+				"handsRequired" : 2,
+				"buyValue" : 1500
 			}
 
 		},
 
 		"armor" : {
+			
+			"tail_armor_01" : {
+				"id" : "tail_armor_01",
+				"name" : "Popsicle Stick Tail Armor",
+				"type" : "armor",
+				"desc" : "Balsawood popsicle sticks, rubber-banded around your fin. It's not pretty, but it's something. +1 Armor when equipped",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 1,
+				"armorSlot" : "tail",
+				"buyValue" : 300
+			},
+			
+			"fin_armor_01" : {
+				"id" : "fin_armor_01",
+				"name" : "Chainmail Fin-Gloves",
+				"type" : "armor",
+				"desc" : "Someone probably bought these off Etsy. +2 Armor when worn. You'll also probably get weird looks from people, but that's hard to quantify as easily.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 2,
+				"armorSlot" : "fin",
+				"buyValue" : 700
+			},
 
 			"body_armor_01" : {
 				"id" : "body_armor_01",
+				"name" : "Discarded Soda Can Armor",
+				"type" : "armor",
+				"desc" : "A set of armor crudely fashioned from soda cans that someone threw in the river. Someone else's senseless litter is your gain! +1 Armor when worn. -1000 Style.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 1,
+				"armorSlot" : "body",
+				"buyValue" : 500
+			},
+			"body_armor_02" : {
+				"id" : "body_armor_02",
 				"name" : "Leather Armor",
 				"type" : "armor",
 				"desc" : "A set of leather armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorValue" : 3,
-				"armorSlot" : "body"
+				"armorSlot" : "body",
+				"buyValue" : 1000
+			},
+			"body_armor_03" : {
+				"id" : "body_armor_03",
+				"name" : "Fish Bone Armor",
+				"type" : "armor",
+				"desc" : "A set of body armor fashioned out of fish bones. Macabre, but effective. +5 Armor when equipped.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 5,
+				"armorSlot" : "body",
+				"buyValue" : 2000
 			},
 
 			"head_armor_01" : {
 				"id" : "head_armor_01",
+				"name" : "Tinfoil Hat",
+				"type" : "armor",
+				"desc" : "Candy bar and snack wrappers that someone fished (hah!) out of the garbage and fashioned into a hat. +1 Armor when worn. Also +10 at keeping the voices out.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 1,
+				"armorSlot" : "head",
+				"buyValue" : 200
+			},
+			"head_armor_02" : {
+				"id" : "head_armor_02",
 				"name" : "Leather Helm",
 				"type" : "armor",
 				"desc" : "A round helm made out of leather. With some difficulty, you can adapt it to the shape of your head. +3 Armor when worn.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorValue" : 3,
-				"armorSlot" : "head"
+				"armorSlot" : "head",
+				"buyValue" : 800
 			}
 
 		},
@@ -125,13 +203,25 @@
 
 			"shield_01" : {
 				"id" : "shield_01",
+				"name" : "Bark Shield",
+				"type" : "shield",
+				"desc" : "A thick piece of bark scraped off the side of a sunken log. Not pretty, but at least it's something solid between you and those who mean you harm. +2 Armor when equipped.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorValue" : 2,
+				"armorSlot" : "shield",
+				"buyValue" : 1
+			},
+			"shield_02" : {
+				"id" : "shield_02",
 				"name" : "Hide Shield",
 				"type" : "shield",
 				"desc" : "A deer hide wrapped around a frame of fish bones. You're not really sure how a deer got underwater, but you're grateful for the +5 Armor it provides when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
-				"armorValue" : 5,
-				"armorSlot" : "shield"
+				"armorValue" : 4,
+				"armorSlot" : "shield",
+				"buyValue" : 1000
 			}
 
 		}
