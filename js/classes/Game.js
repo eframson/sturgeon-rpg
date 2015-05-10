@@ -68,50 +68,62 @@ define([
 				},
 				beforeText: "<p>You decide to...</p>",
 				buttons: ko.observableArray([
-					{
-						text: function(){
-							var text = "Scrounge for food";
-							if(self.player().data().skillCooldowns().findFood()){
-								text += " (" + self.player().data().skillCooldowns().findFood() + ")";
-							}
-							return text;
+					[
+						{
+							text: function(){
+								var text = "Scrounge for food";
+								if(self.player().data().skillCooldowns().findFood()){
+									text += " (" + self.player().data().skillCooldowns().findFood() + ")";
+								}
+								return text;
+							},
+							action: function(){
+								self.playerActions.findFood();
+							},
+							css: function(){
+								return {
+									disabled : self.player().data().skillCooldowns().findFood() > 0
+								}
+							},
 						},
-						action: function(){
-							self.playerActions.findFood();
+						{
+							text: function(){
+								var text = "Scan surroundings";
+								if(self.player().data().skillCooldowns().scanSquares()){
+									text += " (" + self.player().data().skillCooldowns().scanSquares() + ")";
+								}
+								return text;
+							},
+							action: function(){
+								self.playerActions.scanSquares();
+							},
+							css: function(){
+								return {
+									disabled : self.player().data().skillCooldowns().scanSquares() > 0
+								}
+							},
 						},
-						css: function(){
-							return {
-								disabled : self.player().data().skillCooldowns().findFood() > 0
-							}
+						{
+							text: function(){
+								var text = "Check Inventory";
+								text += " (" + self.player().inventorySlotsOccupied() + "/" + self.player().data().inventoryMaxSlots() + ")";
+								return text;
+							},
+							action: function(){
+								self.toggleInventory();
+							},
 						},
-					},
-					{
-						text: function(){
-							var text = "Scan surroundings";
-							if(self.player().data().skillCooldowns().scanSquares()){
-								text += " (" + self.player().data().skillCooldowns().scanSquares() + ")";
-							}
-							return text;
+					],
+					[
+
+						{
+							text: "View Skills/Stats",
+							action: function(){
+								self.toggleInventory();
+							},
 						},
-						action: function(){
-							self.playerActions.scanSquares();
-						},
-						css: function(){
-							return {
-								disabled : self.player().data().skillCooldowns().scanSquares() > 0
-							}
-						},
-					},
-					{
-						text: function(){
-							var text = "Check Inventory";
-							text += " (" + self.player().inventorySlotsOccupied() + "/" + self.player().data().inventoryMaxSlots() + ")";
-							return text;
-						},
-						action: function(){
-							self.toggleInventory();
-						},
-					},
+
+					]
 				]),
 				location: "Midstream",
 			},
@@ -584,13 +596,15 @@ define([
 			}
 		}
 		
-		this.generateRandomLootItem = function(){
+		this.generateRandomLootItem = function(doGold){
 
 			var itemClass = "item";
 
 			var itemToAdd = {};
 
 			var canAdd = true;
+			
+			doGold = (doGold != undefined) ? doGold : true ;
 
 			var possibleItemTypes = {
 				50 : "gold",
@@ -599,6 +613,15 @@ define([
 					"gear",
 				]
 			};
+			
+			if(!doGold){
+				possibleItemTypes = {
+					50 : [
+						"misc",
+						"gear",
+					]
+				};
+			}
 
 			var itemType = doBasedOnPercent(possibleItemTypes);
 
@@ -776,6 +799,63 @@ define([
 		}
 
 		this.squareEventAction = function(){
+			
+			var eventType = doBasedOnPercent({
+				40 : "skill",
+				30 : "trader",
+				20 : "cooldown",
+				10 : "stat",
+			});
+			
+			var msg = "";
+			var action;
+			
+			action = function(){
+
+				self.visibleSection("content-area");
+				$("#event-area").fadeOut(300);
+				$("#inventory-equipment").fadeOut(300, function(){
+					$("#content-area").fadeIn(300);
+					self.freezeMovement(false);
+				});
+
+			}
+			
+			if(eventType == "trader"){
+				msg = "You encounter a friendly trader who offers to show you his wares.";
+				action = function(){
+					
+					var itemArray = Array();
+					
+					var numItems = doRand(3,8);
+					
+					for(var i = 0; i < numItems; i++){
+						itemArray.push(self.generateRandomLootItem(false));
+					}
+
+					self.currentContainer(itemArray);
+					self.currentInventoryRightSide("merchant");
+	
+					self.visibleSection("inventory-equipment");
+					$("#full-screen-notice").fadeOut(300, function(){
+						$("#inventory-equipment").fadeIn(300);
+					});
+				}
+			}else if( eventType == "skill" ){
+				
+			}else if( eventType == "cooldown" ){
+				
+			}else if( eventType == "stat" ){
+				
+			}
+			
+			self.visibleSection("full-screen-notice");
+			$("#content-area").fadeOut(300, function(){
+				self.fullScreenNotice(msg);
+				self.fullScreenNoticeContinueAction = action;
+				$("#full-screen-notice").fadeIn(300);
+			});
+			
 			//30% trader
 			//40% skill increase
 			//10% stat increase
@@ -897,9 +977,13 @@ define([
 		}
 
 		this.setEquipmentItemAsActiveItem = function(item){
-			if( !$.isEmptyObject(item) ){
+			if( !isEmptyObject(item) ){
 				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
 			}
+		}
+		
+		this.setMerchantItemAsActiveItem = function(item, e){
+			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0, canBuy : 1 }, item, e);
 		}
 
 		this._setAsActiveItem = function(opts, item, e){
@@ -916,10 +1000,10 @@ define([
 			var type = item.type;
 			if( ( self.currentContainer().length == 0 && type == "consumables") || (opts.canUse && opts.canUse == 1) ){
 				self.activeItem().canUse(1);
-			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "right" && (type == "armor" || type == "weapon")) || (opts.canEquip && opts.canEquip == 1) ){
+			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "right" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canEquip && opts.canEquip == 1) ){
 				//For now, if a container is open, we just plain can't equip stuff
 				self.activeItem().canEquip(1);
-			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "left" && (type == "armor" || type == "weapon")) || (opts.canUnEquip && opts.canUnEquip == 1) ){
+			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "left" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canUnEquip && opts.canUnEquip == 1) ){
 				self.activeItem().canUnEquip(1);
 			}
 
@@ -929,6 +1013,12 @@ define([
 				self.activeItem().canDrop(1);				
 			}else if( type != "currency" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
+			}
+			
+			if( ( opts.moveDirection == "left" && self.currentInventoryRightSide() == "merchant" ) || ( opts.canBuy && opts.canBuy == 1 ) ){
+				self.activeItem().canBuy(1);
+			}else if( ( opts.moveDirection == "right" && self.currentInventoryRightSide() == "merchant" ) || ( opts.canSell && opts.canSell == 1 ) ){
+				self.activeItem().canSell(1);
 			}
 
 			self.activeItem().moveDirection(opts.moveDirection);
@@ -943,16 +1033,23 @@ define([
 		this.equipActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
+			
+			var alreadyEquippedItem;
 
 			if(item.type == "weapon"){
-				self.player().equipWeapon(item);
+				alreadyEquippedItem = self.player().equipWeapon(item);
 			}else if(item.type == "shield"){
-				self.player().equipShield(item);
+				alreadyEquippedItem = self.player().equipShield(item);
 			}else if(item.type == "armor"){
-				self.player().equipArmor(item);
+				alreadyEquippedItem = self.player().equipArmor(item);
 			}
 
 			self.player().data().inventory.removeItem(item);
+			
+			if( alreadyEquippedItem != undefined ){
+				self.player().addItemToInventory(alreadyEquippedItem);
+			}
+			
 			self._resetActiveItem();
 		}
 
@@ -971,6 +1068,19 @@ define([
 			self.player().data().inventory.addItem(item);
 			self._resetActiveItem();
 
+		}
+		
+		this.buyActiveItem = function(game, event){
+
+			var item = self.activeItem().actualItem();
+			
+			//Do we have enough gold?
+
+		}
+		
+		this.sellActiveItem = function(game, event){
+
+			var item = self.activeItem().actualItem();
 		}
 
 		this.useActiveItem = function(game, event){

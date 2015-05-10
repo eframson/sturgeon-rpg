@@ -141,6 +141,14 @@ button:focus {
 	margin-top: 20px;
 }
 
+#content-area .state-controls .state-button-row {
+	overflow: auto;
+}
+
+#content-area .state-controls .state-button-row:not(:first-child) {
+	margin-top: 5px;
+}
+
 #content-area .state-controls .state-button {
 	width: 175px;
 	margin-left: 5px;
@@ -307,7 +315,7 @@ button:focus {
 #inventory-equipment .header .equipment-header,
 #inventory-equipment .header .container-ui-header,
 #inventory-equipment .header .inventory-header,
-#inventory-equipment .merchant .merchant-header {
+#inventory-equipment .header .merchant-header {
 	padding-left: 0px;
 }
 
@@ -320,7 +328,8 @@ button:focus {
 }
 
 #inventory-equipment .inventory .lines,
-#inventory-equipment .container-ui {
+#inventory-equipment .container-ui,
+#inventory-equipment .merchant {
 	background-color: #F0ECE6;
 }
 
@@ -330,20 +339,24 @@ button:focus {
 
 #inventory-equipment .inventory .line,
 #inventory-equipment .container-ui .line,
-#inventory-equipment .equipment .line {
+#inventory-equipment .equipment .line,
+#inventory-equipment .merchant .line {
 	padding: 5px 10px 5px 10px;
 }
 
 #inventory-equipment .inventory .line:not(.empty),
 #inventory-equipment .container-ui .line:not(.empty),
-#inventory-equipment .equipment .line:not(.empty){
+#inventory-equipment .equipment .line:not(.empty),
+#inventory-equipment .merchant .line:not(.empty) {
 	cursor: pointer;
 }
 
 #inventory-equipment .inventory .line:not(.empty):hover,
 #inventory-equipment .inventory .line:not(.empty).selected,
 #inventory-equipment .container-ui .line:not(.empty):hover,
-#inventory-equipment .container-ui .line:not(.empty).selected {
+#inventory-equipment .container-ui .line:not(.empty).selected,
+#inventory-equipment .merchant .line:not(.empty):hover,
+#inventory-equipment .merchant .line:not(.empty).selected {
 	background-color: #EDC78E;
 }
 
@@ -353,7 +366,8 @@ button:focus {
 }
 
 #inventory-equipment .inventory .line:not(.empty):active,
-#inventory-equipment .container-ui .line:not(.empty):active {
+#inventory-equipment .container-ui .line:not(.empty):active,
+#inventory-equipment .merchant .line:not(.empty):active {
 	background-color: #F6D8AC;
 }
 
@@ -362,7 +376,8 @@ button:focus {
 }
 
 #inventory-equipment .inventory .qty,
-#inventory-equipment .container-ui .qty {
+#inventory-equipment .container-ui .qty,
+#inventory-equipment .merchant .qty {
 	float: right;
 	clear: both;
 }

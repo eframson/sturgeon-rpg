@@ -20,6 +20,10 @@ define([
 		this.desc = data.desc || data.name;
 		this.buyValue = data.buyValue || 0;
 		
+		this.sellValue = ko.computed(function(){
+			return Math.ceil(self.buyValue / 2);
+		});
+		
 		this.getExportData = function(){
 			
 			var exportObj = {};

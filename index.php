@@ -89,8 +89,10 @@
 						<div class="state-before-text" data-bind="html: state().beforeText"></div>
 						<div class="clear"></div>
 						<div class="state-controls" data-bind="foreach: ( typeof state().buttons === 'function' ? state().buttons() : state().buttons )">
-							<div class="state-button">
-								<button type="button" class="btn btn-default" data-bind="click: $data.action, text: (typeof text === 'function' ? text() : text ), css: (typeof css === 'function' ? css() : {} )"></button>
+							<div class="state-button-row" data-bind="foreach: $data">
+								<div class="state-button">
+									<button type="button" class="btn btn-default" data-bind="click: $data.action, text: (typeof text === 'function' ? text() : text ), css: (typeof css === 'function' ? css() : {} )"></button>
+								</div>
 							</div>
 						</div>
 						<div class="clear"></div>
@@ -176,13 +178,13 @@
 							<button class="btn btn-default inventory-control" data-bind="click: equipActiveItem, css: { hidden: activeItem().canEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: unEquipActiveItem, css: { hidden: activeItem().canUnEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Un-Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canUse() != 1 || currentInventoryRightSide() != 'equipment' }">Use</button>
-							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canBuy() != 1 || currentInventoryRightSide() != 'merchant' }">Buy</button>
-							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canSell() != 1 || currentInventoryRightSide() != 'merchant' }">Sell</button>
+							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canBuy() != 1 || currentInventoryRightSide() != 'merchant' }, text : 'Buy 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().buyValue + ' GP' : 0) + ')'">Buy</button>
+							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canSell() != 1 || currentInventoryRightSide() != 'merchant' }, text : 'Sell 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().sellValue() + ' GP' : 0) + ')'"></button>
 							<span data-bind="css: { hidden: currentInventoryRightSide() != 'container'}">
 								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }, html: ( activeItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
 								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1}, html: ( activeItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>
 							</span>
-							<span data-bind="css: { hidden: currentInventoryRightSide() == 'container' }">
+							<span data-bind="css: { hidden: ( currentInventoryRightSide() != 'equipment' && activeItem().moveDirection() == 'left' ) }">
 								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop 1x</button>
 								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop All</button>
 							</span>
@@ -255,9 +257,9 @@
 						<!-- /ko -->
 
 						<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
-							<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'left' }">
+							<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'left' }">
 								<span class="item" data-bind="text: $data.name"></span>
-								<span class="price" data-bind="text: $data.buyValue"></span>
+								<span class="qty" data-bind="text: $data.qty()"></span>
 							</div>
 						</div>
 

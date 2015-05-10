@@ -67,6 +67,8 @@ require([
 					}
 
 				}
+				
+				//Put shortcut for i = inventory, c = view stats
 
 			}
 		});
