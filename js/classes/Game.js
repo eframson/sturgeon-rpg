@@ -584,10 +584,6 @@ define([
 
 			if(itemQtyInInventory != false && itemQtyInInventory > 0){
 
-				if(newItem.id == "gold"){
-					self.player().data().gp(itemQtyInInventory);
-				}
-
 				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
 				self.freezeMovement(false);
 			}else{
@@ -1073,14 +1069,51 @@ define([
 		this.buyActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
+			var moveFrom = self.currentContainer;
+			var moveTo = self.player().data().inventory;
 			
-			//Do we have enough gold?
+			var gold = moveTo.getItemByID("gold");
+			
+			if(gold && gold.qty() >= item.buyValue){
+				gold.qty( gold.qty() - item.buyValue );
+				
+				var newItem = cloneObject(item);
+				newItem.qty(1);
+				
+				var srcNumLeft = moveFrom.removeItem(item, 1);
+	
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
+	
+				//Add to inventory
+				moveTo.addItem(newItem);
+				
+			}
 
 		}
 		
 		this.sellActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
+			var moveFrom = self.player().data().inventory;
+			var moveTo = self.currentContainer;
+			
+			var gold = self.getAvailableItemById("gold", "currency", item.sellValue());
+			goldItem = new Item(gold);
+			
+			var newItem = cloneObject(item);
+			newItem.qty(1);
+			
+			var srcNumLeft = moveFrom.removeItem(item, 1);
+
+			if(srcNumLeft == 0){
+				self._resetActiveItem();
+			}
+
+			//Add to inventory
+			moveTo.addItem(newItem);
+			moveFrom.addItem(goldItem);
 		}
 
 		this.useActiveItem = function(game, event){

@@ -79,7 +79,7 @@
 				<div class="col-md-1"><span class="stat-label">Stat07</span><span class="stat-value">Stat07</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat08</span><span class="stat-value">Stat08</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat09</span><span class="stat-value">Stat09</span></div>
-				<div class="col-md-1"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().data().gp()"></span></div>
+				<div class="col-md-1"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 			</div>
 
 			<div class="row hidden" id="content-area">
@@ -178,8 +178,8 @@
 							<button class="btn btn-default inventory-control" data-bind="click: equipActiveItem, css: { hidden: activeItem().canEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: unEquipActiveItem, css: { hidden: activeItem().canUnEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Un-Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canUse() != 1 || currentInventoryRightSide() != 'equipment' }">Use</button>
-							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canBuy() != 1 || currentInventoryRightSide() != 'merchant' }, text : 'Buy 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().buyValue + ' GP' : 0) + ')'">Buy</button>
-							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canSell() != 1 || currentInventoryRightSide() != 'merchant' }, text : 'Sell 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().sellValue() + ' GP' : 0) + ')'"></button>
+							<button class="btn btn-default inventory-control" data-bind="click: buyActiveItem, css: { hidden: activeItem().canBuy() != 1 || currentInventoryRightSide() != 'merchant', disabled : activeItem().actualItem() && ($root.player().gp() < activeItem().actualItem().buyValue) }, text : 'Buy 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().buyValue + ' GP' : 0) + ')'">Buy</button>
+							<button class="btn btn-default inventory-control" data-bind="click: sellActiveItem, css: { hidden: activeItem().canSell() != 1 || currentInventoryRightSide() != 'merchant' }, text : 'Sell 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().sellValue() + ' GP' : 0) + ')'"></button>
 							<span data-bind="css: { hidden: currentInventoryRightSide() != 'container'}">
 								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }, html: ( activeItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
 								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1}, html: ( activeItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>

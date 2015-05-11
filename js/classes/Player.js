@@ -55,7 +55,6 @@ define([
 				}),
 				abilities : ko.observableArray(playerData.abilities || Array()),
 				speed : ko.observable(playerData.speed || 2),
-				gp : ko.observable(playerData.gp || 0),
 				baseMinDmg : ko.observable(playerData.baseMinDmg || 1),
 				baseMaxDmg : ko.observable(playerData.baseMaxDmg || 2),
 
@@ -123,6 +122,16 @@ define([
 			
 			self.isDead = ko.computed(function(){
 				return self.data().hp() < 1;
+			});
+			
+			self.gp = ko.computed(function(){
+				var gold = self.data().inventory.getItemByID("gold");
+				
+				if(gold){
+					return gold.qty();
+				}else{
+					return 0;
+				}
 			});
 		}
 

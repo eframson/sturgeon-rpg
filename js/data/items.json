@@ -210,7 +210,7 @@
 				"stackable" : 0,
 				"armorValue" : 2,
 				"armorSlot" : "shield",
-				"buyValue" : 1
+				"buyValue" : 500
 			},
 			"shield_02" : {
 				"id" : "shield_02",
