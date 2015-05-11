@@ -69,7 +69,7 @@
 
 			<div class="row player-stats hidden" data-bind="css: { hidden: state() && typeof state().hidePlayerStats === 'function' && state().hidePlayerStats() }">
 				<div class="col-md-1"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().data().level()"></span></div>
-				<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp() + '/' + player().data().maxHp()"></span></div>
+				<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp() + '/' + player().maxHp()"></span></div>
 				<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
 				<div class="col-md-1"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg()"></span></div>
 				<div class="col-md-1"><span class="stat-label">Stat03</span><span class="stat-value">Stat03</span></div>
@@ -267,9 +267,36 @@
 				</div>
 			</div>
 
-			<div id="event-area">
+			<div id="skills-area">
+				<div class="row back">
+					<div class="col-md-12">
+						<button class="btn btn-default" type="button" data-bind="click: showContentArea"><span>Back</span></button>
+					</div>
+				</div>
 				<div class="row">
-					<div class="col-md-12 intro">Lorem Ipsum...</div>
+					<div class="col-md-6 player">
+						<div class="header">Skills</div>
+						<div class="lines">
+							
+							<div class="line">
+								<span class="stat">Find Food:</span>
+								<span class="value" data-bind="text: $root.player().data().skills().findFood()"></span>
+							</div>
+							<div class="line">
+								<span class="stat">Vision Range:</span>
+								<span class="value" data-bind="text: $root.player().data().skills().visionRange()"></span>
+							</div>
+							<div class="line">
+								<span class="stat">Scan Range:</span>
+								<span class="value" data-bind="text: $root.player().data().skills().scanSquares()"></span>
+							</div>
+							
+						</div>
+					</div>
+					<div class="col-md-6"></div>
+				</div>
+				<div class="row">
+					<div class="col-md-12"></div>
 				</div>
 			</div>
 
@@ -326,7 +353,9 @@
 					<div class="col-md-12" data-bind="text: fullScreenNotice()"></div>
 				</div>
 				<div class="row notice-button">
-					<div class="col-md-12"><button type="button" class="btn btn-default" data-bind="click: fullScreenNoticeContinue">Continue</button></div>
+					<div class="col-md-12" data-bind="foreach: fullScreenNoticeButtons">
+						<button type="button" class="btn btn-default" data-bind="click: $data.action, text: $data.title, css : ($data.css && typeof $data.css === 'function' ? $data.css() : '')"></button>
+					</div>
 				</div>
 			</div>
 

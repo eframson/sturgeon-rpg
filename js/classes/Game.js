@@ -115,14 +115,12 @@ define([
 						},
 					],
 					[
-
 						{
 							text: "View Skills/Stats",
 							action: function(){
-								self.toggleInventory();
+								self.showSkillsArea();
 							},
 						},
-
 					]
 				]),
 				location: "Midstream",
@@ -156,10 +154,38 @@ define([
 				function(rand){
 					//console.log("rand: " + rand + " ; temp bonus: " + self.tempFoodFindBonus + " ; findPercent: " + findPercent);
 					message = "You attempt to smoothly swim to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
-					self.tempFoodFindBonus += 2;
+
+					if( self.player().data().skills().findFood() + self.tempFoodFindBonus <= 60 ){
+						self.tempFoodFindBonus += 2;
+					}
+					
 				});
 
 				self.logMessage(message);
+
+				var skillIncrease = 0;
+
+				if( self.player().data().skills().findFood() < 40 ){
+					skillIncrease = doBasedOnPercent({
+						70 : 1,
+						30 : 2,
+					});
+				}else if( self.player().data().skills().findFood() < 80 ){
+					skillIncrease = doBasedOnPercent({
+						90 : 1,
+						10 : 2,
+					});
+				}else{
+					skillIncrease = doBasedOnPercent({
+						80 : 1,
+					});
+				}
+
+				if(skillIncrease){
+					self.player().data().skills().findFood( self.player().data().skills().findFood() + skillIncrease );
+
+					self.logMessage("Your skill in finding food has increased to " + self.player().data().skills().findFood() + "/100");
+				}
 			}
 		};
 		this.fullScreenNoticeContinueAction;
@@ -198,6 +224,7 @@ define([
 			self.freezeMovement = ko.observable(false);
 			self.currentContainer = new ItemCollection(Array());
 			self.fullScreenNotice = ko.observable(undefined);
+			self.fullScreenNoticeButtons = ko.observableArray(undefined);
 			self.currentEnemy = ko.observable(undefined);
 
 			self.level = ko.computed(function(){
@@ -240,7 +267,7 @@ define([
 				//stateID = "idle";
 			}
 
-			$.each(["content-area","inventory-equipment","event-area","full-screen-notice","combat-area"], function(idx, elem){
+			$.each(["content-area","inventory-equipment","skills-area","full-screen-notice","combat-area"], function(idx, elem){
 				if(elem != self.visibleSection()){
 					$("#" + elem).hide();
 				}else{
@@ -349,7 +376,7 @@ define([
 
 		this.showContentArea = function(){
 			self.visibleSection("content-area");
-			$("#event-area").fadeOut(300);
+			$("#skills-area").fadeOut(300);
 			$("#inventory-equipment").fadeOut(300, function(){
 				self.currentContainer.removeAll();
 				self.currentInventoryRightSide("equipment");
@@ -357,6 +384,13 @@ define([
 				self.freezeMovement(false);
 			});
 			self._resetActiveItem();
+		}
+
+		this.showSkillsArea = function(){
+			self.visibleSection("skills-area");
+			$("#content-area").fadeOut(300, function(){
+				$("#skills-area").fadeIn(300);
+			});
 		}
 		
 		self.showDamage = function(which){
@@ -367,11 +401,11 @@ define([
 			}
 		}
 
-		this.showCombatMessage = function(msg, action){
+		this.showCombatMessage = function(msg, buttons){
 			self.visibleSection("full-screen-notice");
 			$("#content-area").fadeOut(300, function(){
 				self.fullScreenNotice(msg);
-				self.fullScreenNoticeContinueAction = action;
+				self.fullScreenNoticeButtons(buttons);
 				$("#full-screen-notice").fadeIn(300);
 			});
 		}
@@ -494,12 +528,6 @@ define([
 				$("#content-area").fadeIn(300);
 				self.freezeMovement(false);
 			});
-		}
-
-		this.fullScreenNoticeContinue = function(){
-			if(typeof self.fullScreenNoticeContinueAction === 'function'){
-				self.fullScreenNoticeContinueAction();
-			}
 		}
 
 		this.hideModal = function(viewModel, event){
@@ -783,72 +811,247 @@ define([
 			
 			self.logMessage(enemyMsg, "combat");
 
-			self.showCombatMessage(enemyMsg, function(){
-				self.startCombat();
-				/*if( self.getGoesFirst() == "enemy" ){
-					self.doCombatRound(false, true);
-				}*/
-			});
+			self.showCombatMessage(
+				enemyMsg,
+				new Array(
+					{
+						title : "Continue",
+						action : function(){
+							self.startCombat();
+							/*if( self.getGoesFirst() == "enemy" ){
+								self.doCombatRound(false, true);
+							}*/
+						},
+					}
+				)
+			);
 
 			//Show our "pop-up", describing the enemy
 
 		}
 
 		this.squareEventAction = function(){
+
+			self.freezeMovement(true);
 			
 			var eventType = doBasedOnPercent({
-				40 : "skill",
-				30 : "trader",
-				20 : "cooldown",
-				10 : "stat",
+				30 : "trainer",
+				40 : "trader",
+				25 : "cooldown",
+				5 : "stat",
 			});
 			
 			var msg = "";
-			var action;
+			var buttons;
 			
-			action = function(){
+			buttons = new Array(
+				{
+					title : "Continue",
+					action : function(){
 
-				self.visibleSection("content-area");
-				$("#event-area").fadeOut(300);
-				$("#inventory-equipment").fadeOut(300, function(){
-					$("#content-area").fadeIn(300);
-					self.freezeMovement(false);
-				});
-
-			}
+						self.visibleSection("content-area");
+						$("#full-screen-notice").fadeOut(300, function(){
+							$("#content-area").fadeIn(300);
+							self.freezeMovement(false);
+						});
+					},
+				}
+			);
 			
 			if(eventType == "trader"){
-				msg = "You encounter a friendly trader who offers to show you his wares.";
-				action = function(){
-					
-					var itemArray = Array();
-					
-					var numItems = doRand(3,8);
-					
-					for(var i = 0; i < numItems; i++){
-						itemArray.push(self.generateRandomLootItem(false));
-					}
 
-					self.currentContainer(itemArray);
-					self.currentInventoryRightSide("merchant");
-	
-					self.visibleSection("inventory-equipment");
-					$("#full-screen-notice").fadeOut(300, function(){
-						$("#inventory-equipment").fadeIn(300);
-					});
+				msg = "You encounter a friendly trader who offers to show you his wares.";
+				buttons = new Array(
+					{
+						title : "Continue",
+						action : function(){
+
+							var itemArray = Array();
+							
+							var numItems = doRand(3,8);
+							
+							for(var i = 0; i < numItems; i++){
+								itemArray.push(self.generateRandomLootItem(false));
+							}
+
+							self.currentContainer(itemArray);
+							self.currentInventoryRightSide("merchant");
+			
+							self.visibleSection("inventory-equipment");
+							$("#full-screen-notice").fadeOut(300, function(){
+								$("#inventory-equipment").fadeIn(300);
+							});
+
+						},
+					}
+				);
+
+			}else if( eventType == "trainer" ){
+
+				var trainCost = 0;
+
+				var trainSkillString = chooseRandomly(
+					Array(
+						"findFood",
+						"scanSquares",
+						"visionRange"
+					)
+				);
+				var trainSkill;
+
+				msg = "You encounter a wise old hermit crab who offers to teach you how to ";
+
+				if(trainSkillString == "findFood"){
+					msg += "get better at scrounging for food";
+					trainCost = (self.player().data().skills().findFood() + 1) * 10;
+					trainSkill = self.player().data().skills().findFood;
+				}else if(trainSkillString == "scanSquares"){
+					msg += "get better at surveying your surroundings";
+					trainCost = (self.player().data().skills().scanSquares() * 1000);
+					trainSkill = self.player().data().skills().scanSquares;
+				}else if(trainSkillString == "visionRange"){
+					msg += "sharpen your vision";
+					trainCost = (self.player().data().skills().visionRange() * 1000);
+					trainSkill = self.player().data().skills().visionRange;
 				}
-			}else if( eventType == "skill" ){
+
+				msg += " for " + trainCost + " GP";
+
+				buttons = new Array(
+					{
+						title : "Buy (" + trainCost + " GP)",
+						action : function(){
+
+							var gold = self.player().data().inventory.getItemByID("gold");
+							gold.qty( gold.qty() - this.trainCost );
+
+							this.trainSkill( this.trainSkill() + 1 );
+
+							if(trainSkillString == "findFood"){
+								self.logMessage("Your skill in finding food has increased to " + this.trainSkill() + "/100" );
+							}else if(trainSkillString == "scanSquares"){
+								self.logMessage("Your scan range has increased to " + this.trainSkill() + "/10" );
+							}else if(trainSkillString == "visionRange"){
+								self.logMessage("Your vision range has increased to " + this.trainSkill() + "/10" );
+							}
+
+							self.visibleSection("content-area");
+							$("#full-screen-notice").fadeOut(300, function(){
+								$("#content-area").fadeIn(300);
+								self.freezeMovement(false);
+							});
+							
+						},
+						css : function(){
+							if( self.player().gp() < this.trainCost ){
+								return "disabled";
+							}
+							return "";
+						},
+						skillIncrease : 1,
+						trainSkill : trainSkill,
+						trainSkillString : trainSkillString,
+						trainCost : trainCost,
+					},
+					{
+						title : "Leave",
+						action : function(){
+
+							self.visibleSection("content-area");
+							$("#full-screen-notice").fadeOut(300, function(){
+								$("#content-area").fadeIn(300);
+								self.freezeMovement(false);
+							});
+
+						},
+					}
+				);
 				
 			}else if( eventType == "cooldown" ){
+
+				msg = "You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. All your cooldowns are instantly finished.";
+				buttons = new Array(
+					{
+						title : "Continue",
+						action : function(){
+
+							self.logMessage(this.msg);
+
+							self.player().data().skillCooldowns().findFood(0);
+							self.player().data().skillCooldowns().scanSquares(0);
+
+							self.visibleSection("content-area");
+							$("#full-screen-notice").fadeOut(300, function(){
+								$("#content-area").fadeIn(300);
+								self.freezeMovement(false);
+							});
+						},
+						msg : msg,
+					}
+				);
 				
 			}else if( eventType == "stat" ){
+
+				var stat = chooseRandomly(
+					Array(
+						"str",
+						"dex",
+						"end",
+						"exp"
+					)
+				);
+
+				msg = "";
+				var statIncreaseAmt = 1;
+				var doExpGain = false;
+
+				if( stat == "str" ){
+					msg = "You find your path blocked by a large rock. Instead of simply swimming around or over it, you decide to try and move it. After an hour of laborious work, you manage to move it out of the way. The experience empowers you, permanently giving you +1 STR.";
+				}else if( stat == "dex" ){
+					msg = "While swimming along, you suddenly realize that you are about to crash right into a sharp metal hook just floating in the water in front of you. With quick thinking and maneuvering, you manage to barrel-roll to the side and avoid it.  As you cruise past, you also snag a tasty-looking worm that someone apparently left just hanging on the hook. As you munch the delicious worm, you think you can probably figure out how to better avoid such water hazards in the future. Gain +1 DEX."
+				}else if( stat == "end" ){
+					msg = "A passing trout challenges you to an impromptu fin-wrestling contest. The ensuing match takes a full hour before your strength finally gives out and you are forced to concede victory to the other fish. Panting and visibly just as exhausted as you and thoroughly impressed with your determination, the trout tells you one of his fin-wrestling secrets. You gain +1 END.";
+				}else if( stat == "exp" ){
+					msg = "You come across a water-logged journal lodged between two rocks. Nonchalantly flippering through the pages, you encounter some surprisingly useful advice.";
+					statIncreaseAmt = Math.ceil( self.player().expRequiredForNextLevel() / 2 );
+					doExpGain = true;
+				}
+
 				
+				buttons = new Array(
+					{
+						title : "Continue",
+						action : function(){
+
+							self.logMessage(this.msg);
+
+							if(!doExpGain){
+								statToIncrease( statToIncrease() + statIncreaseValue );
+							}else{
+								self.player().addExp(statIncreaseValue);
+							}
+
+							
+
+							self.visibleSection("content-area");
+							$("#full-screen-notice").fadeOut(300, function(){
+								$("#content-area").fadeIn(300);
+								self.freezeMovement(false);
+							});
+						},
+						doExpGain : doExpGain, //I'm sure there's a better way to do this, derp
+						msg : msg,
+						statToIncrease : self.player().data()[stat],
+						statIncreaseValue : statIncreaseAmt,
+					}
+				);
+
 			}
 			
 			self.visibleSection("full-screen-notice");
 			$("#content-area").fadeOut(300, function(){
 				self.fullScreenNotice(msg);
-				self.fullScreenNoticeContinueAction = action;
+				self.fullScreenNoticeButtons(buttons);
 				$("#full-screen-notice").fadeIn(300);
 			});
 			
@@ -1383,5 +1586,12 @@ define([
 	Game.prototype.constructor = Game;
 
 	return Game;
+
+/* TODOs
+- Event squares: trader, random skill trainer, or base stat increase
+- Crafting, can upgrade existing stuff or make new stuff
+- Add "health potion" item that can be used during combat (biscuits can't be used during combat) that restores x amount of health
+- Create class for Skills to get them more cohesive
+*/
 
 });

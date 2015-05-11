@@ -21,7 +21,7 @@ define([
 
 				level : ko.observable(playerData.level || 1),
 				hp : ko.observable(playerData.hp || 10),
-				maxHp : ko.observable(playerData.maxHp || 10),
+				exp : ko.observable(playerData.exp || 0),
 				inventory : new ItemCollection(Array()),
 				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 4),
 				equipment : ko.observable({
@@ -55,6 +55,9 @@ define([
 				}),
 				abilities : ko.observableArray(playerData.abilities || Array()),
 				speed : ko.observable(playerData.speed || 2),
+				str : ko.observable(playerData.str || 0),
+				dex : ko.observable(playerData.dex || 0),
+				end : ko.observable(playerData.end || 5),
 				baseMinDmg : ko.observable(playerData.baseMinDmg || 1),
 				baseMaxDmg : ko.observable(playerData.baseMaxDmg || 2),
 
@@ -132,6 +135,14 @@ define([
 				}else{
 					return 0;
 				}
+			});
+
+			self.maxHp = ko.computed(function(){
+				return self.data().end() * 2;
+			});
+
+			self.expRequiredForNextLevel = ko.computed(function(){
+				return ( self.data().level() * 2 ) * 100;
 			});
 		}
 
@@ -245,6 +256,14 @@ define([
 			dmg = ( dmg - self.totalArmor() < 1 ) ? 1 : dmg - self.totalArmor() ;
 			self.data().hp( self.data().hp() - dmg );
 			return self.data().hp();
+		}
+
+		this.addExp = function(xp){
+
+		}
+
+		this.levelUp = function(){
+			self.data().level( self.data().level() + 1 );
 		}
 
 		this.getExportData = function(){

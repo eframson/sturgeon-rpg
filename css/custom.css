@@ -294,17 +294,19 @@ button:focus {
 }
 
 #inventory-equipment,
-#event-area,
+#skills-area,
 #combat-area,
 #full-screen-notice {
 	display: none;
 }
 
-#inventory-equipment .back {
+#inventory-equipment .back,
+#skills-area .back {
 	margin-top: 20px;
 }
 
-#inventory-equipment .back .col-md-12 {
+#inventory-equipment .back .col-md-12,
+#skills-area .back .col-md-12 {
 	padding-left: 0;
 }
 
@@ -412,7 +414,8 @@ button:focus {
 }
 
 
-#combat-area {
+#combat-area,
+#skills-area {
 	margin-top: 40px;
 	text-align: left;
 }
@@ -421,18 +424,21 @@ button:focus {
 	margin-bottom: 20px;
 }
 
-#combat-area .header {
+#combat-area .header,
+#skills-area .header {
 	font-size: 20px;
 	font-weight: bold;
 }
 
-#combat-area .stat {
+#combat-area .stat,
+#skills-area .stat {
 	display: inline-block;
 	font-weight: bold;
 	width: 90px;
 }
 
-#combat-area .value {
+#combat-area .value,
+#skills-area .value {
 	display: inline-block;
 }
 
@@ -456,6 +462,18 @@ button:focus {
 
 #full-screen-notice .notice-button {
 	
+}
+
+#skills-area .stat {
+	width: 120px;
+}
+
+#skills-area .player {
+	padding-left: 0;
+}
+
+#skills-area .back {
+	margin-bottom: 20px;
 }
 
 .file-upload {

@@ -8,7 +8,8 @@
 		"armor" : 0,
 		"speed" : 1,
 		"minDmg" : 1,
-		"maxDmg" : 2
+		"maxDmg" : 2,
+		"expValue" : 25
 	},
 	
 	"monster_02" : {
@@ -20,7 +21,8 @@
 		"armor" : 0,
 		"speed" : 1,
 		"minDmg" : 1,
-		"maxDmg" : 2
+		"maxDmg" : 2,
+		"expValue" : 25
 	},
 	
 	"monster_03" : {
@@ -32,7 +34,8 @@
 		"armor" : 0,
 		"speed" : 1,
 		"minDmg" : 1,
-		"maxDmg" : 1
+		"maxDmg" : 1,
+		"expValue" : 25
 	},
 	
 	"monster_04" : {
@@ -44,7 +47,8 @@
 		"armor" : 0,
 		"speed" : 1,
 		"minDmg" : 1,
-		"maxDmg" : 2
+		"maxDmg" : 2,
+		"expValue" : 25
 	},
 
 	"monster_05" : {
@@ -56,6 +60,7 @@
 		"armor" : 1,
 		"speed" : 2,
 		"minDmg" : 2,
-		"maxDmg" : 4
+		"maxDmg" : 4,
+		"expValue" : 50
 	}
 }

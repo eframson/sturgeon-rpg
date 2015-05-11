@@ -76,6 +76,11 @@ define([
 		console.log(percents);
 		return false;
 	}
+
+	chooseRandomly = function( opts ){
+		var randIdx = doRand(0, opts.length);
+		return opts[randIdx];
+	}
 	
 	failureMsg = function(messageString){
 		displayMessage(messageString, "error", "Oh no!", 8000);
