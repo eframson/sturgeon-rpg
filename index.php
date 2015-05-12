@@ -317,7 +317,7 @@
 							
 						</div>
 						<div class="buttons">
-							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy().isDead() || $root.player().isDead() }, click: $root.playerAttacks">Attack!</button>
+							<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.currentEnemy().isDead() || $root.player().isDead() }, click: $root.playerAttacks">Attack!</button>
 							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
 							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
 						</div>

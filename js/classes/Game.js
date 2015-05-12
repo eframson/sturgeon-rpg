@@ -268,7 +268,7 @@ define([
 			}else{
 				player = new Player();
 				level = new Level({ genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
-				stateID = "start";
+				stateID = "idle";
 				self.levels.push(level);
 				//stateID = "idle";
 			}
@@ -880,15 +880,16 @@ define([
 						title : "Continue",
 						action : function(){
 
+							self.currentContainer.removeAll();
+
 							var itemArray = Array();
 							
 							var numItems = doRand(3,8);
 							
 							for(var i = 0; i < numItems; i++){
-								itemArray.push(self.generateRandomLootItem(false));
+								self.currentContainer.addItem(self.generateRandomLootItem(false));
 							}
 
-							self.currentContainer(itemArray);
 							self.currentInventoryRightSide("merchant");
 			
 							self.visibleSection("inventory-equipment");
@@ -1343,6 +1344,15 @@ define([
 				
 				self.player().data().hp( self.player().maxHp() );
 				self.logMessage("Eating some fish biscuits restored you to full HP!", "player");
+			}else if (item.id == "reset_stone"){
+				
+				self._dropActiveItem(game, event, 1);
+
+				self.level().generateThisLevel(true);
+				self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				self.level().drawMap();
+				
+				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. With a quick glance around, you see that nothing is as it was just a few moments before.", "player");
 			}
 
 		}
@@ -1431,6 +1441,7 @@ define([
 
 		this.logMessage = function(msgText, cssClass){
 			self.logMessages.unshift( {text: msgText, cssClass: cssClass || "info"} );
+			$(".message-log").stop(false, true).effect("highlight", { color: "#BEBEBE" }, 400);
 		}
 
 		this.getLevelById = function(id){

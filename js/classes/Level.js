@@ -473,6 +473,35 @@ define([
 
 		}
 
+		this._doForEachGridSquare = function(action){
+			if( action == undefined || typeof action !== 'function' ){
+				return false;
+			}
+
+			for(y = 0; y < self.grid.length; y++){
+				for(x = 0; x < self.grid[y].length; x++){
+					action(self.grid[y][x]);
+				}
+			}
+
+		}
+
+		this.generateThisLevel = function(isRegenerate){
+			isRegenerate = ( isRegenerate == undefined ) ? false : isRegenerate ;
+
+			if(isRegenerate){
+				self.entranceSquare.removeAll();
+				self.exitSquare.removeAll();
+				self._doForEachGridSquare(function(gridSquare){
+					gridSquare.setScanned(false);
+					gridSquare.setVisibility(false);
+					gridSquare.setDone(false);
+				});
+			}
+
+			self._populateGrid();
+		}
+
 		this.generateNextLevel = function(levelData){
 
 			if( levelData == undefined || levelData.levelNum == undefined ){
