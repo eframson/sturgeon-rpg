@@ -445,7 +445,7 @@ button:focus {
 #combat-area .player,
 #combat-area .enemy {
 	width: 570px;
-	height: 120px;
+	height: 140px;
 }
 
 #combat-area .player .buttons {

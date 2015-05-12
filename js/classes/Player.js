@@ -20,7 +20,8 @@ define([
 			self.data = ko.observable({
 
 				level : ko.observable(playerData.level || 1),
-				hp : ko.observable(playerData.hp || 10),
+				hp : ko.observable(playerData.hp || 0),
+				baseHp : ko.observable(playerData.baseHp || 10),
 				exp : ko.observable(playerData.exp || 0),
 				inventory : new ItemCollection(Array()),
 				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 4),
@@ -55,11 +56,11 @@ define([
 				}),
 				abilities : ko.observableArray(playerData.abilities || Array()),
 				speed : ko.observable(playerData.speed || 2),
-				str : ko.observable(playerData.str || 0),
-				dex : ko.observable(playerData.dex || 0),
-				end : ko.observable(playerData.end || 5),
-				baseMinDmg : ko.observable(playerData.baseMinDmg || 1),
-				baseMaxDmg : ko.observable(playerData.baseMaxDmg || 2),
+				str : ko.observable(playerData.str || doRand(1,6)),
+				dex : ko.observable(playerData.dex || doRand(1,6)),
+				end : ko.observable(playerData.end || doRand(1,6)),
+				//baseMinDmg : ko.observable(playerData.baseMinDmg || 1),
+				//baseMaxDmg : ko.observable(playerData.baseMaxDmg || 2),
 
 			});
 
@@ -84,10 +85,18 @@ define([
 			this.hasInventorySpace = ko.computed(function(){
 				return ( self.inventorySlotsAvailable() > 0 );
 			});
+			
+			this.baseMinDmg = ko.computed(function(){
+				return Math.ceil(self.data().str() * 0.5);
+			});
+			
+			this.baseMaxDmg = ko.computed(function(){
+				return Math.ceil(self.data().str() * 0.85);
+			});
 
 			this.minDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
-				var minDmg = self.data().baseMinDmg();
+				var minDmg = self.baseMinDmg();
 				if( !isEmptyObject(self.data().equipment().weapon()) ){
 					minDmg += self.data().equipment().weapon().dmgMin;
 				}
@@ -96,7 +105,7 @@ define([
 
 			this.maxDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
-				var maxDmg = self.data().baseMaxDmg();
+				var maxDmg = self.baseMaxDmg();
 				if( !isEmptyObject(self.data().equipment().weapon()) ){
 					maxDmg += self.data().equipment().weapon().dmgMax;
 				}
@@ -104,7 +113,7 @@ define([
 			});
 
 			this.totalArmor = ko.computed(function(){
-				var armorValue = 0; //Eventually when DEX is implemented, use that as base AC
+				var armorValue = Math.ceil(self.data().dex() * 0.5); //Eventually when DEX is implemented, use that as base AC
 
 				var armorSlots = self.data().equipment().armor();
 
@@ -138,12 +147,18 @@ define([
 			});
 
 			self.maxHp = ko.computed(function(){
-				return self.data().end() * 2;
+				return self.data().baseHp() + (self.data().end() * 2);
 			});
 
 			self.expRequiredForNextLevel = ko.computed(function(){
-				return ( self.data().level() * 2 ) * 100;
+				return self.data().level() * 100;
 			});
+			
+			if(self.data().hp() == 0){
+				self.data().hp( self.maxHp() );
+			}
+			
+			self.hasLeveledUp = ko.observable(false);
 		}
 
 		this.addItemToInventory = function(itemToAdd){
@@ -259,11 +274,28 @@ define([
 		}
 
 		this.addExp = function(xp){
-
+			var potentialTotalXp = self.data().exp() + xp;
+			if(potentialTotalXp >= self.expRequiredForNextLevel()){
+				self.data().exp( potentialTotalXp - self.expRequiredForNextLevel() );
+				self.data().level( self.data().level() + 1 );
+				self.levelUp();
+			}else{
+				self.data().exp( potentialTotalXp );
+			}
 		}
 
 		this.levelUp = function(){
-			self.data().level( self.data().level() + 1 );
+			//Add stats
+			self.hasLeveledUp(true);
+			self.data().baseHp( self.data().baseHp() + 1 );
+			self.data().skills().findFood( self.data().skills().findFood() + 1 );
+			
+			if( self.data().level() % 3 == 0){
+				self.data().str( self.data().str() + 1 );
+				self.data().dex( self.data().dex() + 1 );
+				self.data().end( self.data().end() + 1 );
+			}
+			//Heal player / reset cooldowns on level up?
 		}
 
 		this.getExportData = function(){

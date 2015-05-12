@@ -26,10 +26,12 @@ define([
 			start: {
 				beforeText: "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
 				buttons: [
-					{
-						text: "Let's bust outta here!",
-						action: function(){ self.setState("d1"); }
-					},
+					[
+						{
+							text: "Let's bust outta here!",
+							action: function(){ self.setState("d1"); }
+						},
+					]
 				],
 				location: "Unknown",
 				hideMap: ko.observable(true),
@@ -38,10 +40,12 @@ define([
 			d1: {
 				beforeText: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
 				buttons: [
-					{
-						text: "OH YEAH!!!",
-						action: function(){ self.setState("d2"); }
-					},
+					[
+						{
+							text: "OH YEAH!!!",
+							action: function(){ self.setState("d2"); }
+						},
+					]
 				],
 				location: "Unknown",
 				hideMap: ko.observable(true),
@@ -50,10 +54,12 @@ define([
 			d2: {
 				beforeText: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
 				buttons: [
-					{
-						text: "Continue",
-						action: function(){ self.setState("idle"); }
-					},
+					[
+						{
+							text: "Continue",
+							action: function(){ self.setState("idle"); }
+						},
+					]
 				],
 				location: "Unknown",
 				hideMap: ko.observable(true),
@@ -262,7 +268,7 @@ define([
 			}else{
 				player = new Player();
 				level = new Level({ genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
-				stateID = "idle";
+				stateID = "start";
 				self.levels.push(level);
 				//stateID = "idle";
 			}
@@ -504,8 +510,16 @@ define([
 			if(enemyDidDmg){
 				self.logMessage("The enemy strikes you for " + enemyDmg + " points of damage!", "combat");				
 			}
-			if(self.currentEnemy().isDead()){
-				self.logMessage("You defeated the enemy! You gain (TBD) amount of XP!", "combat");
+			if( self.player().isDead() ){
+				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
+			}else if(self.currentEnemy().isDead()){
+				self.player().addExp(self.currentEnemy().expValue());
+				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " XP!", "combat");
+				
+				if( self.player().hasLeveledUp() ){
+					self.player().hasLeveledUp(false);
+					self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
+				}
 			}
 			
 		}
@@ -1327,7 +1341,7 @@ define([
 				
 				self._dropActiveItem(game, event, 1);
 				
-				self.player().data().hp( self.player().data().maxHp() );
+				self.player().data().hp( self.player().maxHp() );
 				self.logMessage("Eating some fish biscuits restored you to full HP!", "player");
 			}
 

@@ -72,13 +72,13 @@
 				<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp() + '/' + player().maxHp()"></span></div>
 				<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
 				<div class="col-md-1"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg()"></span></div>
-				<div class="col-md-1"><span class="stat-label">Stat03</span><span class="stat-value">Stat03</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat04</span><span class="stat-value">Stat04</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat05</span><span class="stat-value">Stat05</span></div>
+				<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().data().str()"></span></div>
+				<div class="col-md-1"><span class="stat-label">DEX</span><span class="stat-value" data-bind="text: player().data().dex()"></span></div>
+				<div class="col-md-1"><span class="stat-label">END</span><span class="stat-value" data-bind="text: player().data().end()"></span></div>
 				<div class="col-md-1"><span class="stat-label">Stat06</span><span class="stat-value">Stat06</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat07</span><span class="stat-value">Stat07</span></div>
 				<div class="col-md-1"><span class="stat-label">Stat08</span><span class="stat-value">Stat08</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat09</span><span class="stat-value">Stat09</span></div>
+				<div class="col-md-1"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().data().exp()"></span></div>
 				<div class="col-md-1"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 			</div>
 
@@ -101,7 +101,7 @@
 						<div class="location">Location: <span data-bind="text: location() || state().location"></span></div>
 						<div class="clear"></div>
 					</div>
-					<div class="message-log" data-bind="foreach: logMessages()">
+					<div class="message-log" data-bind="foreach: logMessages(), css: { hidden : $root.stateID() != 'idle' }">
 						<p data-bind="html: $data.text, css: $data.cssClass"></p>
 					</div>
 					<div class="clear"></div>
@@ -317,7 +317,7 @@
 							
 						</div>
 						<div class="buttons">
-							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy().isDead() }, click: $root.playerAttacks">Attack!</button>
+							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy().isDead() || $root.player().isDead() }, click: $root.playerAttacks">Attack!</button>
 							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
 							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
 						</div>
