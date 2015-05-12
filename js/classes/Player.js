@@ -153,12 +153,23 @@ define([
 			self.expRequiredForNextLevel = ko.computed(function(){
 				return self.data().level() * 100;
 			});
-			
+
+			self.numPotionsAvailable = ko.computed(function(){
+				var pots = self.data().inventory.getItemByID("health_potion");
+				
+				if(pots){
+					return pots.qty();
+				}else{
+					return 0;
+				}
+			});
+
+			self.hasLeveledUp = ko.observable(false);
+
+			//Actual init stuff
 			if(self.data().hp() == 0){
 				self.data().hp( self.maxHp() );
 			}
-			
-			self.hasLeveledUp = ko.observable(false);
 		}
 
 		this.addItemToInventory = function(itemToAdd){

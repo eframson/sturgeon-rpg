@@ -308,7 +308,7 @@
 							
 							<div class="line">
 								<span class="stat">HP:</span>
-								<span class="value" data-bind="text: $root.player().data().hp()"></span>
+								<span class="value hp" data-bind="text: $root.player().data().hp()"></span>
 							</div>
 							<div class="line">
 								<span class="stat">Speed:</span>
@@ -318,6 +318,7 @@
 						</div>
 						<div class="buttons">
 							<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.currentEnemy().isDead() || $root.player().isDead() }, click: $root.playerAttacks">Attack!</button>
+							<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.player().numPotionsAvailable() < 1 || $root.player().isDead() }, click: $root.useHealthPotion, text: 'Use Health Potion (' + $root.player().numPotionsAvailable() + ')'">Use Health Potion</button>
 							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
 							<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
 						</div>
@@ -328,7 +329,7 @@
 							
 							<div class="line">
 								<span class="stat">HP:</span>
-								<span class="value" data-bind="text: $root.currentEnemy().hp()"></span>
+								<span class="value hp" data-bind="text: $root.currentEnemy().hp()"></span>
 							</div>
 							<div class="line">
 								<span class="stat">Speed:</span>

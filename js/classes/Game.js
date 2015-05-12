@@ -401,9 +401,9 @@ define([
 		
 		self.showDamage = function(which){
 			if(which == "enemy"){
-				$("#combat-area .enemy").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
+				$("#combat-area > .row > .enemy .hp").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
 			}else if(which == "player"){
-				$("#combat-area .player").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
+				$("#combat-area > .row > .player .hp").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
 			}
 		}
 
@@ -428,7 +428,12 @@ define([
 				]
 			});
 			
-			self.currentEnemy(new Monster( self.getMonsterById(newMonsterID) ));
+			self.currentEnemy(new Monster(
+				$.extend(
+					self.getMonsterById(newMonsterID),
+					{ level : self.level().levelNum() }
+				)
+			));
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
 
@@ -637,9 +642,8 @@ define([
 		this.generateRandomLootItem = function(doGold){
 
 			var itemClass = "item";
-
 			var itemToAdd = {};
-
+			var qtyCoefficient = Math.ceil( self.level().levelNum() / 5 );
 			var canAdd = true;
 			
 			doGold = (doGold != undefined) ? doGold : true ;
@@ -685,6 +689,8 @@ define([
 					goldAmt = 2000;
 				}
 
+				goldAmt * qtyCoefficient;
+
 				itemToAdd = self.getAvailableItemById("gold", "currency", goldAmt);
 
 			}else if(itemType == "misc"){
@@ -701,20 +707,29 @@ define([
 					]
 				});
 
+				var scrapQty = doRand(1,26) * qtyCoefficient;
+				var foodQty = 1 * qtyCoefficient;
+
 				if( miscType == "armor" ){
 
-					itemToAdd = self.getAvailableItemById("armor_scraps", "crafting", doRand(1,26));
+					itemToAdd = self.getAvailableItemById("armor_scraps", "crafting", scrapQty);
 
 				}else if( miscType == "weapon" ){
 
-					itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", doRand(1,26));
+					itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", scrapQty);
 
 				}else if( miscType == "stone" ){
 
 					itemToAdd = self.getAvailableItemById("reset_stone", "consumables", 1);
 
 				}else if( miscType == "food" ){
-					itemToAdd = self.getAvailableItemById("biscuit_food", "consumables", 1);
+					var consumableType = doBasedOnPercent({
+						50 : [
+							"health_potion",
+							"biscuit_food",
+						]
+					});
+					itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
 				}
 
 			}else if(itemType == "gear"){
@@ -727,34 +742,13 @@ define([
 					
 				});
 
-				//Eventually these will be randomized, but let's keep it simple for now...
 				if( gearType == "armor" ){
 
 					itemClass = "armor";
 					
 					var armorId;
 					
-					if(self.level().levelNum() < 5){
-
-						armorId = doBasedOnPercent({
-							25 : [
-								"body_armor_01",
-								"head_armor_01",
-								"shield_01",
-								"tail_armor_01",
-							],
-						});
-						
-					}else if( self.level().levelNum() > 5 ){
-						armorId = doBasedOnPercent({
-							25 : [
-								"body_armor_02",
-								"head_armor_02",
-								"shield_02",
-								"fin_armor_01",
-							],
-						});
-					}
+					armorId = chooseRandomly(self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum()));
 					
 					if(armorId == "shield_01" || armorId == "shield_02"){
 						itemClass = "shield";
@@ -766,8 +760,6 @@ define([
 				}else if( gearType == "weapon" ){
 
 					itemClass = "weapon";
-					
-					
 					
 					var weaponId;
 					
@@ -1353,6 +1345,11 @@ define([
 				self.level().drawMap();
 				
 				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. With a quick glance around, you see that nothing is as it was just a few moments before.", "player");
+			}else if(item.id == "health_potion"){
+				self.useHealthPotion();
+				if( self.player().numPotionsAvailable() == 0 ){
+					self._resetActiveItem();
+				}
 			}
 
 		}
@@ -1439,6 +1436,19 @@ define([
 
 		}
 
+		this.useHealthPotion = function(){
+			var numPotsLeft = self.player().removeItemFromInventory("health_potion", 1);
+			var numHpToRestore = Math.ceil(self.player().maxHp() / 2);
+			var potentialHp = self.player().data().hp() + numHpToRestore;
+			if( potentialHp > self.player().maxHp() ){
+				potentialHp = self.player().maxHp();
+				numHpToRestore = self.player().maxHp() - self.player().data().hp();
+			}
+
+			self.player().data().hp( potentialHp );
+			self.logMessage("Drinking a health potion restored " + numHpToRestore + " HP.", "player");
+		}
+
 		this.logMessage = function(msgText, cssClass){
 			self.logMessages.unshift( {text: msgText, cssClass: cssClass || "info"} );
 			$(".message-log").stop(false, true).effect("highlight", { color: "#BEBEBE" }, 400);
@@ -1503,6 +1513,19 @@ define([
 			return self.itemDataFile.items[type] || false;
 		}
 
+		this.getAvailableItemIdsByTypeForLevel = function(type, level){
+			var allItems = self.getAvailableItemsByType(type);
+			var availableItems = new Array();
+
+			for(var i = 0; i < allItems.length; i++){
+				if( self._itemCanAppearForLevel(allItems[i], level) ){
+					availableItems.push(allItems[i].id);
+				}
+			}
+
+			return availableItems;
+		}
+
 		this.getAvailableItemById = function(itemID, type, qty){
 
 			var matchingItem;
@@ -1546,6 +1569,13 @@ define([
 		this.getAvailableItemTypes = function(){
 			return Object.keys(self.itemDataFile.items);
 		}
+
+		this._itemCanAppearForLevel = function(item, level){
+			if( (item.minLevelRange >= level || item.minLevelRange == undefined) && (item.maxLevelRange < level || item.maxLevelRange == undefined) ){
+				return true;
+			}
+			return false;
+		}
 		
 		this.getMonsterById = function(monsterId){
 			var monsterIDs = Object.keys(self.monsterDataFile);
@@ -1585,19 +1615,21 @@ define([
 				self.showContainerWithContents([itemOne, itemTwo]);
 			}*/
 			
+			/*
 			var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
 			if(itemData){
 				var weap = new Weapon(itemData);
 			}
 			self.showContainerWithContents([weap]);
+			*/
 
-			/*
-				var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
+			
+			var itemData = self.getAvailableItemById("health_potion", "consumables", 1);
 			if(itemData){
-				self.player().addItemToInventory( new Weapon(itemData) );
+				self.player().addItemToInventory( new Item(itemData) );
 			}
 
-			itemData = self.getAvailableItemById("body_armor_01", "armor", 1);
+			/*itemData = self.getAvailableItemById("body_armor_01", "armor", 1);
 			if(itemData){
 				self.player().data().inventory.addItem( new Armor(itemData) );
 			}
@@ -1613,10 +1645,12 @@ define([
 	return Game;
 
 /* TODOs
-- Event squares: trader, random skill trainer, or base stat increase
 - Crafting, can upgrade existing stuff or make new stuff
-- Add "health potion" item that can be used during combat (biscuits can't be used during combat) that restores x amount of health
-- Create class for Skills to get them more cohesive
+- Is monster scaling working?
+- Implement class for Skills to get them more cohesive
+- More obvious turn-based combat
+- Change player position icon to tiny fish icon (https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes)
+- Dynamic loot generation (a la Diablo III)
 */
 
 });

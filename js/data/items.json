@@ -7,7 +7,7 @@
 				"id" : "biscuit_food",
 				"name" : "Fish Biscuits",
 				"type" : "consumables",
-				"desc" : "Restores all HP when consumed. Fish Biscuits are small, compact wafers made of delicious wild berries, soy protein, bacon fat, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly before eating. Do not consume while pregnant. Consult your doctor before use. Fish Biscuits cannot be used as a tourniquet.",
+				"desc" : "Restores all HP when consumed. Fish Biscuits are small, compact wafers made of delicious wild berries, soy protein, bacon fat, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly before eating. Do not consume while pregnant. Consult your doctor before use. Fish Biscuits cannot be used as a tourniquet, or during combat.",
 				"slotsRequired" : 1,
 				"stackable" : 1,
 				"buyValue" : 10
@@ -21,6 +21,16 @@
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"buyValue" : 500
+			},
+
+			"health_potion" : {
+				"id" : "health_potion",
+				"name" : "Health Potion",
+				"type" : "consumables",
+				"desc" : "A flask filled with a refreshing draught that can re-invigorate and rejuvenate even the most badly wounded fish. Restores up to half your max HP. May be used during combat.",
+				"slotsRequired" : 1,
+				"stackable" : 1,
+				"buyValue" : 250
 			}
 
 		},
@@ -63,6 +73,19 @@
 
 		"weapon" : {
 
+			"dev_weapon" : {
+				"id" : "dev_weapon",
+				"name" : "Debug Sword",
+				"type" : "weapon",
+				"desc" : "Well, congratulations, you got the developer sword. How did you even get this? Also, it's not so much a 'sword' as a nuclear-powered lightsaber. Does 1000 - 2000 damage. I guess all challenge has been removed from the game for you now. Of course, you can always drop it, right? I mean, the button's just right there...",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"dmgMin" : 1000,
+				"dmgMax" : 2000,
+				"handsRequired" : 1,
+				"buyValue" : 1,
+				"minLevelRange" : 1000
+			},
 			"melee_weapon_01" : {
 				"id" : "melee_weapon_01",
 				"name" : "Crude Shiv (1H)",
@@ -73,7 +96,8 @@
 				"dmgMin" : 1,
 				"dmgMax" : 2,
 				"handsRequired" : 1,
-				"buyValue" : 500
+				"buyValue" : 500,
+				"maxLevelRange" : 4
 			},
 			"melee_weapon_02" : {
 				"id" : "melee_weapon_02",
@@ -85,7 +109,8 @@
 				"dmgMin" : 2,
 				"dmgMax" : 3,
 				"handsRequired" : 1,
-				"buyValue" : 800
+				"buyValue" : 800,
+				"maxLevelRange" : 4
 			},
 			"melee_weapon_03" : {
 				"id" : "melee_weapon_03",
@@ -137,7 +162,9 @@
 				"stackable" : 0,
 				"armorValue" : 2,
 				"armorSlot" : "fin",
-				"buyValue" : 700
+				"buyValue" : 700,
+				"minLevelRange" : 5,
+				"maxLevelRange" : 10
 			},
 
 			"body_armor_01" : {
@@ -149,7 +176,8 @@
 				"stackable" : 0,
 				"armorValue" : 1,
 				"armorSlot" : "body",
-				"buyValue" : 500
+				"buyValue" : 500,
+				"maxLevelRange" : 5
 			},
 			"body_armor_02" : {
 				"id" : "body_armor_02",
@@ -160,7 +188,8 @@
 				"stackable" : 0,
 				"armorValue" : 3,
 				"armorSlot" : "body",
-				"buyValue" : 1000
+				"buyValue" : 1000,
+				"maxLevelRange" : 5
 			},
 			"body_armor_03" : {
 				"id" : "body_armor_03",
@@ -171,7 +200,9 @@
 				"stackable" : 0,
 				"armorValue" : 5,
 				"armorSlot" : "body",
-				"buyValue" : 2000
+				"buyValue" : 2000,
+				"minLevelRange" : 5,
+				"maxLevelRange" : 10
 			},
 
 			"head_armor_01" : {
@@ -183,7 +214,8 @@
 				"stackable" : 0,
 				"armorValue" : 1,
 				"armorSlot" : "head",
-				"buyValue" : 200
+				"buyValue" : 200,
+				"maxLevelRange" : 5
 			},
 			"head_armor_02" : {
 				"id" : "head_armor_02",
@@ -194,7 +226,9 @@
 				"stackable" : 0,
 				"armorValue" : 3,
 				"armorSlot" : "head",
-				"buyValue" : 800
+				"buyValue" : 800,
+				"minLevelRange" : 5,
+				"maxLevelRange" : 10
 			}
 
 		},
@@ -210,18 +244,21 @@
 				"stackable" : 0,
 				"armorValue" : 2,
 				"armorSlot" : "shield",
-				"buyValue" : 500
+				"buyValue" : 500,
+				"maxLevelRange" : 5
 			},
 			"shield_02" : {
 				"id" : "shield_02",
 				"name" : "Hide Shield",
 				"type" : "shield",
-				"desc" : "A deer hide wrapped around a frame of fish bones. You're not really sure how a deer got underwater, but you're grateful for the +5 Armor it provides when equipped.",
+				"desc" : "A deer hide wrapped around a frame of fish bones. You're not really sure how a deer got underwater, but you're grateful for the +4 Armor it provides when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorValue" : 4,
 				"armorSlot" : "shield",
-				"buyValue" : 1000
+				"buyValue" : 1000,
+				"minLevelRange" : 5,
+				"maxLevelRange" : 10
 			}
 
 		}

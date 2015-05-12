@@ -442,8 +442,8 @@ button:focus {
 	display: inline-block;
 }
 
-#combat-area .player,
-#combat-area .enemy {
+#combat-area > .row > .player,
+#combat-area > .row > .enemy {
 	width: 570px;
 	height: 140px;
 }

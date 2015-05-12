@@ -19,6 +19,8 @@ define([
 		this.qty = ko.observable(data.qty || 1);
 		this.desc = data.desc || data.name;
 		this.buyValue = data.buyValue || 0;
+		this.minLevelRange = data.minLevelRange || 1;
+		this.maxLevelRange = data.maxLevelRange;
 		
 		this.sellValue = ko.computed(function(){
 			return Math.ceil(self.buyValue / 2);

@@ -45,9 +45,9 @@ define([
 
 		ko.observableArray.fn.removeItem = function(itemOrItemID, qty){
 
-			//There's probably a better way to check for this...
-			if(typeof itemOrItemID != "object"){
-				itemOrItemID = this.getItemByID(itemID);
+			//If it's not an Item instance, treat it as an item ID
+			if(!(itemOrItemID instanceof Item)){
+				itemOrItemID = this.getItemByID(itemOrItemID);
 			}
 
 			if(!itemOrItemID){
