@@ -1672,7 +1672,8 @@ define([
 
 			var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
 			armorId = chooseRandomly( availableArmor );
-			if(armorId == "shield_01" || armorId == "shield_02"){				itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
+			if(armorId == "shield_01" || armorId == "shield_02"){
+				itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
 			}else{
 				itemToAdd = self.getAvailableItemById(armorId, "armor", 1);
 			}
@@ -1702,6 +1703,8 @@ define([
 - More obvious turn-based combat
 - Dynamic loot generation (a la Diablo III)
 - Make weapons use the same random-picking logic as armor
+- Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
+- Dynamic level scaling (better odds of items on higher levels, tougher enemies, etc.)
 */
 
 });

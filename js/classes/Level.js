@@ -51,6 +51,7 @@ define([
 			self.hasGenerated = levelData.hasGenerated || false;
 			self.entranceSquare = ko.observableArray(levelData.entranceSquare || []);
 			self.exitSquare = ko.observableArray(levelData.exitSquare || []);
+			self.playerOrientation = levelData.playerOrientation || "up";
 
 			var gridArray = Array();
 			for(y = 0; y < levelData.grid.length; y++){
@@ -122,6 +123,8 @@ define([
 			if(direction == undefined){
 				return false;
 			}
+
+			self.playerOrientation = direction;
 
 			var targetX = self.getPlayerPos("x");
 			var targetY = self.getPlayerPos("y");
@@ -275,18 +278,109 @@ define([
 
 			//Ellipse/oval/thing
 			var midSquare = squareWidth / 2,
-				cx = (playerPos.x * squareHeight) + midSquare,
-			    cy = ((playerPos.y * squareWidth) + midSquare) - 2,
-			    rx = 4,
-			    ry = 7,
-			    triXOffset = 5,
-			    triYOffset = 5;
+				ovalCenterX = (playerPos.x * squareHeight) + midSquare,
+			    ovalCenterY = (playerPos.y * squareWidth) + midSquare,
+			    ovalRadiusX = 4,
+			    ovalRadiusY = 7,
+			    triHeight = 5,
+			    triWidth = 0,
+			    triFirstPointX = 0,
+			    triFirstPointY = 0,
+			    triSecondPointX = 0,
+			    triSecondPointY = 0,
+			    triThirdPointX = 0,
+			    triThirdPointY = 0;
+
+			if( self.playerOrientation == "left" ){
+				ovalCenterX -= 2;
+
+				//Change oval orientation
+				ovalRadiusX = 7;
+			    ovalRadiusY = 4;
+			    triWidth = ovalRadiusY;
+
+			    //Put first Tri point at right edge of oval
+			    triFirstPointX = ovalCenterX + ovalRadiusX;
+			    triFirstPointY = ovalCenterY;
+
+			    triSecondPointX = triFirstPointX + triHeight;
+			    triSecondPointY = triFirstPointY + triWidth;
+
+			    triThirdPointX = triFirstPointX + triHeight;
+			    triThirdPointY = triFirstPointY - triWidth;
+
+			    //Move points right + up, down
+			}
+			else if( self.playerOrientation == "right" ){
+				ovalCenterX += 2;
+
+				//Change oval orientation
+				ovalRadiusX = 7;
+			    ovalRadiusY = 4;
+			    triWidth = ovalRadiusY;
+
+			    //Put first Tri point at left edge of oval
+			    triFirstPointX = ovalCenterX - ovalRadiusX;
+			    triFirstPointY = ovalCenterY;
+
+			    triSecondPointX = triFirstPointX - triHeight;
+			    triSecondPointY = triFirstPointY - triWidth;
+
+			    triThirdPointX = triFirstPointX - triHeight;
+			    triThirdPointY = triFirstPointY + triWidth;
+
+			    //Move points left + up, down
+			}else if( self.playerOrientation == "down" ){
+				ovalCenterY += 2;
+
+				triWidth = ovalRadiusX;
+
+				//Put first Tri point at top edge of oval
+				triFirstPointX = ovalCenterX;
+				triFirstPointY = ovalCenterY - ovalRadiusY;
+
+			    triSecondPointY = triFirstPointY - triHeight;
+			    triSecondPointX = triFirstPointX + triWidth;
+
+				triThirdPointY = triFirstPointY - triHeight;
+			    triThirdPointX = triFirstPointX - triWidth;
+
+				//Move points up + left, right
+			}else if( self.playerOrientation == "up" ){
+				ovalCenterY -= 2;
+
+				triWidth = ovalRadiusX;
+
+				//Put first Tri point at top edge of oval
+			    triFirstPointX = ovalCenterX;
+			    triFirstPointY = ovalCenterY + ovalRadiusY;
+
+			    triSecondPointY = triFirstPointY + triHeight;
+			    triSecondPointX = triFirstPointX - triWidth;
+
+			    triThirdPointY = triFirstPointY + triHeight;
+			    triThirdPointX = triFirstPointX + triWidth;
+
+			    console.log("Oval Ctr X: " + ovalCenterX);
+			    console.log("Oval Ctr Y: " + ovalCenterY);
+
+			    console.log("First X: " + triFirstPointX);
+			    console.log("First Y: " + triFirstPointY);
+
+			    console.log("Second X: " + triSecondPointX);
+			    console.log("Second Y: " + triSecondPointY);
+
+			    console.log("Third X: " + triThirdPointX);
+			    console.log("Third Y: " + triThirdPointY);
+
+				//Move points up + left, right
+			}
 
 			context.save(); // save state
 			context.beginPath();
 
-			context.translate(cx-rx, cy-ry);
-			context.scale(rx, ry);
+			context.translate(ovalCenterX-ovalRadiusX, ovalCenterY-ovalRadiusY);
+			context.scale(ovalRadiusX, ovalRadiusY);
 			context.arc(1, 1, 1, 0, 2 * Math.PI, false);
 
 			context.restore(); // restore to original state
@@ -296,9 +390,9 @@ define([
 
 			//Triangle
 			context.beginPath();
-			context.moveTo(cx, (cy + ry) );
-			context.lineTo((cx + triXOffset), (cy + ry) + triYOffset);
-			context.lineTo((cx - triXOffset), (cy + ry) + triYOffset);
+			context.moveTo(triFirstPointX, triFirstPointY );
+			context.lineTo(triSecondPointX, triSecondPointY);
+			context.lineTo(triThirdPointX, triThirdPointY);
 			context.closePath(); //This is necessary or the stroke won't be finished (i.e. - it'll only stroke two of the sides and won't connect the 3rd + 1st points)
 			context.stroke();
 			context.fill();
