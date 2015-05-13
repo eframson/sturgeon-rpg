@@ -183,7 +183,7 @@
 				"id" : "body_armor_02",
 				"name" : "Leather Armor",
 				"type" : "armor",
-				"desc" : "A set of leather armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.",
+				"desc" : "A set of leather body armor. Gives +3 Armor when worn. Gives 0 Armor when it's just sitting in your bag.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorValue" : 3,

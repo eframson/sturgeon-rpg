@@ -1254,7 +1254,7 @@ define([
 
 			self.player().data().inventory.removeItem(item);
 
-			if( alreadyEquippedItem != undefined ){
+			if( alreadyEquippedItem != undefined && !isEmptyObject(alreadyEquippedItem) ){
 				self.player().addItemToInventory(alreadyEquippedItem);
 			}
 
@@ -1653,6 +1653,8 @@ define([
 			}else{
 				itemToAdd = self.getAvailableItemById(armorId, "armor", 1);
 			}
+
+			self.player().addItemToInventory( new Armor(itemToAdd) );
 		}
 
 		self.init();
@@ -1670,7 +1672,6 @@ define([
 - More obvious turn-based combat
 - Change player position icon to tiny fish icon (https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes)
 - Dynamic loot generation (a la Diablo III)
-- Handle case of item equipping when item is already equipped
 */
 
 });

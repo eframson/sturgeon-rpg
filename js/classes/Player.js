@@ -225,19 +225,19 @@ define([
 		}
 
 		this.equipWeapon = function(item){
-			var existingItem = self._getWeaponSlot();
+			var existingItem = self._getWeaponSlot()();
 			self._getWeaponSlot()(item);
 			return existingItem;
 		}
 
 		this.equipShield = function(item){
-			var existingItem = self._getShieldSlot();
+			var existingItem = self._getShieldSlot()();
 			self._getShieldSlot()(item);
 			return existingItem;
 		}
 
 		this.equipArmor = function(item){
-			var existingItem = self._getArmorSlot(item.armorSlot);
+			var existingItem = self._getArmorSlot(item.armorSlot)();
 			self.equipArmorInSlot(item.armorSlot,item);
 			return existingItem;
 		}
