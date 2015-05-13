@@ -750,7 +750,8 @@ define([
 
 					var armorId;
 
-					armorId = chooseRandomly(self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum()));
+					var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
+					armorId = chooseRandomly( availableArmor );
 					if(armorId == "shield_01" || armorId == "shield_02"){
 						itemClass = "shield";
 						itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
@@ -1517,11 +1518,12 @@ define([
 
 		this.getAvailableItemIdsByTypeForLevel = function(type, level){
 			var allItems = self.getAvailableItemsByType(type);
+			var availableItemKeys = Object.keys(allItems);
 			var availableItems = new Array();
 
-			for(var i = 0; i < allItems.length; i++){
-				if( self._itemCanAppearForLevel(allItems[i], level) ){
-					availableItems.push(allItems[i].id);
+			for(var i = 0; i < availableItemKeys.length; i++){
+				if( self._itemCanAppearForLevel(allItems[availableItemKeys[i]], level) ){
+					availableItems.push(allItems[availableItemKeys[i]].id);
 				}
 			}
 
@@ -1573,7 +1575,7 @@ define([
 		}
 
 		this._itemCanAppearForLevel = function(item, level){
-			if( (item.minLevelRange >= level || item.minLevelRange == undefined) && (item.maxLevelRange < level || item.maxLevelRange == undefined) ){
+			if( (item.minLevelRange <= level || item.minLevelRange == undefined) && (item.maxLevelRange > level || item.maxLevelRange == undefined) ){
 				return true;
 			}
 			return false;
@@ -1637,6 +1639,21 @@ define([
 			}
 			*/
 		}
+		
+		this.armorTest = function(){
+			var itemClass = "armor";
+
+			var armorId;
+
+			var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
+			armorId = chooseRandomly( availableArmor );
+			if(armorId == "shield_01" || armorId == "shield_02"){
+				itemClass = "shield";
+				itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
+			}else{
+				itemToAdd = self.getAvailableItemById(armorId, "armor", 1);
+			}
+		}
 
 		self.init();
 
@@ -1653,6 +1670,7 @@ define([
 - More obvious turn-based combat
 - Change player position icon to tiny fish icon (https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes)
 - Dynamic loot generation (a la Diablo III)
+- Handle case of item equipping when item is already equipped
 */
 
 });
