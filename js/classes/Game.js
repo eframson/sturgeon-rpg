@@ -164,7 +164,7 @@ define([
 					if( self.player().data().skills().findFood() + self.tempFoodFindBonus <= 60 ){
 						self.tempFoodFindBonus += 2;
 					}
-					
+
 				});
 
 				self.logMessage(message);
@@ -382,7 +382,8 @@ define([
 
 		this.showContentArea = function(){
 			self.visibleSection("content-area");
-			$("#skills-area").fadeOut(300);
+			//$("#skills-area").fadeOut(300);
+			$("#skills-area").hide();
 			$("#inventory-equipment").fadeOut(300, function(){
 				self.currentContainer.removeAll();
 				self.currentInventoryRightSide("equipment");
@@ -398,7 +399,7 @@ define([
 				$("#skills-area").fadeIn(300);
 			});
 		}
-		
+
 		self.showDamage = function(which){
 			if(which == "enemy"){
 				$("#combat-area > .row > .enemy .hp").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
@@ -427,13 +428,14 @@ define([
 					"monster_04",
 				]
 			});
-			
+
 			self.currentEnemy(new Monster(
 				$.extend(
 					self.getMonsterById(newMonsterID),
 					{ level : self.level().levelNum() }
 				)
 			));
+
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
 
@@ -442,13 +444,13 @@ define([
 				$("#combat-area").fadeIn(300);
 			});
 		}
-		
+
 		this.getGoesFirst = function(){
-			
+
 			if( self._goesFirst == undefined ){
 
 				var goesFirst;
-	
+
 				if( self.player().data().speed() > self.currentEnemy().speed() ){
 					goesFirst = "player";
 				}else if( self.player().data().speed() < self.currentEnemy().speed() ){
@@ -456,38 +458,38 @@ define([
 				}else{
 					goesFirst = (doRand(0,2) == 1) ? "enemy" : "player" ;
 				}
-				
+
 				self._goesFirst = goesFirst;
 			}
-			
+
 			return self._goesFirst;
 
 		}
-		
+
 		this.playerAttacks = function(game, event){
 			self.doCombatRound();
 		}
-		
+
 		this.doCombatRound = function(playerAttacks, enemyAttacks){
-			
+
 			playerAttacks = ( playerAttacks != undefined ) ? playerAttacks : true ;
 			enemyAttacks = ( enemyAttacks != undefined) ? enemyAttacks : true ;
-			
+
 			var goesFirst = self.getGoesFirst();
-			
+
 			var playerDmg = self.player().doAttack();
 			var enemyDmg = self.currentEnemy().doAttack();
 			var playerDidDmg = false;
 			var enemyDidDmg = false;
-			
+
 			if( goesFirst == "player" ){
-				
+
 				if( playerAttacks ){
 					self.currentEnemy().takeDmg(playerDmg);
 					self.showDamage("enemy");
 					playerDidDmg = true;
 				}
-				
+
 				if(!self.currentEnemy().isDead() && enemyAttacks){
 					self.player().takeDmg(enemyDmg);
 					self.showDamage("player");
@@ -500,33 +502,33 @@ define([
 					self.showDamage("player");
 					enemyDidDmg = true;
 				}
-				
+
 				if(!self.player().isDead() && playerAttacks){
 					self.currentEnemy().takeDmg(playerDmg);
 					self.showDamage("enemy");
 					playerDidDmg = true;
 				}
-				
+
 			}
-			
+
 			if(playerDidDmg){
 				self.logMessage("You strike the enemy for " + playerDmg + " points of damage!", "combat");
 			}
 			if(enemyDidDmg){
-				self.logMessage("The enemy strikes you for " + enemyDmg + " points of damage!", "combat");				
+				self.logMessage("The enemy strikes you for " + enemyDmg + " points of damage!", "combat");
 			}
 			if( self.player().isDead() ){
 				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
 			}else if(self.currentEnemy().isDead()){
 				self.player().addExp(self.currentEnemy().expValue());
 				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " XP!", "combat");
-				
+
 				if( self.player().hasLeveledUp() ){
 					self.player().hasLeveledUp(false);
 					self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
 				}
 			}
-			
+
 		}
 
 		this.lootEnemy = function(){
@@ -603,7 +605,7 @@ define([
 		}
 
 		this.showContainerWithContents = function(itemArray){
-			
+
 			itemArray == itemArray || [];
 
 			self.currentContainer(itemArray);
@@ -638,14 +640,14 @@ define([
 				self.showContainerWithContents([newItem]);
 			}
 		}
-		
+
 		this.generateRandomLootItem = function(doGold){
 
 			var itemClass = "item";
 			var itemToAdd = {};
 			var qtyCoefficient = Math.ceil( self.level().levelNum() / 5 );
 			var canAdd = true;
-			
+
 			doGold = (doGold != undefined) ? doGold : true ;
 
 			var possibleItemTypes = {
@@ -655,7 +657,7 @@ define([
 					"gear",
 				]
 			};
-			
+
 			if(!doGold){
 				possibleItemTypes = {
 					50 : [
@@ -739,17 +741,16 @@ define([
 						"armor",
 						"weapon",
 					],
-					
+
 				});
 
 				if( gearType == "armor" ){
 
 					itemClass = "armor";
-					
+
 					var armorId;
-					
+
 					armorId = chooseRandomly(self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum()));
-					
 					if(armorId == "shield_01" || armorId == "shield_02"){
 						itemClass = "shield";
 						itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
@@ -760,9 +761,9 @@ define([
 				}else if( gearType == "weapon" ){
 
 					itemClass = "weapon";
-					
+
 					var weaponId;
-					
+
 					if(self.level().levelNum() < 5){
 
 						weaponId = doBasedOnPercent({
@@ -771,7 +772,7 @@ define([
 								"melee_weapon_02",
 							],
 						});
-						
+
 					}else if( self.level().levelNum() > 5 ){
 						weaponId = doBasedOnPercent({
 							50 : [
@@ -779,7 +780,7 @@ define([
 								"melee_weapon_04",
 							],
 						});
-					}					
+					}
 
 					itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
@@ -796,7 +797,7 @@ define([
 			}else if(itemClass == "armor" || itemClass == "shield"){
 				newItem = new Armor(itemToAdd);
 			}
-			
+
 			return newItem;
 
 		}
@@ -814,7 +815,7 @@ define([
 					"You charge headfirst into an enemy!",
 				]
 			});
-			
+
 			self.logMessage(enemyMsg, "combat");
 
 			self.showCombatMessage(
@@ -839,17 +840,17 @@ define([
 		this.squareEventAction = function(){
 
 			self.freezeMovement(true);
-			
+
 			var eventType = doBasedOnPercent({
 				30 : "trainer",
 				40 : "trader",
 				25 : "cooldown",
 				5 : "stat",
 			});
-			
+
 			var msg = "";
 			var buttons;
-			
+
 			buttons = new Array(
 				{
 					title : "Continue",
@@ -863,7 +864,7 @@ define([
 					},
 				}
 			);
-			
+
 			if(eventType == "trader"){
 
 				msg = "You encounter a friendly trader who offers to show you his wares.";
@@ -875,15 +876,15 @@ define([
 							self.currentContainer.removeAll();
 
 							var itemArray = Array();
-							
+
 							var numItems = doRand(3,8);
-							
+
 							for(var i = 0; i < numItems; i++){
 								self.currentContainer.addItem(self.generateRandomLootItem(false));
 							}
 
 							self.currentInventoryRightSide("merchant");
-			
+
 							self.visibleSection("inventory-equipment");
 							$("#full-screen-notice").fadeOut(300, function(){
 								$("#inventory-equipment").fadeIn(300);
@@ -947,7 +948,7 @@ define([
 								$("#content-area").fadeIn(300);
 								self.freezeMovement(false);
 							});
-							
+
 						},
 						css : function(){
 							if( self.player().gp() < this.trainCost ){
@@ -973,7 +974,7 @@ define([
 						},
 					}
 				);
-				
+
 			}else if( eventType == "cooldown" ){
 
 				msg = "You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. All your cooldowns are instantly finished.";
@@ -996,7 +997,7 @@ define([
 						msg : msg,
 					}
 				);
-				
+
 			}else if( eventType == "stat" ){
 
 				var stat = chooseRandomly(
@@ -1024,7 +1025,7 @@ define([
 					doExpGain = true;
 				}
 
-				
+
 				buttons = new Array(
 					{
 						title : "Continue",
@@ -1038,7 +1039,7 @@ define([
 								self.player().addExp(statIncreaseValue);
 							}
 
-							
+
 
 							self.visibleSection("content-area");
 							$("#full-screen-notice").fadeOut(300, function(){
@@ -1054,14 +1055,14 @@ define([
 				);
 
 			}
-			
+
 			self.visibleSection("full-screen-notice");
 			$("#content-area").fadeOut(300, function(){
 				self.fullScreenNotice(msg);
 				self.fullScreenNoticeButtons(buttons);
 				$("#full-screen-notice").fadeIn(300);
 			});
-			
+
 			//30% trader
 			//40% skill increase
 			//10% stat increase
@@ -1101,7 +1102,7 @@ define([
 		}
 
 		this.squareEntranceAction = function(){
-			
+
 			self.freezeMovement(true);
 
 			//This is unlikely, but we'd better account for it just to be safe
@@ -1187,7 +1188,7 @@ define([
 				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
 			}
 		}
-		
+
 		this.setMerchantItemAsActiveItem = function(item, e){
 			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0, canBuy : 1 }, item, e);
 		}
@@ -1216,11 +1217,11 @@ define([
 			if( (opts.moveDirection == "left" && self.currentInventoryRightSide() == "equipment") || (opts.canDrop && opts.canDrop == 0) ){
 				self.activeItem().canDrop(0);
 			}else if( opts.moveDirection == "left" && self.currentInventoryRightSide() == "container" || (opts.canDrop && opts.canDrop == 1) ){
-				self.activeItem().canDrop(1);				
+				self.activeItem().canDrop(1);
 			}else if( type != "currency" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
 			}
-			
+
 			if( ( opts.moveDirection == "left" && self.currentInventoryRightSide() == "merchant" ) || ( opts.canBuy && opts.canBuy == 1 ) ){
 				self.activeItem().canBuy(1);
 			}else if( ( opts.moveDirection == "right" && self.currentInventoryRightSide() == "merchant" ) || ( opts.canSell && opts.canSell == 1 ) ){
@@ -1239,7 +1240,7 @@ define([
 		this.equipActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
-			
+
 			var alreadyEquippedItem;
 
 			if(item.type == "weapon"){
@@ -1251,11 +1252,11 @@ define([
 			}
 
 			self.player().data().inventory.removeItem(item);
-			
+
 			if( alreadyEquippedItem != undefined ){
 				self.player().addItemToInventory(alreadyEquippedItem);
 			}
-			
+
 			self._resetActiveItem();
 		}
 
@@ -1275,46 +1276,46 @@ define([
 			self._resetActiveItem();
 
 		}
-		
+
 		this.buyActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
 			var moveFrom = self.currentContainer;
 			var moveTo = self.player().data().inventory;
-			
+
 			var gold = moveTo.getItemByID("gold");
-			
+
 			if(gold && gold.qty() >= item.buyValue){
 				gold.qty( gold.qty() - item.buyValue );
-				
+
 				var newItem = cloneObject(item);
 				newItem.qty(1);
-				
+
 				var srcNumLeft = moveFrom.removeItem(item, 1);
-	
+
 				if(srcNumLeft == 0){
 					self._resetActiveItem();
 				}
-	
+
 				//Add to inventory
 				moveTo.addItem(newItem);
-				
+
 			}
 
 		}
-		
+
 		this.sellActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
 			var moveFrom = self.player().data().inventory;
 			var moveTo = self.currentContainer;
-			
+
 			var gold = self.getAvailableItemById("gold", "currency", item.sellValue());
 			goldItem = new Item(gold);
-			
+
 			var newItem = cloneObject(item);
 			newItem.qty(1);
-			
+
 			var srcNumLeft = moveFrom.removeItem(item, 1);
 
 			if(srcNumLeft == 0){
@@ -1329,21 +1330,22 @@ define([
 		this.useActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
-			
+
 			if(item.id == "biscuit_food" ){
-				
+
 				self._dropActiveItem(game, event, 1);
-				
+
 				self.player().data().hp( self.player().maxHp() );
+
 				self.logMessage("Eating some fish biscuits restored you to full HP!", "player");
 			}else if (item.id == "reset_stone"){
-				
+
 				self._dropActiveItem(game, event, 1);
 
 				self.level().generateThisLevel(true);
 				self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
 				self.level().drawMap();
-				
+
 				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. With a quick glance around, you see that nothing is as it was just a few moments before.", "player");
 			}else if(item.id == "health_potion"){
 				self.useHealthPotion();
@@ -1367,11 +1369,11 @@ define([
 			srcCollection = self.player().data().inventory;
 
 			//Do we have an active container?
-			if(self.currentInventoryRightSide() == 'container'){				
+			if(self.currentInventoryRightSide() == 'container'){
 
 				//Are we moving from inventory -> container OR container -> inventory?
 				if(self.activeItem().moveDirection() == "right"){
-					
+
 					moveTo = "container";
 
 					tarCollection = self.currentContainer;
@@ -1396,7 +1398,7 @@ define([
 			}else{
 				newItem.qty(qty);
 			}
-			
+
 
 			//Remove the object from the source
 			var srcNumLeft = srcCollection.removeItem(existingItem, qty);
@@ -1431,7 +1433,7 @@ define([
 		}
 
 		this.dropAllActiveItem = function(item, event){
-			
+
 			self._dropActiveItem(item, event, "all");
 
 		}
@@ -1576,7 +1578,7 @@ define([
 			}
 			return false;
 		}
-		
+
 		this.getMonsterById = function(monsterId){
 			var monsterIDs = Object.keys(self.monsterDataFile);
 			for(i=0; i < monsterIDs.length; i++){
@@ -1614,7 +1616,7 @@ define([
 			if(itemOne && itemTwo){
 				self.showContainerWithContents([itemOne, itemTwo]);
 			}*/
-			
+
 			/*
 			var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
 			if(itemData){
@@ -1623,7 +1625,7 @@ define([
 			self.showContainerWithContents([weap]);
 			*/
 
-			
+
 			var itemData = self.getAvailableItemById("health_potion", "consumables", 1);
 			if(itemData){
 				self.player().addItemToInventory( new Item(itemData) );
