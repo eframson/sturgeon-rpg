@@ -405,6 +405,11 @@ button:focus {
 	margin-top: 10px;
 }
 
+#inventory-equipment .item-desc .line .stat {
+	font-weight: bold;
+	line-height: 14px;
+}
+
 #inventory-equipment .equipment {
 	padding-left: 0px;
 }

@@ -98,7 +98,7 @@ define([
 				//Eventually let's add STR to this value
 				var minDmg = self.baseMinDmg();
 				if( !isEmptyObject(self.data().equipment().weapon()) ){
-					minDmg += self.data().equipment().weapon().dmgMin;
+					minDmg += self.data().equipment().weapon().dmgMin();
 				}
 				return minDmg;
 			});
@@ -107,7 +107,7 @@ define([
 				//Eventually let's add STR to this value
 				var maxDmg = self.baseMaxDmg();
 				if( !isEmptyObject(self.data().equipment().weapon()) ){
-					maxDmg += self.data().equipment().weapon().dmgMax;
+					maxDmg += self.data().equipment().weapon().dmgMax();
 				}
 				return maxDmg;
 			});
@@ -120,13 +120,13 @@ define([
 				for(slot in armorSlots){
 
 					if( !isEmptyObject( armorSlots[slot]() ) ){
-						armorValue += armorSlots[slot]().armorValue;
+						armorValue += armorSlots[slot]().armorValue();
 					}
 
 				}
 
 				if( !isEmptyObject(self.data().equipment().shield()) ){
-					armorValue += self.data().equipment().shield().armorValue;
+					armorValue += self.data().equipment().shield().armorValue();
 				}
 
 				return armorValue;
@@ -141,6 +141,26 @@ define([
 				
 				if(gold){
 					return gold.qty();
+				}else{
+					return 0;
+				}
+			});
+
+			self.weaponScraps = ko.computed(function(){
+				var scraps = self.data().inventory.getItemByID("weapon_scraps");
+				
+				if(scraps){
+					return scraps.qty();
+				}else{
+					return 0;
+				}
+			});
+
+			self.armorScraps = ko.computed(function(){
+				var scraps = self.data().inventory.getItemByID("armor_scraps");
+				
+				if(scraps){
+					return scraps.qty();
 				}else{
 					return 0;
 				}

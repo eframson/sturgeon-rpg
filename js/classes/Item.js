@@ -18,12 +18,25 @@ define([
 		this.stackable = ( data.stackable != undefined ) ? data.stackable : true;
 		this.qty = ko.observable(data.qty || 1);
 		this.desc = data.desc || data.name;
-		this.buyValue = data.buyValue || 0;
+		this.buyValue = ko.observable(data.buyValue || 0);
 		this.minLevelRange = data.minLevelRange || 1;
 		this.maxLevelRange = data.maxLevelRange;
+		this.canUpgrade = ( data.canUpgrade != undefined ) ? data.canUpgrade : 0;
+		this.numUpgradesApplied = ko.observable(data.numUpgradesApplied || 0);
+		this.isArmor = false;
+		this.isShield = false;
+		this.isWeapon = false;
+		this.attributesImprovedByLastCrafting = "";
 		
 		this.sellValue = ko.computed(function(){
-			return Math.ceil(self.buyValue / 2);
+			return Math.ceil(self.buyValue() / 2);
+		});
+
+		this.costForNextUpgradeLevel = ko.computed(function(){
+			if( self.canUpgrade ){
+				return (self.numUpgradesApplied() + 1) * 100;
+			}
+			return false;
 		});
 		
 		this.getExportData = function(){
@@ -40,7 +53,24 @@ define([
 			
 			return exportObj;
 		}
+
+		this.applyUpgrade = function(){
+			//This should be overridden in a child class
+			self._applyUpgrade();
+			self.buyValue( self.buyValue() + self.costForNextUpgradeLevel() );
+			self.numUpgradesApplied( self.numUpgradesApplied() + 1 );
+		}
+
+		this._applyUpgrade = function(){
+			//This should be overridden in a child class
+			console.log("I'm not being evaluated, am I?");
+		}
 	}
+
+	/*Item.prototype._applyUpgrade = function(){
+		//This should be overridden in a child class
+		console.log("I'm not being evaluated, am I?");
+	}*/
 
 	Item.prototype.constructor = Item;
 

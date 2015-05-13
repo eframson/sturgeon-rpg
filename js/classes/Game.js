@@ -222,6 +222,7 @@ define([
 				canDrop : ko.observable(0),
 				canSell : ko.observable(0),
 				canBuy : ko.observable(0),
+				canUpgrade : ko.observable(0),
 				moveDirection : ko.observable("right"),
 				actualItem : ko.observable(undefined),
 			});
@@ -247,6 +248,15 @@ define([
 					return undefined;
 				}
 			}, self);
+
+			self._activeItemCanBeUpgraded = ko.computed(function(){
+				if( self.activeItem().actualItem() instanceof Armor ){
+					return self.player().armorScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
+				}else if( self.activeItem().actualItem() instanceof Weapon ){
+					return self.player().weaponScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
+				}
+				return false;
+			});
 		}
 
 		this.initGame = function(gameData){
@@ -1171,6 +1181,7 @@ define([
 			self.activeItem().canSell(0);
 			self.activeItem().canBuy(0);
 			self.activeItem().canUnEquip(0);
+			self.activeItem().canUpgrade(0);
 			self.activeItem().moveDirection("right");
 			self.activeItem().actualItem(undefined);
 
@@ -1227,6 +1238,10 @@ define([
 				self.activeItem().canBuy(1);
 			}else if( ( opts.moveDirection == "right" && self.currentInventoryRightSide() == "merchant" ) || ( opts.canSell && opts.canSell == 1 ) ){
 				self.activeItem().canSell(1);
+			}
+
+			if( ( item.canUpgrade == 1 && self.currentInventoryRightSide() == "equipment" ) || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
+				self.activeItem().canUpgrade(1);
 			}
 
 			self.activeItem().moveDirection(opts.moveDirection);
@@ -1286,8 +1301,8 @@ define([
 
 			var gold = moveTo.getItemByID("gold");
 
-			if(gold && gold.qty() >= item.buyValue){
-				gold.qty( gold.qty() - item.buyValue );
+			if(gold && gold.qty() >= item.buyValue()){
+				gold.qty( gold.qty() - item.buyValue() );
 
 				var newItem = cloneObject(item);
 				newItem.qty(1);
@@ -1355,6 +1370,18 @@ define([
 				}
 			}
 
+		}
+
+		this.upgradeActiveItem = function(game, event){
+			var numScrapsLeft,
+				qty = self.activeItem().actualItem().costForNextUpgradeLevel();
+			if( self.activeItem().actualItem() instanceof Armor ){
+				numScrapsLeft = self.player().removeItemFromInventory("armor_scraps", qty);
+			}else if( self.activeItem().actualItem() instanceof Weapon ){
+				numScrapsLeft = self.player().removeItemFromInventory("weapon_scraps", qty);
+			}
+			self.activeItem().actualItem().applyUpgrade();
+			self.logMessage("Using your underwater welding gear, hammer, nails, duct tape, and " + qty + " scraps, you are able to improve the following attribute(s) of your " + self.activeItem().actualItem().name + ": " + self.activeItem().actualItem().attributesImprovedByLastCrafting + "." ,"crafting");
 		}
 
 		this._dropActiveItem = function(game, event, qty){
@@ -1433,9 +1460,9 @@ define([
 
 		}
 
-		this.dropAllActiveItem = function(item, event){
+		this.dropAllActiveItem = function(game, event){
 
-			self._dropActiveItem(item, event, "all");
+			self._dropActiveItem(game, event, "all");
 
 		}
 
@@ -1641,20 +1668,24 @@ define([
 		}
 		
 		this.armorTest = function(){
-			var itemClass = "armor";
-
 			var armorId;
 
 			var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
 			armorId = chooseRandomly( availableArmor );
-			if(armorId == "shield_01" || armorId == "shield_02"){
-				itemClass = "shield";
-				itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
+			if(armorId == "shield_01" || armorId == "shield_02"){				itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
 			}else{
 				itemToAdd = self.getAvailableItemById(armorId, "armor", 1);
 			}
 
 			self.player().addItemToInventory( new Armor(itemToAdd) );
+		}
+
+		this.scrapTest = function(){
+
+			itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", 400);
+			self.player().addItemToInventory( new Item(itemToAdd) );
+			itemToAdd = self.getAvailableItemById("armor_scraps", "crafting", 400);
+			self.player().addItemToInventory( new Item(itemToAdd) );
 		}
 
 		self.init();
@@ -1667,11 +1698,10 @@ define([
 
 /* TODOs
 - Crafting, can upgrade existing stuff or make new stuff
-- Is monster scaling working?
 - Implement class for Skills to get them more cohesive
 - More obvious turn-based combat
-- Change player position icon to tiny fish icon (https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Drawing_shapes)
 - Dynamic loot generation (a la Diablo III)
+- Make weapons use the same random-picking logic as armor
 */
 
 });

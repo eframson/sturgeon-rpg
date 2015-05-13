@@ -84,7 +84,23 @@
 				"dmgMax" : 2000,
 				"handsRequired" : 1,
 				"buyValue" : 1,
-				"minLevelRange" : 1000
+				"minLevelRange" : -1,
+				"maxLevelRange" : -1
+			},
+			"generic_sword" : {
+				"id" : "generic_sword",
+				"name" : "DYNAMIC",
+				"type" : "weapon",
+				"desc" : "A sword",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"dmgMin" : "DYNAMIC",
+				"dmgMax" : "DYNAMIC",
+				"handsRequired" : 1,
+				"buyValue" : "DYNAMIC",
+				"minLevelRange" : -1,
+				"maxLevelRange" : -1,
+				"canUpgrade" : 1
 			},
 			"melee_weapon_01" : {
 				"id" : "melee_weapon_01",
@@ -97,7 +113,8 @@
 				"dmgMax" : 2,
 				"handsRequired" : 1,
 				"buyValue" : 500,
-				"maxLevelRange" : 4
+				"maxLevelRange" : 4,
+				"canUpgrade" : 1
 			},
 			"melee_weapon_02" : {
 				"id" : "melee_weapon_02",
@@ -110,7 +127,8 @@
 				"dmgMax" : 3,
 				"handsRequired" : 1,
 				"buyValue" : 800,
-				"maxLevelRange" : 4
+				"maxLevelRange" : 4,
+				"canUpgrade" : 1
 			},
 			"melee_weapon_03" : {
 				"id" : "melee_weapon_03",
@@ -122,7 +140,8 @@
 				"dmgMin" : 4,
 				"dmgMax" : 6,
 				"handsRequired" : 1,
-				"buyValue" : 1000
+				"buyValue" : 1000,
+				"canUpgrade" : 1
 			},
 			"melee_weapon_04" : {
 				"id" : "melee_weapon_04",
@@ -134,7 +153,8 @@
 				"dmgMin" : 7,
 				"dmgMax" : 12,
 				"handsRequired" : 2,
-				"buyValue" : 1500
+				"buyValue" : 1500,
+				"canUpgrade" : 1
 			}
 
 		},
@@ -150,7 +170,8 @@
 				"stackable" : 0,
 				"armorValue" : 1,
 				"armorSlot" : "tail",
-				"buyValue" : 300
+				"buyValue" : 300,
+				"canUpgrade" : 1
 			},
 			
 			"fin_armor_01" : {
@@ -164,7 +185,8 @@
 				"armorSlot" : "fin",
 				"buyValue" : 700,
 				"minLevelRange" : 5,
-				"maxLevelRange" : 10
+				"maxLevelRange" : 10,
+				"canUpgrade" : 1
 			},
 
 			"body_armor_01" : {
@@ -177,7 +199,8 @@
 				"armorValue" : 1,
 				"armorSlot" : "body",
 				"buyValue" : 500,
-				"maxLevelRange" : 5
+				"maxLevelRange" : 5,
+				"canUpgrade" : 1
 			},
 			"body_armor_02" : {
 				"id" : "body_armor_02",
@@ -189,7 +212,8 @@
 				"armorValue" : 3,
 				"armorSlot" : "body",
 				"buyValue" : 1000,
-				"maxLevelRange" : 5
+				"maxLevelRange" : 5,
+				"canUpgrade" : 1
 			},
 			"body_armor_03" : {
 				"id" : "body_armor_03",
@@ -202,7 +226,8 @@
 				"armorSlot" : "body",
 				"buyValue" : 2000,
 				"minLevelRange" : 5,
-				"maxLevelRange" : 10
+				"maxLevelRange" : 10,
+				"canUpgrade" : 1
 			},
 
 			"head_armor_01" : {
@@ -215,7 +240,8 @@
 				"armorValue" : 1,
 				"armorSlot" : "head",
 				"buyValue" : 200,
-				"maxLevelRange" : 5
+				"maxLevelRange" : 5,
+				"canUpgrade" : 1
 			},
 			"head_armor_02" : {
 				"id" : "head_armor_02",
@@ -228,7 +254,8 @@
 				"armorSlot" : "head",
 				"buyValue" : 800,
 				"minLevelRange" : 5,
-				"maxLevelRange" : 10
+				"maxLevelRange" : 10,
+				"canUpgrade" : 1
 			}
 
 		},
@@ -245,7 +272,8 @@
 				"armorValue" : 2,
 				"armorSlot" : "shield",
 				"buyValue" : 500,
-				"maxLevelRange" : 5
+				"maxLevelRange" : 5,
+				"canUpgrade" : 1
 			},
 			"shield_02" : {
 				"id" : "shield_02",
@@ -258,7 +286,8 @@
 				"armorSlot" : "shield",
 				"buyValue" : 1000,
 				"minLevelRange" : 5,
-				"maxLevelRange" : 10
+				"maxLevelRange" : 10,
+				"canUpgrade" : 1
 			}
 
 		}

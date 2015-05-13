@@ -269,14 +269,49 @@ define([
 				});
 			});
 
-			var midSquare = squareWidth / 2;
+			//Player position indicator
+
+			context.fillStyle = playerColor;
+
+			//Ellipse/oval/thing
+			var midSquare = squareWidth / 2,
+				cx = (playerPos.x * squareHeight) + midSquare,
+			    cy = ((playerPos.y * squareWidth) + midSquare) - 2,
+			    rx = 4,
+			    ry = 7,
+			    triXOffset = 5,
+			    triYOffset = 5;
+
+			context.save(); // save state
+			context.beginPath();
+
+			context.translate(cx-rx, cy-ry);
+			context.scale(rx, ry);
+			context.arc(1, 1, 1, 0, 2 * Math.PI, false);
+
+			context.restore(); // restore to original state
+			context.stroke();
+			context.fill();
+			context.closePath();
+
+			//Triangle
+			context.beginPath();
+			context.moveTo(cx, (cy + ry) );
+			context.lineTo((cx + triXOffset), (cy + ry) + triYOffset);
+			context.lineTo((cx - triXOffset), (cy + ry) + triYOffset);
+			context.closePath(); //This is necessary or the stroke won't be finished (i.e. - it'll only stroke two of the sides and won't connect the 3rd + 1st points)
+			context.stroke();
+			context.fill();
+
+
+			/*var midSquare = squareWidth / 2;
 			context.beginPath();
 	        var radius = midSquare; // Arc radius
 	        var startAngle = 0; // Starting point on circle
 	        var endAngle = Math.PI+(Math.PI*2)/2; // End point on circle
 	        context.fillStyle = playerColor;
 	        context.arc((playerPos.x * squareHeight) + midSquare, (playerPos.y * squareWidth) + midSquare, radius, startAngle, endAngle);
-	        context.fill();
+	        context.fill();*/
 
 		}
 		

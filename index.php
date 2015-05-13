@@ -75,9 +75,13 @@
 				<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().data().str()"></span></div>
 				<div class="col-md-1"><span class="stat-label">DEX</span><span class="stat-value" data-bind="text: player().data().dex()"></span></div>
 				<div class="col-md-1"><span class="stat-label">END</span><span class="stat-value" data-bind="text: player().data().end()"></span></div>
-				<div class="col-md-1"><span class="stat-label">Stat06</span><span class="stat-value">Stat06</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat07</span><span class="stat-value">Stat07</span></div>
-				<div class="col-md-1"><span class="stat-label">Stat08</span><span class="stat-value">Stat08</span></div>
+
+
+				<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
+				<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
+				<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
+
+
 				<div class="col-md-1"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().data().exp()"></span></div>
 				<div class="col-md-1"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 			</div>
@@ -175,11 +179,33 @@
 
 						<div class="inner" data-bind="css: { hidden: activeItem().desc() == '' }">
 							<div class="desc" data-bind="html: activeItem().desc()"></div>
+							<!-- ko if: activeItem().actualItem() -->
+							<div class="line">
+								<span class="stat" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? 'Buy Value:' : 'Sell Value:' "></span>
+								<span class="value" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? activeItem().actualItem().buyValue() + ' GP' : activeItem().actualItem().sellValue() + ' GP' "></span>
+							</div>
+
+								<!-- ko if: activeItem().actualItem().armorValue && typeof activeItem().actualItem().armorValue === 'function' -->
+								<div class="line">
+									<span class="stat">Armor Value:</span>
+									<span class="value" data-bind="text: activeItem().actualItem().armorValue() "></span>
+								</div>
+								<!-- /ko -->
+
+								<!-- ko if: activeItem().actualItem().dmgMin && typeof activeItem().actualItem().dmgMin === 'function' -->
+								<div class="line">
+									<span class="stat">DMG:</span>
+									<span class="value" data-bind="text: activeItem().actualItem().dmgMin() + ' - ' + activeItem().actualItem().dmgMax()"></span>
+								</div>
+								<!-- /ko -->
+
+							<!-- /ko -->
 							<button class="btn btn-default inventory-control" data-bind="click: equipActiveItem, css: { hidden: activeItem().canEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: unEquipActiveItem, css: { hidden: activeItem().canUnEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Un-Equip</button>
 							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canUse() != 1 || currentInventoryRightSide() != 'equipment' }">Use</button>
-							<button class="btn btn-default inventory-control" data-bind="click: buyActiveItem, css: { hidden: activeItem().canBuy() != 1 || currentInventoryRightSide() != 'merchant', disabled : activeItem().actualItem() && ($root.player().gp() < activeItem().actualItem().buyValue) }, text : 'Buy 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().buyValue + ' GP' : 0) + ')'">Buy</button>
+							<button class="btn btn-default inventory-control" data-bind="click: buyActiveItem, css: { hidden: activeItem().canBuy() != 1 || currentInventoryRightSide() != 'merchant', disabled : activeItem().actualItem() && ($root.player().gp() < activeItem().actualItem().buyValue()) }, text : 'Buy 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().buyValue() + ' GP' : 0) + ')'"></button>
 							<button class="btn btn-default inventory-control" data-bind="click: sellActiveItem, css: { hidden: activeItem().canSell() != 1 || currentInventoryRightSide() != 'merchant' }, text : 'Sell 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().sellValue() + ' GP' : 0) + ')'"></button>
+							<button class="btn btn-default inventory-control" data-bind="click: upgradeActiveItem, css: { hidden: activeItem().canUpgrade() != 1 || currentInventoryRightSide() != 'equipment', disabled : !$root._activeItemCanBeUpgraded() }, text: 'Upgrade (' + (activeItem().actualItem() ? activeItem().actualItem().costForNextUpgradeLevel() : '0') + ' sc.)'"></button>
 							<span data-bind="css: { hidden: currentInventoryRightSide() != 'container'}">
 								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }, html: ( activeItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
 								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1}, html: ( activeItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>
