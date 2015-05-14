@@ -1,130 +1,147 @@
 define([
 	'jquery',
 	'knockout',
+	'md5',
 ], function($, ko){
 
-	//Returns number between min (inclusive) and max (exclusive)
-	doRand = function(min, max){
-		return Math.floor(Math.random() * (max - min)) + min;
-	}
-	
-	doBasedOnPercent = function(percentageActions, finallyAction){
-		var percents;
-		if(percentageActions == undefined){
-			return false;
-		}
+	var Utils = {
 
-		var discretePercents = Object.keys(percentageActions);
-		var percents = Array();
+		//Returns number between min (inclusive) and max (exclusive)
+		doRand : function(min, max){
+			return Math.floor(Math.random() * (max - min)) + min;
+		},
+		
+		doBasedOnPercent : function(percentageActions, finallyAction){
+			var percents;
+			if(percentageActions == undefined){
+				return false;
+			}
 
-		for(i = 0; i < discretePercents.length; i++){
+			var discretePercents = Object.keys(percentageActions);
+			var percents = Array();
 
-			if( percentageActions[discretePercents[i]].constructor == Array ){
+			for(i = 0; i < discretePercents.length; i++){
 
-				for(j=0; j < percentageActions[discretePercents[i]].length; j++){
+				if( percentageActions[discretePercents[i]].constructor == Array ){
+
+					for(j=0; j < percentageActions[discretePercents[i]].length; j++){
+						percents.push(discretePercents[i]);
+					}
+
+				}else{
 					percents.push(discretePercents[i]);
 				}
 
-			}else{
-				percents.push(discretePercents[i]);
 			}
 
-		}
+			percents.sort();
+			
+			var rand = this.doRand(1,101);
+			var percentOffset = 0;
+			
+			for(i = 0; i < percents.length; i++){
 
-		percents.sort();
-		
-		var rand = doRand(1,101);
-		var percentOffset = 0;
-		
-		for(i = 0; i < percents.length; i++){
+				var targetPercentage = percents[i];
+				var addToPercentOffset = targetPercentage;
 
-			var targetPercentage = percents[i];
-			var addToPercentOffset = targetPercentage;
+				if( (rand - percentOffset) <= percents[i] ){
 
-			if( (rand - percentOffset) <= percents[i] ){
+					var chosenAction = percentageActions[percents[i]];
 
-				var chosenAction = percentageActions[percents[i]];
+					if( chosenAction.constructor == Array ){
 
-				if( chosenAction.constructor == Array ){
+						var numPossibilities = chosenAction.length;
+						var whichPossibilityIndex = this.doRand(0,numPossibilities);
+						chosenAction = chosenAction[whichPossibilityIndex];
 
-					var numPossibilities = chosenAction.length;
-					var whichPossibilityIndex = doRand(0,numPossibilities);
-					chosenAction = chosenAction[whichPossibilityIndex];
+					}
 
-				}
+					if(typeof chosenAction === 'function'){
+						return chosenAction(rand);
+					}else{
+						return chosenAction;
+					}
 
-				if(typeof chosenAction === 'function'){
-					return chosenAction(rand);
 				}else{
-					return chosenAction;
+					percentOffset += addToPercentOffset;
 				}
-
-			}else{
-				percentOffset += addToPercentOffset;
 			}
-		}
-		
-		if(finallyAction && typeof finallyAction === 'function'){
-			return finallyAction(rand);
-		}
-		
-		//lolwut?
-		console.log(rand + " did not match");
-		console.log("percentageActions:");
-		console.log(percentageActions);
-		console.log("percents:");
-		console.log(percents);
-		return false;
-	}
-
-	chooseRandomly = function( opts ){
-		var randIdx = doRand(0, opts.length);
-		return opts[randIdx];
-	}
-	
-	failureMsg = function(messageString){
-		displayMessage(messageString, "error", "Oh no!", 8000);
-	}
-	
-	successMsg = function(messageString){
-		displayMessage(messageString, "notice", "Success");
-	}
-	
-	displayMessage = function(messageString, type, growlHeader, duration){
-		type = type || "warning";
-	
-		$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
-	}
-
-	getExportDataFromObject = function(obj){
-
-		var exportObj = {};
-		
-		for(prop in obj){
-			if ( typeof obj[prop] !== 'function' ){
-				exportObj[prop] = obj[prop];
-			}else if (ko.isObservable(obj[prop])) {
-				exportObj[prop] = obj[prop]();
+			
+			if(finallyAction && typeof finallyAction === 'function'){
+				return finallyAction(rand);
 			}
-		}
+			
+			//lolwut?
+			console.log(rand + " did not match");
+			console.log("percentageActions:");
+			console.log(percentageActions);
+			console.log("percents:");
+			console.log(percents);
+			return false;
+		},
+
+		chooseRandomly : function( opts ){
+			var randIdx = this.doRand(0, opts.length);
+			return opts[randIdx];
+		},
 		
-		return exportObj;
+		failureMsg : function(messageString){
+			displayMessage(messageString, "error", "Oh no!", 8000);
+		},
+		
+		successMsg : function(messageString){
+			displayMessage(messageString, "notice", "Success");
+		},
+		
+		displayMessage : function(messageString, type, growlHeader, duration){
+			type = type || "warning";
+		
+			$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
+		},
+
+		getExportDataFromObject : function(obj){
+
+			var exportObj = {};
+			
+			for(prop in obj){
+				if ( typeof obj[prop] !== 'function' ){
+					exportObj[prop] = obj[prop];
+				}else if (ko.isObservable(obj[prop])) {
+					exportObj[prop] = obj[prop]();
+				}
+			}
+			
+			return exportObj;
+
+		},
+
+		isEmptyObject : function(obj){
+			return Object.keys(obj).length === 0;
+		},
+		
+		cloneObject : function(obj){
+			
+			var newItemData = ko.mapping.toJS(obj);
+			
+			var className = Object.getPrototypeOf(obj);
+			
+			var newObj = new className.constructor(newItemData);
+			
+			return newObj;
+		},
+
+		microtime : function(get_as_float) {
+			var unixtime_ms = (new Date).getTime();
+			var sec = Math.floor(unixtime_ms/1000);
+			return get_as_float ? (unixtime_ms/1000) : (unixtime_ms - (sec * 1000))/1000 + ' ' + sec;
+		},
+
+		uniqueID : function(){
+			return md5(this.microtime());
+		},
 
 	}
 
-	isEmptyObject = function(obj){
-		return Object.keys(obj).length === 0;
-	}
-	
-	cloneObject = function(obj){
-		
-		var newItemData = ko.mapping.toJS(obj);
-		
-		var className = Object.getPrototypeOf(obj);
-		
-		var newObj = new className.constructor(newItemData);
-		
-		return newObj;
-	}
+	return Utils;
 	
 });

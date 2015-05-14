@@ -82,7 +82,7 @@
 				<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
 
 
-				<div class="col-md-1"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().data().exp()"></span></div>
+				<div class="col-md-1"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().data().exp() + '/' + player().expRequiredForNextLevel()"></span></div>
 				<div class="col-md-1"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 			</div>
 
@@ -165,7 +165,7 @@
 							</div>
 							<!-- /ko -->
 							<!-- ko foreach: $root.player().data().inventory() -->
-							<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'right', hidden : $data.id == 'gold' }">
+							<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
 								<span class="item" data-bind="text: $data.name"></span>
 								<span class="qty" data-bind="text: $data.qty()"></span>
 							</div>
@@ -180,10 +180,13 @@
 						<div class="inner" data-bind="css: { hidden: activeItem().desc() == '' }">
 							<div class="desc" data-bind="html: activeItem().desc()"></div>
 							<!-- ko if: activeItem().actualItem() -->
-							<div class="line">
-								<span class="stat" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? 'Buy Value:' : 'Sell Value:' "></span>
-								<span class="value" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? activeItem().actualItem().buyValue() + ' GP' : activeItem().actualItem().sellValue() + ' GP' "></span>
-							</div>
+
+								<!-- ko if: activeItem().actualItem().id != 'gold' -->
+								<div class="line">
+									<span class="stat" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? 'Buy Value:' : 'Sell Value:' "></span>
+									<span class="value" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? activeItem().actualItem().buyValue() + ' GP' : activeItem().actualItem().sellValue() + ' GP' "></span>
+								</div>
+								<!-- /ko -->
 
 								<!-- ko if: activeItem().actualItem().armorValue && typeof activeItem().actualItem().armorValue === 'function' -->
 								<div class="line">
@@ -200,58 +203,59 @@
 								<!-- /ko -->
 
 							<!-- /ko -->
-							<button class="btn btn-default inventory-control" data-bind="click: equipActiveItem, css: { hidden: activeItem().canEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Equip</button>
-							<button class="btn btn-default inventory-control" data-bind="click: unEquipActiveItem, css: { hidden: activeItem().canUnEquip() != 1 || currentInventoryRightSide() != 'equipment' }">Un-Equip</button>
-							<button class="btn btn-default inventory-control" data-bind="click: useActiveItem, css: { hidden: activeItem().canUse() != 1 || currentInventoryRightSide() != 'equipment' }">Use</button>
-							<button class="btn btn-default inventory-control" data-bind="click: buyActiveItem, css: { hidden: activeItem().canBuy() != 1 || currentInventoryRightSide() != 'merchant', disabled : activeItem().actualItem() && ($root.player().gp() < activeItem().actualItem().buyValue()) }, text : 'Buy 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().buyValue() + ' GP' : 0) + ')'"></button>
-							<button class="btn btn-default inventory-control" data-bind="click: sellActiveItem, css: { hidden: activeItem().canSell() != 1 || currentInventoryRightSide() != 'merchant' }, text : 'Sell 1x (' + ( activeItem().actualItem() ? activeItem().actualItem().sellValue() + ' GP' : 0) + ')'"></button>
-							<button class="btn btn-default inventory-control" data-bind="click: upgradeActiveItem, css: { hidden: activeItem().canUpgrade() != 1 || currentInventoryRightSide() != 'equipment', disabled : !$root._activeItemCanBeUpgraded() }, text: 'Upgrade (' + (activeItem().actualItem() ? activeItem().actualItem().costForNextUpgradeLevel() : '0') + ' sc.)'"></button>
-							<span data-bind="css: { hidden: currentInventoryRightSide() != 'container'}">
-								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }, html: ( activeItem().moveDirection() == 'right' ? 'Put 1x &gt;&gt;' : '&lt;&lt; Put 1x' )"></button>
-								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1}, html: ( activeItem().moveDirection() == 'right' ? 'Put All &gt;&gt;' : '&lt;&lt; Put All' )"></button>
-							</span>
-							<span data-bind="css: { hidden: ( currentInventoryRightSide() != 'equipment' && activeItem().moveDirection() == 'left' ) }">
-								<button class="btn btn-default inventory-control" data-bind="click: dropActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop 1x</button>
-								<button class="btn btn-default inventory-control" data-bind="click: dropAllActiveItem, css: { hidden: activeItem().canDrop() != 1 }">Drop All</button>
-							</span>
+
+							<!-- ko foreach: $root.activeItemButtons() -->
+								<button class="btn btn-default inventory-control" data-bind="css: $data.css, click: $data.click, text: $data.text"></button>
+							<!-- /ko -->
+							
 						</div>
 					</div>
 
 					<div class="col-md-4 equipment" data-bind="css: { hidden: currentInventoryRightSide() != 'equipment' }" >
 
-						<!-- <div class="equipment-spacer"></div> -->
-
 						<div class="equipment-inner-container">
 
-							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().head() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().armor().head().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().head().name) == undefined }">
-								<span class="slot">Head Armor:</span>
-								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().head().name) || 'None'"></span>
-							</div>
+							<!-- ko with: $root.player().data().equipment().armor().head() -->
+								<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+									<span class="slot">Head Armor:</span>
+									<span class="item" data-bind="text: $data.name || 'None'"></span>
+								</div>
+							<!-- /ko -->
 
-							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().fin() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().armor().fin().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().fin().name) == undefined }">
-								<span class="slot">Fin Armor:</span>
-								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().fin().name) || 'None'"></span>
-							</div>
+							<!-- ko with: $root.player().data().equipment().armor().fin() -->
+								<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+									<span class="slot">Fin Armor:</span>
+									<span class="item" data-bind="text: $data.name || 'None'"></span>
+								</div>
+							<!-- /ko -->
 
-							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().body() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().armor().body().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().body().name) == undefined }">
-								<span class="slot">Body Armor:</span>
-								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().body().name) || 'None'"></span>
-							</div>
+							<!-- ko with: $root.player().data().equipment().armor().body() -->
+								<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+									<span class="slot">Body Armor:</span>
+									<span class="item" data-bind="text: $data.name || 'None'"></span>
+								</div>
+							<!-- /ko -->
 
-							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().armor().tail() ) }, css: { selected: $root.activeItem().id()== ko.unwrap($root.player().data().equipment().armor().tail().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().armor().tail().name) == undefined }">
-								<span class="slot">Tail Armor:</span>
-								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().armor().tail().name) || 'None'"></span>
-							</div>
+							<!-- ko with: $root.player().data().equipment().armor().tail() -->
+								<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+									<span class="slot">Tail Armor:</span>
+									<span class="item" data-bind="text: $data.name || 'None'"></span>
+								</div>
+							<!-- /ko -->
 
-							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().weapon() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().weapon().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().weapon().name) == undefined }">
-								<span class="slot">Weapon:</span>
-								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().weapon().name) || 'None'"></span>
-							</div>
+							<!-- ko with: $root.player().data().equipment().weapon() -->
+								<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+									<span class="slot">Weapon:</span>
+									<span class="item" data-bind="text: $data.name || 'None'"></span>
+								</div>
+							<!-- /ko -->
 
-							<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $root.player().data().equipment().shield() ) }, css: { selected: $root.activeItem().id()==ko.unwrap($root.player().data().equipment().shield().id) && $root.activeItem().moveDirection() == 'left', empty : ko.unwrap($root.player().data().equipment().shield().name) == undefined }">
-								<span class="slot">Shield:</span>
-								<span class="item" data-bind="text: ko.unwrap($root.player().data().equipment().shield().name) || 'None'"></span>
-							</div>
+							<!-- ko with: $root.player().data().equipment().shield() -->
+								<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+									<span class="slot">Shield:</span>
+									<span class="item" data-bind="text: $data.name || 'None'"></span>
+								</div>
+							<!-- /ko -->
 
 						</div>
 
@@ -266,7 +270,7 @@
 						<!-- /ko -->
 
 						<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
-							<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'left' }">
+							<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
 								<span class="item" data-bind="text: $data.name"></span>
 								<span class="qty" data-bind="text: $data.qty()"></span>
 							</div>
@@ -283,7 +287,7 @@
 						<!-- /ko -->
 
 						<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
-							<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root.activeItem().id()==$data.id && $root.activeItem().moveDirection() == 'left' }">
+							<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
 								<span class="item" data-bind="text: $data.name"></span>
 								<span class="qty" data-bind="text: $data.qty()"></span>
 							</div>

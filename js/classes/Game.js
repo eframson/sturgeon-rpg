@@ -12,7 +12,7 @@ define([
 	'json!data/monsters.json',
 
 	'Utils',
-], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, Monster, itemDataFile, monsterDataFile) {
+], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, Monster, itemDataFile, monsterDataFile, Utils) {
 
 	function Game() {
 
@@ -156,7 +156,7 @@ define([
 					message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " fish biscuits using your kick-ass mouth feelers.";
 					self.tempFoodFindBonus = 0;
 				};
-				doBasedOnPercent(percentages,
+				Utils.doBasedOnPercent(percentages,
 				function(rand){
 					//console.log("rand: " + rand + " ; temp bonus: " + self.tempFoodFindBonus + " ; findPercent: " + findPercent);
 					message = "You attempt to smoothly swim to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
@@ -172,17 +172,17 @@ define([
 				var skillIncrease = 0;
 
 				if( self.player().data().skills().findFood() < 40 ){
-					skillIncrease = doBasedOnPercent({
+					skillIncrease = Utils.doBasedOnPercent({
 						70 : 1,
 						30 : 2,
 					});
 				}else if( self.player().data().skills().findFood() < 80 ){
-					skillIncrease = doBasedOnPercent({
+					skillIncrease = Utils.doBasedOnPercent({
 						90 : 1,
 						10 : 2,
 					});
 				}else{
-					skillIncrease = doBasedOnPercent({
+					skillIncrease = Utils.doBasedOnPercent({
 						80 : 1,
 					});
 				}
@@ -256,6 +256,203 @@ define([
 					return self.player().weaponScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
 				}
 				return false;
+			});
+
+			self.activeItemButtons = ko.computed(function(){
+				var buttons = new Array();
+
+				if( self.activeItem().actualItem() != undefined ){
+					var actualItem = self.activeItem().actualItem();
+
+					if( self.activeItem().canEquip() && self.currentInventoryRightSide() == "equipment" ){
+						buttons.push({
+							css: "",
+							text: "Equip",
+							click: self.equipActiveItem
+						});
+					}
+
+					if( self.activeItem().canUnEquip() && self.currentInventoryRightSide() == "equipment" ){
+						buttons.push({
+							css: "",
+							text: "Un-Equip",
+							click: self.unEquipActiveItem
+						});
+					}
+
+					//It's not actually dependent on the equipment screen, it just can't be used while looting a container or trading with a merchant
+					if( self.activeItem().canUse() && self.currentInventoryRightSide() == "equipment" ){
+						buttons.push({
+							css: "",
+							text: "Use",
+							click: self.useActiveItem
+						});
+					}
+
+					if( self.activeItem().canBuy() && self.currentInventoryRightSide() == "merchant" ){
+
+						if( actualItem.qty() == 1 ){
+
+							buttons.push({
+								css: ( self.player().gp() < actualItem.buyValue() ) ? "disabled" : "",
+								text: "Buy (" + actualItem.buyValue() + " GP)",
+								click: self.buyActiveItem
+							});
+
+						}else if( actualItem.qty() > 1 ){
+
+							buttons.push({
+								css: ( self.player().gp() < actualItem.buyValue() ) ? "disabled" : "",
+								text: "Buy 1x (" + actualItem.buyValue() + " GP)",
+								click: self.buyActiveItem
+							});
+
+							var numPurchasable = Math.floor( self.player().gp() / actualItem.buyValue() );
+							var actualPurchasable = (numPurchasable <= actualItem.qty()) ? numPurchasable : actualItem.qty() ;
+
+							if(actualPurchasable > 0){
+
+								buttons.push({
+									css: ( self.player().gp() < (actualPurchasable * actualItem.buyValue()) ) ? "disabled" : "",
+									text: "Buy " + actualPurchasable + "x (" + (actualPurchasable * actualItem.buyValue()) + " GP)",
+									click: self.buyMaxActiveItem
+								});
+
+							}
+						}
+
+					}
+
+					if( self.activeItem().canSell() && self.currentInventoryRightSide() == "merchant" ){
+
+						if( self.activeItem().actualItem().qty() == 1 ){
+
+							buttons.push({
+								css: "",
+								text: "Sell (" + self.activeItem().actualItem().sellValue() + " GP)",
+								click: self.sellActiveItem
+							});
+
+						}else if( self.activeItem().actualItem().qty() > 1 ){
+
+							buttons.push({
+								css: "",
+								text: "Sell 1x (" + actualItem.sellValue() + " GP)",
+								click: self.sellActiveItem
+							});
+
+							buttons.push({
+								css: "",
+								text: "Sell All (" + (actualItem.qty() * actualItem.sellValue()) + " GP)",
+								click: self.sellAllActiveItem
+							});
+
+						}
+
+					}
+
+					if( self.activeItem().canUpgrade() && self.currentInventoryRightSide() == "equipment" ){
+
+						buttons.push({
+							css: (self._activeItemCanBeUpgraded()) ? "" : "disabled",
+							text: "Upgrade (" + actualItem.costForNextUpgradeLevel() + " scrap)",
+							click: self.upgradeActiveItem
+						});
+
+					}
+
+					if( self.activeItem().canDrop() && self.currentInventoryRightSide() != 'merchant'){
+						
+						if( self.currentInventoryRightSide() == 'container' ){ //We're moving something
+
+							if( self.activeItem().moveDirection() == "left" ){ //We're moving from the container to the inventory
+
+								if(actualItem.qty() > 1){
+
+									if( actualItem.id != "gold" ){
+										buttons.push({
+											css: "",
+											text: "Take 1x",
+											click: self.dropActiveItem
+										});
+									}
+
+									buttons.push({
+										css: "",
+										text: "Take All",
+										click: self.dropAllActiveItem
+									});
+
+								}else if(actualItem.qty() == 1){
+									buttons.push({
+										css: "",
+										text: "Take",
+										click: self.dropActiveItem
+									});
+								}
+
+							}else if( self.activeItem().moveDirection() == "right" ){ //We're moving from the inventory to the container
+								
+								if( actualItem.id != "gold" ){
+
+									if( actualItem.qty() > 1 ){
+
+										buttons.push({
+											css: "",
+											text: "Put 1x",
+											click: self.dropActiveItem
+										});
+
+										buttons.push({
+											css: "",
+											text: "Put All",
+											click: self.dropAllActiveItem
+										});
+
+									}else if( actualItem.qty() == 1 ){
+										
+										buttons.push({
+											css: "",
+											text: "Put",
+											click: self.dropActiveItem
+										});
+
+									}
+
+								}
+
+							}
+							
+						}else { //We're dropping something
+
+							if(actualItem.qty() > 1){
+
+								buttons.push({
+									css: "",
+									text: "Drop 1x",
+									click: self.dropActiveItem
+								});
+
+								buttons.push({
+									css: "",
+									text: "Drop All",
+									click: self.dropAllActiveItem
+								});
+
+							}else if(actualItem.qty() == 1){
+								buttons.push({
+									css: "",
+									text: "Drop",
+									click: self.dropActiveItem
+								});
+							}
+
+						}
+					}
+
+				}
+
+				return buttons;
 			});
 		}
 
@@ -430,7 +627,7 @@ define([
 		this.startCombat = function(){
 
 			//Initialize a monster
-			var newMonsterID = doBasedOnPercent({
+			var newMonsterID = Utils.doBasedOnPercent({
 				25 : [
 					"monster_01",
 					"monster_02",
@@ -466,7 +663,7 @@ define([
 				}else if( self.player().data().speed() < self.currentEnemy().speed() ){
 					goesFirst = "enemy";
 				}else{
-					goesFirst = (doRand(0,2) == 1) ? "enemy" : "player" ;
+					goesFirst = (Utils.doRand(0,2) == 1) ? "enemy" : "player" ;
 				}
 
 				self._goesFirst = goesFirst;
@@ -630,7 +827,7 @@ define([
 
 			var newItem = self.generateRandomLootItem();
 
-			var container = doBasedOnPercent({
+			var container = Utils.doBasedOnPercent({
 				25 : [
 					"a crate sealed tightly with tar",
 					"an upturned canoe concealing a pocket of air",
@@ -651,21 +848,19 @@ define([
 			}
 		}
 
-		this.generateRandomLootItem = function(doGold){
+		this.generateRandomLootItem = function(quality, doGold){
 
+			quality = quality || "standard";
+			doGold = (doGold != undefined) ? doGold : true ;
 			var itemClass = "item";
 			var itemToAdd = {};
 			var qtyCoefficient = Math.ceil( self.level().levelNum() / 5 );
 			var canAdd = true;
 
-			doGold = (doGold != undefined) ? doGold : true ;
-
 			var possibleItemTypes = {
-				50 : "gold",
-				25 : [
-					"misc",
-					"gear",
-				]
+				40 : "gold",
+				35 : "misc",
+				25 : "gear",
 			};
 
 			if(!doGold){
@@ -677,12 +872,12 @@ define([
 				};
 			}
 
-			var itemType = doBasedOnPercent(possibleItemTypes);
+			var itemType = Utils.doBasedOnPercent(possibleItemTypes);
 
 			if(itemType == "gold"){
 
 				//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 2000
-				var goldSize = doBasedOnPercent({
+				var goldSize = Utils.doBasedOnPercent({
 					1 : "hoard",
 					9 : "large",
 					30 : "medium",
@@ -692,11 +887,11 @@ define([
 				var goldAmt = 0;
 
 				if( goldSize == "small" ){
-					goldAmt = doRand(80, 121);
+					goldAmt = Utils.doRand(80, 121);
 				}else if( goldSize == "medium" ){
-					goldAmt = doRand(160, 241);
+					goldAmt = Utils.doRand(160, 241);
 				}else if( goldSize == "large" ){
-					goldAmt = doRand(320, 481);
+					goldAmt = Utils.doRand(320, 481);
 				}else if( goldSize == "hoard" ){
 					goldAmt = 2000;
 				}
@@ -707,19 +902,16 @@ define([
 
 			}else if(itemType == "misc"){
 
-				//41% armor scraps, 39% weapon scraps, 20% stone of reset
-				var miscType = doBasedOnPercent({
-					20 : [
+				var miscType = Utils.doBasedOnPercent({
+					25 : [
 						"stone",
 						"food",
-					],
-					30 : [
 						"weapon",
 						"armor",
 					]
 				});
 
-				var scrapQty = doRand(1,26) * qtyCoefficient;
+				var scrapQty = Utils.doRand(1,26) * qtyCoefficient;
 				var foodQty = 1 * qtyCoefficient;
 
 				if( miscType == "armor" ){
@@ -735,7 +927,7 @@ define([
 					itemToAdd = self.getAvailableItemById("reset_stone", "consumables", 1);
 
 				}else if( miscType == "food" ){
-					var consumableType = doBasedOnPercent({
+					var consumableType = Utils.doBasedOnPercent({
 						50 : [
 							"health_potion",
 							"biscuit_food",
@@ -746,7 +938,7 @@ define([
 
 			}else if(itemType == "gear"){
 
-				var gearType = doBasedOnPercent({
+				var gearType = Utils.doBasedOnPercent({
 					50 : [
 						"armor",
 						"weapon",
@@ -761,7 +953,7 @@ define([
 					var armorId;
 
 					var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
-					armorId = chooseRandomly( availableArmor );
+					armorId = Utils.chooseRandomly( availableArmor );
 					if(armorId == "shield_01" || armorId == "shield_02"){
 						itemClass = "shield";
 						itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
@@ -775,23 +967,8 @@ define([
 
 					var weaponId;
 
-					if(self.level().levelNum() < 5){
-
-						weaponId = doBasedOnPercent({
-							50 : [
-								"melee_weapon_01",
-								"melee_weapon_02",
-							],
-						});
-
-					}else if( self.level().levelNum() > 5 ){
-						weaponId = doBasedOnPercent({
-							50 : [
-								"melee_weapon_03",
-								"melee_weapon_04",
-							],
-						});
-					}
+					var availableWeapons = self.getAvailableItemIdsByTypeForLevel("weapon", self.level().levelNum());
+					weaponId = Utils.chooseRandomly( availableWeapons );
 
 					itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
@@ -818,7 +995,7 @@ define([
 			console.log("trigger a combat action");
 
 			//Generate "enemy appears" message
-			var enemyMsg = doBasedOnPercent({
+			var enemyMsg = Utils.doBasedOnPercent({
 				25 : [
 					"Suddenly, swimming out of the murky depths, a foe appears!",
 					"A shadow looms over you. You turn around swiftly; it's an enemy!",
@@ -852,7 +1029,7 @@ define([
 
 			self.freezeMovement(true);
 
-			var eventType = doBasedOnPercent({
+			var eventType = Utils.doBasedOnPercent({
 				30 : "trainer",
 				40 : "trader",
 				25 : "cooldown",
@@ -888,10 +1065,10 @@ define([
 
 							var itemArray = Array();
 
-							var numItems = doRand(3,8);
+							var numItems = Utils.doRand(3,8);
 
 							for(var i = 0; i < numItems; i++){
-								self.currentContainer.addItem(self.generateRandomLootItem(false));
+								self.currentContainer.addItem(self.generateRandomLootItem(undefined, false));
 							}
 
 							self.currentInventoryRightSide("merchant");
@@ -909,7 +1086,7 @@ define([
 
 				var trainCost = 0;
 
-				var trainSkillString = chooseRandomly(
+				var trainSkillString = Utils.chooseRandomly(
 					Array(
 						"findFood",
 						"scanSquares",
@@ -1011,7 +1188,7 @@ define([
 
 			}else if( eventType == "stat" ){
 
-				var stat = chooseRandomly(
+				var stat = Utils.chooseRandomly(
 					Array(
 						"str",
 						"dex",
@@ -1196,7 +1373,7 @@ define([
 		}
 
 		this.setEquipmentItemAsActiveItem = function(item){
-			if( !isEmptyObject(item) ){
+			if( !Utils.isEmptyObject(item) ){
 				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
 			}
 		}
@@ -1269,7 +1446,7 @@ define([
 
 			self.player().data().inventory.removeItem(item);
 
-			if( alreadyEquippedItem != undefined && !isEmptyObject(alreadyEquippedItem) ){
+			if( alreadyEquippedItem != undefined && !Utils.isEmptyObject(alreadyEquippedItem) ){
 				self.player().addItemToInventory(alreadyEquippedItem);
 			}
 
@@ -1304,7 +1481,7 @@ define([
 			if(gold && gold.qty() >= item.buyValue()){
 				gold.qty( gold.qty() - item.buyValue() );
 
-				var newItem = cloneObject(item);
+				var newItem = Utils.cloneObject(item);
 				newItem.qty(1);
 
 				var srcNumLeft = moveFrom.removeItem(item, 1);
@@ -1320,19 +1497,51 @@ define([
 
 		}
 
-		this.sellActiveItem = function(game, event){
+		this.buyMaxActiveItem = function(game, event){
 
+			var item = self.activeItem().actualItem();
+			var moveFrom = self.currentContainer;
+			var moveTo = self.player().data().inventory;
+
+			var numPurchasable = Math.floor( self.player().gp() / item.buyValue() );
+			var actualPurchasable = (numPurchasable <= item.qty()) ? numPurchasable : item.qty() ;
+			var totalCost = actualPurchasable * item.buyValue();
+
+			var gold = moveTo.getItemByID("gold");
+
+			if(gold && gold.qty() >= totalCost){
+				gold.qty( gold.qty() - totalCost );
+
+				var newItem = Utils.cloneObject(item);
+				newItem.qty(actualPurchasable);
+
+				var srcNumLeft = moveFrom.removeItem(item, actualPurchasable);
+
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
+
+				//Add to inventory
+				moveTo.addItem(newItem);
+
+			}
+
+		}
+
+		this.sellActiveItem = function(game, event, qty){
+
+			var qty = qty || 1;
 			var item = self.activeItem().actualItem();
 			var moveFrom = self.player().data().inventory;
 			var moveTo = self.currentContainer;
 
-			var gold = self.getAvailableItemById("gold", "currency", item.sellValue());
+			var gold = self.getAvailableItemById("gold", "currency", (qty * item.sellValue()) );
 			goldItem = new Item(gold);
 
-			var newItem = cloneObject(item);
-			newItem.qty(1);
+			var newItem = Utils.cloneObject(item);
+			newItem.qty(qty);
 
-			var srcNumLeft = moveFrom.removeItem(item, 1);
+			var srcNumLeft = moveFrom.removeItem(item, qty);
 
 			if(srcNumLeft == 0){
 				self._resetActiveItem();
@@ -1341,6 +1550,10 @@ define([
 			//Add to inventory
 			moveTo.addItem(newItem);
 			moveFrom.addItem(goldItem);
+		}
+
+		this.sellAllActiveItem = function(game, event){
+			self.sellActiveItem(game, event, self.activeItem().actualItem().qty());
 		}
 
 		this.useActiveItem = function(game, event){
@@ -1386,7 +1599,7 @@ define([
 
 		this._dropActiveItem = function(game, event, qty){
 
-			var itemToMoveId = self.activeItem().id(),
+			var itemToMoveId = self.activeItem().actualItem().id,
 				existingItem = undefined,
 				newItem = undefined,
 				moveFrom = "inventory",
@@ -1419,14 +1632,16 @@ define([
 			//Get the existing item we want to "move"
 			existingItem = srcCollection.getItemByID(itemToMoveId);
 			//Clone it so we're not writing to the same object from two different places
-			newItem = cloneObject(existingItem);
-			//Set the right qty on the object we want to add
-			if(qty == undefined || qty == "all"){
-				newItem.qty(existingItem.qty());
-			}else{
-				newItem.qty(qty);
-			}
+			if(moveTo){
+				newItem = Utils.cloneObject(existingItem);
 
+				//Set the right qty on the object we want to add
+				if(qty == undefined || qty == "all"){
+					newItem.qty(existingItem.qty());
+				}else{
+					newItem.qty(qty);
+				}
+			}
 
 			//Remove the object from the source
 			var srcNumLeft = srcCollection.removeItem(existingItem, qty);
@@ -1464,6 +1679,19 @@ define([
 
 			self._dropActiveItem(game, event, "all");
 
+		}
+
+		this._shouldItemBeSelected = function(item){
+			//If an item is actually active
+			if( self.activeItem().actualItem() != undefined ){
+
+				if(self.activeItem().actualItem().uniqueID == item.uniqueID){
+					return true;
+				}
+				return false;
+
+			}
+			return false;
 		}
 
 		this.useHealthPotion = function(){
@@ -1632,7 +1860,7 @@ define([
 
 			var itemOne, itemTwo;
 
-			itemData = self.getAvailableItemById("armor_scraps", "crafting", doRand(1,26));
+			itemData = self.getAvailableItemById("armor_scraps", "crafting", Utils.doRand(1,26));
 			if(itemData){
 				itemOne = new Item(itemData);
 			}
@@ -1671,7 +1899,7 @@ define([
 			var armorId;
 
 			var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
-			armorId = chooseRandomly( availableArmor );
+			armorId = Utils.chooseRandomly( availableArmor );
 			if(armorId == "shield_01" || armorId == "shield_02"){
 				itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
 			}else{
@@ -1689,6 +1917,12 @@ define([
 			self.player().addItemToInventory( new Item(itemToAdd) );
 		}
 
+		this.goldTest = function(){
+
+			itemToAdd = self.getAvailableItemById("gold", "currency", 2000);
+			self.player().addItemToInventory( new Item(itemToAdd) );
+		}
+
 		self.init();
 
 	};
@@ -1698,31 +1932,28 @@ define([
 	return Game;
 
 /* TODOs
-- Crafting, can upgrade existing stuff or make new stuff
+- Crafting, make new stuff?
 - Implement class for Skills to get them more cohesive
 - More obvious turn-based combat
 - Dynamic loot generation (a la Diablo III)
-- Make weapons use the same random-picking logic as armor
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
 - Dynamic level scaling (better odds of items on higher levels, tougher enemies, etc.)
 - More obvious when level up
 - See at-a-glance if equipment is better or worse
 - Equip items from merchant screen
-- Hide "sell value" on GP
-- Just have "take all" option for GP
 - Break down weapons/armor into scrap
 - Fix crafting button so text fits
 - Scale loot with monster level
-- Increase inventory space every x levels
-- Increase speed every x levels
-- Show how much exp is required for next level
 - Fix weapon instantiation error (merchant screen, lvl 5+ ?)
 - Keyboard shortcuts for "continue" buttons
-- Better loot from monsters than items
-- "Buy all" button
+- Better loot from monsters than item squares
 - Maybe tweak % chance of cooldowns refreshed vs trader vs other stuff
 - Skill up scanning ability with usage/level-up
 - Make armor reduce dmg by a percent rather than flat amount
+- "Empty inventory" line should show up if the player's inventory contains only gold
+- When cloning item, generate new uniqueID
+- Add combat loots to message log
+- Dynamic container name
 */
 
 });

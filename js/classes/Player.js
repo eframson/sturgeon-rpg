@@ -7,7 +7,7 @@ define([
 	'classes/Weapon',
 
 	'Utils',
-], function($, ko, ItemCollection, Item, Armor, Weapon){
+], function($, ko, ItemCollection, Item, Armor, Weapon, Utils){
 
 	function Player(playerData){
 
@@ -56,9 +56,9 @@ define([
 				}),
 				abilities : ko.observableArray(playerData.abilities || Array()),
 				speed : ko.observable(playerData.speed || 2),
-				str : ko.observable(playerData.str || doRand(1,6)),
-				dex : ko.observable(playerData.dex || doRand(1,6)),
-				end : ko.observable(playerData.end || doRand(1,6)),
+				str : ko.observable(playerData.str || Utils.doRand(1,6)),
+				dex : ko.observable(playerData.dex || Utils.doRand(1,6)),
+				end : ko.observable(playerData.end || Utils.doRand(1,6)),
 				//baseMinDmg : ko.observable(playerData.baseMinDmg || 1),
 				//baseMaxDmg : ko.observable(playerData.baseMaxDmg || 2),
 
@@ -97,7 +97,7 @@ define([
 			this.minDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
 				var minDmg = self.baseMinDmg();
-				if( !isEmptyObject(self.data().equipment().weapon()) ){
+				if( !Utils.isEmptyObject(self.data().equipment().weapon()) ){
 					minDmg += self.data().equipment().weapon().dmgMin();
 				}
 				return minDmg;
@@ -106,7 +106,7 @@ define([
 			this.maxDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
 				var maxDmg = self.baseMaxDmg();
-				if( !isEmptyObject(self.data().equipment().weapon()) ){
+				if( !Utils.isEmptyObject(self.data().equipment().weapon()) ){
 					maxDmg += self.data().equipment().weapon().dmgMax();
 				}
 				return maxDmg;
@@ -119,13 +119,13 @@ define([
 
 				for(slot in armorSlots){
 
-					if( !isEmptyObject( armorSlots[slot]() ) ){
+					if( !Utils.isEmptyObject( armorSlots[slot]() ) ){
 						armorValue += armorSlots[slot]().armorValue();
 					}
 
 				}
 
-				if( !isEmptyObject(self.data().equipment().shield()) ){
+				if( !Utils.isEmptyObject(self.data().equipment().shield()) ){
 					armorValue += self.data().equipment().shield().armorValue();
 				}
 
@@ -295,7 +295,7 @@ define([
 		}
 		
 		this.doAttack = function(){
-			return doRand( self.minDmg(), (self.maxDmg() + 1) );
+			return Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
 		}
 		
 		this.takeDmg = function(dmg){
@@ -325,6 +325,10 @@ define([
 				self.data().str( self.data().str() + 1 );
 				self.data().dex( self.data().dex() + 1 );
 				self.data().end( self.data().end() + 1 );
+			}
+			if( self.data().level() % 4 == 0){
+				self.data().speed( self.data().speed() + 1 );
+				self.data().inventoryMaxSlots( self.data().inventoryMaxSlots() + 1 );
 			}
 			//Heal player / reset cooldowns on level up?
 		}

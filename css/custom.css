@@ -403,6 +403,7 @@ button:focus {
 #inventory-equipment .item-desc button.inventory-control {
 	width: 115px;
 	margin-top: 10px;
+	font-size: 12px;
 }
 
 #inventory-equipment .item-desc .line .stat {

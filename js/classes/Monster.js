@@ -3,7 +3,7 @@ define([
 	'knockout',
 
 	'Utils',
-], function($, ko){
+], function($, ko, Utils){
 
 	function Monster(monsterData){
 
@@ -34,6 +34,10 @@ define([
 				self.speed( Math.round(self.speed() + (self.speed() * coefficient)) );
 				self.minDmg( Math.round(self.minDmg() + (self.minDmg() * coefficient)) );
 				self.maxDmg( Math.round(self.maxDmg() + (self.maxDmg() * coefficient)) );
+				self.expValue( Math.round(self.expValue() + (self.expValue() * coefficient)) );
+
+				//This should prevent monsters getting constantly re-scaled every time a game is loaded, lol
+				self.isScaled(1);
 
 			}
 			
@@ -45,7 +49,7 @@ define([
 		this.doAttack = function(){
 			var minDmg = self.minDmg();
 			var maxDmg = self.maxDmg();
-			var rand = doRand( minDmg, (maxDmg + 1) );
+			var rand = Utils.doRand( minDmg, (maxDmg + 1) );
 			return rand;
 		}
 

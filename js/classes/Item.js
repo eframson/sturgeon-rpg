@@ -1,7 +1,8 @@
 define([
 	'jquery',
 	'knockout',
-], function($, ko){
+	'Utils'
+], function($, ko, Utils){
 
 	function Item(data){
 		
@@ -27,6 +28,7 @@ define([
 		this.isShield = false;
 		this.isWeapon = false;
 		this.attributesImprovedByLastCrafting = "";
+		this.uniqueID = (data.uniqueID || Utils.uniqueID());
 		
 		this.sellValue = ko.computed(function(){
 			return Math.ceil(self.buyValue() / 2);

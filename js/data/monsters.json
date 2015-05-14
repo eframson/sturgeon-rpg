@@ -15,7 +15,7 @@
 	"monster_02" : {
 		"id" : "monster_02",
 		"name" : "Bad-Tempered Crawdad",
-		"desc" : "Has tattoos on his shell indicating he's a member of the 'Big Bad Daddy' gang. He also has one depicting a scantily-clad salmon. What an unsavory character!",
+		"desc" : "Has tattoos on his shell indicating he's a member of the 'Big Bad Daddy' gang. He also has one depicting a scantily-clad salmon. What an unsavory fellow!",
 		"level" : 1,
 		"hp" : 6,
 		"armor" : 0,

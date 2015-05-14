@@ -4,7 +4,7 @@ define([
 	'classes/GridSquare',
 
 	'Utils',
-], function($, ko, GridSquare){
+], function($, ko, GridSquare, Utils){
 
 	function Level(levelData){
 
@@ -264,11 +264,6 @@ define([
 						context.fillText(text, col_num * squareWidth + (squareWidth / 5), (row_num * squareHeight) + (squareHeight / 2) + (squareHeight / 4));
 					}
 
-					/*if( square.type == "entrance" || square.type == "exit"){
-						//context.fillText("FOO", col_num * squareWidth, row_num * squareHeight);
-					}*/
-
-
 				});
 			});
 
@@ -461,8 +456,8 @@ define([
 				exitQuadNum;
 
 			//Choose one quad or the other off-the-bat, and then randomize its position inside that
-			entranceQuadNum = ( genOpts.quadsWithPotentialEntrances.length > 0 ) ? genOpts.quadsWithPotentialEntrances[doRand(0, genOpts.quadsWithPotentialEntrances.length)] : 0;
-			exitQuadNum = ( genOpts.quadsWithPotentialExits.length > 0 ) ? genOpts.quadsWithPotentialExits[doRand(0, genOpts.quadsWithPotentialExits.length)] : 0;
+			entranceQuadNum = ( genOpts.quadsWithPotentialEntrances.length > 0 ) ? genOpts.quadsWithPotentialEntrances[Utils.doRand(0, genOpts.quadsWithPotentialEntrances.length)] : 0;
+			exitQuadNum = ( genOpts.quadsWithPotentialExits.length > 0 ) ? genOpts.quadsWithPotentialExits[Utils.doRand(0, genOpts.quadsWithPotentialExits.length)] : 0;
 
 			for(q=1; q <= 4; q++){
 
@@ -476,10 +471,10 @@ define([
 						var type = "empty";
 						var cumePercent = 0;
 
-						if(doRand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
+						if(Utils.doRand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
 
 							//This *should* automatically put the percentages in the correct (ASC) order
-							var type = doBasedOnPercent(genOpts.genPercents);
+							var type = Utils.doBasedOnPercent(genOpts.genPercents);
 
 							self.grid[x][y].notEmpty = true;
 
@@ -501,7 +496,7 @@ define([
 				//Place an entrance and exit, if applicable
 				if(genOpts.quadsWithPotentialExits.length > 0 && self.exitSquare().length == 0 && potentialExits.length > 0){
 
-					squareIdx = doRand(0, potentialExits.length);
+					squareIdx = Utils.doRand(0, potentialExits.length);
 					squarePos = potentialExits[squareIdx];
 					self.grid[ squarePos[0] ][ squarePos[1] ].setType("exit");
 					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
@@ -510,7 +505,7 @@ define([
 
 				if(genOpts.quadsWithPotentialEntrances.length > 0 && self.entranceSquare().length == 0 && potentialEntrances.length > 0){
 
-					squareIdx = doRand(0, potentialEntrances.length);
+					squareIdx = Utils.doRand(0, potentialEntrances.length);
 					squarePos = potentialEntrances[squareIdx];
 					self.grid[ squarePos[0] ][ squarePos[1] ].setType("entrance");
 					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
