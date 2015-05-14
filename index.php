@@ -202,6 +202,13 @@
 								</div>
 								<!-- /ko -->
 
+								<!-- ko if: activeItem().canEquip() -->
+								<div class="line">
+									<span class="stat">If Equipped:</span>
+									<span class="value" data-bind="text: getEquipChangeText()"></span>
+								</div>
+								<!-- /ko -->
+
 							<!-- /ko -->
 
 							<!-- ko foreach: $root.activeItemButtons() -->

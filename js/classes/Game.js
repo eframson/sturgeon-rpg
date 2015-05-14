@@ -1470,6 +1470,35 @@ define([
 
 		}
 
+		this.getEquipChangeText = function(){
+			var actualItem = self.activeItem().actualItem();
+			var changeString = "";
+
+			if( actualItem instanceof Weapon){
+
+				var existingMinDmg = 0;
+				var existingMaxDmg = 0;
+				var minDmgChange = 0;
+				var maxDmgChange = 0;
+
+				if( !Utils.isEmptyObject(self.player().getEquippedWeapon()) ){
+					existingMinDmg = self.player().getEquippedWeapon().minDmg();
+					existingMaxDmg = self.player().getEquippedWeapon().maxDmg();
+					minDmgChange = actualItem.dmgMin() - existingMinDmg;
+					maxDmgChange = actualItem.dmgMax() - existingMaxDmg;
+				}
+
+				changeString = (minDmgChange < 0 ? "-" : "+") + minDmgChange + " - " + (maxDmgChange < 0 ? "-" : "+") + maxDmgChange + " DMG";
+
+			}else if( actualItem instanceof Armor){
+				var existingArmorValue = 0;
+
+				changeString = ( actualItem.armorValue() - existingArmorValue ) + " Armor";
+			}
+
+			return changeString;
+		}
+
 		this.buyActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();

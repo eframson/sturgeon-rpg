@@ -236,11 +236,11 @@ define([
 			return self._getArmorSlot(slot)();
 		}
 
-		this.getEquippedWeapon = function(slot){
+		this.getEquippedWeapon = function(){
 			return self._getWeaponSlot()();
 		}
 
-		this.getEquippedShield = function(slot){
+		this.getEquippedShield = function(){
 			return self._getShieldSlot()();
 		}
 
