@@ -1666,7 +1666,7 @@ define([
 			}
 			*/
 		}
-		
+
 		this.armorTest = function(){
 			var armorId;
 
@@ -1705,6 +1705,24 @@ define([
 - Make weapons use the same random-picking logic as armor
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
 - Dynamic level scaling (better odds of items on higher levels, tougher enemies, etc.)
+- More obvious when level up
+- See at-a-glance if equipment is better or worse
+- Equip items from merchant screen
+- Hide "sell value" on GP
+- Just have "take all" option for GP
+- Break down weapons/armor into scrap
+- Fix crafting button so text fits
+- Scale loot with monster level
+- Increase inventory space every x levels
+- Increase speed every x levels
+- Show how much exp is required for next level
+- Fix weapon instantiation error (merchant screen, lvl 5+ ?)
+- Keyboard shortcuts for "continue" buttons
+- Better loot from monsters than items
+- "Buy all" button
+- Maybe tweak % chance of cooldowns refreshed vs trader vs other stuff
+- Skill up scanning ability with usage/level-up
+- Make armor reduce dmg by a percent rather than flat amount
 */
 
 });

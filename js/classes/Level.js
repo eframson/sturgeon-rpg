@@ -9,7 +9,7 @@ define([
 	function Level(levelData){
 
 		var self = this;
-		
+
 		if(levelData == undefined){
 			levelData = { genOpts : {}, grid : Array() };
 		}
@@ -17,7 +17,7 @@ define([
 		if(levelData.grid == undefined){
 			levelData.grid = Array();
 		}
-		
+
 		this.init = function(levelData){
 
 			self.genOpts = {};
@@ -134,7 +134,7 @@ define([
 				if(direction == "left"){
 					targetX = self.playerPos[0] - numSquares;
 					targetX = (targetX >= this.gridBounds.minX) ? targetX : this.gridBounds.minX ;
-					
+
 				}else if(direction == "right"){
 					targetX = self.playerPos[0] + numSquares;
 					targetX = (targetX <= this.gridBounds.maxX) ? targetX : this.gridBounds.maxX ;
@@ -163,7 +163,7 @@ define([
 			}
 			return self.grid[x][y];
 		}
-		
+
 		this.drawMap = function(){
 
 			//var $map = $("#map");
@@ -207,23 +207,23 @@ define([
 					var fillStyle = "#EDEEF7";
 					var fontStyle = false;
 					var square = self.getSquare(col_num, row_num);
-					
+
 					if( square.isDone ){
-						
+
 						fillStyle = "#7A7A7A";
-						
+
 					}else{
-						
+
 						if(square.isVisible){
-	
+
 							if(odd_row){
-		
+
 								if(col_num % 2){
 									fillStyle = lightFill;
 								}else{
 									fillStyle = darkFill;
 								}
-								
+
 							}else{
 								if(col_num % 2){
 									fillStyle = darkFill;
@@ -231,11 +231,11 @@ define([
 									fillStyle = lightFill;
 								}
 							}
-							
+
 						}
-						
+
 						if(square.isScanned){
-							
+
 							if(square.type == "combat"){
 								fillStyle = combatColor;
 							}else if(square.type == "item"){
@@ -251,9 +251,9 @@ define([
 								fontStyle = "#000000";
 								text = "↓";
 							}
-							
+
 						}
-						
+
 					}
 
 					context.fillStyle = fillStyle;
@@ -267,7 +267,7 @@ define([
 					/*if( square.type == "entrance" || square.type == "exit"){
 						//context.fillText("FOO", col_num * squareWidth, row_num * squareHeight);
 					}*/
-					
+
 
 				});
 			});
@@ -361,18 +361,6 @@ define([
 			    triThirdPointY = triFirstPointY + triHeight;
 			    triThirdPointX = triFirstPointX + triWidth;
 
-			    console.log("Oval Ctr X: " + ovalCenterX);
-			    console.log("Oval Ctr Y: " + ovalCenterY);
-
-			    console.log("First X: " + triFirstPointX);
-			    console.log("First Y: " + triFirstPointY);
-
-			    console.log("Second X: " + triSecondPointX);
-			    console.log("Second Y: " + triSecondPointY);
-
-			    console.log("Third X: " + triThirdPointX);
-			    console.log("Third Y: " + triThirdPointY);
-
 				//Move points up + left, right
 			}
 
@@ -408,19 +396,19 @@ define([
 	        context.fill();*/
 
 		}
-		
+
 		this.showSquaresNearPlayer = function(radius){
 			self._revealSquaresNearPlayer(radius, "vision");
 		}
-		
+
 		this.scanSquaresNearPlayer = function(radius){
 			self._revealSquaresNearPlayer(radius, "scan");
 		}
-		
+
 		this.revealSquaresNearPlayer = function(radius){
 			self._revealSquaresNearPlayer(radius, "all");
 		}
-		
+
 		this._revealSquaresNearPlayer = function(radius, type){
 			radius = radius || 1;
 			type = type || "all";
@@ -433,7 +421,7 @@ define([
 
 			var c,
 				r;
-			
+
 			for(r = startY; r <= endY; r++){
 				for(c = startX; c <= endX; c++){
 					if(type == "vision" || type == "all" ){
@@ -475,26 +463,26 @@ define([
 			//Choose one quad or the other off-the-bat, and then randomize its position inside that
 			entranceQuadNum = ( genOpts.quadsWithPotentialEntrances.length > 0 ) ? genOpts.quadsWithPotentialEntrances[doRand(0, genOpts.quadsWithPotentialEntrances.length)] : 0;
 			exitQuadNum = ( genOpts.quadsWithPotentialExits.length > 0 ) ? genOpts.quadsWithPotentialExits[doRand(0, genOpts.quadsWithPotentialExits.length)] : 0;
-			
+
 			for(q=1; q <= 4; q++){
-				
+
 				var numNonEmpty = 0;
 
 				var bounds = self._getQuadBounds(q);
-				
+
 				for(x = bounds.minX; x < bounds.maxX; x++){
 					for(y = bounds.minY; y < bounds.maxY; y++){
-						
+
 						var type = "empty";
 						var cumePercent = 0;
-						
+
 						if(doRand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
 
 							//This *should* automatically put the percentages in the correct (ASC) order
 							var type = doBasedOnPercent(genOpts.genPercents);
-							
+
 							self.grid[x][y].notEmpty = true;
-							
+
 							numNonEmpty++;
 						}else{
 							if( exitQuadNum == q ){
@@ -503,7 +491,7 @@ define([
 								potentialEntrances.push([x, y]);
 							}
 						}
-						
+
 						self.grid[x][y].setType(type);
 					}
 				}
@@ -541,63 +529,63 @@ define([
 				minY : undefined,
 				maxY : undefined,
 			};
-			
+
 			var medX = Math.floor(this.gridBounds.maxX / 2);
 			var medY = Math.floor(this.gridBounds.maxY / 2);
 
 			if( quadNum == 1 ){
 
 				if(self.quadBounds[1] == undefined){
-					
+
 					bounds.minX = this.gridBounds.minX;
 					bounds.maxX = medX;
 					bounds.minY = this.gridBounds.minY;
 					bounds.maxY = medY;
-					
+
 					self.quadBounds[1] = bounds;
 				}
 				return self.quadBounds[1];
 
 			}else if( quadNum == 2 ){
-				
+
 				if(self.quadBounds[2] == undefined){
-					
+
 					bounds.minX = medX;
 					bounds.maxX = this.gridBounds.maxX;
 					bounds.minY = this.gridBounds.minY;
 					bounds.maxY = medY;
-					
+
 					self.quadBounds[2] = bounds;
 				}
 				return self.quadBounds[2];
-				
+
 			}else if( quadNum == 3 ){
 
 				if(self.quadBounds[3] == undefined){
-					
+
 					bounds.minX = this.gridBounds.minX;
 					bounds.maxX = medX;
 					bounds.minY = medY;
 					bounds.maxY = this.gridBounds.maxY;
-					
+
 					self.quadBounds[3] = bounds;
 				}
 				return self.quadBounds[3];
 
 			}else if( quadNum == 4 ){
-				
+
 				if(self.quadBounds[4] == undefined){
-					
+
 					bounds.minX = medX;
 					bounds.maxX = this.gridBounds.maxX;
 					bounds.minY = medY;
 					bounds.maxY = this.gridBounds.maxY;
-					
+
 					self.quadBounds[4] = bounds;
 				}
 				return self.quadBounds[4];
 			}
-			
+
 			return false;
 
 		}
@@ -662,9 +650,9 @@ define([
 			return false;
 
 		}
-		
+
 		this.getExportData = function(){
-			
+
 			var exportObj = ko.mapping.toJS({
 				playerPos : self.playerPos,
 				levelNum : self.levelNum,
@@ -676,9 +664,9 @@ define([
 				levelID : self.levelID,
 				hasGenerated : self.hasGenerated,
 			});
-			
+
 			var exportGrid = Array();
-			
+
 			for(row = 0; row < self.grid.length; row++){
 				for(col = 0; col < self.grid[row].length; col++){
 					if(exportGrid[row] == undefined){
@@ -687,9 +675,9 @@ define([
 					exportGrid[row][col] = self.grid[row][col].getExportData();
 				}
 			}
-			
+
 			exportObj.grid = exportGrid;
-			
+
 			return exportObj;
 		}
 
@@ -697,7 +685,7 @@ define([
 			self.revealSquaresNearPlayer(50);
 			self.drawMap();
 		}
-		
+
 		this.init(levelData);
 
 	}
