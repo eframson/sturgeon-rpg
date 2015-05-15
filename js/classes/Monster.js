@@ -22,7 +22,7 @@ define([
 			self.minDmg = ko.observable(monsterData.minDmg || 1);
 			self.maxDmg = ko.observable(monsterData.maxDmg || 2);
 			self.autoScale = ko.observable(monsterData.autoScale || 1);
-			self.isScaled = ko.observable(monsterData.autoScale || 0);
+			self.isScaled = ko.observable(monsterData.isScaled || 0);
 			self.expValue = ko.observable(monsterData.expValue || 0);
 
 			if( self.autoScale() && !self.isScaled() ){

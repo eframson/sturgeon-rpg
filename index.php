@@ -159,7 +159,7 @@
 				<div class="row">
 					<div class="col-md-5 inventory">
 						<div class="lines">
-							<!-- ko if: $root.player().data().inventory().length == 0 -->
+							<!-- ko if: $root.player().data().inventory().length == 0 || ($root.player().data().inventory().length == 1 && $root.player().gp() > 0) -->
 							<div class="line empty">
 								<span class="item">Your inventory is empty</span>
 							</div>
@@ -191,21 +191,21 @@
 								<!-- ko if: activeItem().actualItem().armorValue && typeof activeItem().actualItem().armorValue === 'function' -->
 								<div class="line">
 									<span class="stat">Armor Value:</span>
-									<span class="value" data-bind="text: activeItem().actualItem().armorValue() "></span>
+									<span class="value" data-bind="text: activeItem().actualItem().armorValue() + ( activeItem().actualItem().numUpgradesApplied() > 0 ? ' (Improved)' : '') "></span>
 								</div>
 								<!-- /ko -->
 
 								<!-- ko if: activeItem().actualItem().dmgMin && typeof activeItem().actualItem().dmgMin === 'function' -->
 								<div class="line">
 									<span class="stat">DMG:</span>
-									<span class="value" data-bind="text: activeItem().actualItem().dmgMin() + ' - ' + activeItem().actualItem().dmgMax()"></span>
+									<span class="value" data-bind="text: activeItem().actualItem().dmgMin() + ' - ' + activeItem().actualItem().dmgMax() + ( activeItem().actualItem().numUpgradesApplied() > 0 ? ' (Improved)' : '')"></span>
 								</div>
 								<!-- /ko -->
 
-								<!-- ko if: activeItem().canEquip() || ($root.currentInventoryRightSide() == 'merchant' && (activeItem().actualItem().isArmor || activeItem().actualItem().isWeapon))-->
+								<!-- ko if: activeItem().actualItem().isEquippable && activeItem().canUnEquip() == 0 -->
 								<div class="line">
 									<span class="stat">If Equipped:</span>
-									<span class="value" data-bind="text: getEquipChangeText()"></span>
+									<span class="value" data-bind="html: getEquipChangeText()"></span>
 								</div>
 								<!-- /ko -->
 

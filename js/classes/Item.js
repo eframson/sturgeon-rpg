@@ -27,8 +27,11 @@ define([
 		this.isArmor = false;
 		this.isShield = false;
 		this.isWeapon = false;
+		this.isEquippable = false;
 		this.attributesImprovedByLastCrafting = "";
 		this.uniqueID = (data.uniqueID || Utils.uniqueID());
+		this.canScale = ko.observable(data.canScale || 0);
+		this.isScaled = ko.observable(data.isScaled || 0);
 		
 		this.sellValue = ko.computed(function(){
 			return Math.ceil(self.buyValue() / 2);
@@ -65,7 +68,10 @@ define([
 
 		this._applyUpgrade = function(){
 			//This should be overridden in a child class
-			console.log("I'm not being evaluated, am I?");
+		}
+
+		this.scaleStatsForLevel = function(levelNum){
+			//This should be overridden in a child class
 		}
 	}
 

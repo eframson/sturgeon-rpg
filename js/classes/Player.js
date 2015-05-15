@@ -4,10 +4,11 @@ define([
 	'classes/ItemCollection',
 	'classes/Item',
 	'classes/Armor',
+	'classes/Shield',
 	'classes/Weapon',
 
 	'Utils',
-], function($, ko, ItemCollection, Item, Armor, Weapon, Utils){
+], function($, ko, ItemCollection, Item, Armor, Shield, Weapon, Utils){
 
 	function Player(playerData){
 
@@ -197,7 +198,7 @@ define([
 			var numInInventory = self.data().inventory.addItem(
 				itemToAdd,
 				function(){
-					var hasSpace = self.hasInventorySpace();
+					var hasSpace = self.inventorySlotsAvailable() >= itemToAdd.slotsRequired;
 					if( !hasSpace && itemToAdd.id != "gold"){
 						return false;
 					}
@@ -215,7 +216,7 @@ define([
 
 			var numLeft = self.data().inventory.removeItem(itemID, qty);
 				
-			if( numLeft == false ){
+			if( numLeft === false ){
 				console.log("could not remove item");
 			}
 		}

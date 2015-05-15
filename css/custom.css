@@ -6,6 +6,14 @@ button:focus {
 	clear: both;
 }
 
+.negative {
+	color: #d9534f;
+}
+
+.positive {
+	color: #5cb85c;
+}
+
 .modal-content {
 	display: none;
 }

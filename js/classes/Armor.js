@@ -14,6 +14,7 @@ define([
 			this.armorValue = ko.observable(data.armorValue || 0);
 			this.armorSlot = data.armorSlot || "body";
 			this.isArmor = true;
+			this.isEquippable = true;
 		}
 
 		this._applyUpgrade = function(){

@@ -41,8 +41,8 @@ define([
 			
 			for(i = 0; i < percents.length; i++){
 
-				var targetPercentage = percents[i];
-				var addToPercentOffset = targetPercentage;
+				var targetPercentage = parseInt(percents[i]);
+				var addToPercentOffset = parseInt(targetPercentage);
 
 				if( (rand - percentOffset) <= percents[i] ){
 
@@ -126,6 +126,10 @@ define([
 			var className = Object.getPrototypeOf(obj);
 			
 			var newObj = new className.constructor(newItemData);
+
+			if(newObj.hasOwnProperty("uniqueID")){
+				newObj.uniqueID = this.uniqueID();
+			}
 			
 			return newObj;
 		},

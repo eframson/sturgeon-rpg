@@ -6,13 +6,14 @@ define([
 	'classes/Item',
 	'classes/Weapon',
 	'classes/Armor',
+	'classes/Shield',
 	'classes/ItemCollection',
 	'classes/Monster',
 	'json!data/items.json',
 	'json!data/monsters.json',
 
 	'Utils',
-], function($, ko, Player, Level, Item, Weapon, Armor, ItemCollection, Monster, itemDataFile, monsterDataFile, Utils) {
+], function($, ko, Player, Level, Item, Weapon, Armor, Shield, ItemCollection, Monster, itemDataFile, monsterDataFile, Utils) {
 
 	function Game() {
 
@@ -264,7 +265,7 @@ define([
 				if( self.activeItem().actualItem() != undefined ){
 					var actualItem = self.activeItem().actualItem();
 
-					if( self.activeItem().canEquip() && self.currentInventoryRightSide() == "equipment" ){
+					if( self.activeItem().canEquip() ){
 						buttons.push({
 							css: "",
 							text: "Equip",
@@ -351,7 +352,7 @@ define([
 
 					}
 
-					if( self.activeItem().canUpgrade() && self.currentInventoryRightSide() == "equipment" ){
+					if( self.activeItem().canUpgrade() ){
 
 						buttons.push({
 							css: (self._activeItemCanBeUpgraded()) ? "" : "disabled",
@@ -372,21 +373,21 @@ define([
 									if( actualItem.id != "gold" ){
 										buttons.push({
 											css: "",
-											text: "Take 1x",
+											text: "<< Take 1x",
 											click: self.dropActiveItem
 										});
 									}
 
 									buttons.push({
 										css: "",
-										text: "Take All",
+										text: "<< Take All",
 										click: self.dropAllActiveItem
 									});
 
 								}else if(actualItem.qty() == 1){
 									buttons.push({
 										css: "",
-										text: "Take",
+										text: "<< Take",
 										click: self.dropActiveItem
 									});
 								}
@@ -399,13 +400,13 @@ define([
 
 										buttons.push({
 											css: "",
-											text: "Put 1x",
+											text: "Put 1x >>",
 											click: self.dropActiveItem
 										});
 
 										buttons.push({
 											css: "",
-											text: "Put All",
+											text: "Put All >>",
 											click: self.dropAllActiveItem
 										});
 
@@ -413,7 +414,7 @@ define([
 										
 										buttons.push({
 											css: "",
-											text: "Put",
+											text: "Put >>",
 											click: self.dropActiveItem
 										});
 
@@ -741,7 +742,18 @@ define([
 		this.lootEnemy = function(){
 			self.freezeMovement(true);
 
-			self.currentContainer([self.generateRandomLootItem()]);
+			var numLoots = 1 + Math.floor(self.level().levelNum() / 4);
+			var newLootItem;
+			self.currentContainer.removeAll(); //Make sure it's empty
+
+			for(var i=0; i < numLoots; i++){
+				newLootItem = self.generateRandomLootItem("good");
+				if(newLootItem.canScale){
+					newLootItem.scaleStatsForLevel();
+				}
+				self.currentContainer.addItem(newLootItem);
+			}
+
 			self.currentInventoryRightSide("container");
 
 			self.visibleSection("inventory-equipment");
@@ -855,6 +867,11 @@ define([
 			var itemClass = "item";
 			var itemToAdd = {};
 			var qtyCoefficient = Math.ceil( self.level().levelNum() / 5 );
+
+			if( quality == "good" ){
+				qtyCoefficient = qtyCoefficient * 1.5;
+			}
+
 			var canAdd = true;
 
 			var possibleItemTypes = {
@@ -896,7 +913,7 @@ define([
 					goldAmt = 2000;
 				}
 
-				goldAmt * qtyCoefficient;
+				goldAmt = Math.ceil(goldAmt * qtyCoefficient);
 
 				itemToAdd = self.getAvailableItemById("gold", "currency", goldAmt);
 
@@ -911,8 +928,8 @@ define([
 					]
 				});
 
-				var scrapQty = Utils.doRand(1,26) * qtyCoefficient;
-				var foodQty = 1 * qtyCoefficient;
+				var scrapQty = Math.ceil(Utils.doRand(10,36) * qtyCoefficient);
+				var foodQty = Math.ceil(1 * qtyCoefficient);
 
 				if( miscType == "armor" ){
 
@@ -953,6 +970,7 @@ define([
 					var armorId;
 
 					var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
+					availableArmor = availableArmor.concat( self.getAvailableItemIdsByTypeForLevel("shield", self.level().levelNum()) );
 					armorId = Utils.chooseRandomly( availableArmor );
 					if(armorId == "shield_01" || armorId == "shield_02"){
 						itemClass = "shield";
@@ -982,8 +1000,10 @@ define([
 				newItem = new Item(itemToAdd);
 			}else if(itemClass == "weapon"){
 				newItem = new Weapon(itemToAdd);
-			}else if(itemClass == "armor" || itemClass == "shield"){
+			}else if(itemClass == "armor"){
 				newItem = new Armor(itemToAdd);
+			}else if(itemClass == "shield"){
+				newItem = new Shield(itemToAdd);
 			}
 
 			return newItem;
@@ -1032,8 +1052,8 @@ define([
 			var eventType = Utils.doBasedOnPercent({
 				30 : "trainer",
 				40 : "trader",
-				25 : "cooldown",
-				5 : "stat",
+				20 : "cooldown",
+				10 : "stat",
 			});
 
 			var msg = "";
@@ -1222,12 +1242,10 @@ define([
 							self.logMessage(this.msg);
 
 							if(!doExpGain){
-								statToIncrease( statToIncrease() + statIncreaseValue );
+								this.statToIncrease( this.statToIncrease() + this.statIncreaseValue );
 							}else{
-								self.player().addExp(statIncreaseValue);
+								self.player().addExp(this.statIncreaseValue);
 							}
-
-
 
 							self.visibleSection("content-area");
 							$("#full-screen-notice").fadeOut(300, function(){
@@ -1250,12 +1268,6 @@ define([
 				self.fullScreenNoticeButtons(buttons);
 				$("#full-screen-notice").fadeIn(300);
 			});
-
-			//30% trader
-			//40% skill increase
-			//10% stat increase
-			//20% cooldowns reset
-			console.log("trigger an event action");
 		}
 
 		this.squareExitAction = function(){
@@ -1396,7 +1408,7 @@ define([
 			var type = item.type;
 			if( ( self.currentContainer().length == 0 && type == "consumables") || (opts.canUse && opts.canUse == 1) ){
 				self.activeItem().canUse(1);
-			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "right" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canEquip && opts.canEquip == 1) ){
+			}else if ( (opts.moveDirection == "right" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canEquip && opts.canEquip == 1) ){
 				//For now, if a container is open, we just plain can't equip stuff
 				self.activeItem().canEquip(1);
 			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "left" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canUnEquip && opts.canUnEquip == 1) ){
@@ -1417,7 +1429,7 @@ define([
 				self.activeItem().canSell(1);
 			}
 
-			if( ( item.canUpgrade == 1 && self.currentInventoryRightSide() == "equipment" ) || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
+			if( ( item.canUpgrade == 1 && opts.moveDirection == "right") || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
 				self.activeItem().canUpgrade(1);
 			}
 
@@ -1432,22 +1444,36 @@ define([
 
 		this.equipActiveItem = function(game, event){
 
-			var item = self.activeItem().actualItem();
+			var item = self.activeItem().actualItem(),
+				type = item.type;
 
 			var alreadyEquippedItem;
 
-			if(item.type == "weapon"){
+			if(type == "weapon"){
 				alreadyEquippedItem = self.player().equipWeapon(item);
-			}else if(item.type == "shield"){
+			}else if(type == "shield"){
 				alreadyEquippedItem = self.player().equipShield(item);
-			}else if(item.type == "armor"){
+			}else if(type == "armor"){
 				alreadyEquippedItem = self.player().equipArmor(item);
 			}
 
 			self.player().data().inventory.removeItem(item);
 
 			if( alreadyEquippedItem != undefined && !Utils.isEmptyObject(alreadyEquippedItem) ){
-				self.player().addItemToInventory(alreadyEquippedItem);
+				//Skip the normal slot-checking logic to account for 2H weaps or 1H + shield combos
+				self.player().data().inventory.addItem(alreadyEquippedItem);
+				var equippedWeapon = self.player().getEquippedWeapon();
+			}
+
+			if( type == "weapon" && item.handsRequired == 2){ //We just equipped a 2H weapon, so unequip whatever shield we have equipped
+				var existingItem = self.player().getEquippedShield();
+				if( !Utils.isEmptyObject(existingItem) ){
+					self.player().unEquipShield();
+					self.player().data().inventory.addItem(existingItem);
+				}
+			}else if( type == "shield" && !Utils.isEmptyObject(self.player().getEquippedWeapon()) && self.player().getEquippedWeapon().handsRequired == 2){
+				self.player().data().inventory.addItem(self.player().getEquippedWeapon());
+				self.player().unEquipWeapon();
 			}
 
 			self._resetActiveItem();
@@ -1489,20 +1515,32 @@ define([
 				minDmgChange = actualItem.dmgMin() - existingMinDmg;
 				maxDmgChange = actualItem.dmgMax() - existingMaxDmg;
 
-				changeString = (minDmgChange < 0 ? "" : "+") + minDmgChange + " / " + (maxDmgChange < 0 ? "" : "+") + maxDmgChange + " DMG";
+				minDmgChange = ( minDmgChange < 0 ) ? "<span class='negative'>" + minDmgChange + "</span>" : ( minDmgChange > 0 ? "<span class='positive'>+" + minDmgChange + "</span>" : "+" + minDmgChange ) ; //show 0 change as "+0"
+
+				maxDmgChange = ( maxDmgChange < 0 ) ? "<span class='negative'>" + maxDmgChange + "</span>" : ( maxDmgChange > 0 ? "<span class='positive'>+" + maxDmgChange + "</span>" : "+" + maxDmgChange ) ; //show 0 change as "+0"
+
+				changeString = minDmgChange + " - " + maxDmgChange + " DMG";
 
 			}else if( actualItem instanceof Armor){
 
 				var existingArmorValue = 0;
 				var armorValueChange = 0;
-				
-				if( !Utils.isEmptyObject(self.player().getEquippedArmorBySlot(actualItem.armorSlot)) ){
-					existingArmorValue = self.player().getEquippedArmorBySlot(actualItem.armorSlot).armorValue();
+
+				if( actualItem instanceof Shield ){
+					if( !Utils.isEmptyObject(self.player().getEquippedShield()) ){
+						existingArmorValue = self.player().getEquippedShield().armorValue();
+					}
+				}else{
+					if( !Utils.isEmptyObject(self.player().getEquippedArmorBySlot(actualItem.armorSlot)) ){
+						existingArmorValue = self.player().getEquippedArmorBySlot(actualItem.armorSlot).armorValue();
+					}
 				}
 				
 				armorValueChange = actualItem.armorValue() - existingArmorValue;
 
-				changeString = (armorValueChange < 0 ? "" : "+") + armorValueChange + " Armor";
+				armorValueChange = ( armorValueChange < 0 ) ? "<span class='negative'>" + armorValueChange + "</span>" : ( armorValueChange > 0 ? "<span class='positive'>+" + armorValueChange + "</span>" : "+" + armorValueChange ) ; //show 0 change as "+0"
+
+				changeString = armorValueChange + " Armor";
 			}
 
 			return changeString;
@@ -1955,6 +1993,15 @@ define([
 			itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
 			self.player().addItemToInventory( new Weapon(itemToAdd) );
+
+			itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
+			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+
+			itemToAdd = self.getAvailableItemById("melee_weapon_04", "weapon", 1);
+			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+
+			itemToAdd = self.getAvailableItemById("shield_02", "shield", 1);
+			self.player().data().inventory.addItem( new Shield(itemToAdd) );
 		}
 
 		this.scrapTest = function(){
@@ -1971,6 +2018,43 @@ define([
 			self.player().addItemToInventory( new Item(itemToAdd) );
 		}
 
+		this.eventTest = function(){
+
+			var eventType = "";
+			var numTraders = 0;
+			var numTrainers = 0;
+			var numCooldowns = 0;
+			var numStats = 0;
+
+			for(var i=0; i < 1000; i++){
+
+				eventType = Utils.doBasedOnPercent({
+					30 : "trainer",
+					40 : "trader",
+					20 : "cooldown",
+					10 : "stat",
+				});
+
+				if(eventType == "trainer"){
+					numTrainers++;
+				}else if(eventType == "trader"){
+					numTraders++;
+				}else if(eventType == "cooldown"){
+					numCooldowns++;
+				}else if(eventType == "stat"){
+					numStats++;
+				}
+
+				console.log(eventType);
+			}
+
+			console.log("Total traders: " + numTraders);
+			console.log("Total trainers: " + numTrainers);
+			console.log("Total cooldowns: " + numCooldowns);
+			console.log("Total stats: " + numStats);
+
+		}
+
 		self.init();
 
 	};
@@ -1983,26 +2067,22 @@ define([
 - Crafting, make new stuff?
 - Implement class for Skills to get them more cohesive
 - More obvious turn-based combat
-- Dynamic loot generation (a la Diablo III)
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
+
+- Dynamic loot generation (a la Diablo III)
 - Dynamic level scaling (better odds of items on higher levels, tougher enemies, etc.)
+- Scale loot with monster level
+- Better loot from monsters than item squares
+- Add combat loots to message log
+
 - More obvious when level up
-- See at-a-glance if equipment is better or worse
-- Equip items from merchant screen
 - Break down weapons/armor into scrap
 - Fix crafting button so text fits
-- Scale loot with monster level
-- Fix weapon instantiation error (merchant screen, lvl 5+ ?)
 - Keyboard shortcuts for "continue" buttons
-- Better loot from monsters than item squares
-- Maybe tweak % chance of cooldowns refreshed vs trader vs other stuff
 - Skill up scanning ability with usage/level-up
 - Make armor reduce dmg by a percent rather than flat amount
 - "Empty inventory" line should show up if the player's inventory contains only gold
-- When cloning item, generate new uniqueID
-- Add combat loots to message log
 - Dynamic container name
-- Shield aren't actually getting picked when dynamically choosing armor (because they're under "shields" and not "armor"))
 */
 
 });

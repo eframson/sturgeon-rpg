@@ -15,6 +15,7 @@ define([
 			this.dmgMax = ko.observable(data.dmgMax || 1);
 			this.handsRequired = data.handsRequired || 1;
 			this.isWeapon = true;
+			this.isEquippable = true;
 		}
 
 		this._applyUpgrade = function(){
