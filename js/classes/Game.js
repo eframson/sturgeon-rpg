@@ -1482,18 +1482,27 @@ define([
 				var maxDmgChange = 0;
 
 				if( !Utils.isEmptyObject(self.player().getEquippedWeapon()) ){
-					existingMinDmg = self.player().getEquippedWeapon().minDmg();
-					existingMaxDmg = self.player().getEquippedWeapon().maxDmg();
-					minDmgChange = actualItem.dmgMin() - existingMinDmg;
-					maxDmgChange = actualItem.dmgMax() - existingMaxDmg;
+					existingMinDmg = self.player().getEquippedWeapon().dmgMin();
+					existingMaxDmg = self.player().getEquippedWeapon().dmgMax();
 				}
+				
+				minDmgChange = actualItem.dmgMin() - existingMinDmg;
+				maxDmgChange = actualItem.dmgMax() - existingMaxDmg;
 
-				changeString = (minDmgChange < 0 ? "-" : "+") + minDmgChange + " - " + (maxDmgChange < 0 ? "-" : "+") + maxDmgChange + " DMG";
+				changeString = (minDmgChange < 0 ? "" : "+") + minDmgChange + " / " + (maxDmgChange < 0 ? "" : "+") + maxDmgChange + " DMG";
 
 			}else if( actualItem instanceof Armor){
-				var existingArmorValue = 0;
 
-				changeString = ( actualItem.armorValue() - existingArmorValue ) + " Armor";
+				var existingArmorValue = 0;
+				var armorValueChange = 0;
+				
+				if( !Utils.isEmptyObject(self.player().getEquippedArmorBySlot(actualItem.armorSlot)) ){
+					existingArmorValue = self.player().getEquippedArmorBySlot(actualItem.armorSlot).armorValue();
+				}
+				
+				armorValueChange = actualItem.armorValue() - existingArmorValue;
+
+				changeString = (armorValueChange < 0 ? "" : "+") + armorValueChange + " Armor";
 			}
 
 			return changeString;
@@ -1937,6 +1946,16 @@ define([
 
 			self.player().addItemToInventory( new Armor(itemToAdd) );
 		}
+		
+		this.weaponTest = function(){
+			var weaponId;
+
+			var availableWeapons = self.getAvailableItemIdsByTypeForLevel("weapon", self.level().levelNum());
+			weaponId = Utils.chooseRandomly( availableWeapons );
+			itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
+
+			self.player().addItemToInventory( new Weapon(itemToAdd) );
+		}
 
 		this.scrapTest = function(){
 
@@ -1983,6 +2002,7 @@ define([
 - When cloning item, generate new uniqueID
 - Add combat loots to message log
 - Dynamic container name
+- Shield aren't actually getting picked when dynamically choosing armor (because they're under "shields" and not "armor"))
 */
 
 });

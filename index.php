@@ -202,7 +202,7 @@
 								</div>
 								<!-- /ko -->
 
-								<!-- ko if: activeItem().canEquip() -->
+								<!-- ko if: activeItem().canEquip() || ($root.currentInventoryRightSide() == 'merchant' && (activeItem().actualItem().isArmor || activeItem().actualItem().isWeapon))-->
 								<div class="line">
 									<span class="stat">If Equipped:</span>
 									<span class="value" data-bind="text: getEquipChangeText()"></span>
