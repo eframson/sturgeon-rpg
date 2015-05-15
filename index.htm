@@ -144,7 +144,7 @@
 
 				<div class="row back">
 					<div class="col-md-12">
-						<button class="btn btn-default" type="button" data-bind="click: showContentArea, css: { disabled: $root.player().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }"><span data-bind="text: 'Back'"></span></button>
+						<button class="btn btn-default" type="button" data-bind="click: showContentArea, css: { disabled: $root.player().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }"><span data-bind="text: backButtonLabel()"></span></button>
 					</div>
 				</div>
 

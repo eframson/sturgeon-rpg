@@ -14,6 +14,7 @@ requirejs.config({
 		bootstrap : ["jquery"],
 		"jquery.caret.min" : ["jquery"],
 		"jquery.growl" : ["jquery"],
+		"jquery.animateNumbers" : ["jquery"],
 	},
 	//urlArgs: "bust=" +  (new Date()).getTime(),
 });

@@ -235,6 +235,7 @@ define([
 			self.fullScreenNotice = ko.observable(undefined);
 			self.fullScreenNoticeButtons = ko.observableArray(undefined);
 			self.currentEnemy = ko.observable(undefined);
+			self.backButtonLabel = ko.observable("Back");
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -315,7 +316,7 @@ define([
 						if( actualItem.qty() == 1 ){
 
 							buttons.push({
-								css: defaultCss + ( self.player().gp() < actualItem.buyValue() ) ? " disabled" : "",
+								css: defaultCss + (( self.player().gp() < actualItem.buyValue() ) ? " disabled" : ""),
 								text: "Buy (" + actualItem.buyValue() + " GP)",
 								click: self.buyActiveItem
 							});
@@ -323,7 +324,7 @@ define([
 						}else if( actualItem.qty() > 1 ){
 
 							buttons.push({
-								css: defaultCss + ( self.player().gp() < actualItem.buyValue() ) ? " disabled" : "",
+								css: defaultCss + (( self.player().gp() < actualItem.buyValue() ) ? " disabled" : ""),
 								text: "Buy 1x (" + actualItem.buyValue() + " GP)",
 								click: self.buyActiveItem
 							});
@@ -331,10 +332,10 @@ define([
 							var numPurchasable = Math.floor( self.player().gp() / actualItem.buyValue() );
 							var actualPurchasable = (numPurchasable <= actualItem.qty()) ? numPurchasable : actualItem.qty() ;
 
-							if(actualPurchasable > 0){
+							if(actualPurchasable > 0 && actualItem.qty() > 0){
 
 								buttons.push({
-									css: defaultCss + ( self.player().gp() < (actualPurchasable * actualItem.buyValue()) ) ? " disabled" : "",
+									css: defaultCss + (( self.player().gp() < (actualPurchasable * actualItem.buyValue()) ) ? " disabled" : ""),
 									text: "Buy " + actualPurchasable + "x (" + (actualPurchasable * actualItem.buyValue()) + " GP)",
 									click: self.buyMaxActiveItem
 								});
@@ -605,6 +606,7 @@ define([
 			$("#inventory-equipment").fadeOut(300, function(){
 				self.currentContainer.removeAll();
 				self.currentInventoryRightSide("equipment");
+				self.backButtonLabel("Back");
 				$("#content-area").fadeIn(300);
 				self.freezeMovement(false);
 			});
@@ -773,6 +775,7 @@ define([
 
 			self.visibleSection("inventory-equipment");
 			$("#combat-area").fadeOut(300, function(){
+				self.backButtonLabel("Leave");
 				$("#inventory-equipment").fadeIn(300);
 			});
 		}
@@ -2142,8 +2145,6 @@ define([
 - More obvious turn-based combat
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
 - Show dmg taken next to player/monster HP counter
-- Only show "buy max" if player can purchase more than one
-- Dynamic "back" button label
 
 - Dynamic loot generation (a la Diablo III)
 - Add combat loots to message log
