@@ -219,6 +219,7 @@ define([
 				desc : ko.observable(""),
 				canEquip : ko.observable(0),
 				canUnEquip : ko.observable(0),
+				canBreakdown : ko.observable(0),
 				canUse : ko.observable(0),
 				canDrop : ko.observable(0),
 				canSell : ko.observable(0),
@@ -261,13 +262,14 @@ define([
 
 			self.activeItemButtons = ko.computed(function(){
 				var buttons = new Array();
+				var defaultCss = "btn-default";
 
 				if( self.activeItem().actualItem() != undefined ){
 					var actualItem = self.activeItem().actualItem();
 
 					if( self.activeItem().canEquip() ){
 						buttons.push({
-							css: "",
+							css: defaultCss,
 							text: "Equip",
 							click: self.equipActiveItem
 						});
@@ -275,16 +277,34 @@ define([
 
 					if( self.activeItem().canUnEquip() && self.currentInventoryRightSide() == "equipment" ){
 						buttons.push({
-							css: "",
+							css: defaultCss,
 							text: "Un-Equip",
 							click: self.unEquipActiveItem
+						});
+					}
+
+					if( self.activeItem().canUpgrade() ){
+
+						buttons.push({
+							css: defaultCss + ((self._activeItemCanBeUpgraded()) ? "" : " disabled"),
+							text: "Upgrade (" + actualItem.costForNextUpgradeLevel() + " scrap)",
+							click: self.upgradeActiveItem
+						});
+
+					}
+
+					if( self.activeItem().canBreakdown() ){
+						buttons.push({
+							css: "btn-danger",
+							text: "Salvage",
+							click: self.salvageActiveItem
 						});
 					}
 
 					//It's not actually dependent on the equipment screen, it just can't be used while looting a container or trading with a merchant
 					if( self.activeItem().canUse() && self.currentInventoryRightSide() == "equipment" ){
 						buttons.push({
-							css: "",
+							css: defaultCss,
 							text: "Use",
 							click: self.useActiveItem
 						});
@@ -295,7 +315,7 @@ define([
 						if( actualItem.qty() == 1 ){
 
 							buttons.push({
-								css: ( self.player().gp() < actualItem.buyValue() ) ? "disabled" : "",
+								css: defaultCss + ( self.player().gp() < actualItem.buyValue() ) ? " disabled" : "",
 								text: "Buy (" + actualItem.buyValue() + " GP)",
 								click: self.buyActiveItem
 							});
@@ -303,7 +323,7 @@ define([
 						}else if( actualItem.qty() > 1 ){
 
 							buttons.push({
-								css: ( self.player().gp() < actualItem.buyValue() ) ? "disabled" : "",
+								css: defaultCss + ( self.player().gp() < actualItem.buyValue() ) ? " disabled" : "",
 								text: "Buy 1x (" + actualItem.buyValue() + " GP)",
 								click: self.buyActiveItem
 							});
@@ -314,7 +334,7 @@ define([
 							if(actualPurchasable > 0){
 
 								buttons.push({
-									css: ( self.player().gp() < (actualPurchasable * actualItem.buyValue()) ) ? "disabled" : "",
+									css: defaultCss + ( self.player().gp() < (actualPurchasable * actualItem.buyValue()) ) ? " disabled" : "",
 									text: "Buy " + actualPurchasable + "x (" + (actualPurchasable * actualItem.buyValue()) + " GP)",
 									click: self.buyMaxActiveItem
 								});
@@ -329,7 +349,7 @@ define([
 						if( self.activeItem().actualItem().qty() == 1 ){
 
 							buttons.push({
-								css: "",
+								css: defaultCss,
 								text: "Sell (" + self.activeItem().actualItem().sellValue() + " GP)",
 								click: self.sellActiveItem
 							});
@@ -337,28 +357,18 @@ define([
 						}else if( self.activeItem().actualItem().qty() > 1 ){
 
 							buttons.push({
-								css: "",
+								css: defaultCss,
 								text: "Sell 1x (" + actualItem.sellValue() + " GP)",
 								click: self.sellActiveItem
 							});
 
 							buttons.push({
-								css: "",
+								css: defaultCss,
 								text: "Sell All (" + (actualItem.qty() * actualItem.sellValue()) + " GP)",
 								click: self.sellAllActiveItem
 							});
 
 						}
-
-					}
-
-					if( self.activeItem().canUpgrade() ){
-
-						buttons.push({
-							css: (self._activeItemCanBeUpgraded()) ? "" : "disabled",
-							text: "Upgrade (" + actualItem.costForNextUpgradeLevel() + " scrap)",
-							click: self.upgradeActiveItem
-						});
 
 					}
 
@@ -372,21 +382,21 @@ define([
 
 									if( actualItem.id != "gold" ){
 										buttons.push({
-											css: "",
+											css: defaultCss,
 											text: "<< Take 1x",
 											click: self.dropActiveItem
 										});
 									}
 
 									buttons.push({
-										css: "",
+										css: defaultCss,
 										text: "<< Take All",
 										click: self.dropAllActiveItem
 									});
 
 								}else if(actualItem.qty() == 1){
 									buttons.push({
-										css: "",
+										css: defaultCss,
 										text: "<< Take",
 										click: self.dropActiveItem
 									});
@@ -399,13 +409,13 @@ define([
 									if( actualItem.qty() > 1 ){
 
 										buttons.push({
-											css: "",
+											css: defaultCss,
 											text: "Put 1x >>",
 											click: self.dropActiveItem
 										});
 
 										buttons.push({
-											css: "",
+											css: defaultCss,
 											text: "Put All >>",
 											click: self.dropAllActiveItem
 										});
@@ -413,7 +423,7 @@ define([
 									}else if( actualItem.qty() == 1 ){
 										
 										buttons.push({
-											css: "",
+											css: defaultCss,
 											text: "Put >>",
 											click: self.dropActiveItem
 										});
@@ -429,20 +439,20 @@ define([
 							if(actualItem.qty() > 1){
 
 								buttons.push({
-									css: "",
+									css: defaultCss,
 									text: "Drop 1x",
 									click: self.dropActiveItem
 								});
 
 								buttons.push({
-									css: "",
+									css: defaultCss,
 									text: "Drop All",
 									click: self.dropAllActiveItem
 								});
 
 							}else if(actualItem.qty() == 1){
 								buttons.push({
-									css: "",
+									css: defaultCss,
 									text: "Drop",
 									click: self.dropActiveItem
 								});
@@ -474,7 +484,7 @@ define([
 				stateID = gameData.stateID;
 				self.visibleSection(gameData.visibleSection);
 			}else{
-				player = new Player();
+				player = new Player( {str: 2, dex: 2, end: 2} );
 				level = new Level({ genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
 				stateID = "idle";
 				self.levels.push(level);
@@ -640,7 +650,7 @@ define([
 			self.currentEnemy(new Monster(
 				$.extend(
 					self.getMonsterById(newMonsterID),
-					{ level : self.level().levelNum() }
+					{ level : self.level().levelNum(), fullyDynamicStats : 1 }
 				)
 			));
 
@@ -685,45 +695,50 @@ define([
 
 			var goesFirst = self.getGoesFirst();
 
+			var playerHp = self.player().data().hp();
 			var playerDmg = self.player().doAttack();
 			var enemyDmg = self.currentEnemy().doAttack();
 			var playerDidDmg = false;
 			var enemyDidDmg = false;
+			var dmgTaken;
+			var dmgAbsorbed;
 
 			if( goesFirst == "player" ){
 
 				if( playerAttacks ){
 					self.currentEnemy().takeDmg(playerDmg);
-					self.showDamage("enemy");
 					playerDidDmg = true;
 				}
 
 				if(!self.currentEnemy().isDead() && enemyAttacks){
 					self.player().takeDmg(enemyDmg);
-					self.showDamage("player");
 					enemyDidDmg = true;
 				}
 			}else{
 
 				if( enemyAttacks ){
 					self.player().takeDmg(enemyDmg);
-					self.showDamage("player");
 					enemyDidDmg = true;
 				}
 
 				if(!self.player().isDead() && playerAttacks){
 					self.currentEnemy().takeDmg(playerDmg);
-					self.showDamage("enemy");
 					playerDidDmg = true;
 				}
 
 			}
 
 			if(playerDidDmg){
+				self.showDamage("enemy");
 				self.logMessage("You strike the enemy for " + playerDmg + " points of damage!", "combat");
 			}
 			if(enemyDidDmg){
-				self.logMessage("The enemy strikes you for " + enemyDmg + " points of damage!", "combat");
+				dmgTaken = playerHp - self.player().data().hp();
+				dmgAbsorbed = enemyDmg - dmgTaken;
+				if(dmgTaken > 0){
+					self.showDamage("player");
+				}
+				self.logMessage("The enemy tries to strike you for " + enemyDmg + " point(s) of damage! Your armor absorbs " + dmgAbsorbed + " point(s). You take " + dmgTaken + " point(s) of damage.", "combat");
 			}
 			if( self.player().isDead() ){
 				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
@@ -747,7 +762,7 @@ define([
 			self.currentContainer.removeAll(); //Make sure it's empty
 
 			for(var i=0; i < numLoots; i++){
-				newLootItem = self.generateRandomLootItem("good");
+				newLootItem = self.generateRandomLootItem("monster");
 				if(newLootItem.canScale){
 					newLootItem.scaleStatsForLevel();
 				}
@@ -860,32 +875,34 @@ define([
 			}
 		}
 
-		this.generateRandomLootItem = function(quality, doGold){
+		this.generateRandomLootItem = function(lootSet){
 
-			quality = quality || "standard";
-			doGold = (doGold != undefined) ? doGold : true ;
+			lootSet = lootSet || "standard";
 			var itemClass = "item";
 			var itemToAdd = {};
-			var qtyCoefficient = Math.ceil( self.level().levelNum() / 5 );
-
-			if( quality == "good" ){
-				qtyCoefficient = qtyCoefficient * 1.5;
-			}
-
+			var qtyCoefficient = Math.ceil( self.level().levelNum() / 3 );
+			var possibleItemTypes = {};
 			var canAdd = true;
 
-			var possibleItemTypes = {
-				40 : "gold",
-				35 : "misc",
-				25 : "gear",
-			};
-
-			if(!doGold){
+			if( lootSet == "monster" ){
+				qtyCoefficient = qtyCoefficient * 1.5;
+				possibleItemTypes = {
+					30 : "gold",
+					45 : "misc",
+					25 : "gear",
+				};
+			}else if( lootSet == "trader" ){
 				possibleItemTypes = {
 					50 : [
 						"misc",
 						"gear",
 					]
+				};
+			}else{
+				possibleItemTypes = {
+					40 : "gold",
+					35 : "misc",
+					25 : "gear",
 				};
 			}
 
@@ -929,7 +946,7 @@ define([
 				});
 
 				var scrapQty = Math.ceil(Utils.doRand(10,36) * qtyCoefficient);
-				var foodQty = Math.ceil(1 * qtyCoefficient);
+				var foodQty = Math.ceil(Utils.doRand(1,5) * qtyCoefficient);
 
 				if( miscType == "armor" ){
 
@@ -1012,7 +1029,6 @@ define([
 
 		this.squareCombatAction = function(){
 			self.freezeMovement(true);
-			console.log("trigger a combat action");
 
 			//Generate "enemy appears" message
 			var enemyMsg = Utils.doBasedOnPercent({
@@ -1088,7 +1104,7 @@ define([
 							var numItems = Utils.doRand(3,8);
 
 							for(var i = 0; i < numItems; i++){
-								self.currentContainer.addItem(self.generateRandomLootItem(undefined, false));
+								self.currentContainer.addItem(self.generateRandomLootItem("trader"));
 							}
 
 							self.currentInventoryRightSide("merchant");
@@ -1110,10 +1126,18 @@ define([
 					Array(
 						"findFood",
 						"scanSquares",
-						"visionRange"
+						"visionRange",
+						"str",
+						"dex",
+						"end",
+						"speed",
+						"hp"
 					)
 				);
 				var trainSkill;
+				var trainSkillAmt = 1;
+				var trainSkillMax = false;
+				var trainSkillSuccessDesc = "";
 
 				msg = "You encounter a wise old hermit crab who offers to teach you how to ";
 
@@ -1121,14 +1145,43 @@ define([
 					msg += "get better at scrounging for food";
 					trainCost = (self.player().data().skills().findFood() + 1) * 10;
 					trainSkill = self.player().data().skills().findFood;
+					trainSkillSuccessDesc = "skill in finding food";
 				}else if(trainSkillString == "scanSquares"){
 					msg += "get better at surveying your surroundings";
 					trainCost = (self.player().data().skills().scanSquares() * 1000);
 					trainSkill = self.player().data().skills().scanSquares;
+					trainSkillSuccessDesc = "scan range";
 				}else if(trainSkillString == "visionRange"){
 					msg += "sharpen your vision";
 					trainCost = (self.player().data().skills().visionRange() * 1000);
 					trainSkill = self.player().data().skills().visionRange;
+					trainSkillSuccessDesc = "vision range";
+				}else if( trainSkillString == "str" ){
+					msg += "become stronger";
+					trainSkill = self.player().data().str;
+					trainCost = 800;
+					trainSkillSuccessDesc = "strength (STR)";
+				}else if( trainSkillString == "dex" ){
+					msg += "become more agile";
+					trainSkill = self.player().data().dex;
+					trainCost = 800;
+					trainSkillSuccessDesc = "dexterity (DEX)";
+				}else if( trainSkillString == "end" ){
+					msg += "become more resilient";
+					trainSkill = self.player().data().end;
+					trainCost = 800;
+					trainSkillSuccessDesc = "endurance (END)";
+				}else if( trainSkillString == "speed" ){
+					msg += "become quicker";
+					trainSkill = self.player().data().speed;
+					trainCost = 800;
+					trainSkillSuccessDesc = "speed (SPD)";
+				}else if( trainSkillString == "hp" ){
+					msg += "become tougher";
+					trainSkill = self.player().data().baseHp;
+					trainCost = 800;
+					trainSkillAmt = 10;
+					trainSkillSuccessDesc = "max HP bonus";
 				}
 
 				msg += " for " + trainCost + " GP";
@@ -1141,15 +1194,9 @@ define([
 							var gold = self.player().data().inventory.getItemByID("gold");
 							gold.qty( gold.qty() - this.trainCost );
 
-							this.trainSkill( this.trainSkill() + 1 );
+							this.trainSkill( this.trainSkill() + this.trainSkillAmt );
 
-							if(trainSkillString == "findFood"){
-								self.logMessage("Your skill in finding food has increased to " + this.trainSkill() + "/100" );
-							}else if(trainSkillString == "scanSquares"){
-								self.logMessage("Your scan range has increased to " + this.trainSkill() + "/10" );
-							}else if(trainSkillString == "visionRange"){
-								self.logMessage("Your vision range has increased to " + this.trainSkill() + "/10" );
-							}
+							self.logMessage("Your " + this.trainSkillSuccessDesc + " has increased to " + this.trainSkill() + ( this.trainSkillMax ? "/" + trainSkillMax : "" ));
 
 							self.visibleSection("content-area");
 							$("#full-screen-notice").fadeOut(300, function(){
@@ -1168,6 +1215,9 @@ define([
 						trainSkill : trainSkill,
 						trainSkillString : trainSkillString,
 						trainCost : trainCost,
+						trainSkillAmt : trainSkillAmt,
+						trainSkillMax : trainSkillMax,
+						trainSkillSuccessDesc : trainSkillSuccessDesc,
 					},
 					{
 						title : "Leave",
@@ -1366,6 +1416,7 @@ define([
 			self.activeItem().id("");
 			self.activeItem().canUse(0);
 			self.activeItem().canEquip(0);
+			self.activeItem().canBreakdown(0);
 			self.activeItem().canDrop(0);
 			self.activeItem().canSell(0);
 			self.activeItem().canBuy(0);
@@ -1415,6 +1466,10 @@ define([
 				self.activeItem().canUnEquip(1);
 			}
 
+			if( ( item.canBreakdown == 1 && (opts.moveDirection == "right" || self.currentInventoryRightSide() == "equipment" ) ) || ( opts.canBreakdown && opts.canBreakdown == 1 ) ){
+				self.activeItem().canBreakdown(1);
+			}
+
 			if( (opts.moveDirection == "left" && self.currentInventoryRightSide() == "equipment") || (opts.canDrop && opts.canDrop == 0) ){
 				self.activeItem().canDrop(0);
 			}else if( opts.moveDirection == "left" && self.currentInventoryRightSide() == "container" || (opts.canDrop && opts.canDrop == 1) ){
@@ -1429,15 +1484,13 @@ define([
 				self.activeItem().canSell(1);
 			}
 
-			if( ( item.canUpgrade == 1 && opts.moveDirection == "right") || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
+			if( ( item.canUpgrade == 1 && (opts.moveDirection == "right" || self.currentInventoryRightSide() == "equipment" ) ) || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
 				self.activeItem().canUpgrade(1);
 			}
 
 			self.activeItem().moveDirection(opts.moveDirection);
 
 			self.activeItem().actualItem(item);
-
-			//self.activeItem().canUnEquip(1);
 
 
 		}
@@ -1544,6 +1597,26 @@ define([
 			}
 
 			return changeString;
+		}
+
+		this.salvageActiveItem = function(game, event){
+
+			var item = self.activeItem().actualItem(),
+				itemToAdd,
+				scrapQty = Math.round(item.sellValue() / 3);
+
+			if( item instanceof Armor ){
+				itemToAdd = self.getAvailableItemById("armor_scraps", "crafting", scrapQty);
+			}else if( item instanceof Weapon ){
+				itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", scrapQty);
+			}
+
+			self.player().data().inventory.removeItem(item);
+			self._resetActiveItem();
+
+			self.player().data().inventory.addItem(new Item(itemToAdd) );
+			self.logMessage("You gain " + scrapQty + " scraps from salvaging the item.","crafting");
+
 		}
 
 		this.buyActiveItem = function(game, event){
@@ -2068,20 +2141,18 @@ define([
 - Implement class for Skills to get them more cohesive
 - More obvious turn-based combat
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
+- Show dmg taken next to player/monster HP counter
+- Only show "buy max" if player can purchase more than one
+- Dynamic "back" button label
 
 - Dynamic loot generation (a la Diablo III)
-- Dynamic level scaling (better odds of items on higher levels, tougher enemies, etc.)
-- Scale loot with monster level
-- Better loot from monsters than item squares
 - Add combat loots to message log
 
 - More obvious when level up
 - Break down weapons/armor into scrap
 - Fix crafting button so text fits
 - Keyboard shortcuts for "continue" buttons
-- Skill up scanning ability with usage/level-up
-- Make armor reduce dmg by a percent rather than flat amount
-- "Empty inventory" line should show up if the player's inventory contains only gold
+- Skill up scanning ability with usage + level-up
 - Dynamic container name
 */
 

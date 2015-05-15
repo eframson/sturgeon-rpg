@@ -14,7 +14,7 @@ define([
 
 		//Init
 		var self = this;
-		playerData = playerData || {equipment: { armor: {}, }, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array() };
+		playerData = $.extend({equipment: { armor: {}, }, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array() }, playerData);
 
 		this.init = function(playerData){
 
@@ -300,8 +300,36 @@ define([
 		}
 		
 		this.takeDmg = function(dmg){
-			dmg = ( dmg - self.totalArmor() < 1 ) ? 1 : dmg - self.totalArmor() ;
-			self.data().hp( self.data().hp() - dmg );
+
+			var coefficientOfDmgToTake,
+				dmgTaken;
+
+			//What % of our AC is the DMG?
+			var percentOfArmorDmgIs = Math.round((dmg / self.totalArmor()) * 100);
+
+			if( percentOfArmorDmgIs < 100 ){
+
+				if( percentOfArmorDmgIs <= 25 ){
+					coefficientOfDmgToTake = 0;
+				}else{
+					coefficientOfDmgToTake = (50 - (((100 - percentOfArmorDmgIs) * 0.66))) / 100;
+				}
+				
+			}else if( percentOfArmorDmgIs > 100 ){
+
+				if(percentOfArmorDmgIs >= 200){
+					coefficientOfDmgToTake = 1;
+				}else{
+					coefficientOfDmgToTake = 1 + (((100 - percentOfArmorDmgIs) * 0.5) / 100)
+				}
+
+			}else {
+				coefficientOfDmgToTake = 0.5;
+			}
+
+			dmgTaken = Math.round(dmg * coefficientOfDmgToTake);
+
+			self.data().hp( self.data().hp() - dmgTaken );
 			return self.data().hp();
 		}
 

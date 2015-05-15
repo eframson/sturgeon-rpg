@@ -53,6 +53,8 @@ define([
 			self.exitSquare = ko.observableArray(levelData.exitSquare || []);
 			self.playerOrientation = levelData.playerOrientation || "up";
 
+			self.avgDmgPerHit = levelData.avgDmgPerHit || (self.levelNum * 2);
+
 			var gridArray = Array();
 			for(y = 0; y < levelData.grid.length; y++){
 				for(x = 0; x < levelData.grid[y].length; x++){

@@ -32,6 +32,7 @@ define([
 		this.uniqueID = (data.uniqueID || Utils.uniqueID());
 		this.canScale = ko.observable(data.canScale || 0);
 		this.isScaled = ko.observable(data.isScaled || 0);
+		this.canBreakdown = data.canBreakdown || false;
 		
 		this.sellValue = ko.computed(function(){
 			return Math.ceil(self.buyValue() / 2);

@@ -75,9 +75,9 @@
 				<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().data().str()"></span></div>
 				<div class="col-md-1"><span class="stat-label">DEX</span><span class="stat-value" data-bind="text: player().data().dex()"></span></div>
 				<div class="col-md-1"><span class="stat-label">END</span><span class="stat-value" data-bind="text: player().data().end()"></span></div>
+				<div class="col-md-1"><span class="stat-label">SPD</span><span class="stat-value" data-bind="text: player().data().speed()"></span></div>
 
 
-				<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
 				<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
 				<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
 
@@ -144,7 +144,7 @@
 
 				<div class="row back">
 					<div class="col-md-12">
-						<button class="btn btn-default" type="button" data-bind="click: showContentArea, css: { disabled: $root.player().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }"><span>Back</span></button>
+						<button class="btn btn-default" type="button" data-bind="click: showContentArea, css: { disabled: $root.player().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }"><span data-bind="text: 'Back'"></span></button>
 					</div>
 				</div>
 
@@ -212,7 +212,7 @@
 							<!-- /ko -->
 
 							<!-- ko foreach: $root.activeItemButtons() -->
-								<button class="btn btn-default inventory-control" data-bind="css: $data.css, click: $data.click, text: $data.text"></button>
+								<button class="btn inventory-control" data-bind="css: $data.css, click: $data.click, text: $data.text"></button>
 							<!-- /ko -->
 							
 						</div>
