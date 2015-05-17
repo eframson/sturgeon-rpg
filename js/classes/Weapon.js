@@ -11,11 +11,28 @@ define([
 		Item.call(this, data);
 
 		this.init = function(data){
-			this.dmgMin = ko.observable(data.dmgMin || 0);
-			this.dmgMax = ko.observable(data.dmgMax || 1);
-			this.handsRequired = data.handsRequired || 1;
-			this.isWeapon = true;
-			this.isEquippable = true;
+			self.level = ko.observable(data.level || 1);
+			self.dmgMin = ko.observable(data.dmgMin || 0);
+			self.dmgMax = ko.observable(data.dmgMax || 1);
+			self.handsRequired = data.handsRequired || 1;
+			self.isWeapon = true;
+			self.isEquippable = true;
+			self.fullyDynamicStats = data.fullyDynamicStats || 0;
+			self.avgMonsterHpPercentPerHit = data.avgMonsterHpPercentPerHit || 0.3;
+			
+			if(self.fullyDynamicStats){
+				//Obviously move this to a central location...
+				var avgPlayerHp = ( self.level() > 1 ? self.level() + 1 : self.level()) * 6;
+				var avgMonsterHp = Math.round(avgPlayerHp / 2);
+				
+				var avgDmgPerHit = avgMonsterHp * self.avgMonsterHpPercentPerHit;
+				
+				//Let's say the dmg is -30% - +50%
+				self.dmgMin( Math.round(avgDmgPerHit * 0.7) );
+				self.dmgMax( Math.round(avgDmgPerHit * 1.5) );
+				
+				self.buyValue( self.dmgMax() * 100 );
+			}
 		}
 
 		this._applyUpgrade = function(){

@@ -118,7 +118,7 @@
 					<div class="map-inner-container">
 
 						<div class="map-buttons">
-							<div class="map-level-num"><strong>Level: </strong><span data-bind="text: $root.level().levelNum()"></span></div>
+							<div class="map-level-num"><strong>Dungeon Level: </strong><span data-bind="text: $root.level().levelNum()"></span></div>
 							<div class="map-button-cluster">
 								<button type="button" class="btn btn-default up" data-bind="click: $root.movePlayerUp">Swim Upstream</button>
 								<div class="mid-buttons">
@@ -184,7 +184,13 @@
 								<!-- ko if: activeItem().actualItem().id != 'gold' -->
 								<div class="line">
 									<span class="stat" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? 'Buy Value:' : 'Sell Value:' "></span>
-									<span class="value" data-bind="text: activeItem().moveDirection() == 'left' && currentInventoryRightSide() == 'merchant' ? activeItem().actualItem().buyValue() + ' GP' : activeItem().actualItem().sellValue() + ' GP' "></span>
+									<span class="value" data-bind="text:
+										activeItem().moveDirection() == 'left' &&
+										currentInventoryRightSide() == 'merchant' ?
+											activeItem().actualItem().buyValue() + ' GP' :
+											(activeItem().actualItem().sellValue() + ' GP' + (activeItem().actualItem().qty() > 1 ?
+												' ( ea. ' + (activeItem().actualItem().qty() * activeItem().actualItem().sellValue()) + ' GP total)' :
+												''))"></span>
 								</div>
 								<!-- /ko -->
 

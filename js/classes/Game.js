@@ -1011,6 +1011,9 @@ define([
 					itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
 				}
+				
+				itemToAdd.fullyDynamicStats = 1;
+				itemToAdd.level = self.level().levelNum();
 
 			}
 
@@ -2130,6 +2133,20 @@ define([
 			console.log("Total stats: " + numStats);
 
 		}
+		
+		this.scaledWeaponTest = function(){
+			var weaponId;
+
+			itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = self.level().levelNum();
+			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+
+			itemToAdd = self.getAvailableItemById("melee_weapon_04", "weapon", 1);
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = self.level().levelNum();
+			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+		}
 
 		self.init();
 
@@ -2145,6 +2162,8 @@ define([
 - More obvious turn-based combat
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
 - Show dmg taken next to player/monster HP counter
+- Either remove "scan" or make it more useful
+- "Take All" button for container
 
 - Dynamic loot generation (a la Diablo III)
 - Add combat loots to message log

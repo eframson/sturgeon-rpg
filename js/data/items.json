@@ -132,7 +132,8 @@
 				"buyValue" : 800,
 				"maxLevelRange" : 4,
 				"canUpgrade" : 1,
-				"canBreakdown" : 1
+				"canBreakdown" : 1,
+				"avgMonsterHpPercentPerHit" : 0.3
 			},
 			"melee_weapon_03" : {
 				"id" : "melee_weapon_03",
@@ -160,7 +161,8 @@
 				"handsRequired" : 2,
 				"buyValue" : 1500,
 				"canUpgrade" : 1,
-				"canBreakdown" : 1
+				"canBreakdown" : 1,
+				"avgMonsterHpPercentPerHit" : 0.5
 			}
 
 		},
