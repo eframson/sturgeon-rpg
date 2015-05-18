@@ -333,6 +333,14 @@ button:focus {
 	padding-left: 0px;
 }
 
+#inventory-equipment .header .container-ui-header.take-all {
+	padding-right: 0px;
+}
+
+#inventory-equipment .header .container-ui-header.take-all button {
+	margin-top: 11px;
+}
+
 #inventory-equipment .inventory,
 #inventory-equipment .container-ui,
 #inventory-equipment .equipment,

@@ -11,8 +11,9 @@ define([
 	'classes/Monster',
 	'json!data/items.json',
 	'json!data/monsters.json',
-
 	'Utils',
+
+	'jquery.animateNumbers'
 ], function($, ko, Player, Level, Item, Weapon, Armor, Shield, ItemCollection, Monster, itemDataFile, monsterDataFile, Utils) {
 
 	function Game() {
@@ -139,10 +140,17 @@ define([
 		this.playerActions = {
 			scanSquares: function(){
 				self.player().data().skillCooldowns().scanSquares(self.defaultCooldown);
-				self.level().scanSquaresNearPlayer( self.player().data().skills().scanSquares() );
+				self.level().scanSquaresNearPlayer( self.player().data().skills().visionRange() );
 				self.level().drawMap();
 				self.player().data().skillProgress().scanSquares( self.player().data().skillProgress().scanSquares() + 1 );
 				self.logMessage("By holding very still and concentrating, you are able to thoroughly survey your surroundings.");
+
+				//Quick-and-dirty
+				if( self.player().data().skillProgress().scanSquares() > 0 && self.player().data().skillProgress().scanSquares() % 25 == 0 ){
+					self.player().data().skillProgress().scanSquares(0);
+					self.player().data().skills().scanSquares( self.player().data().skills().scanSquares() + 1 );
+					self.logMessage("Your skill in scanning has increased.");
+				}
 			},
 			findFood: function(){
 
@@ -559,6 +567,7 @@ define([
 					self.updateCooldowns();
 					self.player().data().skillProgress().speed( self.player().data().skillProgress().speed() + 1 );
 
+					self.level().scanSquaresNearPlayer(0);
 					self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
 					self.level().drawMap();
 
@@ -851,6 +860,15 @@ define([
 			self.toggleInventory();
 		}
 
+		this.takeAllFromContainer = function(){
+			for( var i=0; i < self.currentContainer().length; i++ ){
+				//Skip the normal cap-checking rules
+				self.player().data().inventory.addItem( self.currentContainer()[i] );
+			}
+			self.currentContainer.removeAll();
+			self._resetActiveItem();
+		}
+
 		this.squareItemAction = function(){
 
 			self.freezeMovement(true);
@@ -965,11 +983,12 @@ define([
 
 				}else if( miscType == "food" ){
 					var consumableType = Utils.doBasedOnPercent({
-						50 : [
-							"health_potion",
-							"biscuit_food",
-						]
+						25 : "health_potion",
+						75 : "biscuit_food",
 					});
+					if(consumableType == "health_potion"){
+						foodQty = Utils.doRand(1, (1 + Math.floor(self.level().levelNum() / 2) ));
+					}
 					itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
 				}
 
@@ -1074,8 +1093,9 @@ define([
 			var eventType = Utils.doBasedOnPercent({
 				30 : "trainer",
 				40 : "trader",
-				20 : "cooldown",
+				15 : "cooldown",
 				10 : "stat",
+				5 : "inventory",
 			});
 
 			var msg = "";
@@ -1316,6 +1336,28 @@ define([
 					}
 				);
 
+			}else if( eventType == "inventory" ){
+
+				msg = "You find a small leather satchel. While it appears to be empty, it still seems to be in pretty good condition, so you strap it onto your pack. Your maximum inventory slots have increased by 1.";
+				buttons = new Array(
+					{
+						title : "Continue",
+						action : function(){
+
+							self.logMessage(this.msg);
+
+							self.player().data().inventoryMaxSlots( self.player().data().inventoryMaxSlots() + 1 );
+
+							self.visibleSection("content-area");
+							$("#full-screen-notice").fadeOut(300, function(){
+								$("#content-area").fadeIn(300);
+								self.freezeMovement(false);
+							});
+						},
+						msg : msg,
+					}
+				);
+
 			}
 
 			self.visibleSection("full-screen-notice");
@@ -1348,6 +1390,7 @@ define([
 				currentLevel.isActive(false);
 				nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
 				nextLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				self.level().scanSquaresNearPlayer(0);
 				nextLevel.drawMap();
 
 				$(this).fadeIn(400, function(){
@@ -2142,7 +2185,7 @@ define([
 			itemToAdd.level = self.level().levelNum();
 			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
 
-			itemToAdd = self.getAvailableItemById("melee_weapon_04", "weapon", 1);
+			itemToAdd = self.getAvailableItemById("melee_weapon_05", "weapon", 1);
 			itemToAdd.fullyDynamicStats = 1;
 			itemToAdd.level = self.level().levelNum();
 			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
@@ -2154,22 +2197,29 @@ define([
 
 	Game.prototype.constructor = Game;
 
+	ko.bindingHandlers.animateNumbers = {
+		init: function(element, valueAccessor){
+			//Don't do anything on init, I think
+			$(element).val(valueAccessor());
+		},
+		update: function(element, valueAccessor){
+			$(element).stop(false, true).animateNumbers(valueAccessor(), false, 300);
+		}
+	}
+
 	return Game;
 
 /* TODOs
-- Crafting, make new stuff?
 - Implement class for Skills to get them more cohesive
 - More obvious turn-based combat
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
 - Show dmg taken next to player/monster HP counter
 - Either remove "scan" or make it more useful
-- "Take All" button for container
-- Allow equip from loot container
+- Allow equip from loot container -- maybe
 - Play sound on level up?
 - Minor sound FX on square events
 - More consistent gold from monsters?
 - Maaaaybe make salvage currency?
-- Possibly increase inventory space by 1 or 2
 - Maybe decrease droprate of potions
 - Increase droprate of fish biscuits
 - Maybe don't make biscuits a full heal -- possibly provide ability to "use x at once"
@@ -2177,6 +2227,8 @@ define([
 - Reveal squares after % of level experienced
 - As long as you can see one square away, vision range doesn't especially matter
 - Make repetitive actions less obvious, or less repetitive
+- More variance in monster HP
+- Fix min/max dmg figures in descriptions
 
 - Dynamic loot generation (a la Diablo III)
 - Add combat loots to message log

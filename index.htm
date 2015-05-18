@@ -152,7 +152,8 @@
 					<div class="col-md-5 inventory-header"><h3>Inventory (<span data-bind="css: { danger: $root.player().inventorySlotsOccupied() > $root.player().data().inventoryMaxSlots() }, text: $root.player().inventorySlotsOccupied()"></span>/<span data-bind="text: $root.player().data().inventoryMaxSlots()"></span> slots occupied)</h3></div>
 					<div class="col-md-3"></div>
 					<div class="col-md-4 equipment-header" data-bind="css: { hidden: currentInventoryRightSide() != 'equipment' }"><h3>Equipment</h3></div>
-					<div class="col-md-4 container-ui-header" data-bind="css: { hidden: currentInventoryRightSide() != 'container' }"><h3>Container</h3></div>
+					<div class="col-md-3 container-ui-header" data-bind="css: { hidden: currentInventoryRightSide() != 'container' }"><h3>Container</h3></div>
+					<div class="col-md-1 container-ui-header take-all" data-bind="css: { hidden: currentInventoryRightSide() != 'container' }"><button class="btn btn-default" type="button" data-bind="click: takeAllFromContainer"><span>Take All</span></button></div>
 					<div class="col-md-4 merchant-header" data-bind="css: { hidden: currentInventoryRightSide() != 'merchant' }"><h3>Merchant</h3></div>
 				</div>
 
@@ -351,7 +352,7 @@
 							
 							<div class="line">
 								<span class="stat">HP:</span>
-								<span class="value hp" data-bind="text: $root.player().data().hp()"></span>
+								<span class="value hp" data-bind="animateNumbers: $root.player().data().hp()"></span>
 							</div>
 							<div class="line">
 								<span class="stat">Speed:</span>
@@ -372,7 +373,7 @@
 							
 							<div class="line">
 								<span class="stat">HP:</span>
-								<span class="value hp" data-bind="text: $root.currentEnemy().hp()"></span>
+								<span class="value hp" data-bind="animateNumbers: $root.currentEnemy().hp()"></span>
 							</div>
 							<div class="line">
 								<span class="stat">Speed:</span>

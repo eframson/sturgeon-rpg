@@ -407,7 +407,7 @@ define([
 		}
 
 		this._revealSquaresNearPlayer = function(radius, type){
-			radius = radius || 1;
+			radius = (radius != undefined) ? radius : 1 ;
 			type = type || "all";
 
 			var playerPos = self.getPlayerPos();
@@ -424,7 +424,7 @@ define([
 					if(type == "vision" || type == "all" ){
 						self.getSquare(c, r).setVisibility(true);
 					}
-					if( type == "scan" || type == "all" ){
+					if( type == "scan" ){
 						self.getSquare(c, r).setScanned(true);
 					}
 				}

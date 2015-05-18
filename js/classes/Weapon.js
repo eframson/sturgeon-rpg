@@ -32,6 +32,18 @@ define([
 				self.dmgMax( Math.round(avgDmgPerHit * 1.5) );
 				
 				self.buyValue( self.dmgMax() * 100 );
+
+				var magicDesc = self.desc;
+				var matches = self.desc.match(/%[^%]+%/g);
+
+				if(matches != undefined){
+					for(var i = 0; i < matches.length; i++){
+						var trimmedMatch = matches[i].replace(/%/g, "");
+						magicDesc = magicDesc.replace("%" + trimmedMatch + "%", self[trimmedMatch]());
+					}
+
+					self.desc = magicDesc;
+				}
 			}
 		}
 
