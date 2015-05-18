@@ -421,9 +421,7 @@ define([
 
 			for(r = startY; r <= endY; r++){
 				for(c = startX; c <= endX; c++){
-					if(type == "vision" || type == "all" ){
-						self.getSquare(c, r).setVisibility(true);
-					}
+					self.getSquare(c, r).setVisibility(true);
 					if( type == "scan" ){
 						self.getSquare(c, r).setScanned(true);
 					}

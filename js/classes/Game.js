@@ -140,7 +140,7 @@ define([
 		this.playerActions = {
 			scanSquares: function(){
 				self.player().data().skillCooldowns().scanSquares(self.defaultCooldown);
-				self.level().scanSquaresNearPlayer( self.player().data().skills().visionRange() );
+				self.level().scanSquaresNearPlayer( self.player().data().skills().scanSquares() );
 				self.level().drawMap();
 				self.player().data().skillProgress().scanSquares( self.player().data().skillProgress().scanSquares() + 1 );
 				self.logMessage("By holding very still and concentrating, you are able to thoroughly survey your surroundings.");
@@ -1304,8 +1304,8 @@ define([
 				}else if( stat == "end" ){
 					msg = "A passing trout challenges you to an impromptu fin-wrestling contest. The ensuing match takes a full hour before your strength finally gives out and you are forced to concede victory to the other fish. Panting and visibly just as exhausted as you and thoroughly impressed with your determination, the trout tells you one of his fin-wrestling secrets. You gain +1 END.";
 				}else if( stat == "exp" ){
-					msg = "You come across a water-logged journal lodged between two rocks. Nonchalantly flippering through the pages, you encounter some surprisingly useful advice.";
 					statIncreaseAmt = Math.ceil( self.player().expRequiredForNextLevel() / 2 );
+					msg = "You come across a water-logged journal lodged between two rocks. Nonchalantly flippering through the pages, you encounter some surprisingly useful advice. Gain " + statIncreaseAmt + " EXP.";
 					doExpGain = true;
 				}
 
@@ -2229,6 +2229,8 @@ define([
 - Make repetitive actions less obvious, or less repetitive
 - More variance in monster HP
 - Fix min/max dmg figures in descriptions
+- Color code combat log messages
+- Create EquippableItem subclass or something
 
 - Dynamic loot generation (a la Diablo III)
 - Add combat loots to message log

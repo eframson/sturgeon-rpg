@@ -41,9 +41,9 @@ define([
 					shield : ko.observable(playerData.equipment.shield || {}),
 				}),
 				skills : ko.observable({
-					scanSquares : ko.observable(playerData.skills.scanSquares || 2),
+					scanSquares : ko.observable(playerData.skills.scanSquares || 1),
 					findFood : ko.observable(playerData.skills.findFood || 20),
-					visionRange : ko.observable(playerData.skills.visionRange || 1),
+					visionRange : ko.observable( (playerData.skills.visionRange != undefined) ? playerData.skills.visionRange : 0 ),
 				}),
 				skillCooldowns : ko.observable({
 					scanSquares : ko.observable(playerData.skillCooldowns.scanSquares || 0),

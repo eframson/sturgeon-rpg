@@ -305,7 +305,7 @@
 				"id" : "shield_01",
 				"name" : "Bark Shield",
 				"type" : "shield",
-				"desc" : "A thick piece of bark scraped off the side of a sunken log. Not pretty, but at least it's something solid between you and those who mean you harm. +2 Armor when equipped.",
+				"desc" : "A thick piece of bark scraped off the side of a sunken log. Not pretty, but at least it's something solid between you and those who mean you harm. %armorValue% Armor when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorValue" : 2,

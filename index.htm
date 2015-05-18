@@ -190,7 +190,7 @@
 										currentInventoryRightSide() == 'merchant' ?
 											activeItem().actualItem().buyValue() + ' GP' :
 											(activeItem().actualItem().sellValue() + ' GP' + (activeItem().actualItem().qty() > 1 ?
-												' ( ea. ' + (activeItem().actualItem().qty() * activeItem().actualItem().sellValue()) + ' GP total)' :
+												' ea. (' + (activeItem().actualItem().qty() * activeItem().actualItem().sellValue()) + ' GP total)' :
 												''))"></span>
 								</div>
 								<!-- /ko -->
