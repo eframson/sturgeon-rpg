@@ -374,7 +374,7 @@ define([
 					}
 
 					if( self.activeItem().canDrop() && self.currentInventoryRightSide() != 'merchant'){
-						
+
 						if( self.currentInventoryRightSide() == 'container' ){ //We're moving something
 
 							if( self.activeItem().moveDirection() == "left" ){ //We're moving from the container to the inventory
@@ -404,7 +404,7 @@ define([
 								}
 
 							}else if( self.activeItem().moveDirection() == "right" ){ //We're moving from the inventory to the container
-								
+
 								if( actualItem.id != "gold" ){
 
 									if( actualItem.qty() > 1 ){
@@ -422,7 +422,7 @@ define([
 										});
 
 									}else if( actualItem.qty() == 1 ){
-										
+
 										buttons.push({
 											css: defaultCss,
 											text: "Put >>",
@@ -434,7 +434,7 @@ define([
 								}
 
 							}
-							
+
 						}else { //We're dropping something
 
 							if(actualItem.qty() > 1){
@@ -890,8 +890,8 @@ define([
 			if( lootSet == "monster" ){
 				qtyCoefficient = qtyCoefficient * 1.5;
 				possibleItemTypes = {
-					30 : "gold",
-					45 : "misc",
+					40 : "gold",
+					35 : "misc",
 					25 : "gear",
 				};
 			}else if( lootSet == "trader" ){
@@ -1011,7 +1011,7 @@ define([
 					itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
 				}
-				
+
 				itemToAdd.fullyDynamicStats = 1;
 				itemToAdd.level = self.level().levelNum();
 
@@ -1570,7 +1570,7 @@ define([
 					existingMinDmg = self.player().getEquippedWeapon().dmgMin();
 					existingMaxDmg = self.player().getEquippedWeapon().dmgMax();
 				}
-				
+
 				minDmgChange = actualItem.dmgMin() - existingMinDmg;
 				maxDmgChange = actualItem.dmgMax() - existingMaxDmg;
 
@@ -1594,7 +1594,7 @@ define([
 						existingArmorValue = self.player().getEquippedArmorBySlot(actualItem.armorSlot).armorValue();
 					}
 				}
-				
+
 				armorValueChange = actualItem.armorValue() - existingArmorValue;
 
 				armorValueChange = ( armorValueChange < 0 ) ? "<span class='negative'>" + armorValueChange + "</span>" : ( armorValueChange > 0 ? "<span class='positive'>+" + armorValueChange + "</span>" : "+" + armorValueChange ) ; //show 0 change as "+0"
@@ -2063,7 +2063,7 @@ define([
 
 			self.player().addItemToInventory( new Armor(itemToAdd) );
 		}
-		
+
 		this.weaponTest = function(){
 			var weaponId;
 
@@ -2133,7 +2133,7 @@ define([
 			console.log("Total stats: " + numStats);
 
 		}
-		
+
 		this.scaledWeaponTest = function(){
 			var weaponId;
 
@@ -2164,12 +2164,24 @@ define([
 - Show dmg taken next to player/monster HP counter
 - Either remove "scan" or make it more useful
 - "Take All" button for container
+- Allow equip from loot container
+- Play sound on level up?
+- Minor sound FX on square events
+- More consistent gold from monsters?
+- Maaaaybe make salvage currency?
+- Possibly increase inventory space by 1 or 2
+- Maybe decrease droprate of potions
+- Increase droprate of fish biscuits
+- Maybe don't make biscuits a full heal -- possibly provide ability to "use x at once"
+- Either hide contents of squares except when scanned -- or, make hostile squares move around
+- Reveal squares after % of level experienced
+- As long as you can see one square away, vision range doesn't especially matter
+- Make repetitive actions less obvious, or less repetitive
 
 - Dynamic loot generation (a la Diablo III)
 - Add combat loots to message log
 
 - More obvious when level up
-- Break down weapons/armor into scrap
 - Fix crafting button so text fits
 - Keyboard shortcuts for "continue" buttons
 - Skill up scanning ability with usage + level-up

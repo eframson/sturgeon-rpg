@@ -25,7 +25,7 @@ define([
 				baseHp : ko.observable(playerData.baseHp || 10),
 				exp : ko.observable(playerData.exp || 0),
 				inventory : new ItemCollection(Array()),
-				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 4),
+				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 5),
 				equipment : ko.observable({
 
 					armor : ko.observable({
@@ -36,7 +36,7 @@ define([
 						tail: ko.observable(playerData.equipment.armor.tail || {}),
 
 					}),
-					
+
 					weapon : ko.observable(playerData.equipment.weapon || {}),
 					shield : ko.observable(playerData.equipment.shield || {}),
 				}),
@@ -70,7 +70,7 @@ define([
 				itemArray.push( new Item(playerData.inventory[i]) );
 			}
 			self.data().inventory(itemArray);
-			
+
 			this.inventorySlotsOccupied = ko.computed(function(){
 				var slotsOccupied = 0;
 				for(i=0; i < self.data().inventory().length; i++){
@@ -86,11 +86,11 @@ define([
 			this.hasInventorySpace = ko.computed(function(){
 				return ( self.inventorySlotsAvailable() > 0 );
 			});
-			
+
 			this.baseMinDmg = ko.computed(function(){
 				return Math.ceil(self.data().str() * 0.5);
 			});
-			
+
 			this.baseMaxDmg = ko.computed(function(){
 				return Math.ceil(self.data().str() * 0.85);
 			});
@@ -132,14 +132,14 @@ define([
 
 				return armorValue;
 			});
-			
+
 			self.isDead = ko.computed(function(){
 				return self.data().hp() < 1;
 			});
-			
+
 			self.gp = ko.computed(function(){
 				var gold = self.data().inventory.getItemByID("gold");
-				
+
 				if(gold){
 					return gold.qty();
 				}else{
@@ -149,7 +149,7 @@ define([
 
 			self.weaponScraps = ko.computed(function(){
 				var scraps = self.data().inventory.getItemByID("weapon_scraps");
-				
+
 				if(scraps){
 					return scraps.qty();
 				}else{
@@ -159,7 +159,7 @@ define([
 
 			self.armorScraps = ko.computed(function(){
 				var scraps = self.data().inventory.getItemByID("armor_scraps");
-				
+
 				if(scraps){
 					return scraps.qty();
 				}else{
@@ -177,7 +177,7 @@ define([
 
 			self.numPotionsAvailable = ko.computed(function(){
 				var pots = self.data().inventory.getItemByID("health_potion");
-				
+
 				if(pots){
 					return pots.qty();
 				}else{
@@ -215,7 +215,7 @@ define([
 				slotsRequired = existingItem.slotsRequired;
 
 			var numLeft = self.data().inventory.removeItem(itemID, qty);
-				
+
 			if( numLeft === false ){
 				console.log("could not remove item");
 			}
@@ -294,11 +294,11 @@ define([
 		this._getShieldSlot = function(){
 			return self.data().equipment().shield;
 		}
-		
+
 		this.doAttack = function(){
 			return Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
 		}
-		
+
 		this.takeDmg = function(dmg){
 
 			var coefficientOfDmgToTake,
@@ -314,7 +314,7 @@ define([
 				}else{
 					coefficientOfDmgToTake = (50 - (((100 - percentOfArmorDmgIs) * 0.66))) / 100;
 				}
-				
+
 			}else if( percentOfArmorDmgIs > 100 ){
 
 				if(percentOfArmorDmgIs >= 200){
@@ -349,7 +349,7 @@ define([
 			self.hasLeveledUp(true);
 			self.data().baseHp( self.data().baseHp() + 1 );
 			self.data().skills().findFood( self.data().skills().findFood() + 1 );
-			
+
 			if( self.data().level() % 3 == 0){
 				self.data().str( self.data().str() + 1 );
 				self.data().dex( self.data().dex() + 1 );

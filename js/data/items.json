@@ -57,7 +57,8 @@
 				"desc" : "Scraps of leather, iron, steel. Formerly part of someone's weapon. Maybe you could use it to make your own weapons better...",
 				"slotsRequired" : 1,
 				"stackable" : 1,
-				"buyValue" : 25
+				"buyValue" : 25,
+				"sellValue" : 1
 			},
 			"armor_scraps" : {
 				"id" : "armor_scraps",
@@ -66,7 +67,8 @@
 				"desc" : "Scraps of leather, iron, scales, or cloth. Formerly part of someone's adventuring gear. Maybe you could use it to reinforce your own armor somehow...",
 				"slotsRequired" : 1,
 				"stackable" : 1,
-				"buyValue" : 25
+				"buyValue" : 25,
+				"sellValue" : 1
 			}
 
 		},
@@ -168,7 +170,7 @@
 		},
 
 		"armor" : {
-			
+
 			"tail_armor_01" : {
 				"id" : "tail_armor_01",
 				"name" : "Popsicle Stick Tail Armor",
@@ -182,7 +184,7 @@
 				"canUpgrade" : 1,
 				"canBreakdown" : 1
 			},
-			
+
 			"fin_armor_01" : {
 				"id" : "fin_armor_01",
 				"name" : "Chainmail Fin-Gloves",

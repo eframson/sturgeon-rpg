@@ -5,7 +5,7 @@ define([
 ], function($, ko, Utils){
 
 	function Item(data){
-		
+
 		if(data == undefined || data.type == undefined || data.name == undefined || data.id == undefined){
 			return false;
 		}
@@ -20,6 +20,7 @@ define([
 		this.qty = ko.observable(data.qty || 1);
 		this.desc = data.desc || data.name;
 		this.buyValue = ko.observable(data.buyValue || 0);
+		this._sellValue = data.sellValue;
 		this.minLevelRange = data.minLevelRange || 1;
 		this.maxLevelRange = data.maxLevelRange;
 		this.canUpgrade = ( data.canUpgrade != undefined ) ? data.canUpgrade : 0;
@@ -33,8 +34,11 @@ define([
 		this.canScale = ko.observable(data.canScale || 0);
 		this.isScaled = ko.observable(data.isScaled || 0);
 		this.canBreakdown = data.canBreakdown || false;
-		
+
 		this.sellValue = ko.computed(function(){
+			if(self._sellValue){
+				return self._sellValue;
+			}
 			return Math.ceil(self.buyValue() / 2);
 		});
 
@@ -44,11 +48,11 @@ define([
 			}
 			return false;
 		});
-		
+
 		this.getExportData = function(){
-			
+
 			var exportObj = {};
-			
+
 			for(prop in self){
 				if ( typeof self[prop] !== 'function' ){
 					exportObj[prop] = self[prop];
@@ -56,7 +60,7 @@ define([
 					exportObj[prop] = self[prop]();
 				}
 			}
-			
+
 			return exportObj;
 		}
 
