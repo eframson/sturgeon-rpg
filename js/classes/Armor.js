@@ -29,6 +29,18 @@ define([
 				self.armorValue( Math.ceil(avgMonsterDmg / 3) );
 				
 				self.buyValue( self.armorValue() * 100 );
+
+				var magicDesc = self.desc;
+				var matches = self.desc.match(/%[^%]+%/g);
+
+				if(matches != undefined){
+					for(var i = 0; i < matches.length; i++){
+						var trimmedMatch = matches[i].replace(/%/g, "");
+						magicDesc = magicDesc.replace("%" + trimmedMatch + "%", self[trimmedMatch]());
+					}
+
+					self.desc = magicDesc;
+				}
 			}
 
 		}

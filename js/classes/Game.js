@@ -2210,36 +2210,44 @@ define([
 	return Game;
 
 /* TODOs
-- Implement class for Skills to get them more cohesive
-- More obvious turn-based combat
-- Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
-- Show dmg taken next to player/monster HP counter
-- Either remove "scan" or make it more useful
-- Allow equip from loot container -- maybe
+
+New Features/Game Improvements
+- Dynamic loot generation (a la Diablo III)
+- More variance in monster HP
 - Play sound on level up?
 - Minor sound FX on square events
+- Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
+
+Code Improvements
+- Create EquippableItem subclass or something
+- Implement class for Skills to get them more cohesive
+
+UI Improvements
+- Color code combat log messages
+- More obvious when level up
+- Dynamic container name
+- Keyboard shortcuts for "continue" buttons
+- Fix crafting button so text fits
+- Add combat loots to message log
+- Fix min/max dmg figures in descriptions
+- More obvious turn-based combat
+
+Feeback/Ideas/Thoughts
+- Make lvl one slightly more challenging
+- Balance item value + dmg/armor + num salvage
+- As long as you can see one square away, vision range doesn't especially matter
+- Make repetitive actions less obvious, or less repetitive
+- Reveal squares after % of level experienced (maybe)
+- Either hide contents of squares except when scanned -- or, make hostile squares move around
 - More consistent gold from monsters?
 - Maaaaybe make salvage currency?
 - Maybe decrease droprate of potions
 - Increase droprate of fish biscuits
 - Maybe don't make biscuits a full heal -- possibly provide ability to "use x at once"
-- Either hide contents of squares except when scanned -- or, make hostile squares move around
-- Reveal squares after % of level experienced
-- As long as you can see one square away, vision range doesn't especially matter
-- Make repetitive actions less obvious, or less repetitive
-- More variance in monster HP
-- Fix min/max dmg figures in descriptions
-- Color code combat log messages
-- Create EquippableItem subclass or something
+- Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
+- Either remove "scan" or make it more useful
+- Show dmg taken next to player/monster HP counter
 
-- Dynamic loot generation (a la Diablo III)
-- Add combat loots to message log
-
-- More obvious when level up
-- Fix crafting button so text fits
-- Keyboard shortcuts for "continue" buttons
-- Skill up scanning ability with usage + level-up
-- Dynamic container name
 */
 
 });
