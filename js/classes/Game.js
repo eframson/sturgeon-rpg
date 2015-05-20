@@ -2217,10 +2217,12 @@ New Features/Game Improvements
 - Play sound on level up?
 - Minor sound FX on square events
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
+- Frenzy strike: 3 hits, 25% chance to hit, 133% dmg
 
 Code Improvements
 - Create EquippableItem subclass or something
 - Implement class for Skills to get them more cohesive
+- Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
 
 UI Improvements
 - Color code combat log messages
@@ -2231,6 +2233,10 @@ UI Improvements
 - Add combat loots to message log
 - Fix min/max dmg figures in descriptions
 - More obvious turn-based combat
+- Allow for a variable number of items to be purchased from merchant
+- Show that a 2H and a shield can't be equipped at the same time
+- Show that a weapon will take up x number of backpack slots
+- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Feeback/Ideas/Thoughts
 - Make lvl one slightly more challenging
