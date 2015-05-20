@@ -1152,7 +1152,7 @@ define([
 					Array(
 						"findFood",
 						"scanSquares",
-						"visionRange",
+						//"visionRange",
 						"str",
 						"dex",
 						"end",
