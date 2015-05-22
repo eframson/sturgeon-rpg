@@ -2218,6 +2218,7 @@ New Features/Game Improvements
 - Minor sound FX on square events
 - Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
 - Frenzy strike: 3 hits, 25% chance to hit, 133% dmg
+- Allow certain weapons to be wielded 1H or 2H (for more dmg)
 
 Code Improvements
 - Create EquippableItem subclass or something
@@ -2237,6 +2238,7 @@ UI Improvements
 - Show that a 2H and a shield can't be equipped at the same time
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
+- Make it more obvious when active item is equipped (so accidental salvage isn't as easy)
 
 Feeback/Ideas/Thoughts
 - Make lvl one slightly more challenging
