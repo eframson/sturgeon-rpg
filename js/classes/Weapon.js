@@ -1,8 +1,9 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/Item'
-], function($, ko, Item){
+	'classes/Item',
+	'Utils'
+], function($, ko, Item, Utils){
 
 	function Weapon(data){
 
@@ -26,8 +27,11 @@ define([
 				var avgMonsterHp = Math.round(avgPlayerHp / 2);
 				
 				var avgDmgPerHit = avgMonsterHp * self.avgMonsterHpPercentPerHit;
+
+				//Randomize it a bit
+				avgDmgPerHit = Utils.doRand((avgDmgPerHit * 0.5), (avgDmgPerHit * 1.5));
 				
-				//Let's say the dmg is -30% - +50%
+				//Let's say the dmg range is -30% - +50%
 				self.dmgMin( Math.round(avgDmgPerHit * 0.7) );
 				self.dmgMax( Math.round(avgDmgPerHit * 1.5) );
 				

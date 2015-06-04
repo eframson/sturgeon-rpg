@@ -37,7 +37,7 @@ define([
 				//var avgPlayerHp = 10 + (self.level() * 3);
 
 				var avgMonsterHp = Math.round(avgPlayerHp / 2);
-				var avgMonsterDmg = avgMonsterHp / 3;
+				var avgMonsterDmg = avgMonsterHp / 2;
 
 				//Let's say HP and DMG both have a 30% variance
 				self.hp( Math.round((Utils.doRand(Math.ceil(avgMonsterHp * 0.7), Math.ceil(avgMonsterHp * 1.3))) * self.avgHpCoefficient) );
