@@ -18,10 +18,12 @@ define([
 			self.handsRequired = data.handsRequired || 1;
 			self.isWeapon = true;
 			self.isEquippable = true;
-			self.fullyDynamicStats = data.fullyDynamicStats || 0;
+			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 			self.avgMonsterHpPercentPerHit = data.avgMonsterHpPercentPerHit || 0.3;
+			self.quality = data.quality || "standard";
+			self.extraDamage = ko.observable(data.extraDamage || 0);
 			
-			if(self.fullyDynamicStats){
+			if(self.fullyDynamicStats && self.isScaled() == 0){
 				//Obviously move this to a central location...
 				var avgPlayerHp = ( self.level() > 1 ? self.level() + 1 : self.level()) * 6;
 				var avgMonsterHp = Math.round(avgPlayerHp / 2);
@@ -34,6 +36,8 @@ define([
 				//Let's say the dmg range is -30% - +50%
 				self.dmgMin( Math.round(avgDmgPerHit * 0.7) );
 				self.dmgMax( Math.round(avgDmgPerHit * 1.5) );
+				self.dmgMin( (self.dmgMin() > 1) ? self.dmgMin() : 1 );
+				self.dmgMax( (self.dmgMax() > 1) ? self.dmgMax() : 1 );
 				
 				self.buyValue( self.dmgMax() * 100 );
 
@@ -48,6 +52,8 @@ define([
 
 					self.desc = magicDesc;
 				}
+
+				self.isScaled(1);
 			}
 		}
 
@@ -59,16 +65,9 @@ define([
 
 		this.init(data);
 	}
-
-	//This is how we have to override the "parent" function
-	/*Weapon.prototype._applyUpgrade = function(){
-		self.dmgMin( self.dmgMin() + 1 );
-		self.dmgMax( self.dmgMax() + 1 );
-		self.attributesImprovedByLastCrafting = "Max DMG, Min DMG";
-	}*/
-
+	
 	Weapon.prototype = Object.create(Item.prototype);
-	Weapon.prototype.constructor = Weapon; //Is this actually necessary?
+	Weapon.prototype.constructor = Weapon;
 
 	return Weapon;
 });

@@ -1,6 +1,170 @@
 {
 	"items" : {
 
+		"scroungables" : {
+
+			"10" : {
+
+				"qual_10_1" : {
+					"id" : "qual_10_1",
+					"name" : "Grilled Halibut",
+					"quality" : "10"
+				},
+
+				"qual_10_2" : {
+					"id" : "qual_10_2",
+					"name" : "Bourbon-Glazed Salmon",
+					"quality" : "10"
+				}
+
+			},
+
+			"20" : {
+
+				"qual_20_1" : {
+					"id" : "qual_20_1",
+					"name" : "Shrimp Taco Salad",
+					"quality" : "20"
+				},
+
+				"qual_20_2" : {
+					"id" : "qual_20_2",
+					"name" : "Salmon Croquettes",
+					"quality" : "20"
+				}
+				
+			},
+
+			"30" : {
+
+				"qual_30_1" : {
+					"id" : "qual_30_1",
+					"name" : "Seared Scallops",
+					"quality" : "30"
+				},
+
+				"qual_30_2" : {
+					"id" : "qual_30_2",
+					"name" : "Tuna Noodle Casserole",
+					"quality" : "30"
+				}
+				
+			},
+
+			"40" : {
+
+				"qual_40_1" : {
+					"id" : "qual_40_1",
+					"name" : "Pan-Seared Halibut",
+					"quality" : "40"
+				},
+
+				"qual_40_2" : {
+					"id" : "qual_40_2",
+					"name" : "Lemon Pepper Shrimp",
+					"quality" : "40"
+				}
+				
+			},
+
+			"50" : {
+
+				"qual_50_1" : {
+					"id" : "qual_50_1",
+					"name" : "Fish Tacos",
+					"quality" : "50"
+				},
+
+				"qual_50_2" : {
+					"id" : "qual_50_2",
+					"name" : "Crab Cakes",
+					"quality" : "50"
+				}
+				
+			},
+
+			"60" : {
+
+				"qual_60_1" : {
+					"id" : "qual_60_1",
+					"name" : "Scallop Piccata",
+					"quality" : "60"
+				},
+
+				"qual_60_2" : {
+					"id" : "qual_60_2",
+					"name" : "Sesame-Crusted Tuna",
+					"quality" : "60"
+				}
+				
+			},
+
+			"70" : {
+
+				"qual_70_1" : {
+					"id" : "qual_70_1",
+					"name" : "Mussels in Broth",
+					"quality" : "70"
+				},
+
+				"qual_70_2" : {
+					"id" : "qual_70_2",
+					"name" : "Pan-Fried Trout",
+					"quality" : "70"
+				}
+				
+			},
+
+			"80" : {
+
+				"qual_80_1" : {
+					"id" : "qual_80_1",
+					"name" : "Jerk-Rubbed Catfish",
+					"quality" : "80"
+				},
+
+				"qual_80_2" : {
+					"id" : "qual_80_2",
+					"name" : "Blackened Tilapia",
+					"quality" : "80"
+				}
+				
+			},
+
+			"90" : {
+
+				"qual_90_1" : {
+					"id" : "qual_90_1",
+					"name" : "Baked Grouper",
+					"quality" : "90"
+				},
+
+				"qual_90_2" : {
+					"id" : "qual_90_2",
+					"name" : "Sauteed Tilapia",
+					"quality" : "90"
+				}
+				
+			},
+
+			"100" : {
+
+				"qual_100_1" : {
+					"id" : "qual_100_1",
+					"name" : "Shrimp-Stuffed Pasta",
+					"quality" : "100"
+				},
+
+				"qual_100_2" : {
+					"id" : "qual_100_2",
+					"name" : "Lobster Risotto",
+					"quality" : "100"
+				}
+				
+			}
+
+		},
+
 		"consumables" : {
 
 			"biscuit_food" : {
@@ -113,13 +277,12 @@
 				"desc" : "A sharpened piece of fish bone. Clearly whoever made this was significantly luckier than whomever it came from. +%dmgMin% - %dmgMax% DMG when equipped ",
 				"slotsRequired" : 1,
 				"stackable" : 0,
-				"dmgMin" : 1,
-				"dmgMax" : 2,
 				"handsRequired" : 1,
 				"buyValue" : 500,
 				"maxLevelRange" : 4,
 				"canUpgrade" : 1,
-				"canBreakdown" : 1
+				"canBreakdown" : 1,
+				"avgMonsterHpPercentPerHit" : 0.2
 			},
 			"melee_weapon_02" : {
 				"id" : "melee_weapon_02",
@@ -128,14 +291,11 @@
 				"desc" : "A shiny dagger. You could fillet someone with this. Careful not to cut yourself on the blade. +%dmgMin% - %dmgMax% DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
-				"dmgMin" : 2,
-				"dmgMax" : 3,
 				"handsRequired" : 1,
 				"buyValue" : 800,
 				"maxLevelRange" : 4,
 				"canUpgrade" : 1,
-				"canBreakdown" : 1,
-				"avgMonsterHpPercentPerHit" : 0.3
+				"canBreakdown" : 1
 			},
 			"melee_weapon_03" : {
 				"id" : "melee_weapon_03",
@@ -144,12 +304,11 @@
 				"desc" : "It's like a dagger, but longer. +%dmgMin% - %dmgMax% DMG when equipped. STAB ALL THE THINGS.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
-				"dmgMin" : 4,
-				"dmgMax" : 6,
 				"handsRequired" : 1,
 				"buyValue" : 1000,
 				"canUpgrade" : 1,
-				"canBreakdown" : 1
+				"canBreakdown" : 1,
+				"avgMonsterHpPercentPerHit" : 0.4
 			},
 			"melee_weapon_04" : {
 				"id" : "melee_weapon_04",
@@ -158,13 +317,11 @@
 				"desc" : "A very large sword. Requires both fins to wield. Good news, though: it does +%dmgMin% - %dmgMax% DMG when equipped. Enjoy your murder spree!",
 				"slotsRequired" : 2,
 				"stackable" : 0,
-				"dmgMin" : 7,
-				"dmgMax" : 12,
 				"handsRequired" : 2,
 				"buyValue" : 1500,
 				"canUpgrade" : 1,
 				"canBreakdown" : 1,
-				"avgMonsterHpPercentPerHit" : 0.5
+				"avgMonsterHpPercentPerHit" : 0.7
 			},
 			"melee_weapon_05" : {
 				"id" : "melee_weapon_05",
@@ -175,7 +332,8 @@
 				"stackable" : 0,
 				"handsRequired" : 1,
 				"canUpgrade" : 1,
-				"canBreakdown" : 1
+				"canBreakdown" : 1,
+				"avgMonsterHpPercentPerHit" : 0.4
 			},
 			"melee_weapon_05" : {
 				"id" : "melee_weapon_05",
@@ -186,7 +344,8 @@
 				"stackable" : 0,
 				"handsRequired" : 2,
 				"canUpgrade" : 1,
-				"canBreakdown" : 1
+				"canBreakdown" : 1,
+				"avgMonsterHpPercentPerHit" : 0.7
 			}
 
 		},

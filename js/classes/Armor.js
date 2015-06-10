@@ -16,6 +16,7 @@ define([
 			self.armorSlot = data.armorSlot || "body";
 			self.isArmor = true;
 			self.isEquippable = true;
+			self.quality = data.quality || "standard";
 
 			self.fullyDynamicStats = data.fullyDynamicStats || 0;
 			

@@ -18,7 +18,7 @@ define([
 		this.isVisible = squareData.isVisible || false;
 		this.isScanned = squareData.isScanned || false;
 		this.isDone = squareData.isDone || false;
-		this.notEmpty = false;
+		this.notEmpty = squareData.notEmpty || false;
 
 		this.setType = function(type){
 			self.type = type;

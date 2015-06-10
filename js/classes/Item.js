@@ -31,9 +31,9 @@ define([
 		this.isEquippable = false;
 		this.attributesImprovedByLastCrafting = "";
 		this.uniqueID = (data.uniqueID || Utils.uniqueID());
-		this.canScale = ko.observable(data.canScale || 0);
 		this.isScaled = ko.observable(data.isScaled || 0);
 		this.canBreakdown = data.canBreakdown || false;
+		this.isEquipped = ko.observable(false);
 
 		this.sellValue = ko.computed(function(){
 			if(self._sellValue){
@@ -52,6 +52,8 @@ define([
 		this.getExportData = function(){
 
 			var exportObj = {};
+
+			exportObj._classNameForLoad = self.constructor.name;
 
 			for(prop in self){
 				if ( typeof self[prop] !== 'function' ){

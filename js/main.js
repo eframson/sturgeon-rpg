@@ -4,7 +4,7 @@ var ko_global = undefined;
 requirejs.config({
 	baseUrl : 'js',
 	paths : {
-		knockout : 'knockout-3.3.0.min',
+		knockout : 'knockout-3.3.0.debug',
 		jquery : 'jquery-2.1.3.min',
 		bootstrap : 'bootstrap.min',
 		text : 'text',
@@ -40,15 +40,11 @@ require([
 
 	$(document).ready(function(){
 
+		//Show our content now that everything's loaded
+		$(".hidden").hide().removeClass("hidden");
+
 		game = new Game();
 		ko.applyBindings(game);
-		
-		$('#importSavedGame').change(function(e){
-			game.processFile(e);
-		});
-
-		//Show our content now that everything's loaded
-		$("#content-area").removeClass("hidden");
 		
 		$(document).keydown(function(e){
 			if( game.arrowKeysControlPlayerPos() ){

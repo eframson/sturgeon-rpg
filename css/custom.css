@@ -2,8 +2,52 @@ button:focus {
 	outline: none !important;
 }
 
+.container {
+	padding-left: 0;
+	padding-right: 0;
+}
+
+.row {
+	/*margin-right: 15px;
+	margin-left: 15px;*/
+	margin-right: 0px;
+	margin-left: 0px;
+}
+
 .clear {
-	clear: both;
+	clear: both !important;
+}
+
+.no-left-padding {
+	padding-left: 0 !important;
+}
+
+.no-right-padding {
+	padding-right: 0 !important;
+}
+
+.with-left-padding {
+	padding-left: 15px !important;
+}
+
+.with-right-padding {
+	padding-right: 15px !important;
+}
+
+.leftcol, .rightcol, .centercol {
+	padding: 0px;
+}
+
+.leftcol, .rightcol {
+	margin-left: 0px;
+	margin-right: 0px;
+}
+
+.centercol {
+	margin-left: 0px;
+	margin-right: 0px;
+	padding-left: 15px;
+	padding-right: 15px;
 }
 
 .negative {
@@ -16,6 +60,7 @@ button:focus {
 
 .desc {
 	font-style: italic;
+	margin-bottom: 10px;
 }
 
 .modal-content {
@@ -32,16 +77,7 @@ button:focus {
 	text-align: center;
 }
 
-.starter-template {
-  padding: 0px 15px;
-  text-align: center;
-}
-
 .hidden {
-	display: none;
-}
-
-.inline-edit, .mass-actions {
 	display: none;
 }
 
@@ -91,17 +127,40 @@ button:focus {
 	background: #f0ad4e;
 }
 
+/*.header-area,
+.content-area,
+.log-area {
+
+}*/
+
+.saved-notice{
+	display: block;
+	margin-top: 22px;
+	text-align: right;
+	font-weight: bold;
+	color: #5cb85c;
+}
+
+.main-content-row {
+	min-height: 200px;
+}
+
+.title-row button {
+	margin-top: 15px;
+}
+
+.header {
+	margin-right: 0px;
+	margin-left: 0px;
+}
+
 .header button {
 	margin-top: 20px;
 }
 
-.title, .story, .buttons {
-	text-align: left;
-}
-
 .player-stats {
-	margin-top: 10px;
-	padding: 10px;
+	margin: 15px 0px;
+	padding: 10px 0px;
 	background-color: #ECECEC;
 }
 
@@ -124,7 +183,7 @@ button:focus {
 	text-align: left;
 }
 
-#content-area {
+.content-area {
 	margin-top: 10px;
 }
 
@@ -137,49 +196,63 @@ button:focus {
 	margin-bottom: 20px;
 }
 
-#content-area .state-container {
+.content-area .state-container {
 	padding: 0;
-	text-align: left;
 }
 
-#content-area .state-container .state-info {
+.content-area .state-container .state-info {
 	padding: 15px;
-	text-align: left;
-	background-color: #F0ECE6;	
+	background-color: #F0ECE6;
 }
 
-#content-area .state-controls {
-	overflow: auto;
-	margin-top: 20px;
-}
-
-#content-area .state-controls .state-button-row {
+.content-area .state-controls {
 	overflow: auto;
 }
 
-#content-area .state-controls .state-button-row:not(:first-child) {
+.content-area .state-controls .state-button-col {
+	float: left;
+}
+
+.content-area .state-controls .state-button-row {
+	overflow: auto;
+}
+
+.content-area .state-controls .state-button-row:not(:first-child) {
 	margin-top: 5px;
 }
 
-#content-area .state-controls .state-button {
+.content-area .state-controls .state-button {
 	width: 175px;
 	margin-left: 5px;
 	float: left;
 }
 
-#content-area .state-controls .state-button:first-child {
+.content-area .state-controls .state-button:first-child {
 	margin-left: 0;
 }
 
-#content-area .state-controls .state-button button {
+.content-area .state-controls .state-button button {
 	width: 100%;
+}
+
+.content-area .player-controls {
+	overflow: auto;
+	background-color: #F0ECE6;
+	padding: 10px;
+}
+
+.content-area .player-controls .state-button-col .state-button-row h3 {
+	margin: 0;
+}
+
+.content-area .player-controls .state-button-col.player-skills {
+	margin-top: 10px;
 }
 
 .message-log {
 	margin-top: 15px;
 	padding: 15px;
 	background-color: #ECECEC;
-	width: 570px;
 	overflow-y: scroll;
 	height: 185px;
 }
@@ -198,7 +271,7 @@ button:focus {
   height   : 20px;
 }
 
-#inventory-equipment .inventory .message-log {
+.inventory .message-log {
 	width: 475px;	
 }
 
@@ -232,262 +305,262 @@ button:focus {
 	text-align: left;
 }
 
-.map-container {
-	/*background-color: #DEDDED;*/
-	padding: 0;
-	/*margin-left: 10px;*/
+.map-buttons {
+	/*background-color: #E7E6F0;*/
+	/*overflow: auto;*/
 }
 
-.map-container .map-buttons,
-.map-container .map {
-	float: left;
+.map-buttons .map-button-cluster {
+	width: 200px;
+	margin: auto;
+	/*background-color: #b8b8c1;*/
+	background-color: #EDEEF7;
+	overflow: auto;
+	padding-bottom: 10px;
+	/*box-shadow: 0px 2px 10px 2px #0C1762;*/
 }
 
-.map-container .map-buttons {
-	width: 210px;
-	margin-left: 15px;
-	margin-right: 15px;
+.map-buttons .map-button-cluster h3 {
+	width: 162px;
+	margin-left: auto;
+	margin-right: auto;
 }
 
-.map-container .map-level-num {
-	text-align: left;
-}
-
-.map-container .map-buttons .map-button-cluster {
-	margin-top: 100px;
-}
-
-.map-container .map-buttons .map-button-cluster button {
+.map-buttons .map-button-cluster button {
 	display: inline-block;
 }
 
-.map-container .map-buttons .map-button-cluster button.up,
-.map-container .map-buttons .map-button-cluster button.down {
+.map-buttons .map-button-cluster button.up,
+.map-buttons .map-button-cluster button.down {
+	display: block;
 	margin: auto;
+	width: 102px;
+}
+
+.map-buttons .map-button-cluster button.up {
+	margin-top: 10px;
+}
+
+.map-buttons .map-button-cluster .mid-buttons {
+	margin: 2px auto;
+	width: 132px;
+}
+
+.map-buttons .map-button-cluster button.left,
+.map-buttons .map-button-cluster button.right {
+	width: 64px;
+}
+
+.map-buttons .arrow-keys-checkbox {
+	margin-top: 7px;
+	margin-left: auto;
+	margin-right: auto;
 	width: 140px;
 }
 
-.map-container .map-buttons .map-button-cluster button.left .mid-buttons {
-	margin: auto;
-}
-
-.map-container .map-buttons .map-button-cluster button.left,
-.map-container .map-buttons .map-button-cluster button.right {
-	width: 100px;
-}
-
-.map-container .map-buttons .arrow-keys-checkbox {
-	text-align: left;
-	margin-top: 40px;
-}
-
-.map-container .map-buttons .arrow-keys-checkbox input{
+.map-buttons .arrow-keys-checkbox input{
 	margin-right: 5px;
+	padding-left: 35px;
 }
 
-.map-container .map-spacer {
-	width: 10px;
-	height: 200px;
-	float: left;
+.map-level-num {
+	text-align: left;
+	margin: auto;
+	width: 230px;
 }
 
-.map-container .map-inner-container {
+.map-container {
 	background-color: #E7E6F0;
-	padding: 15px 10px 15px 0;
-	float: left;
-	width: 560px;
+	padding: 10px;
 }
 
-.map-container .map {
+.map-container h3 {
+	margin: 0 0 10px 0;
+}
+
+.map {
 	width: 304px;
 	height: 304px;
-	margin-left: 0px;
 	border: #6e6e73 2px solid;
+	margin: 0 auto 7px auto;
 }
 
-#inventory-equipment,
-#skills-area,
-#combat-area,
-#full-screen-notice {
-	display: none;
-}
-
-#inventory-equipment .back,
-#skills-area .back {
-	margin-top: 20px;
-}
-
-#inventory-equipment .back .col-md-12,
-#skills-area .back .col-md-12 {
-	padding-left: 0;
-}
-
-#inventory-equipment {
-	text-align: left;
-}
-
-#inventory-equipment .header .equipment-header,
-#inventory-equipment .header .container-ui-header,
-#inventory-equipment .header .inventory-header,
-#inventory-equipment .header .merchant-header {
+.equipment h3,
+.container-ui h3,
+.inventory h3,
+.merchant h3,
+.map-buttons h3 {
 	padding-left: 0px;
+	margin-top: 8px;
 }
 
-#inventory-equipment .header .container-ui-header.take-all {
-	padding-right: 0px;
-}
-
-#inventory-equipment .header .container-ui-header.take-all button {
-	margin-top: 11px;
-}
-
-#inventory-equipment .inventory,
-#inventory-equipment .container-ui,
-#inventory-equipment .equipment,
-#inventory-equipment .merchant {
+.inventory,
+.container-ui,
+.equipment,
+.merchant {
 	padding-left: 0;
 	padding-right: 0;
 }
 
-#inventory-equipment .inventory .lines,
-#inventory-equipment .container-ui,
-#inventory-equipment .merchant {
+.inventory .lines,
+.container-ui .container-ui-inner-container,
+.merchant .container-ui-inner-container {
 	background-color: #F0ECE6;
 }
 
-#inventory-equipment .equipment {
+.equipment .equipment-inner-container{
 	background-color: #E7E6F0;
 }
 
-#inventory-equipment .inventory .line,
-#inventory-equipment .container-ui .line,
-#inventory-equipment .equipment .line,
-#inventory-equipment .merchant .line {
+.inventory .line,
+.container-ui .line,
+.equipment .line,
+.merchant .line {
 	padding: 5px 10px 5px 10px;
 }
 
-#inventory-equipment .inventory .line:not(.empty),
-#inventory-equipment .container-ui .line:not(.empty),
-#inventory-equipment .equipment .line:not(.empty),
-#inventory-equipment .merchant .line:not(.empty) {
+.inventory .line:not(.empty),
+.container-ui .line:not(.empty),
+.equipment .line:not(.empty),
+.merchant .line:not(.empty) {
 	cursor: pointer;
 }
 
-#inventory-equipment .inventory .line:not(.empty):hover,
-#inventory-equipment .inventory .line:not(.empty).selected,
-#inventory-equipment .container-ui .line:not(.empty):hover,
-#inventory-equipment .container-ui .line:not(.empty).selected,
-#inventory-equipment .merchant .line:not(.empty):hover,
-#inventory-equipment .merchant .line:not(.empty).selected {
+.inventory .line:not(.empty):hover,
+.inventory .line:not(.empty).selected,
+.container-ui .line:not(.empty):hover,
+.container-ui .line:not(.empty).selected,
+.merchant .line:not(.empty):hover,
+.merchant .line:not(.empty).selected {
 	background-color: #EDC78E;
 }
 
-#inventory-equipment .equipment .line:not(.empty):hover,
-#inventory-equipment .equipment .line:not(.empty).selected {
+.equipment .line:not(.empty):hover,
+.equipment .line:not(.empty).selected {
 	background-color: #C5C2DB;
 }
 
-#inventory-equipment .inventory .line:not(.empty):active,
-#inventory-equipment .container-ui .line:not(.empty):active,
-#inventory-equipment .merchant .line:not(.empty):active {
+.inventory .line:not(.empty):active,
+.container-ui .line:not(.empty):active,
+.merchant .line:not(.empty):active {
 	background-color: #F6D8AC;
 }
 
-#inventory-equipment .equipment .line:not(.empty):active {
+.equipment .line:not(.empty):active {
 	background-color: #9389EB;
 }
 
-#inventory-equipment .inventory .qty,
-#inventory-equipment .container-ui .qty,
-#inventory-equipment .merchant .qty {
+.inventory .qty,
+.container-ui .qty,
+.merchant .qty {
 	float: right;
 	clear: both;
 }
 
-#inventory-equipment .equipment .slot {
+.equipment .slot {
 	display: inline-block;
 	font-weight: bold;
 	width: 90px;
 }
 
-#inventory-equipment .equipment .item {
+.equipment .item {
 	display: inline-block;
 }
 
-#inventory-equipment .item-desc .inner{
+.item-desc .inner{
 	background-color: #ECECEC;
+	/*background-color: #F0ECE6;*/
 	padding: 5px 10px 5px 10px;
-	margin: 0;
+	margin: 10px 0px 0px 0px;
 }
 
-#inventory-equipment .item-desc button.inventory-control {
-	width: 115px;
+.item-desc .inner.equipped {
+	background-color: #E7E6F0;
+}
+
+.item-desc button.inventory-control {
+	width: 168px;
 	margin-top: 10px;
 	font-size: 12px;
 }
 
-#inventory-equipment .item-desc .line .stat {
+.item-desc .line .stat {
 	font-weight: bold;
 	line-height: 14px;
 }
 
-#inventory-equipment .equipment {
+.item-desc .back {
+	float: left;
+}
+
+.item-desc .take-all {
+	float: right;
+	clear: right;
+}
+
+.equipment {
 	padding-left: 0px;
 }
 
-#inventory-equipment .danger {
+.danger {
 	color: #FF0000;
 }
 
-
-#combat-area,
-#skills-area {
-	margin-top: 40px;
-	text-align: left;
+.main-content-row .combat {
+	margin-top: 25px;
+	margin-bottom: 25px;
 }
 
-#combat-area .notice-text {
-	margin-bottom: 20px;
+.combat-buttons {
+	-webkit-user-select: none; /* webkit (safari, chrome) browsers */
+	-moz-user-select: none; /* mozilla browsers */
+	-khtml-user-select: none; /* webkit (konqueror) browsers */
+	-ms-user-select: none; /* IE10+ */
 }
 
-#combat-area .header,
-#skills-area .header {
+.combat-buttons .line {
+	margin-bottom: 10px;
+}
+
+.combat-buttons .line button {
+	margin-bottom: 0px;
+}
+
+.combat-buttons .line span {
+	display: block;
+	margin-top: 3px;
+}
+
+.combat .header {
 	font-size: 20px;
 	font-weight: bold;
 }
 
-#combat-area .stat,
-#skills-area .stat {
+.combat .stat {
 	display: inline-block;
 	font-weight: bold;
 	width: 90px;
 }
 
-#combat-area .value,
-#skills-area .value {
-	display: inline-block;
+.combat.enemy {
+	background-color: #FFF5F5;
+}
+.combat.player {
+	background-color: #DDEDDD;
 }
 
-#combat-area > .row > .player,
-#combat-area > .row > .enemy {
-	width: 570px;
-	height: 140px;
-}
-
-#combat-area .player .buttons {
-	margin-top: 10px;
-}
-
-#full-screen-notice {
-	margin-top: 40px;
-}
-
-#full-screen-notice .notice-text {
+.full-screen-notice {
+	margin-top: 20px;
 	margin-bottom: 20px;
 }
 
-#full-screen-notice .notice-button {
-	
+.full-screen-notice .notice-text {
+	margin-bottom: 15px;
+	text-align: center;
+}
+
+.full-screen-notice .notice-button {
+	text-align: center;
 }
 
 #skills-area .stat {
@@ -500,6 +573,12 @@ button:focus {
 
 #skills-area .back {
 	margin-bottom: 20px;
+}
+
+.full-screen-row .col-md-12,
+.log-row .col-md-12{
+	padding-left: 0px;
+	padding-right: 0px;
 }
 
 .file-upload {

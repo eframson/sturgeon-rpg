@@ -4,6 +4,7 @@ define([
 	'classes/Player',
 	'classes/Level',
 	'classes/Item',
+	'classes/Consumable',
 	'classes/Weapon',
 	'classes/Armor',
 	'classes/Shield',
@@ -14,7 +15,17 @@ define([
 	'Utils',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Weapon, Armor, Shield, ItemCollection, Monster, itemDataFile, monsterDataFile, Utils) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, Monster, itemDataFile, monsterDataFile, Utils) {
+
+	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
+	var $MAIN_CONTENT_DIV = $(".main-content-row");
+	var $PLAYER_STAT_HEADER = $(".player-stat-row");
+	var $MESSAGE_LOG = $(".log-area");
+	var $SAVED_NOTICE = $(".saved-notice");
+	var BASE_FADEOUT_SPEED = 600;
+	var BASE_FADEIN_SPEED = 400;
+	var FAST_FADEOUT_SPEED = 300;
+	var FAST_FADEIN_SPEED = 300;
 
 	function Game() {
 
@@ -24,118 +35,44 @@ define([
 		this.monsterDataFile = monsterDataFile;
 
 		this.player = undefined;
-		this.states = {
+		this.slides = {
 			start: {
-				beforeText: "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
+				text: "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
 				buttons: [
-					[
-						{
-							text: "Let's bust outta here!",
-							action: function(){ self.setState("d1"); }
-						},
-					]
+					{
+						title: "Let's bust outta here!",
+						action: function(){ self.transitionFullscreenContentToSlideId("d1"); }
+					},
 				],
 				location: "Unknown",
-				hideMap: ko.observable(true),
-				hidePlayerStats: ko.observable(true),
 			},
 			d1: {
-				beforeText: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
+				text: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
 				buttons: [
-					[
-						{
-							text: "OH YEAH!!!",
-							action: function(){ self.setState("d2"); }
-						},
-					]
+					{
+						title: "OH YEAH!!!",
+						action: function(){ self.transitionFullscreenContentToSlideId("d2"); }
+					},
 				],
 				location: "Unknown",
-				hideMap: ko.observable(true),
-				hidePlayerStats: ko.observable(true),
 			},
 			d2: {
-				beforeText: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
+				text: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
 				buttons: [
-					[
-						{
-							text: "Continue",
-							action: function(){ self.setState("idle"); }
-						},
-					]
+					{
+						title: "Continue",
+						action: function(){
+							//Show the main game now
+							self.manageTransitionToView("fullscreen","mainscreen");
+
+							self.isNew(false);
+						}
+					},
 				],
 				location: "Unknown",
-				hideMap: ko.observable(true),
-				hidePlayerStats: ko.observable(true),
-			},
-			idle: {
-				beforeChange: function(){
-
-				},
-				afterRender : function(){
-					self.level().drawMap();
-				},
-				beforeText: "<p>You decide to...</p>",
-				buttons: ko.observableArray([
-					[
-						{
-							text: function(){
-								var text = "Scrounge for food";
-								if(self.player().data().skillCooldowns().findFood()){
-									text += " (" + self.player().data().skillCooldowns().findFood() + ")";
-								}
-								return text;
-							},
-							action: function(){
-								self.playerActions.findFood();
-							},
-							css: function(){
-								return {
-									disabled : self.player().data().skillCooldowns().findFood() > 0
-								}
-							},
-						},
-						{
-							text: function(){
-								var text = "Scan surroundings";
-								if(self.player().data().skillCooldowns().scanSquares()){
-									text += " (" + self.player().data().skillCooldowns().scanSquares() + ")";
-								}
-								return text;
-							},
-							action: function(){
-								self.playerActions.scanSquares();
-							},
-							css: function(){
-								return {
-									disabled : self.player().data().skillCooldowns().scanSquares() > 0
-								}
-							},
-						},
-						{
-							text: function(){
-								var text = "Check Inventory";
-								text += " (" + self.player().inventorySlotsOccupied() + "/" + self.player().data().inventoryMaxSlots() + ")";
-								return text;
-							},
-							action: function(){
-								self.toggleInventory();
-							},
-						},
-					],
-					[
-						{
-							text: "View Skills/Stats",
-							action: function(){
-								self.showSkillsArea();
-							},
-						},
-					]
-				]),
-				location: "Midstream",
 			},
 		};
 
-		this.tempFoodFindBonus = 0;
 		this.defaultCooldown = 10;
 		this.playerActions = {
 			scanSquares: function(){
@@ -155,26 +92,36 @@ define([
 			findFood: function(){
 
 				self.player().data().skillCooldowns().findFood(self.defaultCooldown);
+
+				var findFoodSkill = self.player().data().skillProgress().findFood();
+
+				//See if we get a high quality food item
+				var isHighQuality = Utils.doBasedOnPercent({
+					findFoodSkill : 1,
+				}, function(){
+					return 0;
+				});
+
+				var lowerBounds = (isHighQuality) ? 7 : 1;
+				//Pick a number between 1 and 10 (OR 7 and 10)
+				var consumableItem = self.getRandomScroungable(lowerBounds);
+
 				self.player().data().skillProgress().findFood( self.player().data().skillProgress().findFood() + 1 );
 				var message = "";
 
-				var percentages = {};
-				var findPercent = self.player().data().skills().findFood() + self.tempFoodFindBonus;
+				var qty = self.addFoodToPlayerInventory(consumableItem);
+				message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " food using your kick-ass mouth feelers.";
+
+				/*var percentages = {};
+				var findPercent = self.player().data().skills().findFood();
 				percentages[findPercent] = function(){
-					var qty = self.addFoodToPlayerInventory();
+					var qty = self.addFoodToPlayerInventory(foodObj);
 					message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " fish biscuits using your kick-ass mouth feelers.";
-					self.tempFoodFindBonus = 0;
 				};
 				Utils.doBasedOnPercent(percentages,
 				function(rand){
-					//console.log("rand: " + rand + " ; temp bonus: " + self.tempFoodFindBonus + " ; findPercent: " + findPercent);
 					message = "You attempt to smoothly swim to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
-
-					if( self.player().data().skills().findFood() + self.tempFoodFindBonus <= 60 ){
-						self.tempFoodFindBonus += 2;
-					}
-
-				});
+				});*/
 
 				self.logMessage(message);
 
@@ -203,7 +150,7 @@ define([
 				}
 			}
 		};
-		this.fullScreenNoticeContinueAction;
+		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
 		this.aAction = function() { return self.movePlayerLeft() };
@@ -219,14 +166,10 @@ define([
 		this.initObservables = function(){
 
 			self.showLoading = ko.observable(false);
-			self.stateID = ko.observable();
-			self.state = ko.observable(undefined);
 			self.player = ko.observable();
-			self.showPlayerData = ko.observable(false);
 			self.location = ko.observable();
 			self.levels = ko.observableArray(Array());
 			self.logMessages = ko.observableArray();
-			self.visibleSection = ko.observable("content-area");
 			self.activeItem = ko.observable({
 				id : ko.observable(""),
 				desc : ko.observable(""),
@@ -242,13 +185,22 @@ define([
 				actualItem : ko.observable(undefined),
 			});
 			self.arrowKeysControlPlayerPos = ko.observable(true);
-			self.currentInventoryRightSide = ko.observable("equipment");
+			self.rightColContent = ko.observable("equipment");
 			self.freezeMovement = ko.observable(false);
 			self.currentContainer = new ItemCollection(Array());
-			self.fullScreenNotice = ko.observable(undefined);
-			self.fullScreenNoticeButtons = ko.observableArray(undefined);
 			self.currentEnemy = ko.observable(undefined);
 			self.backButtonLabel = ko.observable("Back");
+			self.isNew = ko.observable(true);
+			self.eventSquareTypeOverride = ko.observable(undefined);
+
+			//Keep track of what is displayed where
+			self.fullScreenContent = ko.observable(undefined);
+			/*self.leftColContent = ko.observable("player_controls");
+			self.centerColContent = ko.observable("map_controls");
+			self.rightColContent = ko.observable("map");*/
+			self.leftColContent = ko.observable(undefined);
+			self.centerColContent = ko.observable("fullscreen_content");
+			self.rightColContent = ko.observable(undefined);
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -289,7 +241,7 @@ define([
 						});
 					}
 
-					if( self.activeItem().canUnEquip() && self.currentInventoryRightSide() == "equipment" ){
+					if( self.activeItem().canUnEquip() && self.rightColContent() == "equipment" ){
 						buttons.push({
 							css: defaultCss,
 							text: "Un-Equip",
@@ -310,13 +262,13 @@ define([
 					if( self.activeItem().canBreakdown() ){
 						buttons.push({
 							css: "btn-danger",
-							text: "Salvage",
+							text: "Salvage" + ( (self.activeItem().actualItem().isEquipped()) ? " (equipped!)" : "" ),
 							click: self.salvageActiveItem
 						});
 					}
 
 					//It's not actually dependent on the equipment screen, it just can't be used while looting a container or trading with a merchant
-					if( self.activeItem().canUse() && self.currentInventoryRightSide() == "equipment" ){
+					if( self.activeItem().canUse() && self.rightColContent() == "equipment" ){
 						buttons.push({
 							css: defaultCss,
 							text: "Use",
@@ -324,7 +276,7 @@ define([
 						});
 					}
 
-					if( self.activeItem().canBuy() && self.currentInventoryRightSide() == "merchant" ){
+					if( self.activeItem().canBuy() && self.rightColContent() == "merchant" ){
 
 						if( actualItem.qty() == 1 ){
 
@@ -358,7 +310,7 @@ define([
 
 					}
 
-					if( self.activeItem().canSell() && self.currentInventoryRightSide() == "merchant" ){
+					if( self.activeItem().canSell() && self.rightColContent() == "merchant" ){
 
 						if( self.activeItem().actualItem().qty() == 1 ){
 
@@ -386,9 +338,9 @@ define([
 
 					}
 
-					if( self.activeItem().canDrop() && self.currentInventoryRightSide() != 'merchant'){
+					if( self.activeItem().canDrop() && self.rightColContent() != 'merchant'){
 
-						if( self.currentInventoryRightSide() == 'container' ){ //We're moving something
+						if( self.rightColContent() == 'container' ){ //We're moving something
 
 							if( self.activeItem().moveDirection() == "left" ){ //We're moving from the container to the inventory
 
@@ -485,7 +437,6 @@ define([
 
 			var level;
 			var player;
-			var stateID;
 
 			if(gameData != undefined){
 
@@ -495,53 +446,78 @@ define([
 				}
 				self.levels(levelArray);
 				player = new Player(gameData.player);
-				stateID = gameData.stateID;
-				self.visibleSection(gameData.visibleSection);
+				self.fullScreenContent(gameData.fullScreenContent);
+
+				self.leftColContent(gameData.leftColContent);
+				self.centerColContent(gameData.centerColContent);
+				self.rightColContent(gameData.rightColContent);
+				self.isNew(gameData.isNew);
+				self.logMessages(gameData.logMessages);
+				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
+				self.freezeMovement(gameData.freezeMovement);
+				self.backButtonLabel(gameData.backButtonLabel);
+				if(gameData.currentEnemy){
+					self.currentEnemy(new Monster(gameData.currentEnemy));
+				}
+
+				var itemArray = Array();
+				for(i = 0; i < gameData.currentContainer.length; i++){
+					if(gameData.currentContainer[i]._classNameForLoad){
+						itemArray.push(  eval("new " + gameData.currentContainer[i]._classNameForLoad +"(gameData.currentContainer[i])")  );
+					}else{
+						itemArray.push( new Item(gameData.currentContainer[i]) );
+					}
+				}
+				self.currentContainer(itemArray);
+
 			}else{
+
 				player = new Player( {str: 2, dex: 2, end: 2} );
 				level = new Level({ genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
-				stateID = "idle";
 				self.levels.push(level);
-				//stateID = "idle";
+
 			}
 
-			$.each(["content-area","inventory-equipment","skills-area","full-screen-notice","combat-area"], function(idx, elem){
-				if(elem != self.visibleSection()){
-					$("#" + elem).hide();
-				}else{
-					$("#" + elem).show();
-				}
-			});
-
-			var newLevel = self.level().generateNextLevel();
+			//Whether this is a new or existing game, make sure we have the next level preloaded
+			var newLevel = self.level().generateNextLevelIfNotSet();
 
 			if( newLevel ){
 				self.levels.push(newLevel);
 			}
 
 			self.player(player);
-			self.stateID(stateID);
-			self.setState(stateID);
 
 			self.level().revealSquaresNearPlayer(player.data().skills().visionRange());
 			self.level().drawMap();
+
+			//Initialize our intro slides if this is a brand new game
+			if(self.fullScreenContent() == undefined && self.isNew()){
+				self.setFullscreenContentFromSlideId("start");
+			}
+
+			if(!self.isNew()){
+				self.replaceMainScreenContent(function(){
+					$MESSAGE_LOG.fadeIn(BASE_FADEIN_SPEED);
+					$PLAYER_STAT_HEADER.fadeIn(BASE_FADEIN_SPEED);
+				});
+			}else{
+				self.replaceMainScreenContent();
+			}
 		}
 
-		this.addFoodToPlayerInventory = function(){
-			var qty = Math.ceil(self.player().data().skills().findFood() / 10);
-			var itemData = self.getAvailableItemById("biscuit_food", "consumables", qty);
-			if(itemData){
-				self.player().addItemToInventory( new Item(itemData) );
-			}
-			return qty;
+		this.addFoodToPlayerInventory = function(consumableItem){
+			return self.player().addItemToInventory( consumableItem );
 		}
 
 		this.loadFromData = function(gameData){
+			
 			if(gameData == undefined){
 				return false;
 			}
 
-			self.initGame(gameData);
+			$.when($MAIN_CONTENT_DIV.add($PLAYER_STAT_HEADER).add($MESSAGE_LOG).fadeOut(FAST_FADEOUT_SPEED)).done(function(){
+				self.initGame(gameData);
+			});
 		}
 
 		this.movePlayerUp = function(){
@@ -605,54 +581,26 @@ define([
 		}
 
 		this.toggleInventory = function(){
-			//game.player().itemTest();
+
 			self.freezeMovement(true);
-			self.visibleSection("inventory-equipment");
-			$("#content-area").fadeOut(300, function(){
-				$("#inventory-equipment").fadeIn(300);
-			});
+			self.manageTransitionToView("mainscreen","equipment");
+			
 		}
 
 		this.showContentArea = function(){
-			self.visibleSection("content-area");
-			//$("#skills-area").fadeOut(300);
-			$("#skills-area").hide();
-			$("#inventory-equipment").fadeOut(300, function(){
-				self.currentContainer.removeAll();
-				self.currentInventoryRightSide("equipment");
-				self.backButtonLabel("Back");
-				$("#content-area").fadeIn(300);
+			
+			self.manageTransitionToView("equipment","mainscreen", function(){
 				self.freezeMovement(false);
 			});
-			self._resetActiveItem();
-		}
 
-		this.showSkillsArea = function(){
-			self.visibleSection("skills-area");
-			$("#content-area").fadeOut(300, function(){
-				$("#skills-area").fadeIn(300);
-			});
 		}
 
 		self.showDamage = function(which){
 			if(which == "enemy"){
-				$("#combat-area > .row > .enemy .hp").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
+				$(".combat.enemy .hp").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
 			}else if(which == "player"){
-				$("#combat-area > .row > .player .hp").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
+				$(".combat.player .hp").stop(false, true).effect("highlight", { color: "#FF3939" }, 800);
 			}
-		}
-
-		this.showCombatMessage = function(msg, buttons){
-			self.visibleSection("full-screen-notice");
-			$("#content-area").fadeOut(300, function(){
-				self.fullScreenNotice(msg);
-				self.fullScreenNoticeButtons(buttons);
-				self.spcAction = function(){
-					buttons[0].action();
-					self.spcAction = function(){ return 1 };
-				}
-				$("#full-screen-notice").fadeIn(300);
-			});
 		}
 
 		this.startCombat = function(){
@@ -676,11 +624,6 @@ define([
 
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
-
-			self.visibleSection("combat-area");
-			$("#full-screen-notice").fadeOut(300, function(){
-				$("#combat-area").fadeIn(300);
-			});
 		}
 
 		this.getGoesFirst = function(){
@@ -705,70 +648,74 @@ define([
 		}
 
 		this.playerAttacks = function(game, event){
-			self.doCombatRound();
+			self.doCombatRound("basic","attack");
 		}
 
-		this.doCombatRound = function(playerAttacks, enemyAttacks){
-
-			playerAttacks = ( playerAttacks != undefined ) ? playerAttacks : true ;
-			enemyAttacks = ( enemyAttacks != undefined) ? enemyAttacks : true ;
+		this.doCombatRound = function(playerAction, playerActionType){
 
 			var goesFirst = self.getGoesFirst();
+			var attacker = (goesFirst == "player") ? self.player() : self.currentEnemy() ;
+			var defender = (goesFirst == "player") ? self.currentEnemy() : self.player() ;
 
-			var playerHp = self.player().data().hp();
-			var playerDmg = self.player().doAttack();
-			var enemyDmg = self.currentEnemy().doAttack();
-			var playerDidDmg = false;
-			var enemyDidDmg = false;
-			var dmgTaken;
-			var dmgAbsorbed;
+			var monsterAction = {
+				actionName : "basic",
+				actionType : "attack"
+			};
+			var playerAction = {
+				actionName : playerAction,
+				actionType : playerActionType
+			};
 
-			if( goesFirst == "player" ){
+			var action = (goesFirst == "player") ? playerAction : monsterAction ;
 
-				if( playerAttacks ){
-					self.currentEnemy().takeDmg(playerDmg);
-					playerDidDmg = true;
-				}
+			//Attacker does something (optionally) to the defender, and UI is updated accordingly
+			attacker.takeCombatAction(action, defender, self);
 
-				if(!self.currentEnemy().isDead() && enemyAttacks){
-					self.player().takeDmg(enemyDmg);
-					enemyDidDmg = true;
-				}
-			}else{
+			//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
+			if(!defender.isDead()){
 
-				if( enemyAttacks ){
-					self.player().takeDmg(enemyDmg);
-					enemyDidDmg = true;
-				}
-
-				if(!self.player().isDead() && playerAttacks){
-					self.currentEnemy().takeDmg(playerDmg);
-					playerDidDmg = true;
-				}
+				action = (goesFirst == "player") ? monsterAction : playerAction ;
+				defender.takeCombatAction(action, attacker, self);
 
 			}
 
-			if(playerDidDmg){
-				self.showDamage("enemy");
-				self.logMessage("You strike the enemy for " + playerDmg + " points of damage!", "combat");
-			}
-			if(enemyDidDmg){
-				dmgTaken = playerHp - self.player().data().hp();
-				dmgAbsorbed = enemyDmg - dmgTaken;
-				if(dmgTaken > 0){
-					self.showDamage("player");
-				}
-				self.logMessage("The enemy tries to strike you for " + enemyDmg + " point(s) of damage! Your armor absorbs " + dmgAbsorbed + " point(s). You take " + dmgTaken + " point(s) of damage.", "combat");
-			}
 			if( self.player().isDead() ){
 				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
-			}else if(self.currentEnemy().isDead()){
+			}
+
+			if( self.currentEnemy().isDead() ){
 				self.player().addExp(self.currentEnemy().expValue());
 				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " XP!", "combat");
 
 				if( self.player().hasLeveledUp() ){
 					self.player().hasLeveledUp(false);
 					self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
+				}
+			}
+
+		}
+
+		this.registerAttack = function(attacker, defender, attackResults){
+
+			var combatLogString = "";
+			var animateSection = "";
+
+			if(defender instanceof Monster){
+				combatLogString = "The enemy is";
+				animateSection = "enemy";
+			}else if(defender instanceof Player){
+				combatLogString = "You are";
+				animateSection = "player";
+			}
+
+			if(attackResults.hitType != 'miss'){
+				self.showDamage(animateSection);
+				self.logMessage(combatLogString + ( attackResults.hitType == 'crit' ? ' critically' : '' ) + " struck for " + attackResults.actualDmg + " points of damage! An additional " + (attackResults.attemptedDmg - attackResults.actualDmg) + " points were absorbed by armor.", "combat");
+			}else{
+				if(defender instanceof Monster){
+					self.logMessage('You try to strike the enemy, but miss!','combat');
+				}else if(defender instanceof Player){
+					self.logMessage('The enemy tries to strike you, but misses!','combat');
 				}
 			}
 
@@ -789,21 +736,11 @@ define([
 				self.currentContainer.addItem(newLootItem);
 			}
 
-			self.currentInventoryRightSide("container");
-
-			self.visibleSection("inventory-equipment");
-			$("#combat-area").fadeOut(300, function(){
-				self.backButtonLabel("Leave");
-				$("#inventory-equipment").fadeIn(300);
-			});
+			self.manageTransitionToView("combat","container");
 		}
 
 		this.leaveCombat = function(){
-			self.visibleSection("content-area");
-			$("#combat-area").fadeOut(300, function(){
-				$("#content-area").fadeIn(300);
-				self.freezeMovement(false);
-			});
+			self.manageTransitionToView("combat","mainscreen", function(){ self.freezeMovement(false); });
 		}
 
 		this.hideModal = function(viewModel, event){
@@ -812,50 +749,14 @@ define([
 			$('#myModal .modal-content').hide();
 		}
 
-		this.setState = function(stateID, extraCallback){
+		this.setFullscreenContentFromSlideId = function(slideID){
+			self.fullScreenContent(self.slides[slideID]);
+		}
 
-			self.stateID(stateID);
-
-			var no_slide =
-			{
-				text: "<p>This part doesn't exist yet, dummy!</p>",
-				buttons: [
-					{
-						text: "Sorry!",
-						action: function(){ console.log("All is forgiven"); }
-					},
-				]
-			};
-
-			var state = no_slide;
-
-			if(self.states.hasOwnProperty(stateID)){
-				state = self.states[stateID];
-			}
-
-			$("#content-area").fadeOut(600, function(){
-
-				if(state.beforeChange && typeof state.beforeChange === 'function'){
-					state.beforeChange();
-				}
-
-				self.state(state);
-
-				if(state.afterChange && typeof state.afterChange === 'function'){
-					state.afterChange();
-				}
-
-				$(this).fadeIn(400, function(){
-
-					if(state.afterRender && typeof state.afterRender === 'function'){
-						state.afterRender();
-					}
-
-					if(extraCallback && typeof extraCallback === 'function'){
-						extraCallback();
-					}
-
-				});
+		this.transitionFullscreenContentToSlideId = function(slideID){
+			$FULL_SCREEN_NOTICE_DIV.fadeOut(BASE_FADEOUT_SPEED, function(){
+				self.setFullscreenContentFromSlideId(slideID);
+				$FULL_SCREEN_NOTICE_DIV.fadeIn(BASE_FADEIN_SPEED);
 			});
 		}
 
@@ -864,7 +765,7 @@ define([
 			itemArray == itemArray || [];
 
 			self.currentContainer(itemArray);
-			self.currentInventoryRightSide("container");
+			self.rightColContent("container");
 
 			self.toggleInventory();
 		}
@@ -991,14 +892,18 @@ define([
 					itemToAdd = self.getAvailableItemById("reset_stone", "consumables", 1);
 
 				}else if( miscType == "food" ){
+
 					var consumableType = Utils.doBasedOnPercent({
 						25 : "health_potion",
-						75 : "biscuit_food",
+						75 : "food",
 					});
+
 					if(consumableType == "health_potion"){
 						foodQty = Utils.doRand(1, (1 + Math.floor(self.level().levelNum() / 2) ));
+						itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
+					}else{
+						itemToAdd = self.getRandomScroungable(10);
 					}
-					itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
 				}
 
 			}else if(itemType == "gear"){
@@ -1074,22 +979,28 @@ define([
 				]
 			});
 
-			self.logMessage(enemyMsg, "combat");
+			//self.logMessage(enemyMsg, "combat");
 
-			self.showCombatMessage(
-				enemyMsg,
-				new Array(
+			self.fullScreenContent({
+				text: enemyMsg,
+				buttons: [
 					{
 						title : "Continue",
 						action : function(){
-							self.startCombat();
-							/*if( self.getGoesFirst() == "enemy" ){
-								self.doCombatRound(false, true);
+							self.manageTransitionToView("fullscreen","combat");
+
+							/*self.spcAction = function(){
+								buttons[0].action();
+								self.spcAction = function(){ return 1 };
 							}*/
-						},
+
+							self.startCombat();
+						}
 					}
-				)
-			);
+				]
+			});
+
+			self.manageTransitionToView("mainscreen","fullscreen");
 
 			//Show our "pop-up", describing the enemy
 
@@ -1107,26 +1018,28 @@ define([
 				5 : "inventory",
 			});
 
-			var msg = "";
-			var buttons;
+			if( self.eventSquareTypeOverride() !== undefined ){
+				eventType = self.eventSquareTypeOverride();
+				self.eventSquareTypeOverride(undefined);
+			}
 
+			var text = "";
+			var buttons;
+			var afterLoad;
+
+			//For stat/xp increase, cooldown resets, and inventory space increases, just show the message and move on
 			buttons = new Array(
 				{
 					title : "Continue",
 					action : function(){
-
-						self.visibleSection("content-area");
-						$("#full-screen-notice").fadeOut(300, function(){
-							$("#content-area").fadeIn(300);
-							self.freezeMovement(false);
-						});
+						self.manageTransitionToView("fullscreen", "mainscreen", function(){ self.freezeMovement(false) });
 					},
 				}
 			);
 
 			if(eventType == "trader"){
 
-				msg = "You encounter a friendly trader who offers to show you his wares.";
+				text = "You encounter a friendly trader who offers to show you his wares.";
 				buttons = new Array(
 					{
 						title : "Continue",
@@ -1142,12 +1055,7 @@ define([
 								self.currentContainer.addItem(self.generateRandomLootItem("trader"));
 							}
 
-							self.currentInventoryRightSide("merchant");
-
-							self.visibleSection("inventory-equipment");
-							$("#full-screen-notice").fadeOut(300, function(){
-								$("#inventory-equipment").fadeIn(300);
-							});
+							self.manageTransitionToView("fullscreen","merchant");
 
 						},
 					}
@@ -1160,66 +1068,70 @@ define([
 				var trainSkillString = Utils.chooseRandomly(
 					Array(
 						"findFood",
-						"scanSquares",
-						//"visionRange",
+						"scanSquares"/*,
 						"str",
 						"dex",
 						"end",
 						"speed",
-						"hp"
+						"hp"*/
 					)
 				);
 				var trainSkill;
 				var trainSkillAmt = 1;
 				var trainSkillMax = false;
 				var trainSkillSuccessDesc = "";
+				var skillOrStat = "stat";
 
-				msg = "You encounter a wise old hermit crab who offers to teach you how to ";
+				text = "You encounter a wise old hermit crab who offers to teach you how to ";
 
 				if(trainSkillString == "findFood"){
-					msg += "get better at scrounging for food";
+					text += "get better at scrounging for food";
 					trainCost = (self.player().data().skills().findFood() + 1) * 10;
 					trainSkill = self.player().data().skills().findFood;
+					trainSkill = "findFood";
 					trainSkillSuccessDesc = "skill in finding food";
+					skillOrStat = "skill";
 				}else if(trainSkillString == "scanSquares"){
-					msg += "get better at surveying your surroundings";
+					text += "get better at surveying your surroundings";
 					trainCost = (self.player().data().skills().scanSquares() * 1000);
 					trainSkill = self.player().data().skills().scanSquares;
+					trainSkill = "scanSquares";
 					trainSkillSuccessDesc = "scan range";
-				}else if(trainSkillString == "visionRange"){
-					msg += "sharpen your vision";
-					trainCost = (self.player().data().skills().visionRange() * 1000);
-					trainSkill = self.player().data().skills().visionRange;
-					trainSkillSuccessDesc = "vision range";
+					skillOrStat = "skill";
 				}else if( trainSkillString == "str" ){
-					msg += "become stronger";
+					text += "become stronger";
 					trainSkill = self.player().data().str;
+					trainSkill = "str";
 					trainCost = 800;
 					trainSkillSuccessDesc = "strength (STR)";
 				}else if( trainSkillString == "dex" ){
-					msg += "become more agile";
+					text += "become more agile";
 					trainSkill = self.player().data().dex;
+					trainSkill = "dex";
 					trainCost = 800;
 					trainSkillSuccessDesc = "dexterity (DEX)";
 				}else if( trainSkillString == "end" ){
-					msg += "become more resilient";
+					text += "become more resilient";
 					trainSkill = self.player().data().end;
+					trainSkill = "end";
 					trainCost = 800;
 					trainSkillSuccessDesc = "endurance (END)";
 				}else if( trainSkillString == "speed" ){
-					msg += "become quicker";
+					text += "become quicker";
 					trainSkill = self.player().data().speed;
+					trainSkill = "speed";
 					trainCost = 800;
 					trainSkillSuccessDesc = "speed (SPD)";
 				}else if( trainSkillString == "hp" ){
-					msg += "become tougher";
+					text += "become tougher";
 					trainSkill = self.player().data().baseHp;
+					trainSkill = "baseHp";
 					trainCost = 800;
 					trainSkillAmt = 10;
 					trainSkillSuccessDesc = "max HP bonus";
 				}
 
-				msg += " for " + trainCost + " GP";
+				text += " for " + trainCost + " GP";
 
 				buttons = new Array(
 					{
@@ -1227,42 +1139,40 @@ define([
 						action : function(){
 
 							var gold = self.player().data().inventory.getItemByID("gold");
-							gold.qty( gold.qty() - this.trainCost );
+							var trainSkill;
+							if(this.vars.skillOrStat == 'skill'){
+								trainSkill = self.player().data().skills()[this.vars.trainSkill];
+							}else if(this.vars.skillOrStat == 'stat'){
+								trainSkill = self.player().data()[this.vars.trainSkill];
+							}
+							gold.qty( gold.qty() - this.vars.trainCost );
 
-							this.trainSkill( this.trainSkill() + this.trainSkillAmt );
+							trainSkill( trainSkill() + this.vars.trainSkillAmt );
 
-							self.logMessage("Your " + this.trainSkillSuccessDesc + " has increased to " + this.trainSkill() + ( this.trainSkillMax ? "/" + trainSkillMax : "" ));
+							self.logMessage("Your " + this.vars.trainSkillSuccessDesc + " has increased to " + trainSkill() + ( this.vars.trainSkillMax ? "/" + this.vars.trainSkillMax : "" ));
 
-							self.visibleSection("content-area");
-							$("#full-screen-notice").fadeOut(300, function(){
-								$("#content-area").fadeIn(300);
-								self.freezeMovement(false);
-							});
+							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
 
 						},
 						css : function(){
-							if( self.player().gp() < this.trainCost ){
+							if( self.player().gp() < this.vars.trainCost ){
 								return "disabled";
 							}
 							return "";
 						},
-						skillIncrease : 1,
-						trainSkill : trainSkill,
-						trainSkillString : trainSkillString,
-						trainCost : trainCost,
-						trainSkillAmt : trainSkillAmt,
-						trainSkillMax : trainSkillMax,
-						trainSkillSuccessDesc : trainSkillSuccessDesc,
+						vars : {
+							trainCost : trainCost,
+							trainSkill : trainSkill,
+							trainSkillAmt : trainSkillAmt,
+							trainSkillSuccessDesc : trainSkillSuccessDesc,
+							skillOrStat : skillOrStat,
+						}
 					},
 					{
 						title : "Leave",
 						action : function(){
 
-							self.visibleSection("content-area");
-							$("#full-screen-notice").fadeOut(300, function(){
-								$("#content-area").fadeIn(300);
-								self.freezeMovement(false);
-							});
+							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
 
 						},
 					}
@@ -1270,24 +1180,19 @@ define([
 
 			}else if( eventType == "cooldown" ){
 
-				msg = "You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. All your cooldowns are instantly finished.";
+				afterLoad = function(){
+					self.player().data().skillCooldowns().findFood(0);
+					self.player().data().skillCooldowns().scanSquares(0);
+					self.logMessage(text);
+				};
+
+				text = "You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. All your cooldowns are instantly finished.";
 				buttons = new Array(
 					{
 						title : "Continue",
 						action : function(){
-
-							self.logMessage(this.msg);
-
-							self.player().data().skillCooldowns().findFood(0);
-							self.player().data().skillCooldowns().scanSquares(0);
-
-							self.visibleSection("content-area");
-							$("#full-screen-notice").fadeOut(300, function(){
-								$("#content-area").fadeIn(300);
-								self.freezeMovement(false);
-							});
+							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
 						},
-						msg : msg,
 					}
 				);
 
@@ -1302,79 +1207,61 @@ define([
 					)
 				);
 
-				msg = "";
 				var statIncreaseAmt = 1;
-				var doExpGain = false;
 
 				if( stat == "str" ){
-					msg = "You find your path blocked by a large rock. Instead of simply swimming around or over it, you decide to try and move it. After an hour of laborious work, you manage to move it out of the way. The experience empowers you, permanently giving you +1 STR.";
+					text = "You find your path blocked by a large rock. Instead of simply swimming around or over it, you decide to try and move it. After an hour of laborious work, you manage to move it out of the way. The experience empowers you, permanently giving you +1 STR.";
 				}else if( stat == "dex" ){
-					msg = "While swimming along, you suddenly realize that you are about to crash right into a sharp metal hook just floating in the water in front of you. With quick thinking and maneuvering, you manage to barrel-roll to the side and avoid it.  As you cruise past, you also snag a tasty-looking worm that someone apparently left just hanging on the hook. As you munch the delicious worm, you think you can probably figure out how to better avoid such water hazards in the future. Gain +1 DEX."
+					text = "While swimming along, you suddenly realize that you are about to crash right into a sharp metal hook just floating in the water in front of you. With quick thinking and maneuvering, you manage to barrel-roll to the side and avoid it.  As you cruise past, you also snag a tasty-looking worm that someone apparently left just hanging on the hook. As you munch the delicious worm, you think you can probably figure out how to better avoid such water hazards in the future. Gain +1 DEX."
 				}else if( stat == "end" ){
-					msg = "A passing trout challenges you to an impromptu fin-wrestling contest. The ensuing match takes a full hour before your strength finally gives out and you are forced to concede victory to the other fish. Panting and visibly just as exhausted as you and thoroughly impressed with your determination, the trout tells you one of his fin-wrestling secrets. You gain +1 END.";
+					text = "A passing trout challenges you to an impromptu fin-wrestling contest. The ensuing match takes a full hour before your strength finally gives out and you are forced to concede victory to the other fish. Panting and visibly just as exhausted as you and thoroughly impressed with your determination, the trout tells you one of his fin-wrestling secrets. You gain +1 END.";
 				}else if( stat == "exp" ){
 					statIncreaseAmt = Math.ceil( self.player().expRequiredForNextLevel() / 2 );
-					msg = "You come across a water-logged journal lodged between two rocks. Nonchalantly flippering through the pages, you encounter some surprisingly useful advice. Gain " + statIncreaseAmt + " EXP.";
-					doExpGain = true;
+					text = "You come across a water-logged journal lodged between two rocks. Nonchalantly flippering through the pages, you encounter some surprisingly useful advice. Gain " + statIncreaseAmt + " EXP.";
 				}
 
+				afterLoad = function(){
+					if(stat != "exp"){
+						self.player().data()[stat]( self.player().data()[stat]() + statIncreaseAmt );
+					}else{
+						self.player().addExp(statIncreaseAmt);
+					}
+					self.logMessage(text);
+				};
 
 				buttons = new Array(
 					{
 						title : "Continue",
 						action : function(){
-
-							self.logMessage(this.msg);
-
-							if(!doExpGain){
-								this.statToIncrease( this.statToIncrease() + this.statIncreaseValue );
-							}else{
-								self.player().addExp(this.statIncreaseValue);
-							}
-
-							self.visibleSection("content-area");
-							$("#full-screen-notice").fadeOut(300, function(){
-								$("#content-area").fadeIn(300);
-								self.freezeMovement(false);
-							});
+							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
 						},
-						doExpGain : doExpGain, //I'm sure there's a better way to do this, derp
-						msg : msg,
-						statToIncrease : self.player().data()[stat],
-						statIncreaseValue : statIncreaseAmt,
 					}
 				);
 
 			}else if( eventType == "inventory" ){
 
-				msg = "You find a small leather satchel. While it appears to be empty, it still seems to be in pretty good condition, so you strap it onto your pack. Your maximum inventory slots have increased by 1.";
+				afterLoad = function(){
+					self.player().data().inventoryMaxSlots( self.player().data().inventoryMaxSlots() + 1 );
+					self.logMessage(text);
+				};
+
+				text = "You find a small leather satchel. While it appears to be empty, it still seems to be in pretty good condition, so you strap it onto your pack. Your maximum inventory space has increased by 1.";
 				buttons = new Array(
 					{
 						title : "Continue",
 						action : function(){
-
-							self.logMessage(this.msg);
-
-							self.player().data().inventoryMaxSlots( self.player().data().inventoryMaxSlots() + 1 );
-
-							self.visibleSection("content-area");
-							$("#full-screen-notice").fadeOut(300, function(){
-								$("#content-area").fadeIn(300);
-								self.freezeMovement(false);
-							});
+							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
 						},
-						msg : msg,
 					}
 				);
 
 			}
 
-			self.visibleSection("full-screen-notice");
-			$("#content-area").fadeOut(300, function(){
-				self.fullScreenNotice(msg);
-				self.fullScreenNoticeButtons(buttons);
-				$("#full-screen-notice").fadeIn(300);
+			self.fullScreenContent({
+				text : text,
+				buttons: buttons
 			});
+			self.manageTransitionToView("mainscreen","fullscreen", afterLoad);
 		}
 
 		this.squareExitAction = function(){
@@ -1383,7 +1270,7 @@ define([
 
 			if(self.level().nextLevelID() == undefined){
 
-				var newLevel = self.level().generateNextLevel();
+				var newLevel = self.level().generateNextLevelIfNotSet();
 
 				if( newLevel ){
 					self.levels.push(newLevel);
@@ -1394,17 +1281,15 @@ define([
 			var nextLevel = self.getLevelById( self.level().nextLevelID() );
 			var currentLevel = self.level();
 
-			$(".map-inner-container").fadeOut(400, function(){
+			self.manageTransitionToView("mainscreen","mainscreen", function(){
+				self.freezeMovement(false);
+			}, function(){
 				nextLevel.isActive(true);
 				currentLevel.isActive(false);
 				nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
 				nextLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
-				self.level().scanSquaresNearPlayer(0);
+				self.level().scanSquaresNearPlayer();
 				nextLevel.drawMap();
-
-				$(this).fadeIn(400, function(){
-					self.freezeMovement(false);
-				});
 			});
 
 		}
@@ -1416,7 +1301,7 @@ define([
 			//This is unlikely, but we'd better account for it just to be safe
 			if(self.level().prevLevelID() == undefined){
 
-				var newLevel = self.level().generatePrevLevel();
+				var newLevel = self.level().generatePrevLevelIfNotSet();
 
 				if( newLevel ){
 					self.levels.push(newLevel);
@@ -1427,16 +1312,14 @@ define([
 			var prevLevel = self.getLevelById( self.level().prevLevelID() );
 			var currentLevel = self.level();
 
-			$(".map-inner-container").fadeOut(400, function(){
+			self.manageTransitionToView("mainscreen","mainscreen", function(){
+				self.freezeMovement(false);
+			}, function(){
 				prevLevel.isActive(true);
 				currentLevel.isActive(false);
 				prevLevel.setPlayerPos( prevLevel.exitSquare()[0], prevLevel.exitSquare()[1] );
 				prevLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
 				prevLevel.drawMap();
-
-				$(this).fadeIn(400, function(){
-					self.freezeMovement(false);
-				});
 			});
 		}
 
@@ -1486,7 +1369,7 @@ define([
 		}
 
 		this.setContainerItemAsActiveItem = function(item, e){
-			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0 }, item, e);
+			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0, showQty: true}, item, e);
 		}
 
 		this.setInventoryItemAsActiveItem = function(item, e){
@@ -1495,6 +1378,7 @@ define([
 
 		this.setEquipmentItemAsActiveItem = function(item){
 			if( !Utils.isEmptyObject(item) ){
+				item.isEquipped(true);
 				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
 			}
 		}
@@ -1518,31 +1402,30 @@ define([
 			if( ( self.currentContainer().length == 0 && type == "consumables") || (opts.canUse && opts.canUse == 1) ){
 				self.activeItem().canUse(1);
 			}else if ( (opts.moveDirection == "right" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canEquip && opts.canEquip == 1) ){
-				//For now, if a container is open, we just plain can't equip stuff
 				self.activeItem().canEquip(1);
-			}else if ( (self.currentInventoryRightSide() == "equipment" && opts.moveDirection == "left" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canUnEquip && opts.canUnEquip == 1) ){
+			}else if ( (self.rightColContent() == "equipment" && opts.moveDirection == "left" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canUnEquip && opts.canUnEquip == 1) ){
 				self.activeItem().canUnEquip(1);
 			}
 
-			if( ( item.canBreakdown == 1 && (opts.moveDirection == "right" || self.currentInventoryRightSide() == "equipment" ) ) || ( opts.canBreakdown && opts.canBreakdown == 1 ) ){
+			if( ( item.canBreakdown == 1 && (opts.moveDirection == "right" || self.rightColContent() == "equipment" ) ) || ( opts.canBreakdown && opts.canBreakdown == 1 ) ){
 				self.activeItem().canBreakdown(1);
 			}
 
-			if( (opts.moveDirection == "left" && self.currentInventoryRightSide() == "equipment") || (opts.canDrop && opts.canDrop == 0) ){
+			if( (opts.moveDirection == "left" && self.rightColContent() == "equipment") || (opts.canDrop && opts.canDrop == 0) ){
 				self.activeItem().canDrop(0);
-			}else if( opts.moveDirection == "left" && self.currentInventoryRightSide() == "container" || (opts.canDrop && opts.canDrop == 1) ){
+			}else if( opts.moveDirection == "left" && self.rightColContent() == "container" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
 			}else if( type != "currency" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
 			}
 
-			if( ( opts.moveDirection == "left" && self.currentInventoryRightSide() == "merchant" ) || ( opts.canBuy && opts.canBuy == 1 ) ){
+			if( ( opts.moveDirection == "left" && self.rightColContent() == "merchant" ) || ( opts.canBuy && opts.canBuy == 1 ) ){
 				self.activeItem().canBuy(1);
-			}else if( ( opts.moveDirection == "right" && self.currentInventoryRightSide() == "merchant" ) || ( opts.canSell && opts.canSell == 1 ) ){
+			}else if( ( opts.moveDirection == "right" && self.rightColContent() == "merchant" ) || ( opts.canSell && opts.canSell == 1 ) ){
 				self.activeItem().canSell(1);
 			}
 
-			if( ( item.canUpgrade == 1 && (opts.moveDirection == "right" || self.currentInventoryRightSide() == "equipment" ) ) || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
+			if( ( item.canUpgrade == 1 && (opts.moveDirection == "right" || self.rightColContent() == "equipment" ) ) || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
 				self.activeItem().canUpgrade(1);
 			}
 
@@ -1661,7 +1544,7 @@ define([
 
 			var item = self.activeItem().actualItem(),
 				itemToAdd,
-				scrapQty = Math.round(item.sellValue() / 3);
+				scrapQty = (item.level() * 50) + (item.numUpgradesApplied() * 50);
 
 			if( item instanceof Armor ){
 				itemToAdd = self.getAvailableItemById("armor_scraps", "crafting", scrapQty);
@@ -1669,7 +1552,20 @@ define([
 				itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", scrapQty);
 			}
 
-			self.player().data().inventory.removeItem(item);
+			if(self.rightColContent() == "equipment" && self.activeItem().moveDirection() == "left" ){ //If item is equipped
+
+				if(item.type == "weapon"){
+					self.player().unEquipWeapon(item);
+				}else if(item.type == "shield"){
+					self.player().unEquipShield(item);
+				}else if(item.type == "armor"){
+					self.player().unEquipArmor(item);
+				}
+
+			}else{
+				self.player().data().inventory.removeItem(item);
+			}
+
 			self._resetActiveItem();
 
 			self.player().data().inventory.addItem(new Item(itemToAdd) );
@@ -1767,14 +1663,7 @@ define([
 
 			var item = self.activeItem().actualItem();
 
-			if(item.id == "biscuit_food" ){
-
-				self._dropActiveItem(game, event, 1);
-
-				self.player().data().hp( self.player().maxHp() );
-
-				self.logMessage("Eating some fish biscuits restored you to full HP!", "player");
-			}else if (item.id == "reset_stone"){
+			if (item.id == "reset_stone"){
 
 				self._dropActiveItem(game, event, 1);
 
@@ -1782,12 +1671,28 @@ define([
 				self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
 				self.level().drawMap();
 
-				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. With a quick glance around, you see that nothing is as it was just a few moments before.", "player");
+				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. " +
+								"With a quick glance around, you see that nothing is as it was just a few moments before.", "player");
+
 			}else if(item.id == "health_potion"){
-				self.useHealthPotion();
-				if( self.player().numPotionsAvailable() == 0 ){
+
+				var numPotsLeft = self.player().removeItemFromInventory("health_potion", 1);
+
+				self.player().restoreHealth(0.5, 1);
+
+				self.logMessage("Drinking a health potion restored " + numHpToRestore + " HP.", "player");
+
+				if( numPotsLeft == 0 ){
 					self._resetActiveItem();
 				}
+			}else if(item.type == "consumables"){
+
+				self._dropActiveItem(game, event, 1);
+
+				self.player().restoreHealth((item.quality() / 100), 1);
+
+				self.logMessage("Eating some food restored some of your HP!", "player");
+
 			}
 
 		}
@@ -1817,7 +1722,7 @@ define([
 			srcCollection = self.player().data().inventory;
 
 			//Do we have an active container?
-			if(self.currentInventoryRightSide() == 'container'){
+			if(self.rightColContent() == 'container'){
 
 				//Are we moving from inventory -> container OR container -> inventory?
 				if(self.activeItem().moveDirection() == "right"){
@@ -1901,17 +1806,86 @@ define([
 			return false;
 		}
 
-		this.useHealthPotion = function(){
-			var numPotsLeft = self.player().removeItemFromInventory("health_potion", 1);
-			var numHpToRestore = Math.ceil(self.player().maxHp() / 2);
-			var potentialHp = self.player().data().hp() + numHpToRestore;
-			if( potentialHp > self.player().maxHp() ){
-				potentialHp = self.player().maxHp();
-				numHpToRestore = self.player().maxHp() - self.player().data().hp();
+		this.showSkillsArea = function(){
+			self.manageTransitionToView("mainscreen","skills");
+		}
+
+		this.manageTransitionToView = function(fromArea, toArea, afterTransitionCallback, extraMidTransitionCallback){
+
+			var midTransitionCallback;
+			extraMidTransitionCallback = (extraMidTransitionCallback !== undefined && typeof extraMidTransitionCallback === 'function') ? extraMidTransitionCallback : function(){};
+
+			if(toArea == "equipment"){
+				//For now it's assumed that one can only get here from Main Screen...
+				midTransitionCallback = function(){
+					self.leftColContent("inventory");
+					self.centerColContent("item_desc");
+					self.rightColContent("equipment");
+				}
+			}else if(toArea == "mainscreen"){
+				//Make sure we capture this value now, in case it changes later
+				var isNew = self.isNew();
+				midTransitionCallback = function(){
+					self.leftColContent("player_controls");
+					self.centerColContent("map_controls");
+					self.rightColContent("map");
+
+					self._resetActiveItem();
+					self.currentContainer.removeAll();
+					self.backButtonLabel("Back");
+
+					if(isNew == true){
+						$MESSAGE_LOG.fadeIn(BASE_FADEIN_SPEED);
+						$PLAYER_STAT_HEADER.fadeIn(BASE_FADEIN_SPEED);
+					}
+				}
+			}else if(toArea == "combat"){
+				//For now it's assumed that one can only get here from Fullscreen Message...
+				midTransitionCallback = function(){
+					self.leftColContent("combat_player");
+					self.centerColContent("combat_buttons");
+					self.rightColContent("combat_enemy");
+				}
+			}else if(toArea == "container"){
+				midTransitionCallback = function(){
+					self.leftColContent("inventory");
+					self.centerColContent("item_desc");
+					self.rightColContent("container");
+				}
+			}else if(toArea == "merchant"){
+				//For now it's assumed that one can only get here from Fullscreen Message...
+				midTransitionCallback = function(){
+					self.leftColContent("inventory");
+					self.centerColContent("item_desc");
+					self.rightColContent("merchant");
+				}
+			}else if(toArea == "fullscreen"){
+				//We're assuming that the fullscreen content has already been set...
+				midTransitionCallback = function(){
+					self.leftColContent(undefined);
+					self.centerColContent("fullscreen_content");
+					self.rightColContent(undefined);
+				}
 			}
 
-			self.player().data().hp( potentialHp );
-			self.logMessage("Drinking a health potion restored " + numHpToRestore + " HP.", "player");
+			self.replaceMainScreenContent(function() { midTransitionCallback(); extraMidTransitionCallback(); }, afterTransitionCallback);
+		}
+
+		this.replaceMainScreenContent = function(midTransitionCallback, postTransitionCallback){
+			$MAIN_CONTENT_DIV.fadeOut(FAST_FADEOUT_SPEED, function(){
+
+				if(typeof midTransitionCallback === 'function'){
+					midTransitionCallback();
+				}
+
+				$MAIN_CONTENT_DIV.fadeIn(FAST_FADEIN_SPEED, function(){
+					
+					if(typeof postTransitionCallback === 'function'){
+						postTransitionCallback();
+					}
+					
+				});
+			});
 		}
 
 		this.logMessage = function(msgText, cssClass){
@@ -1928,41 +1902,40 @@ define([
 			return false;
 		}
 
-		this.importData = function(){
-			$('#importSavedGame').click();
+		this.loadGame = function(){
+			self.loadFromData(JSON.parse(localStorage.getItem("saveData"), function(k, v){
+				if(v.constructor == String && v.match(/^function \(/)){
+					eval("var rehydratedFunction = " + v);
+					return rehydratedFunction;
+				}
+				return v;
+			}));
 		}
 
-		this.exportData = function(){
+		this.saveGame = function(){
+			var saveData = self.getExportData();
+			localStorage.setItem("saveData", saveData);
 
-			var exportData = self.getExportData();
-			var blob = new Blob([exportData], {type: "text/json;charset=utf-8"});
-			saveAs(blob, "export.json");
-
-		}
-
-		this.processFile = function(e){
-			var file = e.target.files[0];
-
-			if(file){
-
-				var reader = new FileReader();
-				reader.onload = function(e){
-					var saveData = $.parseJSON(e.target.result);
-					self.loadFromData(saveData);
-				}
-				reader.onerror = function(){
-					console.log(arguments);
-				}
-
-				reader.readAsText(file);
-			}
+			$SAVED_NOTICE.finish().show();
+			$SAVED_NOTICE.delay(800).fadeOut(600);
 		}
 
 		this.getExportData = function(){
 			var exportObj = {
-				player : self.player().getExportData(),
-				stateID : self.stateID(),
-				levels : Array(),
+				player 				: self.player().getExportData(),
+				levels 				: Array(),
+				leftColContent 		: self.leftColContent(),
+				centerColContent 	: self.centerColContent(),
+				rightColContent		: self.rightColContent(),
+				fullScreenContent 	: self.fullScreenContent(),
+				isNew				: self.isNew(),
+				//logMessages			: Array(),
+				logMessages			: self.logMessages(),
+				arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
+				freezeMovement		: self.freezeMovement(),
+				backButtonLabel : self.backButtonLabel(),
+				currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
+				currentContainer : Array()
 			}
 
 			for(i=0; i < self.levels().length; i++){
@@ -1971,7 +1944,42 @@ define([
 				exportObj.levels.push(thisLevel.getExportData());
 			}
 
-			return JSON.stringify(exportObj);
+			/*for(i=0; i < self.logMessages().length; i++){
+				var message = self.logMessages()[i];
+				exportObj.logMessages.push(message);
+			}*/
+
+			for(i=0; i < self.currentContainer().length; i++){
+				var item = self.currentContainer()[i];
+
+				exportObj.currentContainer.push(item.getExportData());
+			}
+
+			return JSON.stringify(exportObj, function(k, v){
+				if(typeof v === 'function'){
+					return v.toString();
+				}else{
+					return v;
+				}
+			});
+		}
+
+		this.getRandomScroungable = function(lowerBounds){
+			var quality = Utils.doRand(lowerBounds, 11);
+			quality = quality * 10;
+			var array = self.itemDataFile.items.scroungables[quality];
+			var arrayKeys = Object.keys(array);
+			var foodKey = Utils.chooseRandomly( arrayKeys );
+			var foodObj = self.itemDataFile.items.scroungables[quality][foodKey];
+
+			var qty = Math.floor(self.player().data().skills().findFood() / 10);
+			var descString = (foodObj.quality < 40) ? "small" : ( foodObj.quality < 70 ? "decent" : "large" );
+			descString = "Restores a " + descString + " amount of health when consumed";
+			var itemData = $.extend(
+				foodObj,
+				{ qty : qty, type : "consumables", desc : descString }
+			)
+			return new Consumable(itemData);
 		}
 
 		this.getAvailableItemsByType = function(type){
@@ -2200,6 +2208,11 @@ define([
 			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
 		}
 
+		this.skipToGrid = function(){
+			self.manageTransitionToView("fullscreen","mainscreen");
+			self.isNew(false);
+		}
+
 		self.init();
 
 	};
@@ -2220,36 +2233,15 @@ define([
 
 /* TODOs
 
-New Features/Game Improvements
-- Dynamic loot generation (a la Diablo III)
-- More variance in monster HP
-- Play sound on level up?
-- Minor sound FX on square events
-- Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
-- Frenzy strike: 3 hits, 25% chance to hit, 133% dmg
-- Allow certain weapons to be wielded 1H or 2H (for more dmg)
-
-Code Improvements
-- Create EquippableItem subclass or something
-- Implement class for Skills to get them more cohesive
-- Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
-
-UI Improvements
-- Color code combat log messages
-- More obvious when level up
-- Dynamic container name
-- Keyboard shortcuts for "continue" buttons
-- Fix crafting button so text fits
-- Add combat loots to message log
-- Fix min/max dmg figures in descriptions
-- More obvious turn-based combat
-- Allow for a variable number of items to be purchased from merchant
-- Show that a 2H and a shield can't be equipped at the same time
-- Show that a weapon will take up x number of backpack slots
-- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
-- Make it more obvious when active item is equipped (so accidental salvage isn't as easy)
-
 Feeback/Ideas/Thoughts
+- Perks! (unlock add'l abilities in combat; no/reduced cooldown on scan; better odds/always find better/best kind of food; better merchant prices when buying/selling; better odds of finding quality food; )
+- Choose class (i.e. - perk) on start
+- Choose perk on levelup
+- Purple square potions (drink and the next purple square will be an "x" type)
+- Add chance to crit!
+- Level-bosses (with a fight or flee question first) which must be defeated before advancing to the next level; always have an exceptional piece of gear as loot
+- +1/2/3/etc. weapons? Maybe have some kind of defined "quality" measurements
+- Gambling! X gold for Y nice thing, Z chance of success
 - Make lvl one slightly more challenging
 - Balance item value + dmg/armor + num salvage
 - As long as you can see one square away, vision range doesn't especially matter
@@ -2264,6 +2256,42 @@ Feeback/Ideas/Thoughts
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Either remove "scan" or make it more useful
 - Show dmg taken next to player/monster HP counter
+- Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
+
+Bugs
+- XP find item doesn't add XP properly! (sometimes?)
+- Doesn't stop game when player is dead
+- Consumable sell value doesn't display properly in loot screen
+
+New Features/Game Improvements
+- Play sound on level up?
+- Minor sound FX on square events
+- Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
+- Attacks to add:
+Flurry of Blows: 3x attacks, 30% chance to hit, 200% of normal dmg, 3 rd cooldown
+Mighty Strike: 1x attack, 50% chance to hit, 300% of normal dmg, 2 rd cooldown
+Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds (effective immediately if applicable), 2 rd cooldown
+- Allow certain weapons to be wielded 1H or 2H (for more dmg)
+
+Code Improvements
+- Create Consumable item class
+- Create EquippableItem subclass or something
+- Implement class for Skills to get them more cohesive
+- Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
+
+UI Improvements
+- Color code combat log messages
+- More obvious when level up
+- Dynamic container name
+- Keyboard shortcuts for "continue" buttons
+- Add combat loots to message log
+- More obvious turn-based combat
+- Allow for a variable number of items to be purchased from merchant
+- Show that a 2H and a shield can't be equipped at the same time
+- Show that a weapon will take up x number of backpack slots
+- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
+- Make it more obvious when active item is equipped (so accidental salvage isn't as easy)
+- Show item cost rather than qty in merchant table? (show available qty in item description)
 
 */
 

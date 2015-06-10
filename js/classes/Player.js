@@ -1,6 +1,7 @@
 define([
 	'jquery',
 	'knockout',
+	'classes/Entity',
 	'classes/ItemCollection',
 	'classes/Item',
 	'classes/Armor',
@@ -8,13 +9,15 @@ define([
 	'classes/Weapon',
 
 	'Utils',
-], function($, ko, ItemCollection, Item, Armor, Shield, Weapon, Utils){
+], function($, ko, Entity, ItemCollection, Item, Armor, Shield, Weapon, Utils){
 
 	function Player(playerData){
 
 		//Init
 		var self = this;
 		playerData = $.extend({equipment: { armor: {}, }, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array() }, playerData);
+
+		Entity.call(this, playerData);
 
 		this.init = function(playerData){
 
@@ -30,15 +33,15 @@ define([
 
 					armor : ko.observable({
 
-						head : ko.observable(playerData.equipment.armor.head || {}),
-						fin : ko.observable(playerData.equipment.armor.fin || {}),
-						body : ko.observable(playerData.equipment.armor.body || {}),
-						tail: ko.observable(playerData.equipment.armor.tail || {}),
+						head : self._instantiateObservableIfSet(playerData.equipment.armor.head, Armor),
+						fin : self._instantiateObservableIfSet(playerData.equipment.armor.fin, Armor),
+						body : self._instantiateObservableIfSet(playerData.equipment.armor.body, Armor),
+						tail: self._instantiateObservableIfSet(playerData.equipment.armor.tail, Armor)
 
 					}),
 
-					weapon : ko.observable(playerData.equipment.weapon || {}),
-					shield : ko.observable(playerData.equipment.shield || {}),
+					weapon : self._instantiateObservableIfSet(playerData.equipment.weapon, Weapon),
+					shield : self._instantiateObservableIfSet(playerData.equipment.shield, Shield),
 				}),
 				skills : ko.observable({
 					scanSquares : ko.observable(playerData.skills.scanSquares || 1),
@@ -60,14 +63,21 @@ define([
 				str : ko.observable(playerData.str || Utils.doRand(1,6)),
 				dex : ko.observable(playerData.dex || Utils.doRand(1,6)),
 				end : ko.observable(playerData.end || Utils.doRand(1,6)),
-				//baseMinDmg : ko.observable(playerData.baseMinDmg || 1),
-				//baseMaxDmg : ko.observable(playerData.baseMaxDmg || 2),
+				chanceToCrit : ko.observable(playerData.chanceToCrit || 0.05),
 
 			});
 
+			//These are ugly hacks...eventually we should just get rid of the extra data() layer, right?
+			self.hp = self.data().hp;
+			self.speed = self.data().speed;
+
 			var itemArray = Array();
 			for(i = 0; i < playerData.inventory.length; i++){
-				itemArray.push( new Item(playerData.inventory[i]) );
+				if(playerData.inventory[i]._classNameForLoad){
+					itemArray.push(  eval("new " + playerData.inventory[i]._classNameForLoad +"(playerData.inventory[i])")  );
+				}else{
+					itemArray.push( new Item(playerData.inventory[i]) );
+				}
 			}
 			self.data().inventory(itemArray);
 
@@ -133,9 +143,7 @@ define([
 				return armorValue;
 			});
 
-			self.isDead = ko.computed(function(){
-				return self.data().hp() < 1;
-			});
+			self.armor = self.totalArmor;
 
 			self.gp = ko.computed(function(){
 				var gold = self.data().inventory.getItemByID("gold");
@@ -295,42 +303,64 @@ define([
 			return self.data().equipment().shield;
 		}
 
-		this.doAttack = function(){
-			return Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
-		}
+		this.getAttackResults = function(attackType){
 
-		this.takeDmg = function(dmg){
+			var numAttacks = 1;
+			var chanceToHit = 1.0;
+			var chanceToCrit = 0.0;
+			var dmgModifier = 1.0;
+			var hitType = "hit";
+			var attackResults = Array();
+			/*
+			Flurry of Blows: 3x attacks, 30% chance to hit, 200% of normal dmg, 3 rd cooldown
+Mighty Strike: 1x attack, 50% chance to hit, 300% of normal dmg, 2 rd cooldown
+Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds (effective immediately if applicable), 2 rd cooldown
+			*/
 
-			var coefficientOfDmgToTake,
-				dmgTaken;
-
-			//What % of our AC is the DMG?
-			var percentOfArmorDmgIs = Math.round((dmg / self.totalArmor()) * 100);
-
-			if( percentOfArmorDmgIs < 100 ){
-
-				if( percentOfArmorDmgIs <= 25 ){
-					coefficientOfDmgToTake = 0;
-				}else{
-					coefficientOfDmgToTake = (50 - (((100 - percentOfArmorDmgIs) * 0.66))) / 100;
-				}
-
-			}else if( percentOfArmorDmgIs > 100 ){
-
-				if(percentOfArmorDmgIs >= 200){
-					coefficientOfDmgToTake = 1;
-				}else{
-					coefficientOfDmgToTake = 1 + (((100 - percentOfArmorDmgIs) * 0.5) / 100)
-				}
-
-			}else {
-				coefficientOfDmgToTake = 0.5;
+			if(attackType == 'flurry'){
+				numAttacks = 3;
+				chanceToHit = 0.3;
+				dmgModifier = 2.0;
+			}else if(attackType == 'mighty'){
+				chanceToHit = 0.5;
+				dmgModifier = 3.0;
+			}else if(attackType == 'stun'){
+				chanceToHit = 0.5;
+				dmgModifier = 0.5;
 			}
 
-			dmgTaken = Math.round(dmg * coefficientOfDmgToTake);
+			for(var i = 1; i <= numAttacks; i++){
+				var hitRoll = Utils.doRand(1, 101);
+				var didHit = (hitRoll <= (chanceToHit * 100)) ? true : false ;
+				var dmgDealt = 0;
 
-			self.data().hp( self.data().hp() - dmgTaken );
-			return self.data().hp();
+				if(didHit){
+					var critRoll = Utils.doRand(1, 101);
+					var didCrit = (critRoll <= (chanceToCrit * 100)) ? true : false ;
+
+					if(didCrit){
+						dmgDealt = self.maxDmg();
+						hitType = "crit";
+					}else{
+						dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
+					}
+
+					dmgDealt += self.data().equipment().weapon().extraDamage();
+
+					dmgDealt = dmgDealt * dmgModifier;
+
+				}else{
+					hitType = "miss";
+				}
+
+				attackResults.push({
+					dmg : dmgDealt,
+					type : hitType,
+					attackType : attackType,
+				});
+			}
+
+			return attackResults;
 		}
 
 		this.addExp = function(xp){
@@ -362,6 +392,25 @@ define([
 			//Heal player / reset cooldowns on level up?
 		}
 
+		this.restoreHealth = function(amt, isPct){
+
+			var toRestoreAmt = amt;
+			var maxHp = self.maxHp();
+			var hp = self.data().hp();
+
+			if(isPct){
+				toRestoreAmt = Math.round(amt * maxHp);
+			}
+
+			toRestoreAmt = (toRestoreAmt <= (maxHp - hp)) ? toRestoreAmt : (maxHp - hp) ;
+
+			self.data().hp( hp + toRestoreAmt );
+		}
+
+		this.hasWeapon = function(){
+			return !Utils.isEmptyObject( self.getEquippedWeapon() );
+		}
+
 		this.getExportData = function(){
 
 			var exportObj = {};
@@ -380,9 +429,14 @@ define([
 			return ko.mapping.toJS( exportObj );
 		}
 
+		this._instantiateObservableIfSet = function(obj, className){
+			return ko.observable(obj !== undefined && !Utils.isEmptyObject(obj) ? new className(obj) : {});
+		}
+
 		self.init(playerData);
 	}
 
+	Player.prototype = Object.create(Entity.prototype);
 	Player.prototype.constructor = Player;
 
 	return Player;

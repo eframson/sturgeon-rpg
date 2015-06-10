@@ -29,7 +29,7 @@ define([
 				},
 				percentEmpty : 50,
 				minNonEmptyPerQuad: 3, //Not currently used
-				maxNonEmptyPerQuad: 10,
+				maxNonEmptyPerQuad: 0, //0 = unlimited
 				quadsWithPotentialExits: [1, 2],
 				quadsWithPotentialEntrances: [3, 4],
 			}, (levelData.genOpts || {}));
@@ -263,7 +263,7 @@ define([
 					if( square.type == "entrance" || square.type == "exit"){
 						context.fillStyle = fontStyle;
 						context.font = "26px serif";
-						context.fillText(text, col_num * squareWidth + (squareWidth / 5), (row_num * squareHeight) + (squareHeight / 2) + (squareHeight / 4));
+						context.fillText(text, col_num * squareWidth + (squareWidth / 4), (row_num * squareHeight) + (squareHeight / 2) + (squareHeight / 4));
 					}
 
 				});
@@ -471,7 +471,7 @@ define([
 						var type = "empty";
 						var cumePercent = 0;
 
-						if(Utils.doRand(0,99) < genOpts.percentEmpty && numNonEmpty <= genOpts.maxNonEmptyPerQuad && (x != playerPos.x && y != playerPos.y)){
+						if(Utils.doRand(0,99) < genOpts.percentEmpty && (genOpts.maxNonEmptyPerQuad == 0 || numNonEmpty <= genOpts.maxNonEmptyPerQuad) && (x != playerPos.x && y != playerPos.y)){
 
 							//This *should* automatically put the percentages in the correct (ASC) order
 							var type = Utils.doBasedOnPercent(genOpts.genPercents);
@@ -614,7 +614,7 @@ define([
 			self._populateGrid();
 		}
 
-		this.generateNextLevel = function(levelData){
+		this.generateNextLevelIfNotSet = function(levelData){
 
 			if( levelData == undefined || levelData.levelNum == undefined ){
 				levelData = { levelNum : (self.levelNum() + 1) };
@@ -630,7 +630,7 @@ define([
 
 		}
 
-		this.generatePrevLevel = function(levelData){
+		this.generatePrevLevelIfNotSet = function(levelData){
 
 			if( levelData == undefined || levelData.levelNum == undefined ){
 				levelData = { levelNum : (self.levelNum() - 1) };
