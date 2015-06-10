@@ -205,6 +205,11 @@ define([
 		};
 		this.fullScreenNoticeContinueAction;
 		this._goesFirst;
+		this.wAction = function() { return self.movePlayerUp() };
+		this.aAction = function() { return self.movePlayerLeft() };
+		this.sAction = function() { return self.movePlayerDown() };
+		this.dAction = function() { return self.movePlayerRight() };
+		this.spcAction = function(){ return 1 };
 
 		this.init = function(){
 			self.initObservables();
@@ -642,6 +647,10 @@ define([
 			$("#content-area").fadeOut(300, function(){
 				self.fullScreenNotice(msg);
 				self.fullScreenNoticeButtons(buttons);
+				self.spcAction = function(){
+					buttons[0].action();
+					self.spcAction = function(){ return 1 };
+				}
 				$("#full-screen-notice").fadeIn(300);
 			});
 		}

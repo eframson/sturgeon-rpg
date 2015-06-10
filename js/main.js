@@ -53,24 +53,19 @@ require([
 		$(document).keydown(function(e){
 			if( game.arrowKeysControlPlayerPos() ){
 
-				if( e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 39 || e.keyCode == 40){
-					
-					e.preventDefault();
-
-					if(e.keyCode == 37){
-						game.movePlayerLeft();
-					}else if(e.keyCode == 38){
-						game.movePlayerUp();
-					}else if(e.keyCode == 39){
-						game.movePlayerRight();
-					} else if(e.keyCode == 40){
-						game.movePlayerDown();
-					}
-
+				if(e.keyCode == 65){
+					game.aAction();
+				}else if(e.keyCode == 87){
+					game.wAction();
+				}else if(e.keyCode == 68){
+					game.dAction();
+				} else if(e.keyCode == 83){
+					game.sAction();
+				} else if(e.keyCode == 32){
+					game.spcAction();
 				}
 				
 				//Put shortcut for i = inventory, c = view stats
-
 			}
 		});
 
