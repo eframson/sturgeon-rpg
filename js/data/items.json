@@ -254,22 +254,6 @@
 				"maxLevelRange" : -1,
 				"canBreakdown" : 1
 			},
-			"generic_sword" : {
-				"id" : "generic_sword",
-				"name" : "DYNAMIC",
-				"type" : "weapon",
-				"desc" : "A sword",
-				"slotsRequired" : 1,
-				"stackable" : 0,
-				"dmgMin" : "DYNAMIC",
-				"dmgMax" : "DYNAMIC",
-				"handsRequired" : 1,
-				"buyValue" : "DYNAMIC",
-				"minLevelRange" : -1,
-				"maxLevelRange" : -1,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1
-			},
 			"melee_weapon_01" : {
 				"id" : "melee_weapon_01",
 				"name" : "Crude Shiv (1H)",
@@ -340,6 +324,18 @@
 				"name" : "Longsword (2H)",
 				"type" : "weapon",
 				"desc" : "A two-finned weapon with a straight, 43-inch long, double-edged steel blade. Only a foot shorter than Peter Dinklage, and much deadlier. Although Peter is a much better actor, so there's that. +%dmgMin% - %dmgMax% DMG when equipped.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 2,
+				"canUpgrade" : 1,
+				"canBreakdown" : 1,
+				"avgMonsterHpPercentPerHit" : 0.7
+			},
+			"melee_weapon_06" : {
+				"id" : "melee_weapon_06",
+				"name" : "Swordchucks (2H)",
+				"type" : "weapon",
+				"desc" : "\"Swordchucks, yo! I'd be like Bruce Lee meets Musashi! Only Better! God, I'm so BRILLIANT!\" +%dmgMin% - %dmgMax% DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 2,
