@@ -658,6 +658,8 @@ define([
 				isActive : self.isActive,
 				levelID : self.levelID,
 				hasGenerated : self.hasGenerated,
+				entranceSquare : self.entranceSquare,
+				exitSquare : self.exitSquare,
 			});
 
 			var exportGrid = Array();

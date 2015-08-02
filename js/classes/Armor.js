@@ -28,6 +28,10 @@ define([
 				
 				//Let's say the dmg is -30% - +50%
 				self.armorValue( Math.ceil(avgMonsterDmg / 3) );
+
+				if (data.monsterLootCoefficient){
+					self.armorValue( Math.ceil(self.armorValue() * data.monsterLootCoefficient) );
+				}
 				
 				self.buyValue( self.armorValue() * 100 );
 

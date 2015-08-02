@@ -71,6 +71,11 @@ define([
 			self.hp = self.data().hp;
 			self.speed = self.data().speed;
 
+			//Why is this necessary??
+			self.isDead = ko.computed(function(){
+				return self.hp() < 1;
+			});
+
 			var itemArray = Array();
 			for(i = 0; i < playerData.inventory.length; i++){
 				if(playerData.inventory[i]._classNameForLoad){

@@ -657,8 +657,11 @@ define([
 			var attacker = (goesFirst == "player") ? self.player() : self.currentEnemy() ;
 			var defender = (goesFirst == "player") ? self.currentEnemy() : self.player() ;
 
+			var monsterAttackName = Utils.doBasedOnPercent(
+				self.currentEnemy().availableAttacks
+			);
 			var monsterAction = {
-				actionName : "basic",
+				actionName : monsterAttackName,
 				actionType : "attack"
 			};
 			var playerAction = {
@@ -863,6 +866,10 @@ define([
 
 				goldAmt = Math.ceil(goldAmt * qtyCoefficient);
 
+				if(lootSet == "monster"){
+					goldAmt = Math.round(goldAmt * self.currentEnemy().lootCoefficient());
+				}
+
 				itemToAdd = self.getAvailableItemById("gold", "currency", goldAmt);
 
 			}else if(itemType == "misc"){
@@ -877,7 +884,9 @@ define([
 				});
 
 				var scrapQty = Math.ceil(Utils.doRand(10,36) * qtyCoefficient);
-				var foodQty = Math.ceil(Utils.doRand(1,5) * qtyCoefficient);
+				if(lootSet == "monster"){
+					scrapQty = Math.round(scrapQty * self.currentEnemy().lootCoefficient());
+				}
 
 				if( miscType == "armor" ){
 
@@ -900,10 +909,15 @@ define([
 
 					if(consumableType == "health_potion"){
 						foodQty = Utils.doRand(1, (1 + Math.floor(self.level().levelNum() / 2) ));
+						if(lootSet == "monster"){
+							foodQty = Math.round(foodQty * self.currentEnemy().lootCoefficient());
+						}
 						itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
 					}else{
 						itemToAdd = self.getRandomScroungable(10);
 					}
+
+					itemClass = "consumable";
 				}
 
 			}else if(itemType == "gear"){
@@ -947,7 +961,9 @@ define([
 
 				itemToAdd.fullyDynamicStats = 1;
 				itemToAdd.level = self.level().levelNum();
-
+				if(lootSet == "monster"){
+					itemToAdd.monsterLootCoefficient = self.currentEnemy().lootCoefficient();
+				}
 			}
 
 			var newItem;
@@ -960,6 +976,8 @@ define([
 				newItem = new Armor(itemToAdd);
 			}else if(itemClass == "shield"){
 				newItem = new Shield(itemToAdd);
+			}else{
+				newItem = itemToAdd;
 			}
 
 			return newItem;
@@ -1022,6 +1040,10 @@ define([
 				eventType = self.eventSquareTypeOverride();
 				self.eventSquareTypeOverride(undefined);
 			}
+
+			//DEBUGGING
+			eventType = "stat";
+			//END DEBUGGING
 
 			var text = "";
 			var buttons;
@@ -1206,6 +1228,10 @@ define([
 						"exp"
 					)
 				);
+
+				//DEBUGGING
+				stat = "exp";
+				//END DEBUGGING
 
 				var statIncreaseAmt = 1;
 
@@ -2060,7 +2086,7 @@ define([
 			}
 		}
 
-		this.itemTest = function(){
+		this.testItem = function(){
 
 			var itemData = {};
 
@@ -2110,7 +2136,7 @@ define([
 			*/
 		}
 
-		this.armorTest = function(){
+		this.testArmor = function(){
 			var armorId;
 
 			var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
@@ -2124,7 +2150,7 @@ define([
 			self.player().addItemToInventory( new Armor(itemToAdd) );
 		}
 
-		this.weaponTest = function(){
+		this.testWeapon = function(){
 			var weaponId;
 
 			var availableWeapons = self.getAvailableItemIdsByTypeForLevel("weapon", self.level().levelNum());
@@ -2143,7 +2169,7 @@ define([
 			self.player().data().inventory.addItem( new Shield(itemToAdd) );
 		}
 
-		this.scrapTest = function(){
+		this.testScrap = function(){
 
 			itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", 400);
 			self.player().addItemToInventory( new Item(itemToAdd) );
@@ -2151,13 +2177,13 @@ define([
 			self.player().addItemToInventory( new Item(itemToAdd) );
 		}
 
-		this.goldTest = function(){
+		this.testGold = function(){
 
 			itemToAdd = self.getAvailableItemById("gold", "currency", 2000);
 			self.player().addItemToInventory( new Item(itemToAdd) );
 		}
 
-		this.eventTest = function(){
+		this.testEvent = function(){
 
 			var eventType = "";
 			var numTraders = 0;
@@ -2194,7 +2220,7 @@ define([
 
 		}
 
-		this.scaledWeaponTest = function(){
+		this.testScaledWeapon = function(){
 			var weaponId;
 
 			itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
@@ -2206,6 +2232,11 @@ define([
 			itemToAdd.fullyDynamicStats = 1;
 			itemToAdd.level = self.level().levelNum();
 			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+		}
+
+		this.testVisionRange = function(){
+			self.level().scanSquaresNearPlayer( 10 );
+			self.level().drawMap();
 		}
 
 		this.skipToGrid = function(){
@@ -2257,11 +2288,12 @@ Feeback/Ideas/Thoughts
 - Either remove "scan" or make it more useful
 - Show dmg taken next to player/monster HP counter
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
+- Let monster archetypes use specified attacks
+- Have some attack-specific stats as well as entity-specific stats
 
 Bugs
-- XP find item doesn't add XP properly! (sometimes?)
-- Doesn't stop game when player is dead
-- Consumable sell value doesn't display properly in loot screen
+- Intermittent issue with item squares?
+- When inventory is full, item squares don't add the item to the inventory
 
 New Features/Game Improvements
 - Play sound on level up?
@@ -2274,10 +2306,11 @@ Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
 
 Code Improvements
-- Create Consumable item class
 - Create EquippableItem subclass or something
 - Implement class for Skills to get them more cohesive
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
+- Standardize the way objects are saved
+- Remove "data" layer from player
 
 UI Improvements
 - Color code combat log messages
@@ -2285,13 +2318,12 @@ UI Improvements
 - Dynamic container name
 - Keyboard shortcuts for "continue" buttons
 - Add combat loots to message log
-- More obvious turn-based combat
+- More obvious turn-based combat (visual delay between parts of a round?)
 - Allow for a variable number of items to be purchased from merchant
 - Show that a 2H and a shield can't be equipped at the same time
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 - Make it more obvious when active item is equipped (so accidental salvage isn't as easy)
-- Show item cost rather than qty in merchant table? (show available qty in item description)
 
 */
 

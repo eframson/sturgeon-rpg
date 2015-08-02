@@ -38,6 +38,11 @@ define([
 				self.dmgMax( Math.round(avgDmgPerHit * 1.5) );
 				self.dmgMin( (self.dmgMin() > 1) ? self.dmgMin() : 1 );
 				self.dmgMax( (self.dmgMax() > 1) ? self.dmgMax() : 1 );
+
+				if (data.monsterLootCoefficient){
+					self.dmgMin( Math.ceil(self.dmgMin() * data.monsterLootCoefficient) );
+					self.dmgMax( Math.ceil(self.dmgMax() * data.monsterLootCoefficient) );
+				}
 				
 				self.buyValue( self.dmgMax() * 100 );
 

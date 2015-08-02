@@ -39,7 +39,8 @@ define([
 			if(self._sellValue){
 				return self._sellValue;
 			}
-			return Math.ceil(self.buyValue() / 2);
+			var buyValue = self.buyValue();
+			return Math.ceil(buyValue / 2);
 		});
 
 		this.costForNextUpgradeLevel = ko.computed(function(){

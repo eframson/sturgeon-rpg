@@ -39,6 +39,7 @@ define([
 			self.lootCoefficient = ko.observable(monsterData.lootCoefficient || 1);
 
 			self.monsterArchetypeDataFile = monsterArchetypeDataFile;
+			self.availableAttacks = monsterData.availableAttacks || {};
 
 			if(self.fullyDynamicStats && !self.isScaled()){
 				
@@ -62,6 +63,7 @@ define([
 				self.chanceToHitCoefficient = ko.observable(archetypeData.chanceToHitCoefficient);
 				self.dmgCoefficient = ko.observable(archetypeData.dmgCoefficient);
 				self.lootCoefficient = ko.observable(archetypeData.lootCoefficient);
+				self.availableAttacks = archetypeData.attacks;
 
 				//Let's say HP and DMG both have a 30% variance
 				self.maxHp( Math.round((Utils.doRand(Math.ceil(avgMonsterHp * 0.7), Math.ceil(avgMonsterHp * 1.3))) * self.avgHpCoefficient) );
