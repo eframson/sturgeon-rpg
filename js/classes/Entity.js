@@ -23,9 +23,80 @@ define([
 			self.minDmg = ko.observable(data.minDmg || 1);
 			self.maxDmg = ko.observable(data.maxDmg || 2);
 
+			self.activeEffects = ko.observable({
+
+			});
+
+			self.passiveEffects = ko.observableArray(data.passiveEffects || []);
+
 			self.isDead = ko.computed(function(){
 				return self.hp() < 1;
 			});
+
+		}
+
+		this.attacks = {
+
+			basic : {
+				numAttacks : 1,
+				chanceToHit : 1,
+				chanceToCrit : 0,
+				dmgModifier : 1,
+				onHitEffect : {
+
+				},
+				onMissEffect : {
+
+				}
+			},
+			flurry : {
+				numAttacks : 2,
+				chanceToHit : 0.3,
+				chanceToCrit : 0,
+				dmgModifier : 1.5,
+				onHitEffect : {
+
+				},
+				onMissEffect : {
+
+				}
+			},
+			flurry_improved : {
+				numAttacks : 3,
+				chanceToHit : 0.3,
+				chanceToCrit : 0,
+				dmgModifier : 2.0,
+				onHitEffect : {
+
+				},
+				onMissEffect : {
+
+				}
+			},
+			mighty : {
+				numAttacks : 1,
+				chanceToHit : 0.5,
+				chanceToCrit : 0,
+				dmgModifier : 3.0,
+				onHitEffect : {
+
+				},
+				onMissEffect : {
+
+				}
+			},
+			stun : {
+				numAttacks : 1,
+				chanceToHit : 0.5,
+				chanceToCrit : 0,
+				dmgModifier : 0.5,
+				onHitEffect : {
+
+				},
+				onMissEffect : {
+
+				}
+			}
 
 		}
 

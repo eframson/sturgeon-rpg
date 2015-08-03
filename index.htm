@@ -73,21 +73,21 @@
 
 				<!-- start stat row header row -->
 				<div class="row player-stat-row player-stats hidden">
-					<div class="col-md-1 with-left-padding"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().data().level()"></span></div>
-					<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().data().hp() + '/' + player().maxHp()"></span></div>
+					<div class="col-md-1 with-left-padding"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().level()"></span></div>
+					<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().hp() + '/' + player().maxHp()"></span></div>
 					<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
 					<div class="col-md-1"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg()"></span></div>
-					<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().data().str()"></span></div>
-					<div class="col-md-1"><span class="stat-label">DEX</span><span class="stat-value" data-bind="text: player().data().dex()"></span></div>
-					<div class="col-md-1"><span class="stat-label">END</span><span class="stat-value" data-bind="text: player().data().end()"></span></div>
-					<div class="col-md-1"><span class="stat-label">SPD</span><span class="stat-value" data-bind="text: player().data().speed()"></span></div>
+					<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().str()"></span></div>
+					<div class="col-md-1"><span class="stat-label">DEX</span><span class="stat-value" data-bind="text: player().dex()"></span></div>
+					<div class="col-md-1"><span class="stat-label">END</span><span class="stat-value" data-bind="text: player().end()"></span></div>
+					<div class="col-md-1"><span class="stat-label">SPD</span><span class="stat-value" data-bind="text: player().speed()"></span></div>
 
 
 					<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
 					<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
 
 
-					<div class="col-md-1"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().data().exp() + '/' + player().expRequiredForNextLevel()"></span></div>
+					<div class="col-md-1"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().exp() + '/' + player().expRequiredForNextLevel()"></span></div>
 					<div class="col-md-1 with-right-padding"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 				</div>
 				<!-- end stat row header row -->
@@ -118,8 +118,8 @@
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
 													click: playerActions.findFood,
-													text: 'Scrounge for food' + ( player().data().skillCooldowns().findFood() ? ' (' + player().data().skillCooldowns().findFood() + ')' : '' ),
-													css: { disabled : player().data().skillCooldowns().findFood() > 0 }">
+													text: 'Scrounge for food' + ( player().skillCooldowns().findFood() ? ' (' + player().skillCooldowns().findFood() + ')' : '' ),
+													css: { disabled : player().skillCooldowns().findFood() > 0 }">
 												</button>
 											</div>
 										</div>
@@ -127,8 +127,8 @@
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
 													click: playerActions.scanSquares,
-													text: 'Scan surroundings' + ( player().data().skillCooldowns().scanSquares() ? ' (' + player().data().skillCooldowns().scanSquares() + ')' : '' ),
-													css: { disabled : player().data().skillCooldowns().scanSquares() > 0 }">
+													text: 'Scan surroundings' + ( player().skillCooldowns().scanSquares() ? ' (' + player().skillCooldowns().scanSquares() + ')' : '' ),
+													css: { disabled : player().skillCooldowns().scanSquares() > 0 }">
 												</button>
 											</div>
 										</div>
@@ -141,7 +141,7 @@
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
 													click: toggleInventory,
-													text: 'Check Inventory' + ' (' + player().inventorySlotsOccupied() + '/' + player().data().inventoryMaxSlots() + ')'">
+													text: 'Check Inventory' + ' (' + player().inventorySlotsOccupied() + '/' + player().inventoryMaxSlots() + ')'">
 												</button>
 											</div>
 										</div>
@@ -161,11 +161,11 @@
 										</div>
 										<div class="state-button-row">
 											<span class="stat">Find Food:</span>
-											<span class="value" data-bind="text: $root.player().data().skills().findFood()"></span>
+											<span class="value" data-bind="text: $root.player().skills().findFood()"></span>
 										</div>
 										<div class="state-button-row">
 											<span class="stat">Scan Range:</span>
-											<span class="value" data-bind="text: $root.player().data().skills().scanSquares()"></span>
+											<span class="value" data-bind="text: $root.player().skills().scanSquares()"></span>
 										</div>
 									</div>
 									<div class="clear"></div>
@@ -177,15 +177,15 @@
 							<!-- start inventory area -->
 							<div class="inventory" data-bind="css: { hidden: leftColContent() != 'inventory' }">
 								
-								<h3>Inventory (<span data-bind="css: { danger: player().inventorySlotsOccupied() > player().data().inventoryMaxSlots() }, text: player().inventorySlotsOccupied()"></span>/<span data-bind="text: player().data().inventoryMaxSlots()"></span> slots occupied)</h3>
+								<h3>Inventory (<span data-bind="css: { danger: player().inventorySlotsOccupied() > player().inventoryMaxSlots() }, text: player().inventorySlotsOccupied()"></span>/<span data-bind="text: player().inventoryMaxSlots()"></span> slots occupied)</h3>
 
 								<div class="lines">
-									<!-- ko if: $root.player().data().inventory().length == 0 || ($root.player().data().inventory().length == 1 && $root.player().gp() > 0) -->
+									<!-- ko if: $root.player().inventory.items().length == 0 || ($root.player().inventory.items().length == 1 && $root.player().gp() > 0) -->
 									<div class="line empty">
 										<span class="item">Your inventory is empty</span>
 									</div>
 									<!-- /ko -->
-									<!-- ko foreach: $root.player().data().inventory() -->
+									<!-- ko foreach: $root.player().inventory.items() -->
 									<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
 										<span class="item" data-bind="text: $data.name"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
@@ -202,11 +202,11 @@
 									
 									<div class="line">
 										<span class="stat">HP:</span>
-										<span class="value hp" data-bind="animateNumbers: $root.player().data().hp()"></span>
+										<span class="value hp" data-bind="animateNumbers: $root.player().hp()"></span>
 									</div>
 									<div class="line">
 										<span class="stat">Speed:</span>
-										<span class="value" data-bind="text: $root.player().data().speed()"></span>
+										<span class="value" data-bind="text: $root.player().speed()"></span>
 									</div>
 									
 								</div>
@@ -246,7 +246,7 @@
 							<!-- start inventory/equipment/merchant item description area -->
 							<div class="item-desc" data-bind="css: { hidden: centerColContent() != 'item_desc' }">
 
-								<button class="btn btn-default back" type="button" data-bind="click: showContentArea, css: { disabled: player().inventorySlotsOccupied() > player().data().inventoryMaxSlots() }"><span data-bind="text: backButtonLabel()"></span></button>
+								<button class="btn btn-default back" type="button" data-bind="click: showContentArea, css: { disabled: player().inventorySlotsOccupied() > player().inventoryMaxSlots() }"><span data-bind="text: backButtonLabel()"></span></button>
 
 								<button class="btn btn-default take-all" type="button" data-bind="click: takeAllFromContainer, css: { hidden: rightColContent() != 'container' }"><span>Take All</span></button>
 
@@ -383,42 +383,42 @@
 
 								<div class="equipment-inner-container">
 
-									<!-- ko with: $root.player().data().equipment().armor().head() -->
+									<!-- ko with: $root.player().equipment().armor().head() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Head Armor:</span>
 											<span class="item" data-bind="text: $data.name || 'None'"></span>
 										</div>
 									<!-- /ko -->
 
-									<!-- ko with: $root.player().data().equipment().armor().fin() -->
+									<!-- ko with: $root.player().equipment().armor().fin() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Fin Armor:</span>
 											<span class="item" data-bind="text: $data.name || 'None'"></span>
 										</div>
 									<!-- /ko -->
 
-									<!-- ko with: $root.player().data().equipment().armor().body() -->
+									<!-- ko with: $root.player().equipment().armor().body() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Body Armor:</span>
 											<span class="item" data-bind="text: $data.name || 'None'"></span>
 										</div>
 									<!-- /ko -->
 
-									<!-- ko with: $root.player().data().equipment().armor().tail() -->
+									<!-- ko with: $root.player().equipment().armor().tail() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Tail Armor:</span>
 											<span class="item" data-bind="text: $data.name || 'None'"></span>
 										</div>
 									<!-- /ko -->
 
-									<!-- ko with: $root.player().data().equipment().weapon() -->
+									<!-- ko with: $root.player().equipment().weapon() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Weapon:</span>
 											<span class="item" data-bind="text: $data.name || 'None'"></span>
 										</div>
 									<!-- /ko -->
 
-									<!-- ko with: $root.player().data().equipment().shield() -->
+									<!-- ko with: $root.player().equipment().shield() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Shield:</span>
 											<span class="item" data-bind="text: $data.name || 'None'"></span>
@@ -435,13 +435,13 @@
 
 								<h3>Container</h3>
 
-								<!-- ko if: $root.currentContainer().length == 0 -->
+								<!-- ko if: $root.currentContainer.items().length == 0 -->
 								<div class="line empty">
 									<span class="item">The container is empty</span>
 								</div>
 								<!-- /ko -->
 
-								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
+								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
 										<span class="item" data-bind="text: $data.name"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
@@ -456,13 +456,13 @@
 
 								<h3>Merchant</h3>
 
-								<!-- ko if: $root.currentContainer().length == 0 -->
+								<!-- ko if: $root.currentContainer.items().length == 0 -->
 								<div class="line empty">
 									<span class="item">The merchant has no goods for sale</span>
 								</div>
 								<!-- /ko -->
 
-								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer()">
+								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
 										<span class="item" data-bind="text: $data.name"></span>
 										<span class="qty" data-bind="text: $data.buyValue() + ' GP'"></span>

@@ -22,55 +22,47 @@ define([
 
 		this.init = function(playerData){
 
-			self.data = ko.observable({
+			self.level = ko.observable(playerData.level || 1);
+			self.hp = ko.observable(playerData.hp || 0);
+			self.baseHp = ko.observable(playerData.baseHp || 10);
+			self.exp = ko.observable(playerData.exp || 0);
+			self.inventory = new ItemCollection(Array());
+			self.inventoryMaxSlots = ko.observable(playerData.inventoryMaxSlots || 5);
+			self.equipment = ko.observable({
 
-				level : ko.observable(playerData.level || 1),
-				hp : ko.observable(playerData.hp || 0),
-				baseHp : ko.observable(playerData.baseHp || 10),
-				exp : ko.observable(playerData.exp || 0),
-				inventory : new ItemCollection(Array()),
-				inventoryMaxSlots : ko.observable(playerData.inventoryMaxSlots || 5),
-				equipment : ko.observable({
+				armor : ko.observable({
 
-					armor : ko.observable({
-
-						head : self._instantiateObservableIfSet(playerData.equipment.armor.head, Armor),
-						fin : self._instantiateObservableIfSet(playerData.equipment.armor.fin, Armor),
-						body : self._instantiateObservableIfSet(playerData.equipment.armor.body, Armor),
-						tail: self._instantiateObservableIfSet(playerData.equipment.armor.tail, Armor)
-
-					}),
-
-					weapon : self._instantiateObservableIfSet(playerData.equipment.weapon, Weapon),
-					shield : self._instantiateObservableIfSet(playerData.equipment.shield, Shield),
-				}),
-				skills : ko.observable({
-					scanSquares : ko.observable(playerData.skills.scanSquares || 1),
-					findFood : ko.observable(playerData.skills.findFood || 20),
-					visionRange : ko.observable( (playerData.skills.visionRange != undefined) ? playerData.skills.visionRange : 0 ),
-				}),
-				skillCooldowns : ko.observable({
-					scanSquares : ko.observable(playerData.skillCooldowns.scanSquares || 0),
-					findFood : ko.observable(playerData.skillCooldowns.findFood || 0),
-				}),
-				skillProgress : ko.observable({
-					scanSquares : ko.observable(playerData.skillProgress.scanSquares || 0),
-					findFood : ko.observable(playerData.skillProgress.findFood || 0),
-					speed : ko.observable(playerData.skillProgress.speed || 0),
+					head : self._instantiateObservableIfSet(playerData.equipment.armor.head, Armor),
+					fin : self._instantiateObservableIfSet(playerData.equipment.armor.fin, Armor),
+					body : self._instantiateObservableIfSet(playerData.equipment.armor.body, Armor),
+					tail : self._instantiateObservableIfSet(playerData.equipment.armor.tail, Armor)
 
 				}),
-				abilities : ko.observableArray(playerData.abilities || Array()),
-				speed : ko.observable(playerData.speed || 2),
-				str : ko.observable(playerData.str || Utils.doRand(1,6)),
-				dex : ko.observable(playerData.dex || Utils.doRand(1,6)),
-				end : ko.observable(playerData.end || Utils.doRand(1,6)),
-				chanceToCrit : ko.observable(playerData.chanceToCrit || 0.05),
+
+				weapon : self._instantiateObservableIfSet(playerData.equipment.weapon, Weapon),
+				shield : self._instantiateObservableIfSet(playerData.equipment.shield, Shield),
+			});
+			self.skills = ko.observable({
+				scanSquares : ko.observable(playerData.skills.scanSquares || 1),
+				findFood : ko.observable(playerData.skills.findFood || 20),
+				visionRange : ko.observable( (playerData.skills.visionRange != undefined) ? playerData.skills.visionRange : 0 ),
+			});
+			self.skillCooldowns = ko.observable({
+				scanSquares : ko.observable(playerData.skillCooldowns.scanSquares || 0),
+				findFood : ko.observable(playerData.skillCooldowns.findFood || 0),
+			});
+			self.skillProgress = ko.observable({
+				scanSquares : ko.observable(playerData.skillProgress.scanSquares || 0),
+				findFood : ko.observable(playerData.skillProgress.findFood || 0),
+				speed : ko.observable(playerData.skillProgress.speed || 0),
 
 			});
-
-			//These are ugly hacks...eventually we should just get rid of the extra data() layer, right?
-			self.hp = self.data().hp;
-			self.speed = self.data().speed;
+			self.abilities = ko.observableArray(playerData.abilities || Array());
+			self.speed = ko.observable(playerData.speed || 2);
+			self.str = ko.observable(playerData.str || Utils.doRand(1,6));
+			self.dex = ko.observable(playerData.dex || Utils.doRand(1,6));
+			self.end = ko.observable(playerData.end || Utils.doRand(1,6));
+			self.chanceToCrit = ko.observable(playerData.chanceToCrit || 0.05);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
@@ -85,18 +77,18 @@ define([
 					itemArray.push( new Item(playerData.inventory[i]) );
 				}
 			}
-			self.data().inventory(itemArray);
+			self.inventory.items(itemArray);
 
 			this.inventorySlotsOccupied = ko.computed(function(){
 				var slotsOccupied = 0;
-				for(i=0; i < self.data().inventory().length; i++){
-					slotsOccupied += self.data().inventory()[i].slotsRequired;
+				for(i=0; i < self.inventory.items().length; i++){
+					slotsOccupied += self.inventory.items()[i].slotsRequired;
 				}
 				return slotsOccupied;
 			});
 
 			this.inventorySlotsAvailable = ko.computed(function(){
-				return self.data().inventoryMaxSlots() - self.inventorySlotsOccupied();
+				return self.inventoryMaxSlots() - self.inventorySlotsOccupied();
 			});
 
 			this.hasInventorySpace = ko.computed(function(){
@@ -104,18 +96,18 @@ define([
 			});
 
 			this.baseMinDmg = ko.computed(function(){
-				return Math.ceil(self.data().str() * 0.5);
+				return Math.ceil(self.str() * 0.5);
 			});
 
 			this.baseMaxDmg = ko.computed(function(){
-				return Math.ceil(self.data().str() * 0.85);
+				return Math.ceil(self.str() * 0.85);
 			});
 
 			this.minDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
 				var minDmg = self.baseMinDmg();
-				if( !Utils.isEmptyObject(self.data().equipment().weapon()) ){
-					minDmg += self.data().equipment().weapon().dmgMin();
+				if( !Utils.isEmptyObject(self.equipment().weapon()) ){
+					minDmg += self.equipment().weapon().dmgMin();
 				}
 				return minDmg;
 			});
@@ -123,16 +115,16 @@ define([
 			this.maxDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
 				var maxDmg = self.baseMaxDmg();
-				if( !Utils.isEmptyObject(self.data().equipment().weapon()) ){
-					maxDmg += self.data().equipment().weapon().dmgMax();
+				if( !Utils.isEmptyObject(self.equipment().weapon()) ){
+					maxDmg += self.equipment().weapon().dmgMax();
 				}
 				return maxDmg;
 			});
 
 			this.totalArmor = ko.computed(function(){
-				var armorValue = Math.ceil(self.data().dex() * 0.5); //Eventually when DEX is implemented, use that as base AC
+				var armorValue = Math.ceil(self.dex() * 0.5); //Eventually when DEX is implemented, use that as base AC
 
-				var armorSlots = self.data().equipment().armor();
+				var armorSlots = self.equipment().armor();
 
 				for(slot in armorSlots){
 
@@ -142,8 +134,8 @@ define([
 
 				}
 
-				if( !Utils.isEmptyObject(self.data().equipment().shield()) ){
-					armorValue += self.data().equipment().shield().armorValue();
+				if( !Utils.isEmptyObject(self.equipment().shield()) ){
+					armorValue += self.equipment().shield().armorValue();
 				}
 
 				return armorValue;
@@ -152,7 +144,7 @@ define([
 			self.armor = self.totalArmor;
 
 			self.gp = ko.computed(function(){
-				var gold = self.data().inventory.getItemByID("gold");
+				var gold = self.inventory.getItemByID("gold");
 
 				if(gold){
 					return gold.qty();
@@ -162,7 +154,7 @@ define([
 			});
 
 			self.weaponScraps = ko.computed(function(){
-				var scraps = self.data().inventory.getItemByID("weapon_scraps");
+				var scraps = self.inventory.getItemByID("weapon_scraps");
 
 				if(scraps){
 					return scraps.qty();
@@ -172,7 +164,7 @@ define([
 			});
 
 			self.armorScraps = ko.computed(function(){
-				var scraps = self.data().inventory.getItemByID("armor_scraps");
+				var scraps = self.inventory.getItemByID("armor_scraps");
 
 				if(scraps){
 					return scraps.qty();
@@ -182,15 +174,15 @@ define([
 			});
 
 			self.maxHp = ko.computed(function(){
-				return self.data().baseHp() + (self.data().end() * 2);
+				return self.baseHp() + (self.end() * 2);
 			});
 
 			self.expRequiredForNextLevel = ko.computed(function(){
-				return self.data().level() * 100;
+				return self.level() * 100;
 			});
 
 			self.numPotionsAvailable = ko.computed(function(){
-				var pots = self.data().inventory.getItemByID("health_potion");
+				var pots = self.inventory.getItemByID("health_potion");
 
 				if(pots){
 					return pots.qty();
@@ -202,8 +194,8 @@ define([
 			self.hasLeveledUp = ko.observable(false);
 
 			//Actual init stuff
-			if(self.data().hp() == 0){
-				self.data().hp( self.maxHp() );
+			if(self.hp() == 0){
+				self.hp( self.maxHp() );
 			}
 		}
 
@@ -211,7 +203,7 @@ define([
 
 			ignoreInventoryConstraints = (ignoreInventoryConstraints === undefined) ? false : ignoreInventoryConstraints ;
 
-			var numJustAdded = self.data().inventory.addItem(
+			var numJustAdded = self.inventory.addItem(
 				itemToAdd,
 				function(){
 					if(ignoreInventoryConstraints){
@@ -233,7 +225,7 @@ define([
 			var existingItem = self.getInventoryItemByID(itemID),
 				slotsRequired = existingItem.slotsRequired;
 
-			var numLeft = self.data().inventory.removeItem(itemID, qty);
+			var numLeft = self.inventory.removeItem(itemID, qty);
 
 			if( numLeft === false ){
 				console.log("could not remove item");
@@ -242,13 +234,13 @@ define([
 
 		this.setInventoryItemQty = function(itemOrItemID, qty){
 
-			return self.data().inventory.setItemQty(itemOrItemID, qty);
+			return self.inventory.setItemQty(itemOrItemID, qty);
 
 		}
 
 		this.getInventoryItemByID = function(itemID){
 
-			return self.data().inventory.getItemByID(itemID);
+			return self.inventory.getItemByID(itemID);
 
 		}
 
@@ -303,15 +295,15 @@ define([
 		}
 
 		this._getArmorSlot = function(slot){
-			return self.data().equipment().armor()[slot];
+			return self.equipment().armor()[slot];
 		}
 
 		this._getWeaponSlot = function(){
-			return self.data().equipment().weapon;
+			return self.equipment().weapon;
 		}
 
 		this._getShieldSlot = function(){
-			return self.data().equipment().shield;
+			return self.equipment().shield;
 		}
 
 		this.getAttackResults = function(attackType){
@@ -356,7 +348,7 @@ Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds
 						dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
 					}
 
-					dmgDealt += self.data().equipment().weapon().extraDamage();
+					dmgDealt += self.equipment().weapon().extraDamage();
 
 					dmgDealt = dmgDealt * dmgModifier;
 
@@ -375,30 +367,30 @@ Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds
 		}
 
 		this.addExp = function(xp){
-			var potentialTotalXp = self.data().exp() + xp;
+			var potentialTotalXp = self.exp() + xp;
 			if(potentialTotalXp >= self.expRequiredForNextLevel()){
-				self.data().exp( potentialTotalXp - self.expRequiredForNextLevel() );
-				self.data().level( self.data().level() + 1 );
+				self.exp( potentialTotalXp - self.expRequiredForNextLevel() );
+				self.level( self.level() + 1 );
 				self.levelUp();
 			}else{
-				self.data().exp( potentialTotalXp );
+				self.exp( potentialTotalXp );
 			}
 		}
 
 		this.levelUp = function(){
 			//Add stats
 			self.hasLeveledUp(true);
-			self.data().baseHp( self.data().baseHp() + 1 );
-			self.data().skills().findFood( self.data().skills().findFood() + 1 );
+			self.baseHp( self.baseHp() + 1 );
+			self.skills().findFood( self.skills().findFood() + 1 );
 
-			if( self.data().level() % 3 == 0){
-				self.data().str( self.data().str() + 1 );
-				self.data().dex( self.data().dex() + 1 );
-				self.data().end( self.data().end() + 1 );
+			if( self.level() % 3 == 0){
+				self.str( self.str() + 1 );
+				self.dex( self.dex() + 1 );
+				self.end( self.end() + 1 );
 			}
-			if( self.data().level() % 4 == 0){
-				self.data().speed( self.data().speed() + 1 );
-				self.data().inventoryMaxSlots( self.data().inventoryMaxSlots() + 1 );
+			if( self.level() % 4 == 0){
+				self.speed( self.speed() + 1 );
+				self.inventoryMaxSlots( self.inventoryMaxSlots() + 1 );
 			}
 			//Heal player / reset cooldowns on level up?
 		}
@@ -407,7 +399,7 @@ Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds
 
 			var toRestoreAmt = amt;
 			var maxHp = self.maxHp();
-			var hp = self.data().hp();
+			var hp = self.hp();
 
 			if(isPct){
 				toRestoreAmt = Math.round(amt * maxHp);
@@ -415,7 +407,7 @@ Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds
 
 			toRestoreAmt = (toRestoreAmt <= (maxHp - hp)) ? toRestoreAmt : (maxHp - hp) ;
 
-			self.data().hp( hp + toRestoreAmt );
+			self.hp( hp + toRestoreAmt );
 		}
 
 		this.hasWeapon = function(){
@@ -424,20 +416,36 @@ Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds
 
 		this.getExportData = function(){
 
+
 			var exportObj = {};
 
-			for (prop in self.data()){
+			exportObj._classNameForLoad = self.constructor.name;
+
+			for(prop in self){
 				if(prop != "inventory"){
-					exportObj[prop] = self.data()[prop];
+					if ( typeof self[prop] !== 'function' ){
+						exportObj[prop] = self[prop];
+					}else if (ko.isObservable(self[prop])) {
+						exportObj[prop] = self[prop]();
+					}
 				}
 			}
 
-			exportObj.inventory = Array();
-			$.each( self.data().inventory(), function(idx, elem){
-				exportObj.inventory.push( elem.getExportData() );
-			});
+			exportObj.inventory = self.inventory.getExportData();
 
 			return ko.mapping.toJS( exportObj );
+
+			/*var exportObj = {};
+
+			for (prop in self){
+				if(prop != "inventory"){
+					exportObj[prop] = self[prop];
+				}
+			}
+
+			exportObj.inventory = self.inventory.getExportData();
+
+			return ko.mapping.toJS( exportObj );*/
 		}
 
 		this._instantiateObservableIfSet = function(obj, className){

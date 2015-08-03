@@ -10,14 +10,16 @@ define([
 
 		items = items || Array();
 
+		this.items = ko.observableArray(items);
+
 		//It would be nice if we could add this function just to the instance of ko
 		//returned by this class rather than the global ko obj, but we'll see...
 		//Maybe cloning?
 		//http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
 		//var newObject = jQuery.extend(true, {}, oldObject);
-		ko.observableArray.fn.getItemByID = function(itemID){
+		this.getItemByID = function(itemID){
 
-			var items = this();
+			var items = self.items();
 
 			for(i = 0; i < items.length; i++){
 				if( itemID == items[i].id ){
@@ -28,7 +30,7 @@ define([
 
 		}
 
-		ko.observableArray.fn.setItemQty = function(itemOrItemID, qty){
+		this.setItemQty = function(itemOrItemID, qty){
 
 			if(!itemOrItemID || typeof qty != "number"){
 				return false;
@@ -36,18 +38,18 @@ define([
 
 			//There's probably a better way to check for this...
 			if(typeof itemOrItemID != "object"){
-				itemOrItemID = this.getItemByID(itemID);
+				itemOrItemID = self.getItemByID(itemID);
 			}
 
 			itemOrItemID.qty(qty);
 
 		}
 
-		ko.observableArray.fn.removeItem = function(itemOrItemID, qty){
+		this.removeItem = function(itemOrItemID, qty){
 
 			//If it's not an Item instance, treat it as an item ID
 			if(!(itemOrItemID instanceof Item)){
-				itemOrItemID = this.getItemByID(itemOrItemID);
+				itemOrItemID = self.getItemByID(itemOrItemID);
 			}
 
 			if(!itemOrItemID){
@@ -58,7 +60,7 @@ define([
 
 			//If qty is undefined or if qty is equal to "all" or it's greater than the item qty we currently have
 			if( qty == undefined || qty && (qty == "all" || qty >= existingQty) ){
-				this.remove(itemOrItemID);
+				self.items.remove(itemOrItemID);
 				return 0;
 			}else{
 				itemOrItemID.qty( existingQty - qty );
@@ -66,13 +68,13 @@ define([
 			}
 		}
 
-		ko.observableArray.fn.addItem = function(itemToAdd, extraCanAddCheck, afterAddCallback){
+		this.addItem = function(itemToAdd, extraCanAddCheck, afterAddCallback){
 
 			if(itemToAdd == undefined || !(itemToAdd instanceof Item) ){
 				return false;
 			}
 
-			var existingItem = this.getItemByID(itemToAdd.id);
+			var existingItem = self.getItemByID(itemToAdd.id);
 			var canAdd = true;
 			var newQty = 0;
 
@@ -91,7 +93,7 @@ define([
 					newQty = existingItem.qty() + itemToAdd.qty();
 					existingItem.qty(newQty);
 				}else{
-					this.push(itemToAdd);
+					self.items.push(itemToAdd);
 					newQty = itemToAdd.qty();
 
 					if(afterAddCallback && typeof afterAddCallback === 'function'){
@@ -106,8 +108,32 @@ define([
 
 		}
 
+		this.removeAll = function(items){
+			return self.items.removeAll();
+		}
 
-		return ko.observableArray(items);
+		this.getExportData = function(){
+
+			var exportObj = [];
+			
+			$.each( self.items(), function(idx, elem){
+				exportObj.push( elem.getExportData() );
+			});
+
+			/*var exportObj = {};
+
+			exportObj._classNameForLoad = self.constructor.name;
+
+			for(prop in self){
+				if ( typeof self[prop] !== 'function' ){
+					exportObj[prop] = self[prop];
+				}else if (ko.isObservable(self[prop])) {
+					exportObj[prop] = self[prop]();
+				}
+			}*/
+
+			return exportObj;
+		}
 
 	}
 

@@ -76,24 +76,24 @@ define([
 		this.defaultCooldown = 10;
 		this.playerActions = {
 			scanSquares: function(){
-				self.player().data().skillCooldowns().scanSquares(self.defaultCooldown);
-				self.level().scanSquaresNearPlayer( self.player().data().skills().scanSquares() );
+				self.player().skillCooldowns().scanSquares(self.defaultCooldown);
+				self.level().scanSquaresNearPlayer( self.player().skills().scanSquares() );
 				self.level().drawMap();
-				self.player().data().skillProgress().scanSquares( self.player().data().skillProgress().scanSquares() + 1 );
+				self.player().skillProgress().scanSquares( self.player().skillProgress().scanSquares() + 1 );
 				self.logMessage("By holding very still and concentrating, you are able to thoroughly survey your surroundings.");
 
 				//Quick-and-dirty
-				if( self.player().data().skillProgress().scanSquares() > 0 && self.player().data().skillProgress().scanSquares() % 25 == 0 ){
-					self.player().data().skillProgress().scanSquares(0);
-					self.player().data().skills().scanSquares( self.player().data().skills().scanSquares() + 1 );
+				if( self.player().skillProgress().scanSquares() > 0 && self.player().skillProgress().scanSquares() % 25 == 0 ){
+					self.player().skillProgress().scanSquares(0);
+					self.player().skills().scanSquares( self.player().skills().scanSquares() + 1 );
 					self.logMessage("Your skill in scanning has increased.");
 				}
 			},
 			findFood: function(){
 
-				self.player().data().skillCooldowns().findFood(self.defaultCooldown);
+				self.player().skillCooldowns().findFood(self.defaultCooldown);
 
-				var findFoodSkill = self.player().data().skillProgress().findFood();
+				var findFoodSkill = self.player().skillProgress().findFood();
 
 				//See if we get a high quality food item
 				var isHighQuality = Utils.doBasedOnPercent({
@@ -106,14 +106,14 @@ define([
 				//Pick a number between 1 and 10 (OR 7 and 10)
 				var consumableItem = self.getRandomScroungable(lowerBounds);
 
-				self.player().data().skillProgress().findFood( self.player().data().skillProgress().findFood() + 1 );
+				self.player().skillProgress().findFood( self.player().skillProgress().findFood() + 1 );
 				var message = "";
 
 				var qty = self.addFoodToPlayerInventory(consumableItem);
 				message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " food using your kick-ass mouth feelers.";
 
 				/*var percentages = {};
-				var findPercent = self.player().data().skills().findFood();
+				var findPercent = self.player().skills().findFood();
 				percentages[findPercent] = function(){
 					var qty = self.addFoodToPlayerInventory(foodObj);
 					message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " fish biscuits using your kick-ass mouth feelers.";
@@ -127,12 +127,12 @@ define([
 
 				var skillIncrease = 0;
 
-				if( self.player().data().skills().findFood() < 40 ){
+				if( self.player().skills().findFood() < 40 ){
 					skillIncrease = Utils.doBasedOnPercent({
 						70 : 1,
 						30 : 2,
 					});
-				}else if( self.player().data().skills().findFood() < 80 ){
+				}else if( self.player().skills().findFood() < 80 ){
 					skillIncrease = Utils.doBasedOnPercent({
 						90 : 1,
 						10 : 2,
@@ -144,9 +144,9 @@ define([
 				}
 
 				if(skillIncrease){
-					self.player().data().skills().findFood( self.player().data().skills().findFood() + skillIncrease );
+					self.player().skills().findFood( self.player().skills().findFood() + skillIncrease );
 
-					self.logMessage("Your skill in finding food has increased to " + self.player().data().skills().findFood() + "/100");
+					self.logMessage("Your skill in finding food has increased to " + self.player().skills().findFood() + "/100");
 				}
 			}
 		};
@@ -468,7 +468,7 @@ define([
 						itemArray.push( new Item(gameData.currentContainer[i]) );
 					}
 				}
-				self.currentContainer(itemArray);
+				self.currentContainer.items(itemArray);
 
 			}else{
 
@@ -487,7 +487,7 @@ define([
 
 			self.player(player);
 
-			self.level().revealSquaresNearPlayer(player.data().skills().visionRange());
+			self.level().revealSquaresNearPlayer(player.skills().visionRange());
 			self.level().drawMap();
 
 			//Initialize our intro slides if this is a brand new game
@@ -546,10 +546,10 @@ define([
 
 				if(currentPos.x != newPos.x || currentPos.y != newPos.y){
 					self.updateCooldowns();
-					self.player().data().skillProgress().speed( self.player().data().skillProgress().speed() + 1 );
+					self.player().skillProgress().speed( self.player().skillProgress().speed() + 1 );
 
 					self.level().scanSquaresNearPlayer(0);
-					self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
+					self.level().revealSquaresNearPlayer(self.player().skills().visionRange());
 					self.level().drawMap();
 
 					var square = self.level().getSquare(newPos.x, newPos.y);
@@ -572,7 +572,7 @@ define([
 		}
 
 		this.updateCooldowns = function(){
-			$.each(self.player().data().skillCooldowns(), function(skill, cooldown){
+			$.each(self.player().skillCooldowns(), function(skill, cooldown){
 				var cooldownValue = cooldown();
 				if(cooldownValue > 0){
 					cooldown(cooldownValue - 1);
@@ -632,9 +632,9 @@ define([
 
 				var goesFirst;
 
-				if( self.player().data().speed() > self.currentEnemy().speed() ){
+				if( self.player().speed() > self.currentEnemy().speed() ){
 					goesFirst = "player";
-				}else if( self.player().data().speed() < self.currentEnemy().speed() ){
+				}else if( self.player().speed() < self.currentEnemy().speed() ){
 					goesFirst = "enemy";
 				}else{
 					goesFirst = (Utils.doRand(0,2) == 1) ? "enemy" : "player" ;
@@ -775,9 +775,9 @@ define([
 		}
 
 		this.takeAllFromContainer = function(){
-			for( var i=0; i < self.currentContainer().length; i++ ){
+			for( var i=0; i < self.currentContainer.items().length; i++ ){
 				//Skip the normal cap-checking rules
-				self.player().data().inventory.addItem( self.currentContainer()[i] );
+				self.player().inventory.addItem( self.currentContainer.items()[i] );
 			}
 			self.currentContainer.removeAll();
 			self._resetActiveItem();
@@ -1109,45 +1109,45 @@ define([
 
 				if(trainSkillString == "findFood"){
 					text += "get better at scrounging for food";
-					trainCost = (self.player().data().skills().findFood() + 1) * 10;
-					trainSkill = self.player().data().skills().findFood;
+					trainCost = (self.player().skills().findFood() + 1) * 10;
+					trainSkill = self.player().skills().findFood;
 					trainSkill = "findFood";
 					trainSkillSuccessDesc = "skill in finding food";
 					skillOrStat = "skill";
 				}else if(trainSkillString == "scanSquares"){
 					text += "get better at surveying your surroundings";
-					trainCost = (self.player().data().skills().scanSquares() * 1000);
-					trainSkill = self.player().data().skills().scanSquares;
+					trainCost = (self.player().skills().scanSquares() * 1000);
+					trainSkill = self.player().skills().scanSquares;
 					trainSkill = "scanSquares";
 					trainSkillSuccessDesc = "scan range";
 					skillOrStat = "skill";
 				}else if( trainSkillString == "str" ){
 					text += "become stronger";
-					trainSkill = self.player().data().str;
+					trainSkill = self.player().str;
 					trainSkill = "str";
 					trainCost = 800;
 					trainSkillSuccessDesc = "strength (STR)";
 				}else if( trainSkillString == "dex" ){
 					text += "become more agile";
-					trainSkill = self.player().data().dex;
+					trainSkill = self.player().dex;
 					trainSkill = "dex";
 					trainCost = 800;
 					trainSkillSuccessDesc = "dexterity (DEX)";
 				}else if( trainSkillString == "end" ){
 					text += "become more resilient";
-					trainSkill = self.player().data().end;
+					trainSkill = self.player().end;
 					trainSkill = "end";
 					trainCost = 800;
 					trainSkillSuccessDesc = "endurance (END)";
 				}else if( trainSkillString == "speed" ){
 					text += "become quicker";
-					trainSkill = self.player().data().speed;
+					trainSkill = self.player().speed;
 					trainSkill = "speed";
 					trainCost = 800;
 					trainSkillSuccessDesc = "speed (SPD)";
 				}else if( trainSkillString == "hp" ){
 					text += "become tougher";
-					trainSkill = self.player().data().baseHp;
+					trainSkill = self.player().baseHp;
 					trainSkill = "baseHp";
 					trainCost = 800;
 					trainSkillAmt = 10;
@@ -1161,10 +1161,10 @@ define([
 						title : "Buy (" + trainCost + " GP)",
 						action : function(){
 
-							var gold = self.player().data().inventory.getItemByID("gold");
+							var gold = self.player().inventory.getItemByID("gold");
 							var trainSkill;
 							if(this.vars.skillOrStat == 'skill'){
-								trainSkill = self.player().data().skills()[this.vars.trainSkill];
+								trainSkill = self.player().skills()[this.vars.trainSkill];
 							}else if(this.vars.skillOrStat == 'stat'){
 								trainSkill = self.player().data()[this.vars.trainSkill];
 							}
@@ -1204,8 +1204,8 @@ define([
 			}else if( eventType == "cooldown" ){
 
 				afterLoad = function(){
-					self.player().data().skillCooldowns().findFood(0);
-					self.player().data().skillCooldowns().scanSquares(0);
+					self.player().skillCooldowns().findFood(0);
+					self.player().skillCooldowns().scanSquares(0);
 					self.logMessage(text);
 				};
 
@@ -1268,7 +1268,7 @@ define([
 			}else if( eventType == "inventory" ){
 
 				afterLoad = function(){
-					self.player().data().inventoryMaxSlots( self.player().data().inventoryMaxSlots() + 1 );
+					self.player().inventoryMaxSlots( self.player().inventoryMaxSlots() + 1 );
 					self.logMessage(text);
 				};
 
@@ -1314,7 +1314,7 @@ define([
 				nextLevel.isActive(true);
 				currentLevel.isActive(false);
 				nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
-				nextLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				nextLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
 				self.level().scanSquaresNearPlayer();
 				nextLevel.drawMap();
 			});
@@ -1345,7 +1345,7 @@ define([
 				prevLevel.isActive(true);
 				currentLevel.isActive(false);
 				prevLevel.setPlayerPos( prevLevel.exitSquare()[0], prevLevel.exitSquare()[1] );
-				prevLevel.revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				prevLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
 				prevLevel.drawMap();
 			});
 		}
@@ -1478,11 +1478,11 @@ define([
 				alreadyEquippedItem = self.player().equipArmor(item);
 			}
 
-			self.player().data().inventory.removeItem(item);
+			self.player().inventory.removeItem(item);
 
 			if( alreadyEquippedItem != undefined && !Utils.isEmptyObject(alreadyEquippedItem) ){
 				//Skip the normal slot-checking logic to account for 2H weaps or 1H + shield combos
-				self.player().data().inventory.addItem(alreadyEquippedItem);
+				self.player().inventory.addItem(alreadyEquippedItem);
 				var equippedWeapon = self.player().getEquippedWeapon();
 			}
 
@@ -1490,10 +1490,10 @@ define([
 				var existingItem = self.player().getEquippedShield();
 				if( !Utils.isEmptyObject(existingItem) ){
 					self.player().unEquipShield();
-					self.player().data().inventory.addItem(existingItem);
+					self.player().inventory.addItem(existingItem);
 				}
 			}else if( type == "shield" && !Utils.isEmptyObject(self.player().getEquippedWeapon()) && self.player().getEquippedWeapon().handsRequired == 2){
-				self.player().data().inventory.addItem(self.player().getEquippedWeapon());
+				self.player().inventory.addItem(self.player().getEquippedWeapon());
 				self.player().unEquipWeapon();
 			}
 
@@ -1512,7 +1512,7 @@ define([
 				self.player().unEquipArmor(item);
 			}
 
-			self.player().data().inventory.addItem(item);
+			self.player().inventory.addItem(item);
 			self._resetActiveItem();
 
 		}
@@ -1590,12 +1590,12 @@ define([
 				}
 
 			}else{
-				self.player().data().inventory.removeItem(item);
+				self.player().inventory.removeItem(item);
 			}
 
 			self._resetActiveItem();
 
-			self.player().data().inventory.addItem(new Item(itemToAdd) );
+			self.player().inventory.addItem(new Item(itemToAdd) );
 			self.logMessage("You gain " + scrapQty + " scraps from salvaging the item.","crafting");
 
 		}
@@ -1604,7 +1604,7 @@ define([
 
 			var item = self.activeItem().actualItem();
 			var moveFrom = self.currentContainer;
-			var moveTo = self.player().data().inventory;
+			var moveTo = self.player().inventory;
 
 			var gold = moveTo.getItemByID("gold");
 
@@ -1631,7 +1631,7 @@ define([
 
 			var item = self.activeItem().actualItem();
 			var moveFrom = self.currentContainer;
-			var moveTo = self.player().data().inventory;
+			var moveTo = self.player().inventory;
 
 			var numPurchasable = Math.floor( self.player().gp() / item.buyValue() );
 			var actualPurchasable = (numPurchasable <= item.qty()) ? numPurchasable : item.qty() ;
@@ -1662,7 +1662,7 @@ define([
 
 			var qty = qty || 1;
 			var item = self.activeItem().actualItem();
-			var moveFrom = self.player().data().inventory;
+			var moveFrom = self.player().inventory;
 			var moveTo = self.currentContainer;
 
 			var gold = self.getAvailableItemById("gold", "currency", (qty * item.sellValue()) );
@@ -1689,13 +1689,18 @@ define([
 		this.useActiveItem = function(game, event){
 
 			var item = self.activeItem().actualItem();
+			var srcNumLeft;
 
 			if (item.id == "reset_stone"){
 
-				self.removeActiveItem(game, event, 1);
+				srcNumLeft = self.removeActiveItem(game, event, 1);
+
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
 
 				self.level().generateThisLevel(true);
-				self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
+				self.level().revealSquaresNearPlayer(self.player().skills().visionRange());
 				self.level().drawMap();
 
 				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. " +
@@ -1715,7 +1720,11 @@ define([
 				}
 			}else if(item.type == "consumables"){
 
-				self.removeActiveItem(game, event, 1);
+				srcNumLeft = self.removeActiveItem(game, event, 1);
+
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
 
 				self.player().restoreHealth((item.quality() / 100), 1);
 
@@ -1747,7 +1756,7 @@ define([
 				srcCollection = undefined,
 				tarCollection = undefined;
 
-			srcCollection = self.player().data().inventory;
+			srcCollection = self.player().inventory;
 
 			//Do we have an active container?
 			if(self.rightColContent() == 'container'){
@@ -1765,7 +1774,7 @@ define([
 					moveTo = "inventory";
 
 					srcCollection = self.currentContainer;
-					tarCollection = self.player().data().inventory;
+					tarCollection = self.player().inventory;
 				}
 			}
 
@@ -1826,7 +1835,7 @@ define([
 			var actualItem = self.activeItem().actualItem(),
 				srcCollection = undefined;
 
-			srcCollection = self.player().data().inventory;
+			srcCollection = self.player().inventory;
 
 			//Do we have an active container?
 			if(self.rightColContent() == 'container' && self.activeItem().moveDirection() == "left"){
@@ -1981,7 +1990,7 @@ define([
 				freezeMovement		: self.freezeMovement(),
 				backButtonLabel : self.backButtonLabel(),
 				currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
-				currentContainer : Array()
+				currentContainer : self.currentContainer.getExportData()
 			}
 
 			for(i=0; i < self.levels().length; i++){
@@ -1995,11 +2004,11 @@ define([
 				exportObj.logMessages.push(message);
 			}*/
 
-			for(i=0; i < self.currentContainer().length; i++){
-				var item = self.currentContainer()[i];
+			/*for(i=0; i < self.currentContainer.items().length; i++){
+				var item = self.currentContainer.items()[i];
 
-				exportObj.currentContainer.push(item.getExportData());
-			}
+				exportObj.currentContainer.items().push(item.getExportData());
+			}*/
 
 			return JSON.stringify(exportObj, function(k, v){
 				if(typeof v === 'function'){
@@ -2018,7 +2027,7 @@ define([
 			var foodKey = Utils.chooseRandomly( arrayKeys );
 			var foodObj = self.itemDataFile.items.scroungables[quality][foodKey];
 
-			var qty = Math.floor(self.player().data().skills().findFood() / 10);
+			var qty = Math.floor(self.player().skills().findFood() / 10);
 			var descString = (foodObj.quality < 40) ? "small" : ( foodObj.quality < 70 ? "decent" : "large" );
 			descString = "Restores a " + descString + " amount of health when consumed";
 			var itemData = $.extend(
@@ -2151,7 +2160,7 @@ define([
 
 			/*itemData = self.getAvailableItemById("body_armor_01", "armor", 1);
 			if(itemData){
-				self.player().data().inventory.addItem( new Armor(itemData) );
+				self.player().inventory.addItem( new Armor(itemData) );
 			}
 			*/
 		}
@@ -2180,13 +2189,13 @@ define([
 			self.player().addItemToInventory( new Weapon(itemToAdd) );
 
 			itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
-			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+			self.player().inventory.addItem( new Weapon(itemToAdd) );
 
 			itemToAdd = self.getAvailableItemById("melee_weapon_04", "weapon", 1);
-			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+			self.player().inventory.addItem( new Weapon(itemToAdd) );
 
 			itemToAdd = self.getAvailableItemById("shield_02", "shield", 1);
-			self.player().data().inventory.addItem( new Shield(itemToAdd) );
+			self.player().inventory.addItem( new Shield(itemToAdd) );
 		}
 
 		this.testScrap = function(){
@@ -2246,19 +2255,19 @@ define([
 			itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
 			itemToAdd.fullyDynamicStats = 1;
 			itemToAdd.level = self.level().levelNum();
-			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+			self.player().inventory.addItem( new Weapon(itemToAdd) );
 
 			itemToAdd = self.getAvailableItemById("melee_weapon_05", "weapon", 1);
 			itemToAdd.fullyDynamicStats = 1;
 			itemToAdd.level = self.level().levelNum();
-			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+			self.player().inventory.addItem( new Weapon(itemToAdd) );
 		}
 
 		this.testInventoryCapacity = function(){
 
 			console.log();
 
-			for(var i=0; i < self.player().data().inventoryMaxSlots(); i++){
+			for(var i=0; i < self.player().inventoryMaxSlots(); i++){
 				var newLootItem = self.generateRandomLootItem();
 				self.player().addItemToInventory( newLootItem, 1 );
 			}
@@ -2324,7 +2333,7 @@ Feeback/Ideas/Thoughts
 
 Bugs
 - Intermittent issue with item squares?
-- When inventory is full, item squares don't add the item to the inventory
+- When lvl 1 is regenerated, it includes an entrance square
 
 New Features/Game Improvements
 - Play sound on level up?
