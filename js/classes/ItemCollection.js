@@ -99,7 +99,7 @@ define([
 					}
 				}
 
-				return newQty;
+				return itemToAdd.qty();
 			}
 
 			return false;

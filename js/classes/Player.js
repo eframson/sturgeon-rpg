@@ -4,12 +4,13 @@ define([
 	'classes/Entity',
 	'classes/ItemCollection',
 	'classes/Item',
+	'classes/Consumable',
 	'classes/Armor',
 	'classes/Shield',
 	'classes/Weapon',
 
 	'Utils',
-], function($, ko, Entity, ItemCollection, Item, Armor, Shield, Weapon, Utils){
+], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, Utils){
 
 	function Player(playerData){
 
@@ -206,11 +207,16 @@ define([
 			}
 		}
 
-		this.addItemToInventory = function(itemToAdd){
+		this.addItemToInventory = function(itemToAdd, ignoreInventoryConstraints){
 
-			var numInInventory = self.data().inventory.addItem(
+			ignoreInventoryConstraints = (ignoreInventoryConstraints === undefined) ? false : ignoreInventoryConstraints ;
+
+			var numJustAdded = self.data().inventory.addItem(
 				itemToAdd,
 				function(){
+					if(ignoreInventoryConstraints){
+						return true;
+					}
 					var hasSpace = self.inventorySlotsAvailable() >= itemToAdd.slotsRequired;
 					if( !hasSpace && itemToAdd.id != "gold"){
 						return false;
@@ -219,7 +225,7 @@ define([
 				}
 			);
 
-			return numInInventory;
+			return numJustAdded;
 		}
 
 		this.removeItemFromInventory = function(itemID, qty){

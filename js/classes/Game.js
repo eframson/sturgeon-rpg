@@ -267,8 +267,8 @@ define([
 						});
 					}
 
-					//It's not actually dependent on the equipment screen, it just can't be used while looting a container or trading with a merchant
-					if( self.activeItem().canUse() && self.rightColContent() == "equipment" ){
+					//It's not actually dependent on the equipment screen, it just can't be used while trading with a merchant
+					if( self.activeItem().canUse() && self.rightColContent() != "merchant" ){
 						buttons.push({
 							css: defaultCss,
 							text: "Use",
@@ -733,9 +733,6 @@ define([
 
 			for(var i=0; i < numLoots; i++){
 				newLootItem = self.generateRandomLootItem("monster");
-				if(newLootItem.canScale){
-					newLootItem.scaleStatsForLevel();
-				}
 				self.currentContainer.addItem(newLootItem);
 			}
 
@@ -767,10 +764,14 @@ define([
 
 			itemArray == itemArray || [];
 
-			self.currentContainer(itemArray);
-			self.rightColContent("container");
+			self.currentContainer.removeAll(); //Make sure it's empty
 
-			self.toggleInventory();
+			for(var i=0; i < itemArray.length; i++){
+				self.currentContainer.addItem(itemArray[i]);
+			}
+
+			self.manageTransitionToView("mainscreen","container");
+
 		}
 
 		this.takeAllFromContainer = function(){
@@ -797,10 +798,10 @@ define([
 				]
 			});
 
-			var itemQtyInInventory = self.player().addItemToInventory(newItem);
+			var numJustAdded = self.player().addItemToInventory(newItem);
 
-			if(itemQtyInInventory != false && itemQtyInInventory > 0){
-
+			if(numJustAdded != false && numJustAdded > 0){
+			//if(self.player().inventorySlotsAvailable() > -1){
 				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
 				self.freezeMovement(false);
 			}else{
@@ -1395,7 +1396,7 @@ define([
 		}
 
 		this.setContainerItemAsActiveItem = function(item, e){
-			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0, showQty: true}, item, e);
+			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 1, showQty: true}, item, e);
 		}
 
 		this.setInventoryItemAsActiveItem = function(item, e){
@@ -1425,7 +1426,7 @@ define([
 			self.activeItem().desc(item.desc);
 
 			var type = item.type;
-			if( ( self.currentContainer().length == 0 && type == "consumables") || (opts.canUse && opts.canUse == 1) ){
+			if( type == "consumables" || (opts.canUse && opts.canUse == 1) ){
 				self.activeItem().canUse(1);
 			}else if ( (opts.moveDirection == "right" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canEquip && opts.canEquip == 1) ){
 				self.activeItem().canEquip(1);
@@ -1691,7 +1692,7 @@ define([
 
 			if (item.id == "reset_stone"){
 
-				self._dropActiveItem(game, event, 1);
+				self.removeActiveItem(game, event, 1);
 
 				self.level().generateThisLevel(true);
 				self.level().revealSquaresNearPlayer(self.player().data().skills().visionRange());
@@ -1702,6 +1703,7 @@ define([
 
 			}else if(item.id == "health_potion"){
 
+				//TODO: Make this handle the case of consuming a potion in combat as well as outside of combat from either the inventory OR a container!
 				var numPotsLeft = self.player().removeItemFromInventory("health_potion", 1);
 
 				self.player().restoreHealth(0.5, 1);
@@ -1713,7 +1715,7 @@ define([
 				}
 			}else if(item.type == "consumables"){
 
-				self._dropActiveItem(game, event, 1);
+				self.removeActiveItem(game, event, 1);
 
 				self.player().restoreHealth((item.quality() / 100), 1);
 
@@ -1816,6 +1818,24 @@ define([
 		this.dropAllActiveItem = function(game, event){
 
 			self._dropActiveItem(game, event, "all");
+
+		}
+
+		this.removeActiveItem = function(game, event, qty){
+
+			var actualItem = self.activeItem().actualItem(),
+				srcCollection = undefined;
+
+			srcCollection = self.player().data().inventory;
+
+			//Do we have an active container?
+			if(self.rightColContent() == 'container' && self.activeItem().moveDirection() == "left"){
+				srcCollection = self.currentContainer;
+			}
+
+			var srcNumLeft = srcCollection.removeItem(actualItem, qty);
+
+			return srcNumLeft;
 
 		}
 
@@ -2232,6 +2252,17 @@ define([
 			itemToAdd.fullyDynamicStats = 1;
 			itemToAdd.level = self.level().levelNum();
 			self.player().data().inventory.addItem( new Weapon(itemToAdd) );
+		}
+
+		this.testInventoryCapacity = function(){
+
+			console.log();
+
+			for(var i=0; i < self.player().data().inventoryMaxSlots(); i++){
+				var newLootItem = self.generateRandomLootItem();
+				self.player().addItemToInventory( newLootItem, 1 );
+			}
+
 		}
 
 		this.testVisionRange = function(){
