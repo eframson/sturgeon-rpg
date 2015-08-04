@@ -47,21 +47,23 @@ define([
 				},
 				onMissEffect : {
 
-				}
+				},
+				baseCooldown : 0
 			},
 			flurry : {
-				numAttacks : 2,
-				chanceToHit : 0.3,
+				numAttacks : 3,
+				chanceToHit : 1,
 				chanceToCrit : 0,
-				dmgModifier : 1.5,
-				onHitEffect : {
+				dmgModifier : 0.3,
+				onHitEffect : function(hitData){
 
 				},
 				onMissEffect : {
 
-				}
+				},
+				baseCooldown : 2
 			},
-			flurry_improved : {
+			/*flurry_improved : {
 				numAttacks : 3,
 				chanceToHit : 0.3,
 				chanceToCrit : 0,
@@ -71,8 +73,9 @@ define([
 				},
 				onMissEffect : {
 
-				}
-			},
+				},
+				baseCooldown : 0
+			},*/
 			mighty : {
 				numAttacks : 1,
 				chanceToHit : 0.5,
@@ -83,7 +86,8 @@ define([
 				},
 				onMissEffect : {
 
-				}
+				},
+				baseCooldown : 2
 			},
 			stun : {
 				numAttacks : 1,
@@ -95,7 +99,8 @@ define([
 				},
 				onMissEffect : {
 
-				}
+				},
+				baseCooldown : 3
 			}
 
 		}

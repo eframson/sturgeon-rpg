@@ -2327,6 +2327,9 @@ Feeback/Ideas/Thoughts
 Bugs
 - Intermittent issue with item squares?
 - When lvl 1 is regenerated, it includes an entrance square
+- "Scrounge up false food with mouth feelers"
+- Free food sold at merchants
+
 
 New Features/Game Improvements
 - Play sound on level up?
