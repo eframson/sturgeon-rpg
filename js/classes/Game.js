@@ -1042,10 +1042,6 @@ define([
 				self.eventSquareTypeOverride(undefined);
 			}
 
-			//DEBUGGING
-			eventType = "stat";
-			//END DEBUGGING
-
 			var text = "";
 			var buttons;
 			var afterLoad;
@@ -1229,10 +1225,6 @@ define([
 						"exp"
 					)
 				);
-
-				//DEBUGGING
-				stat = "exp";
-				//END DEBUGGING
 
 				var statIncreaseAmt = 1;
 
@@ -2330,6 +2322,7 @@ Feeback/Ideas/Thoughts
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
 - Let monster archetypes use specified attacks
 - Have some attack-specific stats as well as entity-specific stats
+- Let food be used from loot screen
 
 Bugs
 - Intermittent issue with item squares?
