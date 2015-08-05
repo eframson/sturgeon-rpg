@@ -110,18 +110,15 @@ define([
 				var message = "";
 
 				var qty = self.addFoodToPlayerInventory(consumableItem);
-				message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " food using your kick-ass mouth feelers.";
 
-				/*var percentages = {};
-				var findPercent = self.player().skills().findFood();
-				percentages[findPercent] = function(){
-					var qty = self.addFoodToPlayerInventory(foodObj);
-					message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " fish biscuits using your kick-ass mouth feelers.";
-				};
-				Utils.doBasedOnPercent(percentages,
-				function(rand){
-					message = "You attempt to smoothly swim to the bottom of the riverbed, but you miscalculate the strength of your mighty fins and crash down on some fish biscuits, destroying them completely.";
-				});*/
+				if(qty != false && qty > 0){
+					message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " food using your kick-ass mouth feelers.";
+				}else{
+					message = "You gracefully float to the bottom of the river and successfully scrounge up "
+							  + consumableItem.qty() + " food using your kick-ass mouth feelers, but your inventory is full!";
+					self.freezeMovement(true);
+					self.showContainerWithContents([consumableItem]);
+				}
 
 				self.logMessage(message);
 
@@ -2325,11 +2322,8 @@ Feeback/Ideas/Thoughts
 - Let food be used from loot screen
 
 Bugs
-- Intermittent issue with item squares?
 - When lvl 1 is regenerated, it includes an entrance square
-- "Scrounge up false food with mouth feelers"
 - Free food sold at merchants
-
 
 New Features/Game Improvements
 - Play sound on level up?
