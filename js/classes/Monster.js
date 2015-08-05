@@ -54,7 +54,7 @@ define([
 
 				var newMonsterArchetypeId = self.archetypeId || Utils.chooseRandomly(self.getAvailableMonsterArchetypeIdsByClass(self.archetypeClass));
 				var archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
-				console.log(archetypeData);
+				//console.log(archetypeData);
 
 				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient);
 				self.xpCoefficient = ko.observable(archetypeData.xpCoefficient);

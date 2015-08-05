@@ -1,7 +1,9 @@
 var game = undefined;
 var ko_global = undefined;
 
-requirejs.config({
+window.DEBUG = ((window.location.href.indexOf("localhost") || window.location.href.indexOf("192.168")) >= 0) ? 1 : 0;
+
+var requireJSConfig = {
 	baseUrl : 'js',
 	paths : {
 		knockout : 'knockout-3.3.0.debug',
@@ -16,8 +18,13 @@ requirejs.config({
 		"jquery.growl" : ["jquery"],
 		"jquery.animateNumbers" : ["jquery"],
 	},
-	//urlArgs: "bust=" +  (new Date()).getTime(),
-});
+};
+
+if(!window.DEBUG){
+	requireJSConfig.urlArgs = "bust=" + (new Date()).getTime();
+}
+
+requirejs.config(requireJSConfig);
 
 require([
 	'jquery',
