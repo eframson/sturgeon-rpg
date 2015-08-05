@@ -163,63 +163,52 @@ define([
 
 		this.makeAttack = function(attackName, target, game){
 
-			var numAttacks = 1;
-			var chanceToHit = 1.0;
-			var chanceToCrit = 0.0;
-			var dmgModifier = 1.0;
+			var attackData = this.attacks[attackName];
 
-			//We'll definitely have to implement usage of base entity stats here
-
-			/*
-			Flurry of Blows: 3x attacks, 30% chance to hit, 200% of normal dmg, 3 rd cooldown
-Mighty Strike: 1x attack, 50% chance to hit, 300% of normal dmg, 2 rd cooldown
-Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds (effective immediately if applicable), 2 rd cooldown
-			*/
-
-			if(attackName == 'flurry'){
-				numAttacks = 3;
-				chanceToHit = 0.3;
-				dmgModifier = 2.0;
-			}else if(attackName == 'mighty'){
-				chanceToHit = 0.5;
-				dmgModifier = 3.0;
-			}else if(attackName == 'stun'){
-				chanceToHit = 0.5;
-				dmgModifier = 0.5;
-			}
+			var numAttacks = attackData.numAttacks;
+			var chanceToHit = attackData.chanceToHit;
+			var chanceToCrit = attackData.chanceToCrit;
+			var dmgModifier = attackData.dmgModifier;
+			var onHitEffect = attackData.onHitEffect;
+			var onMissEffect = attackData.onMissEffect;
+			var baseCooldown = attackData.baseCooldown;
 
 			for(var i = 1; i <= numAttacks; i++){
 
 				var attackResults = Array();
 				var hitRoll = Utils.doRand(1, 101);
 				var didHit = (hitRoll <= (chanceToHit * 100)) ? true : false ;
-				var dmgDealt = 0;
 				var hitType = "hit";
+				var dmgObject = {
+					dmgDealt : 0,
+					didCrit : 0,
+					dmgModifier : dmgModifier
+				}
 
 				if(didHit){
 					var critRoll = Utils.doRand(1, 101);
 					var didCrit = (critRoll <= (chanceToCrit * 100)) ? true : false ;
 
 					if(didCrit){
-						dmgDealt = self.maxDmg();
+						dmgObject.dmgDealt = self.maxDmg();
 						hitType = "crit";
 					}else{
-						dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
+						dmgObject.dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
 					}
 
 					//Yes, we're making assumptions for now
-					dmgDealt += self.hasWeapon() ? self.getEquippedWeapon().extraDamage() : 0 ;
+					dmgObject.dmgDealt += self.hasWeapon() ? self.getEquippedWeapon().extraDamage() : 0 ;
 
-					dmgDealt = dmgDealt * dmgModifier;
+					dmgObject.dmgDealt = dmgObject.dmgDealt * dmgObject.dmgModifier;
 
 				}else{
 					hitType = "miss";
 				}
 
-				var actualDmg = target.calculateActualDmg(dmgDealt);
+				var actualDmg = target.calculateActualDmg(dmgObject.dmgDealt);
 
 				attackResults = {
-					attemptedDmg : dmgDealt,
+					attemptedDmg : dmgObject.dmgDealt,
 					actualDmg : actualDmg,
 					hitType : hitType,
 					attackType : attackName,
