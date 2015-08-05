@@ -63,10 +63,6 @@ button:focus {
 	margin-bottom: 10px;
 }
 
-.modal-content {
-	display: none;
-}
-
 .no_right_padding {
 	padding-right: 0;
 }
@@ -88,24 +84,6 @@ button:focus {
 .modal-body {
 	overflow-y: scroll;
 	max-height: 500px;
-}
-
-.modal-content .select2-container {
-	width: 400px !important;
-}
-
-.modal-content .select2-container--default .select2-selection__choice {
-	background-color: #337ab7;
-	border: none;
-	color: #fff;
-}
-
-.modal-content .select2-container--default .select2-selection__choice .select2-selection__choice__remove {
-	color: #fff;
-}
-
-.modal-content .select2-container--default .select2-selection__choice .select2-selection__choice__remove:hover {
-	color: #d9534f;
 }
 
 .growl {

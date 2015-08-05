@@ -2329,7 +2329,7 @@ Bugs
 - When lvl 1 is regenerated, it includes an entrance square
 - "Scrounge up false food with mouth feelers"
 - Free food sold at merchants
-- Random (non-exp) stat encounters crash + loading fails as well
+
 
 New Features/Game Improvements
 - Play sound on level up?

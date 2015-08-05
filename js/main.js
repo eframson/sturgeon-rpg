@@ -71,3 +71,14 @@ require([
 	});
 
 });
+
+window.onerror = function(errorText, fileName, lineNo){
+	$("#myModal .modal-body").html(
+		'Please copy and send the following error text:' +
+		'<br/><br/>message: ' + errorText +
+		'<br/>url: ' + fileName +
+		'<br/>line: ' + lineNo +
+		'<br/><br/>Now reload the page or try loading a previous save'
+	);
+	$('#myModal').modal('show');
+}
