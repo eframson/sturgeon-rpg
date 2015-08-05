@@ -1162,7 +1162,7 @@ define([
 							if(this.vars.skillOrStat == 'skill'){
 								trainSkill = self.player().skills()[this.vars.trainSkill];
 							}else if(this.vars.skillOrStat == 'stat'){
-								trainSkill = self.player().data()[this.vars.trainSkill];
+								trainSkill = self.player()[this.vars.trainSkill];
 							}
 							gold.qty( gold.qty() - this.vars.trainCost );
 
@@ -1241,7 +1241,7 @@ define([
 
 				afterLoad = function(){
 					if(stat != "exp"){
-						self.player().data()[stat]( self.player().data()[stat]() + statIncreaseAmt );
+						self.player()[stat]( self.player()[stat]() + statIncreaseAmt );
 					}else{
 						self.player().addExp(statIncreaseAmt);
 					}
