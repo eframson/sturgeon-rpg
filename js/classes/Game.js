@@ -602,22 +602,22 @@ define([
 
 		this.startCombat = function(){
 
-			//Initialize a monster
-			var newMonsterID = Utils.doBasedOnPercent({
-				25 : [
-					"monster_01",
-					"monster_02",
-					"monster_03",
-					"monster_04",
-				]
-			});
+			//Choose a monster base
+			var availableMonsters = self.getAvailableMonsterIdsByMonsterCategory("regular");
+			var newMonsterID = Utils.chooseRandomly( availableMonsters );
 
 			self.currentEnemy(new Monster(
 				$.extend(
-					self.getMonsterById(newMonsterID),
+					self.getMonsterDataByIdAndCategory(newMonsterID, "regular"),
 					{ level : self.level().levelNum(), fullyDynamicStats : 1 }
 				)
 			));
+
+			console.log("Init new monster. Monster has:");
+			console.log("minDmg: " + self.currentEnemy().minDmg());
+			console.log("maxDmg: " + self.currentEnemy().maxDmg());
+			console.log("hit chance: " + self.currentEnemy().chanceToHit());
+			console.log("crit chance: " + self.currentEnemy().chanceToCrit());
 
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
@@ -2085,6 +2085,24 @@ define([
 			return Object.keys(self.itemDataFile.items);
 		}
 
+		this.getAvailableMonsterIdsByMonsterCategory = function(category){
+
+			category =  category || "regular";
+			return Object.keys(self.monsterDataFile[category]);
+
+		}
+
+		this.getMonsterDataByIdAndCategory = function(monsterId, category){
+
+			var monsterIDs = Object.keys(self.monsterDataFile[category]);
+			for(i=0; i < monsterIDs.length; i++){
+				if(monsterIDs[i] == monsterId){
+					return self.monsterDataFile[category][monsterIDs[i]];
+				}
+			}
+
+		}
+
 		this._getSrcCollectionForActiveItem = function(){
 			
 			var srcCollection = self.player().inventory;
@@ -2101,15 +2119,6 @@ define([
 				return true;
 			}
 			return false;
-		}
-
-		this.getMonsterById = function(monsterId){
-			var monsterIDs = Object.keys(self.monsterDataFile);
-			for(i=0; i < monsterIDs.length; i++){
-				if(monsterIDs[i] == monsterId){
-					return self.monsterDataFile[monsterIDs[i]];
-				}
-			}
 		}
 
 		this.testPotion = function(){
@@ -2235,6 +2244,7 @@ Feeback/Ideas/Thoughts
 
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
+- POSSIBLE bug in food randomization logic
 
 New Features/Game Improvements
 - Play sound on level up?

@@ -102,12 +102,12 @@ define([
 		calculateAveragesForLevel : function(levelNum) {
 
 			var avgPlayerHp = 10 + (levelNum * 2);
-			var avgMonsterHp = Math.round(avgPlayerHp / 2);
+			var avgMonsterHp = Math.round( (levelNum > 1) ? (avgPlayerHp / 2) : (avgPlayerHp / 3) );
 
 			var averages = {
-				avgPlayerHp : avgMonsterHp,
+				avgPlayerHp : avgPlayerHp,
 				avgMonsterHp : avgMonsterHp,
-				avgMonsterDmg : avgMonsterHp / 2,
+				avgMonsterDmg : Math.round( (levelNum > 1) ? (avgMonsterHp / 2) : (avgMonsterHp / 3) ),
 			};
 
 			return averages;

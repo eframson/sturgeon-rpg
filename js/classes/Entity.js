@@ -57,6 +57,21 @@ define([
 				description : 'Strike your enemy with your currently equipped weapon (if any)',
 				buttonLabel : 'Attack',
 			},
+			debug_basic : {
+				numAttacks : 1,
+				chanceToHitCoefficient : 1,
+				chanceToCritCoefficient : 1,
+				dmgCoefficient : 1,
+				onHit : {
+
+				},
+				onMissEffect : {
+
+				},
+				baseCooldown : 0,
+				description : 'Strike your enemy with your currently equipped weapon (if any)',
+				buttonLabel : 'Attack',
+			},
 			flurry : {
 				numAttacks : 3,
 				chanceToHitCoefficient : 1,
@@ -185,6 +200,11 @@ define([
 			chanceToHit = Math.round(chanceToHit * chanceToHitCoefficient);
 			chanceToCrit = Math.round(chanceToCrit * chanceToCritCoefficient);
 
+			if(attackName == 'debug_basic'){
+				console.log("chanceToHit: " + chanceToHit);
+				console.log("chanceToCrit: " + chanceToCrit);
+			}
+
 			for(var i = 1; i <= numAttacks; i++){
 
 				var attackResults = Array();
@@ -197,28 +217,64 @@ define([
 					dmgCoefficient : dmgCoefficient
 				}
 
+				if(attackName == 'debug_basic'){
+					console.log("hitRoll: " + hitRoll);
+				}
+
 				if(didHit){
 					var critRoll = Utils.doRand(1, 101);
 					var didCrit = (critRoll <= chanceToCrit) ? true : false ;
 
+					if(attackName == 'debug_basic'){
+						console.log("critRoll: " + critRoll);
+					}
+
 					if(didCrit){
 						dmgObject.dmgDealt = self.maxDmg();
 						hitType = "crit";
+						if(attackName == 'debug_basic'){
+							console.log("attack was critical");
+						}
 					}else{
 						dmgObject.dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
 					}
 
+					if(attackName == 'debug_basic'){
+						console.log("dmgDealt: " + dmgObject.dmgDealt);
+					}
+
 					dmgObject.dmgDealt = dmgObject.dmgDealt * self.dmgCoefficient();
+
+					if(attackName == 'debug_basic'){
+						console.log("dmgDealt times attack entity dmg coefficient: " + dmgObject.dmgDealt);
+					}
 
 					if(typeof onHit === 'function'){
 						onHit(dmgObject);
 					}
 
+					if(attackName == 'debug_basic'){
+						console.log("dmgDeal after onHit: " + dmgObject.dmgDealt);
+					}
+
 					dmgObject.dmgDealt = dmgObject.dmgDealt * dmgObject.dmgCoefficient;
+
+					if(attackName == 'debug_basic'){
+						console.log("dmgDealt times attack dmg coefficient: " + dmgObject.dmgDealt);
+					}
+
 					dmgObject.dmgDealt = Math.ceil(dmgObject.dmgDealt);
+
+					if(attackName == 'debug_basic'){
+						console.log("dmgDealt after ceil: " + dmgObject.dmgDealt);
+					}
 
 					//Yes, we're making assumptions for now
 					dmgObject.dmgDealt += self.hasWeapon() ? self.getEquippedWeapon().extraDamage() : 0 ;
+
+					if(attackName == 'debug_basic'){
+						console.log("dmgDealt plus weapon damage: " + dmgObject.dmgDealt);
+					}
 
 				}else{
 					hitType = "miss";
