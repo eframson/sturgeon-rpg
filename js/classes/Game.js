@@ -900,10 +900,15 @@ define([
 
 				}else if( miscType == "food" ){
 
-					var consumableType = Utils.doBasedOnPercent({
-						25 : "health_potion",
-						75 : "food",
-					});
+					var consumableType;
+					if( lootSet == "trader" ){
+						consumableType = "health_potion";
+					}else{
+						consumableType = Utils.doBasedOnPercent({
+							25 : "health_potion",
+							75 : "food",
+						});
+					}
 
 					if(consumableType == "health_potion"){
 						foodQty = Utils.doRand(1, (1 + Math.floor(self.level().levelNum() / 2) ));
@@ -2323,7 +2328,9 @@ Feeback/Ideas/Thoughts
 
 Bugs
 - When lvl 1 is regenerated, it includes an entrance square
-- Free food sold at merchants
+- Monsters sometimes have no loot
+- Weapons are "usable" from loot container view
+- Unequipped items show as equipped for salave menu (after being auto-unequipped by equpping a 2H)
 
 New Features/Game Improvements
 - Play sound on level up?
