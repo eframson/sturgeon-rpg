@@ -2226,25 +2226,38 @@ define([
 /* TODOs
 
 Feeback/Ideas/Thoughts
-- Perks! (unlock add'l abilities in combat; no/reduced cooldown on scan; better odds/always find better/best kind of food; better merchant prices when buying/selling; better odds of finding quality food; )
-- Choose class (i.e. - perk) on start
+- Perks!
+- Choose class (i.e. - perk) on start?
 - Choose perk on levelup
 - Purple square potions (drink and the next purple square will be an "x" type)
+- Stat enhancing potions
 - Level-bosses (with a fight or flee question first) which must be defeated before advancing to the next level; always have an exceptional piece of gear as loot
+- Give names to exceptional weapons
+- Make quality a more cohesive concept between item types
 - +1/2/3/etc. weapons? Maybe have some kind of defined "quality" measurements
-- Gambling! X gold for Y nice thing, Z chance of success
+- Gambling squares! X gold for Y nice thing, Z chance of success
 - Balance item value + dmg/armor + num salvage
 - More consistent gold from monsters?
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Either remove "scan" or make it more useful
 - Show dmg taken next to player/monster HP counter
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
-- Let monster archetypes use specified attacks
-- Have some attack-specific stats as well as entity-specific stats
+
+Perk Ideas
+- Increase effectiveness of dex stat's contribution to armor value
+- Increased crit chance
+- Some/Increased contribution of end stat's contribution to max hp
+- Increased hp gain on level up
+- No/reduced cooldown on scan
+- No/reduced cooldown on find food
+- Better odds of finding high quality food
+- Find more food
+- Better merchant prices when buying/selling
+- More scraps from salvaging
+- Better odds of winning gambling squares
 
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
-- POSSIBLE bug in food randomization logic
 
 New Features/Game Improvements
 - Play sound on level up?

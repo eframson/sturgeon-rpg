@@ -62,6 +62,8 @@ define([
 			self.str = ko.observable(playerData.str || Utils.doRand(1,6));
 			self.dex = ko.observable(playerData.dex || Utils.doRand(1,6));
 			self.end = ko.observable(playerData.end || Utils.doRand(1,6));
+			self.baseChanceToCrit = ko.observable(playerData.baseChanceToCrit || 5);
+			self.hasLeveledUp = ko.observable(playerData.hasLeveledUp || false);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
@@ -121,7 +123,7 @@ define([
 			});
 
 			this.totalArmor = ko.computed(function(){
-				var armorValue = Math.ceil(self.dex() * 0.5); //Eventually when DEX is implemented, use that as base AC
+				var armorValue = Math.ceil(self.dex() * 1);
 
 				var armorSlots = self.equipment().armor();
 
@@ -190,7 +192,9 @@ define([
 				}
 			});
 
-			self.hasLeveledUp = ko.observable(false);
+			this.chanceToCrit = ko.computed(function(){
+				return self.baseChanceToCrit() + self.dex();
+			});
 
 			//Actual init stuff
 			if(self.hp() == 0){
@@ -319,7 +323,8 @@ define([
 		this.levelUp = function(){
 			//Add stats
 			self.hasLeveledUp(true);
-			self.baseHp( self.baseHp() + 1 );
+			self.baseHp( self.baseHp() + self.end() );
+			self.hp(self.maxHp());
 			self.skills().findFood( self.skills().findFood() + 1 );
 
 			if( self.level() % 3 == 0){
@@ -331,7 +336,7 @@ define([
 				self.speed( self.speed() + 1 );
 				self.inventoryMaxSlots( self.inventoryMaxSlots() + 1 );
 			}
-			//Heal player / reset cooldowns on level up?
+			//Reset cooldowns on level up?
 		}
 
 		this.restoreHealth = function(amt, isPct){
