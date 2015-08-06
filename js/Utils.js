@@ -99,6 +99,20 @@ define([
 			$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
 		},
 
+		calculateAveragesForLevel : function(levelNum) {
+
+			var avgPlayerHp = 10 + (levelNum * 2);
+			var avgMonsterHp = Math.round(avgPlayerHp / 2);
+
+			var averages = {
+				avgPlayerHp : avgMonsterHp,
+				avgMonsterHp : avgMonsterHp,
+				avgMonsterDmg : avgMonsterHp / 2,
+			};
+
+			return averages;
+		},
+
 		getExportDataFromObject : function(obj){
 
 			var exportObj = {};

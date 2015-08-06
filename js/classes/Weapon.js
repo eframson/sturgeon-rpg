@@ -24,9 +24,9 @@ define([
 			self.extraDamage = ko.observable(data.extraDamage || 0);
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
-				//Obviously move this to a central location...
-				var avgPlayerHp = ( self.level() > 1 ? self.level() + 1 : self.level()) * 6;
-				var avgMonsterHp = Math.round(avgPlayerHp / 2);
+				var averages = Utils.calculateAveragesForLevel(self.level());
+				var avgPlayerHp = averages.avgPlayerHp;
+				var avgMonsterHp = averages.avgMonsterHp;
 				
 				var avgDmgPerHit = avgMonsterHp * self.avgMonsterHpPercentPerHit;
 

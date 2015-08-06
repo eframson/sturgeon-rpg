@@ -22,6 +22,11 @@ define([
 			self.speed = ko.observable(data.speed || 1);
 			self.minDmg = ko.observable(data.minDmg || 1);
 			self.maxDmg = ko.observable(data.maxDmg || 2);
+			self.minDmg = ko.observable(data.minDmg || 1);
+
+			self.chanceToHit = ko.observable(data.chanceToHit || 100);
+			self.chanceToCrit = ko.observable(data.chanceToCrit || 5);
+			self.dmgCoefficient = ko.observable(data.dmgCoefficient || 1);
 
 			self.activeEffects = ko.observable({
 
@@ -39,68 +44,70 @@ define([
 
 			basic : {
 				numAttacks : 1,
-				chanceToHit : 1,
-				chanceToCrit : 0,
-				dmgModifier : 1,
-				onHitEffect : {
+				chanceToHitCoefficient : 1,
+				chanceToCritCoefficient : 1,
+				dmgCoefficient : 1,
+				onHit : {
 
 				},
 				onMissEffect : {
 
 				},
-				baseCooldown : 0
+				baseCooldown : 0,
+				description : 'Strike your enemy with your currently equipped weapon (if any)',
+				buttonLabel : 'Attack',
 			},
 			flurry : {
 				numAttacks : 3,
-				chanceToHit : 1,
-				chanceToCrit : 0,
-				dmgModifier : 0.3,
-				onHitEffect : function(hitData){
+				chanceToHitCoefficient : 1,
+				chanceToCritCoefficient : 1,
+				dmgCoefficient : 0.3,
+				onHit : function(hitData){
+					var doExtraDmg = Utils.doBasedOnPercent({
+						30 : 1,
+						70 : 0
+					});
 
+					if(doExtraDmg){
+						hitData.dmgCoefficient = 1.5;
+					}
 				},
 				onMissEffect : {
 
 				},
-				baseCooldown : 2
+				baseCooldown : 2,
+				description : 'Make three quick attacks for 30% of normal damage each. Chance on hit to do 150% of normal damage.',
+				buttonLabel : 'Flurry',
 			},
-			/*flurry_improved : {
-				numAttacks : 3,
-				chanceToHit : 0.3,
-				chanceToCrit : 0,
-				dmgModifier : 2.0,
-				onHitEffect : {
-
-				},
-				onMissEffect : {
-
-				},
-				baseCooldown : 0
-			},*/
 			mighty : {
 				numAttacks : 1,
-				chanceToHit : 0.5,
-				chanceToCrit : 0,
-				dmgModifier : 3.0,
-				onHitEffect : {
+				chanceToHitCoefficient : 0.5,
+				chanceToCritCoefficient : 1,
+				dmgCoefficient : 3.0,
+				onHit : {
 
 				},
 				onMissEffect : {
 
 				},
-				baseCooldown : 2
+				baseCooldown : 2,
+				description : '',
+				buttonLabel : 'Attack',
 			},
 			stun : {
 				numAttacks : 1,
-				chanceToHit : 0.5,
-				chanceToCrit : 0,
-				dmgModifier : 0.5,
-				onHitEffect : {
+				chanceToHitCoefficient : 1,
+				chanceToCritCoefficient : 1,
+				dmgCoefficient : 0.5,
+				onHit : {
 
 				},
 				onMissEffect : {
 
 				},
-				baseCooldown : 3
+				baseCooldown : 3,
+				description : '',
+				buttonLabel : 'Attack',
 			}
 
 		}
@@ -166,28 +173,33 @@ define([
 			var attackData = this.attacks[attackName];
 
 			var numAttacks = attackData.numAttacks;
-			var chanceToHit = attackData.chanceToHit;
-			var chanceToCrit = attackData.chanceToCrit;
-			var dmgModifier = attackData.dmgModifier;
-			var onHitEffect = attackData.onHitEffect;
+			var chanceToHit = self.chanceToHit();
+			var chanceToCrit = self.chanceToCrit();
+			var dmgCoefficient = attackData.dmgCoefficient;
+			var onHit = attackData.onHit;
 			var onMissEffect = attackData.onMissEffect;
 			var baseCooldown = attackData.baseCooldown;
+			var chanceToCritCoefficient = attackData.chanceToCritCoefficient;
+			var chanceToHitCoefficient = attackData.chanceToHitCoefficient;
+
+			chanceToHit = Math.round(chanceToHit * chanceToHitCoefficient);
+			chanceToCrit = Math.round(chanceToCrit * chanceToCritCoefficient);
 
 			for(var i = 1; i <= numAttacks; i++){
 
 				var attackResults = Array();
 				var hitRoll = Utils.doRand(1, 101);
-				var didHit = (hitRoll <= (chanceToHit * 100)) ? true : false ;
+				var didHit = (hitRoll <= chanceToHit) ? true : false ;
 				var hitType = "hit";
 				var dmgObject = {
 					dmgDealt : 0,
 					didCrit : 0,
-					dmgModifier : dmgModifier
+					dmgCoefficient : dmgCoefficient
 				}
 
 				if(didHit){
 					var critRoll = Utils.doRand(1, 101);
-					var didCrit = (critRoll <= (chanceToCrit * 100)) ? true : false ;
+					var didCrit = (critRoll <= chanceToCrit) ? true : false ;
 
 					if(didCrit){
 						dmgObject.dmgDealt = self.maxDmg();
@@ -196,10 +208,17 @@ define([
 						dmgObject.dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
 					}
 
+					dmgObject.dmgDealt = dmgObject.dmgDealt * self.dmgCoefficient();
+
+					if(typeof onHit === 'function'){
+						onHit(dmgObject);
+					}
+
+					dmgObject.dmgDealt = dmgObject.dmgDealt * dmgObject.dmgCoefficient;
+					dmgObject.dmgDealt = Math.ceil(dmgObject.dmgDealt);
+
 					//Yes, we're making assumptions for now
 					dmgObject.dmgDealt += self.hasWeapon() ? self.getEquippedWeapon().extraDamage() : 0 ;
-
-					dmgObject.dmgDealt = dmgObject.dmgDealt * dmgObject.dmgModifier;
 
 				}else{
 					hitType = "miss";

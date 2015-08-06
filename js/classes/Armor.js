@@ -1,8 +1,9 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/Item'
-], function($, ko, Item){
+	'classes/Item',
+	'Utils'
+], function($, ko, Item, Utils){
 
 	function Armor(data){
 
@@ -21,10 +22,11 @@ define([
 			self.fullyDynamicStats = data.fullyDynamicStats || 0;
 			
 			if(self.fullyDynamicStats){
-				//Obviously move this to a central location...
-				var avgPlayerHp = ( self.level() > 1 ? self.level() + 1 : self.level()) * 6;
-				var avgMonsterHp = Math.round(avgPlayerHp / 2);
-				var avgMonsterDmg = avgMonsterHp / 3;
+
+				var averages = Utils.calculateAveragesForLevel(self.level());
+				var avgPlayerHp = averages.avgPlayerHp;
+				var avgMonsterHp = averages.avgMonsterHp;
+				var avgMonsterDmg = averages.avgMonsterDmg;
 				
 				//Let's say the dmg is -30% - +50%
 				self.armorValue( Math.ceil(avgMonsterDmg / 3) );

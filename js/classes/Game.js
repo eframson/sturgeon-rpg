@@ -645,7 +645,7 @@ define([
 		}
 
 		this.playerAttacks = function(game, event){
-			self.doCombatRound("basic","attack");
+			self.doCombatRound("flurry","attack");
 		}
 
 		this.doCombatRound = function(playerAction, playerActionType){
@@ -1982,7 +1982,6 @@ define([
 				rightColContent		: self.rightColContent(),
 				fullScreenContent 	: self.fullScreenContent(),
 				isNew				: self.isNew(),
-				//logMessages			: Array(),
 				logMessages			: self.logMessages(),
 				arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
 				freezeMovement		: self.freezeMovement(),
@@ -1996,17 +1995,6 @@ define([
 
 				exportObj.levels.push(thisLevel.getExportData());
 			}
-
-			/*for(i=0; i < self.logMessages().length; i++){
-				var message = self.logMessages()[i];
-				exportObj.logMessages.push(message);
-			}*/
-
-			/*for(i=0; i < self.currentContainer.items().length; i++){
-				var item = self.currentContainer.items()[i];
-
-				exportObj.currentContainer.items().push(item.getExportData());
-			}*/
 
 			return JSON.stringify(exportObj, function(k, v){
 				if(typeof v === 'function'){

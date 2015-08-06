@@ -31,12 +31,9 @@ define([
 
 			self.hpCoefficient = ko.observable(monsterData.hpCoefficient || 1);
 			self.xpCoefficient = ko.observable(monsterData.xpCoefficient || 1);
-
 			self.chanceOfEpicLoot = ko.observable(monsterData.chanceOfEpicLoot || 0);
-			self.chanceToCrit = ko.observable(monsterData.chanceToCrit || 0.05);
-			self.chanceToHitCoefficient = ko.observable(monsterData.chanceToHitCoefficient || 1);
-			self.dmgCoefficient = ko.observable(monsterData.dmgCoefficient || 1);
 			self.lootCoefficient = ko.observable(monsterData.lootCoefficient || 1);
+			self.chanceToCrit = ko.observable(monsterData.chanceToCrit || 0);
 
 			self.monsterArchetypeDataFile = monsterArchetypeDataFile;
 			self.availableAttacks = monsterData.availableAttacks || {};
@@ -44,23 +41,19 @@ define([
 			if(self.fullyDynamicStats && !self.isScaled()){
 				
 				//Idea 1
-				var avgPlayerHp = ( self.level() > 1 ? self.level() + 1 : self.level()) * 6;
-
-				//Idea 2
-				//var avgPlayerHp = 10 + (self.level() * 3);
-
-				var avgMonsterHp = Math.round(avgPlayerHp / 2);
-				var avgMonsterDmg = avgMonsterHp / 2;
+				var averages = Utils.calculateAveragesForLevel(self.level());
+				var avgPlayerHp = averages.avgPlayerHp;
+				var avgMonsterHp = averages.avgMonsterHp;
+				var avgMonsterDmg = averages.avgMonsterDmg;
 
 				var newMonsterArchetypeId = self.archetypeId || Utils.chooseRandomly(self.getAvailableMonsterArchetypeIdsByClass(self.archetypeClass));
 				var archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
-				//console.log(archetypeData);
 
 				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient);
 				self.xpCoefficient = ko.observable(archetypeData.xpCoefficient);
 				self.chanceOfEpicLoot = ko.observable(archetypeData.chanceOfEpicLoot);
 				self.chanceToCrit = ko.observable(archetypeData.chanceToCrit);
-				self.chanceToHitCoefficient = ko.observable(archetypeData.chanceToHitCoefficient);
+				self.chanceToHit = ko.observable(archetypeData.chanceToHit);
 				self.dmgCoefficient = ko.observable(archetypeData.dmgCoefficient);
 				self.lootCoefficient = ko.observable(archetypeData.lootCoefficient);
 				self.availableAttacks = archetypeData.attacks;

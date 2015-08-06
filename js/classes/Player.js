@@ -62,7 +62,6 @@ define([
 			self.str = ko.observable(playerData.str || Utils.doRand(1,6));
 			self.dex = ko.observable(playerData.dex || Utils.doRand(1,6));
 			self.end = ko.observable(playerData.end || Utils.doRand(1,6));
-			self.chanceToCrit = ko.observable(playerData.chanceToCrit || 0.05);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
@@ -304,66 +303,6 @@ define([
 
 		this._getShieldSlot = function(){
 			return self.equipment().shield;
-		}
-
-		this.getAttackResults = function(attackType){
-
-			var numAttacks = 1;
-			var chanceToHit = 1.0;
-			var chanceToCrit = 0.0;
-			var dmgModifier = 1.0;
-			var hitType = "hit";
-			var attackResults = Array();
-			/*
-			Flurry of Blows: 3x attacks, 30% chance to hit, 200% of normal dmg, 3 rd cooldown
-Mighty Strike: 1x attack, 50% chance to hit, 300% of normal dmg, 2 rd cooldown
-Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds (effective immediately if applicable), 2 rd cooldown
-			*/
-
-			if(attackType == 'flurry'){
-				numAttacks = 3;
-				chanceToHit = 0.3;
-				dmgModifier = 2.0;
-			}else if(attackType == 'mighty'){
-				chanceToHit = 0.5;
-				dmgModifier = 3.0;
-			}else if(attackType == 'stun'){
-				chanceToHit = 0.5;
-				dmgModifier = 0.5;
-			}
-
-			for(var i = 1; i <= numAttacks; i++){
-				var hitRoll = Utils.doRand(1, 101);
-				var didHit = (hitRoll <= (chanceToHit * 100)) ? true : false ;
-				var dmgDealt = 0;
-
-				if(didHit){
-					var critRoll = Utils.doRand(1, 101);
-					var didCrit = (critRoll <= (chanceToCrit * 100)) ? true : false ;
-
-					if(didCrit){
-						dmgDealt = self.maxDmg();
-						hitType = "crit";
-					}else{
-						dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
-					}
-
-					dmgDealt += self.equipment().weapon().extraDamage();
-
-					dmgDealt = dmgDealt * dmgModifier;
-
-				}else{
-					hitType = "miss";
-				}
-
-				attackResults.push({
-					dmg : dmgDealt,
-					type : hitType,
-					attackType : attackType,
-				});
-			}
-
-			return attackResults;
 		}
 
 		this.addExp = function(xp){
