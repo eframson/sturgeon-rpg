@@ -10,6 +10,7 @@ define([
 		//Init
 		var self = this;
 		data = data || {};
+		data.cooldowns = data.cooldowns | {};
 
 		this.init = function(data){
 
@@ -27,6 +28,11 @@ define([
 			self.chanceToHit = ko.observable(data.chanceToHit || 100);
 			self.chanceToCrit = ko.observable(data.chanceToCrit || 5);
 			self.dmgCoefficient = ko.observable(data.dmgCoefficient || 1);
+
+			self.cooldowns = ko.observable({
+				basic : ko.observable(data.cooldowns.basic || 0),
+				flurry : ko.observable(data.cooldowns.basic || 0)
+			});
 
 			self.activeEffects = ko.observable({
 
@@ -290,6 +296,8 @@ define([
 				};
 
 				target.takeDmg(actualDmg);
+
+				self.cooldowns[attackName] = baseCooldown;
 
 				//Register the attack
 				game.registerAttack(self, target, attackResults);
