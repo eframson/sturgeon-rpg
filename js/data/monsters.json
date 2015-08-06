@@ -1,10 +1,10 @@
 {
 	"regular" : {
-		
+
 		"monster_01" : {
 			"id" : "monster_01",
 			"name" : "Angry Guppy",
-			"desc" : "A guppy that woke up on the wrong side of the bed this morning."
+			"desc" : "A guppy that woke up on the wrong side of the riverbed this morning."
 		},
 		
 		"monster_02" : {
@@ -29,6 +29,48 @@
 			"id" : "monster_05",
 			"name" : "Scurvy Sea Dog",
 			"desc" : "You thought this was just a thing that pirates said. Nope! It's real, and it's currently fighting you."
+		},
+
+		"monster_06" : {
+			"id" : "monster_06",
+			"name" : "Grouchy Hermit Crab",
+			"desc" : "This crab appears to be fed up with people knocking on his shell and asking him for advice. He's ready to give you a piece of his mind. And by \"mind\" he means \"pincers.\""
+		},
+
+		"monster_07" : {
+			"id" : "monster_07",
+			"name" : "Emo Eel",
+			"desc" : "This eel is just...man. Nobody understand his pain, you know? Ugh. It's just like, I mean, I don't even...just...ugh. Spends his days working as a Sand Bar-ista."
+		},
+
+		"monster_08" : {
+			"id" : "monster_08",
+			"name" : "Vengeful Clownfish",
+			"desc" : "This is the part they didn't show you in the movie. His name is Nemo. [He thinks] you killed his mother. Prepare to die!"
+		},
+
+		"monster_09" : {
+			"id" : "monster_09",
+			"name" : "Samurai Salmon",
+			"desc" : "Like most salmon, he was born in fresh water, migrated to the ocean, and is now returning to his birthplace. Unlike other salmon, however, this one spent his time in the ocean learning how to dual-wield katanas. Different strokes for different folks, I guess."
+		},
+
+		"monster_10" : {
+			"id" : "monster_10",
+			"name" : "Hungry Alligator",
+			"desc" : "Possibly a crocodile. That's not important, though, because they both have a lot of teeth, and they're all sharp as hell. I would not want to mess with one of these wingless sea dragons, if I were you."
+		},
+
+		"monster_11" : {
+			"id" : "monster_11",
+			"name" : "Zebra Archerfish",
+			"desc" : "Did you know that Archerfish can bring down insects and other prey up to 3 meters above the water's surface? I'm not sure what 3 meters translates to in normal-person units, but I'm guessing it's a lot more impressive than that super-soaker you got when you were a kid. I really hope more fish don't learn how to turn their faces into guns, or we're going to have some real problems on our hands, real fast."
+		},
+
+		"monster_12" : {
+			"id" : "monster_12",
+			"name" : "Confused Elk",
+			"desc" : "What the--?! This is a LAND MAMMAL! How did this get in here!? I mean, this is a game about fish and other aquatic creatures. Not a game about freakin' moose! Mooses? Moo--you know what, just...just fight it anyway. Whatever. I'm going to go find a dictionary."
 		}
 	},
 
