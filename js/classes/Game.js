@@ -916,6 +916,7 @@ define([
 							foodQty = Math.round(foodQty * self.currentEnemy().lootCoefficient());
 						}
 						itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
+						itemToAdd = new Consumable(itemToAdd);
 					}else{
 						itemToAdd = self.getRandomScroungable(10);
 					}
@@ -1390,7 +1391,7 @@ define([
 		}
 
 		this.setContainerItemAsActiveItem = function(item, e){
-			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 1, showQty: true}, item, e);
+			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0, showQty: true}, item, e);
 		}
 
 		this.setInventoryItemAsActiveItem = function(item, e){
@@ -1704,6 +1705,7 @@ define([
 
 				//TODO: Make this handle the case of consuming a potion in combat as well as outside of combat from either the inventory OR a container!
 				var numPotsLeft = self.player().removeItemFromInventory("health_potion", 1);
+				var numHpToRestore = Math.round(self.player().maxHp() / 2);
 
 				self.player().restoreHealth(0.5, 1);
 
@@ -2303,34 +2305,23 @@ Feeback/Ideas/Thoughts
 - Choose class (i.e. - perk) on start
 - Choose perk on levelup
 - Purple square potions (drink and the next purple square will be an "x" type)
-- Add chance to crit!
 - Level-bosses (with a fight or flee question first) which must be defeated before advancing to the next level; always have an exceptional piece of gear as loot
 - +1/2/3/etc. weapons? Maybe have some kind of defined "quality" measurements
 - Gambling! X gold for Y nice thing, Z chance of success
-- Make lvl one slightly more challenging
 - Balance item value + dmg/armor + num salvage
-- As long as you can see one square away, vision range doesn't especially matter
-- Make repetitive actions less obvious, or less repetitive
-- Reveal squares after % of level experienced (maybe)
-- Either hide contents of squares except when scanned -- or, make hostile squares move around
 - More consistent gold from monsters?
-- Maaaaybe make salvage currency?
-- Maybe decrease droprate of potions
-- Increase droprate of fish biscuits
-- Maybe don't make biscuits a full heal -- possibly provide ability to "use x at once"
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Either remove "scan" or make it more useful
 - Show dmg taken next to player/monster HP counter
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
 - Let monster archetypes use specified attacks
 - Have some attack-specific stats as well as entity-specific stats
-- Let food be used from loot screen
 
 Bugs
 - When lvl 1 is regenerated, it includes an entrance square
 - Monsters sometimes have no loot
-- Weapons are "usable" from loot container view
-- Unequipped items show as equipped for salave menu (after being auto-unequipped by equpping a 2H)
+- Unequipped items show as equipped for salvage menu (after being auto-unequipped by equpping a 2H)
+- Health potions consumed directly from containers are not deleted properly
 
 New Features/Game Improvements
 - Play sound on level up?
