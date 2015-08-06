@@ -645,7 +645,7 @@ define([
 		}
 
 		this.playerAttacks = function(game, event){
-			self.doCombatRound("flurry","attack");
+			self.doCombatRound("basic","attack");
 		}
 
 		this.doCombatRound = function(playerAction, playerActionType){
