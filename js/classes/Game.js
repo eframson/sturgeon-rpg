@@ -1478,6 +1478,7 @@ define([
 			if( alreadyEquippedItem != undefined && !Utils.isEmptyObject(alreadyEquippedItem) ){
 				//Skip the normal slot-checking logic to account for 2H weaps or 1H + shield combos
 				self.player().inventory.addItem(alreadyEquippedItem);
+				alreadyEquippedItem.isEquipped(false);
 				var equippedWeapon = self.player().getEquippedWeapon();
 			}
 
@@ -1485,6 +1486,7 @@ define([
 				var existingItem = self.player().getEquippedShield();
 				if( !Utils.isEmptyObject(existingItem) ){
 					self.player().unEquipShield();
+					existingItem.isEquipped(false);
 					self.player().inventory.addItem(existingItem);
 				}
 			}else if( type == "shield" && !Utils.isEmptyObject(self.player().getEquippedWeapon()) && self.player().getEquippedWeapon().handsRequired == 2){
@@ -1507,6 +1509,7 @@ define([
 				self.player().unEquipArmor(item);
 			}
 
+			item.isEquipped(false);
 			self.player().inventory.addItem(item);
 			self._resetActiveItem();
 
@@ -1704,7 +1707,8 @@ define([
 			}else if(item.id == "health_potion"){
 
 				//TODO: Make this handle the case of consuming a potion in combat as well as outside of combat from either the inventory OR a container!
-				var numPotsLeft = self.player().removeItemFromInventory("health_potion", 1);
+				var srcCollection = self._getSrcCollectionForActiveItem();
+				var numPotsLeft = srcCollection.removeItem("health_potion", 1);
 				var numHpToRestore = Math.round(self.player().maxHp() / 2);
 
 				self.player().restoreHealth(0.5, 1);
@@ -1749,10 +1753,8 @@ define([
 				newItem = undefined,
 				moveFrom = "inventory",
 				moveTo = false,
-				srcCollection = undefined,
+				srcCollection = self.player().inventory,
 				tarCollection = undefined;
-
-			srcCollection = self.player().inventory;
 
 			//Do we have an active container?
 			if(self.rightColContent() == 'container'){
@@ -2095,6 +2097,17 @@ define([
 			return Object.keys(self.itemDataFile.items);
 		}
 
+		this._getSrcCollectionForActiveItem = function(){
+			
+			var srcCollection = self.player().inventory;
+
+			if(self.rightColContent() == 'container' && self.activeItem().moveDirection() == "left"){
+				srcCollection = self.currentContainer;
+			}
+
+			return srcCollection;
+		}
+
 		this._itemCanAppearForLevel = function(item, level){
 			if( (item.minLevelRange <= level || item.minLevelRange == undefined) && (item.maxLevelRange > level || item.maxLevelRange == undefined) ){
 				return true;
@@ -2111,87 +2124,16 @@ define([
 			}
 		}
 
-		this.testItem = function(){
-
-			var itemData = {};
-
-			/*var itemData = self.getAvailableItemById("biscuit_food", "consumables", 1);
-			if(itemData){
-				self.player().addItemToInventory( new Item(itemData) );
-
-				//Add 3 more
-				itemData.qty = 3;
-				self.player().addItemToInventory( new Item(itemData) );
-			}
-
-			var itemOne, itemTwo;
-
-			itemData = self.getAvailableItemById("armor_scraps", "crafting", Utils.doRand(1,26));
-			if(itemData){
-				itemOne = new Item(itemData);
-			}
-
-			itemData = self.getAvailableItemById("body_armor_01", "armor", 1);
-			if(itemData){
-				itemTwo = new Armor(itemData);
-			}
-
-			if(itemOne && itemTwo){
-				self.showContainerWithContents([itemOne, itemTwo]);
-			}*/
-
-			/*
-			var itemData = self.getAvailableItemById("melee_weapon_01", "weapon", 1);
-			if(itemData){
-				var weap = new Weapon(itemData);
-			}
-			self.showContainerWithContents([weap]);
-			*/
-
+		this.testPotion = function(){
 
 			var itemData = self.getAvailableItemById("health_potion", "consumables", 1);
-			if(itemData){
-				self.player().addItemToInventory( new Item(itemData) );
-			}
 
-			/*itemData = self.getAvailableItemById("body_armor_01", "armor", 1);
-			if(itemData){
-				self.player().inventory.addItem( new Armor(itemData) );
-			}
-			*/
-		}
+			self.currentContainer.removeAll();
 
-		this.testArmor = function(){
-			var armorId;
+			self.currentContainer.addItem(new Consumable(itemData));
 
-			var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
-			armorId = Utils.chooseRandomly( availableArmor );
-			if(armorId == "shield_01" || armorId == "shield_02"){
-				itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
-			}else{
-				itemToAdd = self.getAvailableItemById(armorId, "armor", 1);
-			}
+			self.manageTransitionToView("mainscreen","container");
 
-			self.player().addItemToInventory( new Armor(itemToAdd) );
-		}
-
-		this.testWeapon = function(){
-			var weaponId;
-
-			var availableWeapons = self.getAvailableItemIdsByTypeForLevel("weapon", self.level().levelNum());
-			weaponId = Utils.chooseRandomly( availableWeapons );
-			itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
-
-			self.player().addItemToInventory( new Weapon(itemToAdd) );
-
-			itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
-			self.player().inventory.addItem( new Weapon(itemToAdd) );
-
-			itemToAdd = self.getAvailableItemById("melee_weapon_04", "weapon", 1);
-			self.player().inventory.addItem( new Weapon(itemToAdd) );
-
-			itemToAdd = self.getAvailableItemById("shield_02", "shield", 1);
-			self.player().inventory.addItem( new Shield(itemToAdd) );
 		}
 
 		this.testScrap = function(){
@@ -2245,20 +2187,6 @@ define([
 
 		}
 
-		this.testScaledWeapon = function(){
-			var weaponId;
-
-			itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
-			itemToAdd.fullyDynamicStats = 1;
-			itemToAdd.level = self.level().levelNum();
-			self.player().inventory.addItem( new Weapon(itemToAdd) );
-
-			itemToAdd = self.getAvailableItemById("melee_weapon_05", "weapon", 1);
-			itemToAdd.fullyDynamicStats = 1;
-			itemToAdd.level = self.level().levelNum();
-			self.player().inventory.addItem( new Weapon(itemToAdd) );
-		}
-
 		this.testInventoryCapacity = function(){
 
 			console.log();
@@ -2275,9 +2203,9 @@ define([
 			self.level().drawMap();
 		}
 
-		this.skipToGrid = function(){
-			self.manageTransitionToView("fullscreen","mainscreen");
-			self.isNew(false);
+		this.monsterTest = function(){
+			self.startCombat();
+			self.lootEnemy();
 		}
 
 		self.init();
@@ -2318,10 +2246,7 @@ Feeback/Ideas/Thoughts
 - Have some attack-specific stats as well as entity-specific stats
 
 Bugs
-- When lvl 1 is regenerated, it includes an entrance square
-- Monsters sometimes have no loot
-- Unequipped items show as equipped for salvage menu (after being auto-unequipped by equpping a 2H)
-- Health potions consumed directly from containers are not deleted properly
+- Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
 
 New Features/Game Improvements
 - Play sound on level up?
@@ -2338,7 +2263,6 @@ Code Improvements
 - Implement class for Skills to get them more cohesive
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
 - Standardize the way objects are saved
-- Remove "data" layer from player
 
 UI Improvements
 - Color code combat log messages

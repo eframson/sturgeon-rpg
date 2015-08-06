@@ -609,6 +609,10 @@ define([
 					gridSquare.setVisibility(false);
 					gridSquare.setDone(false);
 				});
+
+				if(self.levelNum() == 1){
+					self.genOpts.quadsWithPotentialEntrances = [];
+				}
 			}
 
 			self._populateGrid();
