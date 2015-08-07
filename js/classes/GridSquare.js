@@ -19,6 +19,7 @@ define([
 		this.isScanned = squareData.isScanned || false;
 		this.isDone = squareData.isDone || false;
 		this.notEmpty = squareData.notEmpty || false;
+		this.isChallengeActive = ko.observable(squareData.isChallengeActive || false);
 
 		this.setType = function(type){
 			self.type = type;
@@ -43,6 +44,8 @@ define([
 			for(prop in self){
 				if ( typeof self[prop] !== 'function' ){
 					exportObj[prop] = self[prop];
+				}else if (ko.isObservable(self[prop])) {
+					exportObj[prop] = self[prop]();
 				}
 			}
 			

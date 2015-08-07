@@ -123,7 +123,7 @@ define([
 			});
 
 			this.totalArmor = ko.computed(function(){
-				var armorValue = Math.ceil(self.dex() * 1);
+				var armorValue = Math.floor(self.dex() / 2);
 
 				var armorSlots = self.equipment().armor();
 

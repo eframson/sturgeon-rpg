@@ -191,7 +191,7 @@ define([
 
 		this.makeAttack = function(attackName, target, game){
 
-			var attackData = this.attacks[attackName];
+			var attackData = self.attacks[attackName];
 
 			var numAttacks = attackData.numAttacks;
 			var chanceToHit = self.chanceToHit();

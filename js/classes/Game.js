@@ -453,6 +453,7 @@ define([
 				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
 				self.freezeMovement(gameData.freezeMovement);
 				self.backButtonLabel(gameData.backButtonLabel);
+
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
 				}
@@ -586,9 +587,13 @@ define([
 
 		this.showContentArea = function(){
 			
-			self.manageTransitionToView("equipment","mainscreen", function(){
-				self.freezeMovement(false);
-			});
+			if(self.level().getActiveSquare().type == 'exit'){
+				self.squareExitAction();
+			}else{
+				self.manageTransitionToView("equipment","mainscreen", function(){
+					self.freezeMovement(false);
+				});
+			}
 
 		}
 
@@ -600,7 +605,7 @@ define([
 			}
 		}
 
-		this.startCombat = function(){
+		this.startCombat = function(encounterType){
 
 			//Choose a monster base
 			var availableMonsters = self.getAvailableMonsterIdsByMonsterCategory("regular");
@@ -609,7 +614,12 @@ define([
 			self.currentEnemy(new Monster(
 				$.extend(
 					self.getMonsterDataByIdAndCategory(newMonsterID, "regular"),
-					{ level : self.level().levelNum(), fullyDynamicStats : 1 }
+					{
+						level : self.level().levelNum(),
+						fullyDynamicStats : 1,
+						archetypeId : (encounterType == "boss" ? "boss" : undefined),
+						archetypeClass : (encounterType == "boss" ? "special" : undefined)
+					}
 				)
 			));
 
@@ -618,6 +628,7 @@ define([
 			console.log("maxDmg: " + self.currentEnemy().maxDmg());
 			console.log("hit chance: " + self.currentEnemy().chanceToHit());
 			console.log("crit chance: " + self.currentEnemy().chanceToCrit());
+			console.log("max hp: " + self.currentEnemy().maxHp());
 
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
@@ -731,6 +742,10 @@ define([
 			for(var i=0; i < numLoots; i++){
 				newLootItem = self.generateRandomLootItem("monster");
 				self.currentContainer.addItem(newLootItem);
+			}
+
+			if(self.level().getActiveSquare().type == 'exit'){
+				self.backButtonLabel("Onwards!");
 			}
 
 			self.manageTransitionToView("combat","container");
@@ -1288,6 +1303,7 @@ define([
 
 		this.squareExitAction = function(){
 
+			var square = self.level().getActiveSquare();
 			self.freezeMovement(true);
 
 			if(self.level().nextLevelID() == undefined){
@@ -1303,16 +1319,44 @@ define([
 			var nextLevel = self.getLevelById( self.level().nextLevelID() );
 			var currentLevel = self.level();
 
-			self.manageTransitionToView("mainscreen","mainscreen", function(){
-				self.freezeMovement(false);
-			}, function(){
-				nextLevel.isActive(true);
-				currentLevel.isActive(false);
-				nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
-				nextLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
-				self.level().scanSquaresNearPlayer();
-				nextLevel.drawMap();
-			});
+			if(square.isChallengeActive()){
+				self.fullScreenContent({
+					text: "The water around you grows chilly, and you are filled with a sense of foreboding. You think something big is coming your way...",
+					buttons: [
+						{
+							title : "Actually, on second thought...",
+							action : function(){
+								self.manageTransitionToView("fullscreen","mainscreen");
+
+								self.freezeMovement(false);
+							}
+						},
+						{
+							title : "Let's do this!",
+							action : function(){
+								self.manageTransitionToView("fullscreen","combat");
+								square.isChallengeActive(0);
+
+								self.startCombat("boss");
+							}
+						}
+					]
+				});
+
+				self.manageTransitionToView("mainscreen","fullscreen");
+			}else{
+				self.manageTransitionToView("mainscreen","mainscreen", function(){
+					self.backButtonLabel("Back");
+					self.freezeMovement(false);
+				}, function(){
+					nextLevel.isActive(true);
+					currentLevel.isActive(false);
+					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
+					nextLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
+					self.level().scanSquaresNearPlayer();
+					nextLevel.drawMap();
+				});
+			}
 
 		}
 
@@ -1362,7 +1406,7 @@ define([
 
 			}else if(type == "exit"){
 
-				self.squareExitAction();
+				self.squareExitAction(square);
 
 			}else if(type == "entrance"){
 

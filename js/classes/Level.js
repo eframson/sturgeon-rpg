@@ -166,6 +166,11 @@ define([
 			return self.grid[x][y];
 		}
 
+		this.getActiveSquare = function(){
+			var pos = self.getPlayerPos();
+			return self.getSquare(pos.x, pos.y);
+		}
+
 		this.drawMap = function(){
 
 			//var $map = $("#map");
@@ -499,6 +504,7 @@ define([
 					squareIdx = Utils.doRand(0, potentialExits.length);
 					squarePos = potentialExits[squareIdx];
 					self.grid[ squarePos[0] ][ squarePos[1] ].setType("exit");
+					self.grid[ squarePos[0] ][ squarePos[1] ].isChallengeActive(1);
 					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
 					self.exitSquare([ squarePos[0], squarePos[1] ]);
 				}
