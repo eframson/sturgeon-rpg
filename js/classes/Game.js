@@ -2228,7 +2228,7 @@ define([
 
 		}
 
-		this.testInventoryCapacity = function(){
+		this.testInventoryCapacity = function(levelNum){
 
 			console.log();
 
@@ -2237,6 +2237,16 @@ define([
 				self.player().addItemToInventory( newLootItem, 1 );
 			}
 
+		}
+
+		this.testScalingWeapon = function(levelNum){
+			var itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = levelNum;
+			var newItem = new Weapon(itemToAdd);
+
+			console.log("minDmg: " + newItem.dmgMin());
+			console.log("maxDmg: " + newItem.dmgMax());
 		}
 
 		this.testVisionRange = function(){
@@ -2286,6 +2296,8 @@ Feeback/Ideas/Thoughts
 - Either remove "scan" or make it more useful
 - Show dmg taken next to player/monster HP counter
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
+- Think about floor as a whole instead of just fight-to-fight
+- Battle arena event?
 
 Perk Ideas
 - Increase effectiveness of dex stat's contribution to armor value
@@ -2302,6 +2314,8 @@ Perk Ideas
 
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
+- Procedural loot generation not scaling?
+- Giving more HP pool to the player
 
 New Features/Game Improvements
 - Play sound on level up?
