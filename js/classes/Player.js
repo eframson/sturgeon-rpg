@@ -24,7 +24,7 @@ define([
 
 			self.level = ko.observable(playerData.level || 1);
 			self.hp = ko.observable(playerData.hp || 0);
-			self.baseHp = ko.observable(playerData.baseHp || 10);
+			self.baseHp = ko.observable(playerData.baseHp || 20);
 			self.exp = ko.observable(playerData.exp || 0);
 			self.inventory = new ItemCollection(Array());
 			self.inventoryMaxSlots = ko.observable(playerData.inventoryMaxSlots || 5);
@@ -323,14 +323,14 @@ define([
 		this.levelUp = function(){
 			//Add stats
 			self.hasLeveledUp(true);
-			self.baseHp( self.baseHp() + self.end() );
+			self.baseHp( self.baseHp() + 5 );
 			self.hp(self.maxHp());
 			self.skills().findFood( self.skills().findFood() + 1 );
+			self.end( self.end() + 1 );
 
 			if( self.level() % 3 == 0){
 				self.str( self.str() + 1 );
 				self.dex( self.dex() + 1 );
-				self.end( self.end() + 1 );
 			}
 			if( self.level() % 4 == 0){
 				self.speed( self.speed() + 1 );

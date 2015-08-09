@@ -1727,10 +1727,14 @@ define([
 		this.sellAllActiveItem = function(game, event){
 			self.sellActiveItem(game, event, self.activeItem().actualItem().qty());
 		}
+		
+		this.useHealthPotion = function(game, event){
+			self.useActiveItem(game, event, {id : "health_potion"});
+		}
 
-		this.useActiveItem = function(game, event){
+		this.useActiveItem = function(game, event, item){
 
-			var item = self.activeItem().actualItem();
+			item = item || self.activeItem().actualItem();
 			var srcNumLeft;
 
 			if (item.id == "reset_stone"){
