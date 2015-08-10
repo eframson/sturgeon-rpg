@@ -101,7 +101,7 @@ define([
 			});
 
 			this.baseMaxDmg = ko.computed(function(){
-				return Math.ceil(self.str() * 0.85);
+				return Math.ceil(self.str() * 1.5);
 			});
 
 			this.minDmg = ko.computed(function(){

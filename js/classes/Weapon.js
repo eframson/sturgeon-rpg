@@ -20,31 +20,34 @@ define([
 			self.isEquippable = true;
 			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 			self.avgMonsterHpPercentPerHit = data.avgMonsterHpPercentPerHit || 0.3;
-			self.quality = data.quality || "standard";
+			self.quality = data.quality || 40;
+			self.qualityModifier = data.qualityModifier || 1;
 			self.extraDamage = ko.observable(data.extraDamage || 0);
+			self.minDmgPctOfAvg = data.minDmgPctOfAvg || 0.7;
+			self.maxDmgPctOfAvg = data.maxDmgPctOfAvg || 1.3;
+			self.monsterLootCoefficient = data.monsterLootCoefficient || 1;
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 				var averages = Utils.calculateAveragesForLevel(self.level());
 				var avgPlayerHp = averages.avgPlayerHp;
 				var avgMonsterHp = averages.avgMonsterHp;
-				
-				var avgDmgPerHit = avgMonsterHp * self.avgMonsterHpPercentPerHit;
+				var avgDmgPerHit = averages.avgPlayerDmg;
 
-				//Randomize it a bit
-				avgDmgPerHit = Utils.doRand((avgDmgPerHit * 0.5), (avgDmgPerHit * 1.5));
+				//Apply quality multiplier
+				avgDmgPerHit = avgDmgPerHit * self.qualityModifier;
+
+				avgDmgPerHit = avgDmgPerHit * self.monsterLootCoefficient
 				
-				//Let's say the dmg range is -30% - +50%
-				self.dmgMin( Math.round(avgDmgPerHit * 0.7) );
-				self.dmgMax( Math.round(avgDmgPerHit * 1.5) );
+				//Let's say the dmg range is -30% - +30%
+				self.dmgMin( Math.round(avgDmgPerHit * self.minDmgPctOfAvg) );
+				self.dmgMax( Math.round(avgDmgPerHit * self.maxDmgPctOfAvg) );
 				self.dmgMin( (self.dmgMin() > 1) ? self.dmgMin() : 1 );
 				self.dmgMax( (self.dmgMax() > 1) ? self.dmgMax() : 1 );
 
-				if (data.monsterLootCoefficient){
-					self.dmgMin( Math.ceil(self.dmgMin() * data.monsterLootCoefficient) );
-					self.dmgMax( Math.ceil(self.dmgMax() * data.monsterLootCoefficient) );
-				}
+				//Shouldn't ever happen, but just to be on the safe side...
+				self.dmgMax( (self.dmgMax() < self.dmgMin()) ? self.dmgMin() : self.dmgMax() );
 				
-				self.buyValue( self.dmgMax() * 100 );
+				self.buyValue( Math.round( (avgDmgPerHit * 100) + (self.quality * 10) ) );
 
 				var magicDesc = self.desc;
 				var matches = self.desc.match(/%[^%]+%/g);

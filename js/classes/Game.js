@@ -834,9 +834,11 @@ define([
 			if( lootSet == "monster" ){
 				qtyCoefficient = qtyCoefficient * 1.5;
 				possibleItemTypes = {
-					40 : "gold",
-					35 : "misc",
-					25 : "gear",
+					30 : [
+						"gold",
+						"misc",
+					],
+					40 : "gear",
 				};
 			}else if( lootSet == "trader" ){
 				possibleItemTypes = {
@@ -847,9 +849,11 @@ define([
 				};
 			}else{
 				possibleItemTypes = {
-					40 : "gold",
-					35 : "misc",
-					25 : "gear",
+					40 : [
+						"gold",
+						"misc",
+					],
+					20 : "gear",
 				};
 			}
 
@@ -2284,6 +2288,7 @@ define([
 /* TODOs
 
 Feeback/Ideas/Thoughts
+- Save at start of each level
 - Perks!
 - Choose class (i.e. - perk) on start?
 - Choose perk on levelup
@@ -2318,8 +2323,7 @@ Perk Ideas
 
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
-- Procedural loot generation not scaling?
-- Giving more HP pool to the player
+- Armor shows positive change if equipped when selected in container, then no change when added to inventory and selected (NOT REPRODUCIBLE)
 
 New Features/Game Improvements
 - Play sound on level up?
