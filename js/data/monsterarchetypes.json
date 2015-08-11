@@ -99,10 +99,10 @@
 		"boss" : {
 			"id" : "boss",
 			"displayString" : "Boss",
-			"hpCoefficient" : 4,
-			"dmgCoefficient" : 3,
+			"hpCoefficient" : 3,
+			"dmgCoefficient" : 2,
 			"chanceToHit" : 100,
-			"chanceToCrit" : 15,
+			"chanceToCrit" : 10,
 			"xpCoefficient" : 3.0,
 			"lootCoefficient" : 3.0,
 			"chanceOfEpicLoot" : 1.0,
