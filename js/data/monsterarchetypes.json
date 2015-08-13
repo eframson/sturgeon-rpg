@@ -87,7 +87,7 @@
 			"dmgCoefficient" : 2,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 10,
-			"xpCoefficient" : 2.0,
+			"xpCoefficient" : 1.5,
 			"lootCoefficient" : 2.0,
 			"chanceOfEpicLoot" : 0.3,
 			"attacks" : {
@@ -103,7 +103,7 @@
 			"dmgCoefficient" : 2,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 10,
-			"xpCoefficient" : 3.0,
+			"xpCoefficient" : 2.0,
 			"lootCoefficient" : 3.0,
 			"chanceOfEpicLoot" : 1.0,
 			"attacks" : {

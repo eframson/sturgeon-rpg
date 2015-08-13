@@ -65,7 +65,7 @@ define([
 				self.minDmg( Math.ceil(avgMonsterDmg * 0.7) * self.avgDmgCoefficient );
 				self.maxDmg( Math.ceil(avgMonsterDmg * 1.3) * self.avgDmgCoefficient );
 				self.speed( self.level() );
-				self.expValue( Math.ceil((avgMonsterHp * 5) * self.xpCoefficient()) );
+				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
 
 				
 
