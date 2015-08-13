@@ -13,7 +13,8 @@
 			"chanceOfEpicLoot" : 0.0,
 			"attacks" : {
 				"100" : "debug_basic"
-			}
+			},
+			"appearsOnLevel" : 1
 		},
 		
 		"heavy" : {
@@ -28,7 +29,8 @@
 			"chanceOfEpicLoot" : 0.0,
 			"attacks" : {
 				"100" : "debug_basic"
-			}
+			},
+			"appearsOnLevel" : 1
 		},
 		
 		"scout" : {
@@ -43,7 +45,8 @@
 			"chanceOfEpicLoot" : 0.0,
 			"attacks" : {
 				"100" : "debug_basic"
-			}
+			},
+			"appearsOnLevel" : 1
 		},
 
 		"tank" : {
@@ -58,7 +61,8 @@
 			"chanceOfEpicLoot" : 0.0,
 			"attacks" : {
 				"100" : "debug_basic"
-			}
+			},
+			"appearsOnLevel" : 1
 		},
 
 		"berserker" : {
@@ -73,7 +77,8 @@
 			"chanceOfEpicLoot" : 0.0,
 			"attacks" : {
 				"100" : "flurry"
-			}
+			},
+			"appearsOnLevel" : 2
 		}
 
 	},

@@ -113,7 +113,7 @@ define([
 			avgMonsterHp = Math.round( avgMonsterHp );
 			var avgPlayerDmgPerHit = Math.round(avgMonsterHp / 4);
 			//var avgMonsterDmgPerHit = Math.round(avgPlayerDmgPerHit / 2);
-			var avgMonsterDmgPerHit = Math.round(avgPlayerHp / 10);
+			var avgMonsterDmgPerHit = Math.round( (avgPlayerHp / 10) + (levelNum * 1));
 
 			var averages = {
 				avgPlayerHp : avgPlayerHp,

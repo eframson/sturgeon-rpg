@@ -9,13 +9,14 @@ define([
 	'classes/Armor',
 	'classes/Shield',
 	'classes/ItemCollection',
+	'classes/DataCollection',
 	'classes/Monster',
 	'json!data/items.json',
 	'json!data/monsters.json',
 	'Utils',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, Monster, itemDataFile, monsterDataFile, Utils) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, itemDataFile, monsterDataFile, Utils) {
 
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
 	var $MAIN_CONTENT_DIV = $(".main-content-row");
@@ -31,8 +32,8 @@ define([
 
 		var self = this;
 
-		this.itemDataFile = itemDataFile;
-		this.monsterDataFile = monsterDataFile;
+		this.itemDataCollection = new DataCollection(itemDataFile);
+		this.monsterDataCollection = new DataCollection(monsterDataFile);
 
 		this.player = undefined;
 		this.slides = {
@@ -607,8 +608,9 @@ define([
 
 		this.startCombat = function(encounterType){
 
-			//Choose a monster base
 			var availableMonsters = self.getAvailableMonsterIdsByMonsterCategory("regular");
+			
+			//Pick a monster ID randomly
 			var newMonsterID = Utils.chooseRandomly( availableMonsters );
 
 			self.currentEnemy(new Monster(
@@ -2060,10 +2062,9 @@ define([
 		this.getRandomScroungable = function(lowerBounds){
 			var quality = Utils.doRand(lowerBounds, 11);
 			quality = quality * 10;
-			var array = self.itemDataFile.items.scroungables[quality];
-			var arrayKeys = Object.keys(array);
-			var foodKey = Utils.chooseRandomly( arrayKeys );
-			var foodObj = self.itemDataFile.items.scroungables[quality][foodKey];
+			var availableScroungableItemKeys = self.itemDataCollection.getNode(["items", "scroungables", quality], 1);
+			var foodKey = Utils.chooseRandomly( availableScroungableItemKeys );
+			var foodObj = self.itemDataCollection.getNode(["items", "scroungables", quality, foodKey]);
 
 			var qty = Math.floor(self.player().skills().findFood() / 10);
 			var descString = (foodObj.quality < 40) ? "small" : ( foodObj.quality < 70 ? "decent" : "large" );
@@ -2076,7 +2077,7 @@ define([
 		}
 
 		this.getAvailableItemsByType = function(type){
-			return self.itemDataFile.items[type] || false;
+			return self.itemDataCollection.getNode(["items", type]) || false;
 		}
 
 		this.getAvailableItemIdsByTypeForLevel = function(type, level){
@@ -2134,25 +2135,35 @@ define([
 		}
 
 		this.getAvailableItemTypes = function(){
-			return Object.keys(self.itemDataFile.items);
+			return self.itemDataCollection.getNode(["items"], 1);
 		}
 
 		this.getAvailableMonsterIdsByMonsterCategory = function(category){
+			category = category || "regular";
+			return self.monsterDataCollection.getNode([category], 1);
+		}
 
+		this.getAvailableMonsterDataByMonsterCategory = function(category, asArray){
+
+			asArray = (asArray !== undefined) ? asArray : 0 ;
 			category =  category || "regular";
-			return Object.keys(self.monsterDataFile[category]);
+			var monsterDataObjById = self.monsterDataFile[category];
 
+			if(!asArray){
+				return monsterDataObjById;
+			}
+
+			var monsterDataArray = [];
+			var keys = Object.keys(monsterDataObjById);
+			for (var i = 0; i < keys.length; i++) {
+				monsterDataArray.push(monsterDataObjById[keys[i]]);
+			}
+
+			return monsterDataArray;
 		}
 
 		this.getMonsterDataByIdAndCategory = function(monsterId, category){
-
-			var monsterIDs = Object.keys(self.monsterDataFile[category]);
-			for(i=0; i < monsterIDs.length; i++){
-				if(monsterIDs[i] == monsterId){
-					return self.monsterDataFile[category][monsterIDs[i]];
-				}
-			}
-
+			return self.monsterDataCollection.getNode([category, monsterId]);
 		}
 
 		this._getSrcCollectionForActiveItem = function(){
@@ -2288,6 +2299,7 @@ define([
 /* TODOs
 
 Feeback/Ideas/Thoughts
+- Tighten up/standardize/streamline weapon dmg gemeration randomization (quality = random, bosses = always high quality, certain weapons do more than avg dmg, certain do less than avg [coefficient for that stuff], certain weapons might have a higher/lower min/max dmg [maybe less max + more min, or more max and less min])
 - Save at start of each level
 - Perks!
 - Choose class (i.e. - perk) on start?

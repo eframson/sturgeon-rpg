@@ -2,10 +2,11 @@ define([
 	'jquery',
 	'knockout',
 	'classes/Entity',
+	'classes/DataCollection',
 
 	'json!data/monsterarchetypes.json',
 	'Utils',
-], function($, ko, Entity, monsterArchetypeDataFile, Utils){
+], function($, ko, Entity, DataCollection, monsterArchetypeDataFile, Utils){
 
 	function Monster(monsterData){
 
@@ -35,7 +36,7 @@ define([
 			self.lootCoefficient = ko.observable(monsterData.lootCoefficient || 1);
 			self.chanceToCrit = ko.observable(monsterData.chanceToCrit || 0);
 
-			self.monsterArchetypeDataFile = monsterArchetypeDataFile;
+			self.monsterArchetypeDataCollection = new DataCollection(monsterArchetypeDataFile);
 			self.availableAttacks = monsterData.availableAttacks || {};
 
 			if(self.fullyDynamicStats && !self.isScaled()){
@@ -46,7 +47,8 @@ define([
 				var avgMonsterHp = averages.avgMonsterHp;
 				var avgMonsterDmg = averages.avgMonsterDmg;
 
-				var newMonsterArchetypeId = self.archetypeId || Utils.chooseRandomly(self.getAvailableMonsterArchetypeIdsByClass(self.archetypeClass));
+
+				var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
 				var archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 
 				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient);
@@ -95,16 +97,28 @@ define([
 		}
 
 		this.getMonsterArchetypeById = function(archetypeID, archetypeClass){
-			var archetypeIDs = self.getAvailableMonsterArchetypeIdsByClass(archetypeClass);
-			for(i=0; i < archetypeIDs.length; i++){
-				if(archetypeIDs[i] == archetypeID){
-					return self.monsterArchetypeDataFile[archetypeClass][archetypeIDs[i]];
-				}
-			}
+			return self.monsterArchetypeDataCollection.getNode([archetypeClass, archetypeID]);
 		}
 
 		this.getAvailableMonsterArchetypeIdsByClass = function(archetypeClass){
-			return Object.keys(self.monsterArchetypeDataFile[archetypeClass]);
+			return self.monsterArchetypeDataCollection.getNode([archetypeClass], 1);
+		}
+
+		this._getAppropriateArchetypeIdForLevel = function(){
+
+			//Get a list of all monster archetypes
+			var allAvailableArchetypes = self.monsterArchetypeDataCollection.getNode([self.archetypeClass]);
+
+			//Filter out by ones that shouldn't appear on the current level
+			allAvailableArchetypes = $.grep($.map(allAvailableArchetypes, function(obj, idx){ return obj }), function(elem, idx){
+				return elem.appearsOnLevel <= self.level();
+			});
+
+			var availableArchetypeIds = $.map(allAvailableArchetypes, function(elem, idx){
+				return elem.id;
+			});
+
+			return Utils.chooseRandomly(availableArchetypeIds);
 		}
 
 		this.getExportData = function(){

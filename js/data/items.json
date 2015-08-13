@@ -239,21 +239,6 @@
 
 		"weapon" : {
 
-			"dev_weapon" : {
-				"id" : "dev_weapon",
-				"name" : "Debug Sword",
-				"type" : "weapon",
-				"desc" : "Well, congratulations, you got the developer sword. How did you even get this? Also, it's not so much a 'sword' as a nuclear-powered lightsaber. Does 1000 - 2000 damage. I guess all challenge has been removed from the game for you now. Of course, you can always drop it, right? I mean, the button's just right there...",
-				"slotsRequired" : 1,
-				"stackable" : 0,
-				"dmgMin" : 1000,
-				"dmgMax" : 2000,
-				"handsRequired" : 1,
-				"buyValue" : 1,
-				"minLevelRange" : -1,
-				"maxLevelRange" : -1,
-				"canBreakdown" : 1
-			},
 			"melee_weapon_01" : {
 				"id" : "melee_weapon_01",
 				"name" : "Crude Shiv (1H)",
