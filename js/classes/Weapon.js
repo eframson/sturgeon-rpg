@@ -19,9 +19,6 @@ define([
 			self.isWeapon = true;
 			self.isEquippable = true;
 			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
-			self.avgMonsterHpPercentPerHit = data.avgMonsterHpPercentPerHit || 0.3;
-			self.quality = data.quality || 40;
-			self.qualityModifier = data.qualityModifier || 1;
 			self.extraDamage = ko.observable(data.extraDamage || 0);
 			self.minDmgPctOfAvg = data.minDmgPctOfAvg || 0.7;
 			self.maxDmgPctOfAvg = data.maxDmgPctOfAvg || 1.3;
@@ -33,10 +30,8 @@ define([
 				var avgMonsterHp = averages.avgMonsterHp;
 				var avgDmgPerHit = averages.avgPlayerDmg;
 
-				//Apply quality multiplier
+				//Apply coefficient representing item quality to our average figure
 				avgDmgPerHit = avgDmgPerHit * self.qualityModifier;
-
-				avgDmgPerHit = avgDmgPerHit * self.monsterLootCoefficient
 				
 				//Let's say the dmg range is -30% - +30%
 				self.dmgMin( Math.round(avgDmgPerHit * self.minDmgPctOfAvg) );

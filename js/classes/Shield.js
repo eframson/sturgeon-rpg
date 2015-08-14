@@ -12,7 +12,6 @@ define([
 
 		this.init = function(data){
 			this.isShield = true;
-			self.quality = data.quality || "standard";
 		}
 
 		this.init(data);

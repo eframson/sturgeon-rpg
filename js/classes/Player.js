@@ -44,7 +44,7 @@ define([
 			});
 			self.skills = ko.observable({
 				scanSquares : ko.observable(playerData.skills.scanSquares || 1),
-				findFood : ko.observable(playerData.skills.findFood || 20),
+				findFood : ko.observable(playerData.skills.findFood || "poor"),
 				visionRange : ko.observable( (playerData.skills.visionRange != undefined) ? playerData.skills.visionRange : 0 ),
 			});
 			self.skillCooldowns = ko.observable({
@@ -101,7 +101,7 @@ define([
 			});
 
 			this.baseMaxDmg = ko.computed(function(){
-				return Math.ceil(self.str() * 1.5);
+				return Math.ceil(self.str() * 1.2);
 			});
 
 			this.minDmg = ko.computed(function(){
@@ -325,7 +325,7 @@ define([
 			self.hasLeveledUp(true);
 			self.baseHp( self.baseHp() + 5 );
 			self.hp(self.maxHp());
-			self.skills().findFood( self.skills().findFood() + 1 );
+			self.skills().findFood( self.skillProgress().findFood() + 1 );
 			self.end( self.end() + 1 );
 
 			if( self.level() % 3 == 0){
@@ -336,6 +336,8 @@ define([
 				self.speed( self.speed() + 1 );
 				self.inventoryMaxSlots( self.inventoryMaxSlots() + 1 );
 			}
+
+			self._updateFindFoodSkillIfProgressIsSufficient();
 			//Reset cooldowns on level up?
 		}
 
@@ -356,6 +358,32 @@ define([
 
 		this.hasWeapon = function(){
 			return !Utils.isEmptyObject( self.getEquippedWeapon() );
+		}
+
+		this._updateFindFoodSkillIfProgressIsSufficient = function(){
+			if(self.skillProgress().findFood() == 10){
+				self._levelUpFindFoodSkill();
+				self.skillProgress().findFood(0);
+			}
+		}
+
+		this._levelUpFindFoodSkill = function(){
+			var skillProgression = [
+				"poor",
+				"good",
+				"great",
+				"exceptional"
+			];
+
+			var currentSkill = self.skills().findFood();
+
+			var currentIdx = skillProgression.indexOf(currentSkill);
+
+			if(currentIdx < (skillProgression.length - 1)){
+				currentIdx++;
+				self.skills().findFood(skillProgression[currentIdx]);
+			}
+			
 		}
 
 		this.getExportData = function(){

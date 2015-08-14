@@ -17,9 +17,8 @@ define([
 			self.armorSlot = data.armorSlot || "body";
 			self.isArmor = true;
 			self.isEquippable = true;
-			self.quality = data.quality || "standard";
 
-			self.fullyDynamicStats = data.fullyDynamicStats || 0;
+			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 			
 			if(self.fullyDynamicStats){
 
@@ -27,13 +26,9 @@ define([
 				var avgPlayerHp = averages.avgPlayerHp;
 				var avgMonsterHp = averages.avgMonsterHp;
 				var avgMonsterDmg = averages.avgMonsterDmg;
-				
-				//Let's say the dmg is -30% - +50%
-				self.armorValue( Math.ceil(avgMonsterDmg / 3) );
+				var baseArmorValue = averages.avgPlayerArmorValue;
 
-				if (data.monsterLootCoefficient){
-					self.armorValue( Math.ceil(self.armorValue() * data.monsterLootCoefficient) );
-				}
+				baseArmorValue = baseArmorValue * self.qualityModifier;
 				
 				self.buyValue( self.armorValue() * 100 );
 

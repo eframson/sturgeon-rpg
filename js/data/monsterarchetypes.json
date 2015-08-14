@@ -14,7 +14,13 @@
 			"attacks" : {
 				"100" : "debug_basic"
 			},
-			"appearsOnLevel" : 1
+			"appearsOnLevel" : 1,
+			"qualityOdds" : {
+				"50" : [
+					"poor",
+					"good"
+				]
+			}
 		},
 		
 		"heavy" : {
@@ -30,7 +36,14 @@
 			"attacks" : {
 				"100" : "npc_mighty"
 			},
-			"appearsOnLevel" : 1
+			"appearsOnLevel" : 1,
+			"qualityOdds" : {
+				"20" : "poor",
+				"40" : [
+					"good",
+					"great"
+				]
+			}
 		},
 		
 		"scout" : {
@@ -46,7 +59,14 @@
 			"attacks" : {
 				"100" : "debug_basic"
 			},
-			"appearsOnLevel" : 1
+			"appearsOnLevel" : 1,
+			"qualityOdds" : {
+				"20" : "poor",
+				"40" : [
+					"good",
+					"great"
+				]
+			}
 		},
 
 		"tank" : {
@@ -62,7 +82,14 @@
 			"attacks" : {
 				"100" : "debug_basic"
 			},
-			"appearsOnLevel" : 1
+			"appearsOnLevel" : 1,
+			"qualityOdds" : {
+				"20" : "poor",
+				"40" : [
+					"good",
+					"great"
+				]
+			}
 		},
 
 		"berserker" : {
@@ -78,7 +105,14 @@
 			"attacks" : {
 				"100" : "flurry"
 			},
-			"appearsOnLevel" : 2
+			"appearsOnLevel" : 2,
+			"qualityOdds" : {
+				"10" : "poor",
+				"45" : [
+					"good",
+					"great"
+				]
+			}
 		}
 
 	},
@@ -98,6 +132,13 @@
 			"attacks" : {
 				"80" : "debug_basic",
 				"20" : "flurry"
+			},
+			"qualityOdds" : {
+				"10" : "exceptional",
+				"45" : [
+					"good",
+					"great"
+				]
 			}
 		},
 
@@ -116,6 +157,9 @@
 					"debug_basic",
 					"flurry"
 				]
+			},
+			"qualityOdds" : {
+				"100" : "exceptional"
 			}
 		}
 

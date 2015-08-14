@@ -34,6 +34,22 @@ define([
 		this.isScaled = ko.observable(data.isScaled || 0);
 		this.canBreakdown = data.canBreakdown || false;
 		this.isEquipped = ko.observable(false);
+		this.quality = ko.observable(data.quality || "good"); //poor, good, great, exceptional
+		self.qualityModifier = undefined;
+
+		if(data.qualityModifier){
+			self.qualityModifier = data.qualityModifier;
+		}else if(self.quality == "poor"){
+			self.qualityModifier = 0.7;
+		}else if(self.quality == "good"){
+			self.qualityModifier = 1;
+		}else if(self.quality == "great"){
+			self.qualityModifier = 1.3;
+		}else if(self.quality == "exceptional"){
+			self.qualityModifier = 1.5;
+		}else {
+			self.qualityModifier = 1;
+		}
 
 		this.sellValue = ko.computed(function(){
 			if(self._sellValue){

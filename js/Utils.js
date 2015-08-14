@@ -104,22 +104,25 @@ define([
 			var avgPlayerHp = 20 + ((levelNum - 1) * 2);
 			var avgMonsterHp;
 			if(levelNum == 1){
-				avgMonsterHp = avgPlayerHp / 2;
+				avgMonsterHp = avgPlayerHp / 3;
 			}else if(levelNum == 2) {
 				avgMonsterHp = avgPlayerHp;
 			}else {
 				avgMonsterHp = avgPlayerHp * 2;
 			}
 			avgMonsterHp = Math.round( avgMonsterHp );
-			var avgPlayerDmgPerHit = Math.round(avgMonsterHp / 4);
+			var avgPlayerDmgPerHit = Math.round(avgMonsterHp / 5);
 			//var avgMonsterDmgPerHit = Math.round(avgPlayerDmgPerHit / 2);
 			var avgMonsterDmgPerHit = Math.round( (avgPlayerHp / 10) + (levelNum * 1));
+
+			var avgPlayerArmorValue = Math.round(avgMonsterDmgPerHit / 2);
 
 			var averages = {
 				avgPlayerHp : avgPlayerHp,
 				avgPlayerDmg : avgPlayerDmgPerHit,
 				avgMonsterHp : avgMonsterHp,
 				avgMonsterDmg : avgMonsterDmgPerHit,
+				avgPlayerArmorValue : avgPlayerArmorValue
 			};
 
 			return averages;

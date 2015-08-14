@@ -11,8 +11,6 @@ define([
 
 		Item.call(this, data);
 
-		this.quality = ko.observable(data.quality || 50);
-
 		this.init = function(data){
 			//Nothing special here
 		}

@@ -94,18 +94,9 @@ define([
 
 				self.player().skillCooldowns().findFood(self.defaultCooldown);
 
-				var findFoodSkill = self.player().skillProgress().findFood();
+				var findFoodSkill = self.player().skills().findFood();
 
-				//See if we get a high quality food item
-				var isHighQuality = Utils.doBasedOnPercent({
-					findFoodSkill : 1,
-				}, function(){
-					return 0;
-				});
-
-				var lowerBounds = (isHighQuality) ? 7 : 1;
-				//Pick a number between 1 and 10 (OR 7 and 10)
-				var consumableItem = self.getRandomScroungable(lowerBounds);
+				var consumableItem = self.getRandomScroungable(findFoodSkill);
 
 				self.player().skillProgress().findFood( self.player().skillProgress().findFood() + 1 );
 				var message = "";
@@ -123,28 +114,9 @@ define([
 
 				self.logMessage(message);
 
-				var skillIncrease = 0;
-
-				if( self.player().skills().findFood() < 40 ){
-					skillIncrease = Utils.doBasedOnPercent({
-						70 : 1,
-						30 : 2,
-					});
-				}else if( self.player().skills().findFood() < 80 ){
-					skillIncrease = Utils.doBasedOnPercent({
-						90 : 1,
-						10 : 2,
-					});
-				}else{
-					skillIncrease = Utils.doBasedOnPercent({
-						80 : 1,
-					});
-				}
-
-				if(skillIncrease){
-					self.player().skills().findFood( self.player().skills().findFood() + skillIncrease );
-
-					self.logMessage("Your skill in finding food has increased to " + self.player().skills().findFood() + "/100");
+				if(self.player().skillProgress().findFood() == 10){ //Yeah this is duplicate code somewhat, fix later
+					self._updateFindFoodSkillIfProgressIsSufficient();
+					self.logMessage("Your skill in scrounging food has increased! You can now find " + self.player().skills().findFood() + " quality food.");
 				}
 			}
 		};
@@ -471,7 +443,7 @@ define([
 
 			}else{
 
-				player = new Player( {str: 2, dex: 2, end: 2} );
+				player = new Player( {str: 3, dex: 2, end: 2} );
 				level = new Level({ genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
 				self.levels.push(level);
 
@@ -939,7 +911,7 @@ define([
 						itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
 						itemToAdd = new Consumable(itemToAdd);
 					}else{
-						itemToAdd = self.getRandomScroungable(10);
+						itemToAdd = self.getRandomScroungable();
 					}
 
 					itemClass = "consumable";
@@ -1361,6 +1333,7 @@ define([
 					nextLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
 					self.level().scanSquaresNearPlayer();
 					nextLevel.drawMap();
+					self.saveGame();
 				});
 			}
 
@@ -1780,7 +1753,14 @@ define([
 					self._resetActiveItem();
 				}
 
-				self.player().restoreHealth((item.quality() / 100), 1);
+				var qualityPercentages = {
+					poor : 0.25,
+					good : 0.50,
+					great : 0.75,
+					exceptional : 1
+				}
+
+				self.player().restoreHealth( qualityPercentages[item.quality()], 1);
 
 				self.logMessage("Eating some food restored some of your HP!", "player");
 
@@ -2059,16 +2039,34 @@ define([
 			});
 		}
 
-		this.getRandomScroungable = function(lowerBounds){
-			var quality = Utils.doRand(lowerBounds, 11);
-			quality = quality * 10;
-			var availableScroungableItemKeys = self.itemDataCollection.getNode(["items", "scroungables", quality], 1);
-			var foodKey = Utils.chooseRandomly( availableScroungableItemKeys );
-			var foodObj = self.itemDataCollection.getNode(["items", "scroungables", quality, foodKey]);
+		this.getRandomScroungable = function(qualityCategory){
 
-			var qty = Math.floor(self.player().skills().findFood() / 10);
-			var descString = (foodObj.quality < 40) ? "small" : ( foodObj.quality < 70 ? "decent" : "large" );
-			descString = "Restores a " + descString + " amount of health when consumed";
+			if(!qualityCategory){
+				qualityCategory = Utils.chooseRandomly([
+					"poor",
+					"good",
+					"great",
+					"exceptional"
+				]);
+			}
+
+			var possibleFoods = self.itemDataCollection.getNode(["items", "consumables", "scroungables", qualityCategory], 1);
+
+			var foodKey = Utils.chooseRandomly(possibleFoods);
+
+			var foodObj = self.itemDataCollection.getNode(["items", "consumables", "scroungables", qualityCategory, foodKey]);
+
+			var qty = 2;
+
+			var descriptionsForQuality = {
+				poor : "a small amount",
+				good : "a decent amount",
+				great : "a large amount",
+				exceptional : "all",
+			};
+
+			var descString = descriptionsForQuality[qualityCategory];
+			descString = "Restores " + descString +" of your health when consumed";
 			var itemData = $.extend(
 				foodObj,
 				{ qty : qty, type : "consumables", desc : descString }
@@ -2300,13 +2298,12 @@ define([
 
 Feeback/Ideas/Thoughts
 - Tighten up/standardize/streamline weapon dmg gemeration randomization (quality = random, bosses = always high quality, certain weapons do more than avg dmg, certain do less than avg [coefficient for that stuff], certain weapons might have a higher/lower min/max dmg [maybe less max + more min, or more max and less min])
-- Save at start of each level
 - Perks!
 - Choose class (i.e. - perk) on start?
 - Choose perk on levelup
 - Purple square potions (drink and the next purple square will be an "x" type)
 - Stat enhancing potions
-- Level-bosses (with a fight or flee question first) which must be defeated before advancing to the next level; always have an exceptional piece of gear as loot
+- Level-bosses always have an exceptional piece of gear as loot
 - Give names to exceptional weapons
 - Make quality a more cohesive concept between item types
 - +1/2/3/etc. weapons? Maybe have some kind of defined "quality" measurements
@@ -2332,6 +2329,7 @@ Perk Ideas
 - Better merchant prices when buying/selling
 - More scraps from salvaging
 - Better odds of winning gambling squares
+- Regain HP (more HP?) on lvl up
 
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
