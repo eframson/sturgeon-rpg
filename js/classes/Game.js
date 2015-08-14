@@ -2297,7 +2297,7 @@ define([
 /* TODOs
 
 Feeback/Ideas/Thoughts
-- Tighten up/standardize/streamline weapon dmg gemeration randomization (quality = random, bosses = always high quality, certain weapons do more than avg dmg, certain do less than avg [coefficient for that stuff], certain weapons might have a higher/lower min/max dmg [maybe less max + more min, or more max and less min])
+- Tighten up/standardize/streamline weapon dmg generation randomization (quality = random, bosses = always high quality, certain weapons do more than avg dmg, certain do less than avg [coefficient for that stuff], certain weapons might have a higher/lower min/max dmg [maybe less max + more min, or more max and less min])
 - Perks!
 - Choose class (i.e. - perk) on start?
 - Choose perk on levelup
@@ -2316,6 +2316,50 @@ Feeback/Ideas/Thoughts
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
 - Think about floor as a whole instead of just fight-to-fight
 - Battle arena event?
+- Write combat simulator for testing balancing stuff
+
+Ability
+- ID
+- Description
+- Name
+
+CombatAbility::Ability
+- Number of attacks/strikes/attempts
+- Chance to hit/coefficient
+- Chance to crit/coefficient
+- Dmg/coefficient
+- On hit effect
+- On miss effect
+- Cooldown
+- Button label
+
+CombatEffect::Ability
+- Duration
+- Delay until effect can be applied again after expiration
+- doRound
+- Effect logic (??)
+
+OverworldAbility::Ability
+- Button label
+- Chance of effect
+
+ActiveAbility::OverworldAbility
+- Cooldown
+- Progression
+- doAbility
+- doOnSuccessfulActivation
+
+PassiveAbility::OverworldAbility
+- Permanent effect logic (??)
+
+IntermittentPassiveAbility::PassiveAbility
+- Num rounds delay between attempts
+- doRound
+- doOnSuccessfulApplication
+
+
+
+
 
 Perk Ideas
 - Increase effectiveness of dex stat's contribution to armor value
@@ -2330,6 +2374,7 @@ Perk Ideas
 - More scraps from salvaging
 - Better odds of winning gambling squares
 - Regain HP (more HP?) on lvl up
+- Passive HP regen
 
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
