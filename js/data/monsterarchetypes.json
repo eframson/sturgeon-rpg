@@ -21,14 +21,14 @@
 			"id" : "heavy",
 			"displayString" : "Thug",
 			"hpCoefficient" : 1,
-			"dmgCoefficient" : 2,
-			"chanceToHit" : 50,
+			"dmgCoefficient" : 1,
+			"chanceToHit" : 100,
 			"chanceToCrit" : 0,
 			"xpCoefficient" : 1.5,
 			"lootCoefficient" : 1.5,
 			"chanceOfEpicLoot" : 0.0,
 			"attacks" : {
-				"100" : "debug_basic"
+				"100" : "npc_mighty"
 			},
 			"appearsOnLevel" : 1
 		},

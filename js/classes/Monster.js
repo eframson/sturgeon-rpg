@@ -68,11 +68,6 @@ define([
 				self.maxDmg( Math.ceil(avgMonsterDmg * 1.3) * self.avgDmgCoefficient );
 				self.speed( self.level() );
 				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
-
-				
-
-				
-
 				
 				
 				self.name( self.name() + (archetypeData.displayString ? " " + archetypeData.displayString : "") );

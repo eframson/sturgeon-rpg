@@ -100,6 +100,26 @@ define([
 				description : 'Make three quick attacks for 30% of normal damage each. Chance on hit to do 150% of normal damage.',
 				buttonLabel : 'Flurry',
 			},
+			npc_mighty : {
+				numAttacks : 1,
+				chanceToHitCoefficient : 1,
+				chanceToCritCoefficient : 1,
+				dmgCoefficient : 0.5,
+				onHit : function(hitData){
+					var doExtraDmg = Utils.doBasedOnPercent({
+						50 : 1
+					}, function(){
+						return 0;
+					});
+
+					if(doExtraDmg){
+						hitData.dmgCoefficient = 1.5;
+					}
+				},
+				onMissEffect : {
+
+				},
+			},
 			mighty : {
 				numAttacks : 1,
 				chanceToHitCoefficient : 0.5,
