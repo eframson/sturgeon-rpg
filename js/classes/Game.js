@@ -2317,6 +2317,15 @@ Feeback/Ideas/Thoughts
 - Think about floor as a whole instead of just fight-to-fight
 - Battle arena event?
 - Write combat simulator for testing balancing stuff
+- Shortcut to food
+- Reminder to save before bosses -OR- auto-save before bosses
+- Add "flee" option
+- Bosses every x levels + minibosses
+- Make difficulty scaling more gradual
+- Gradual boss difficulty scaling
+- Built-in unlimited level resets (w/some cost, e.g. - 25% of gp)
+- Obstacles/mazes/labyrinthine structure in levels
+- Always take *some* damage, always absorb *some* damage
 
 Ability
 - ID
@@ -2381,6 +2390,7 @@ Bugs
 - Armor shows positive change if equipped when selected in container, then no change when added to inventory and selected (NOT REPRODUCIBLE)
 - Scrounging for food on combat/item/event squares maybe breaks?
 - Saving/loading in merchant/container screen doesn't work?
+- Bosses show up where they shouldn't
 
 New Features/Game Improvements
 - Play sound on level up?

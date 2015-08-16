@@ -153,10 +153,11 @@
 			"lootCoefficient" : 3.0,
 			"chanceOfEpicLoot" : 1.0,
 			"attacks" : {
-				"50" : [
-					"debug_basic",
-					"flurry"
-				]
+				//"50" : [
+				//	"debug_basic",
+				//	"flurry"
+				//],
+				"100" : "debug_basic"
 			},
 			"qualityOdds" : {
 				"100" : "exceptional"
