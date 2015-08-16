@@ -2379,6 +2379,8 @@ Perk Ideas
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
 - Armor shows positive change if equipped when selected in container, then no change when added to inventory and selected (NOT REPRODUCIBLE)
+- Scrounging for food on combat/item/event squares maybe breaks?
+- Saving/loading in merchant/container screen doesn't work?
 
 New Features/Game Improvements
 - Play sound on level up?
