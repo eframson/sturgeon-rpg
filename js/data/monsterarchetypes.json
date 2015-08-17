@@ -48,9 +48,9 @@
 		
 		"scout" : {
 			"id" : "scout",
-			"displayString" : "Scout",
+			"displayString" : "Assassin",
 			"hpCoefficient" : 0.8,
-			"dmgCoefficient" : 2,
+			"dmgCoefficient" : 1.5,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 20,
 			"xpCoefficient" : 1.3,

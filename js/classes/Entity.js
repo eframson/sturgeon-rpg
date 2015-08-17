@@ -155,35 +155,11 @@ define([
 
 		this.calculateActualDmg = function(dmg){
 
-			var coefficientOfDmgToTake,
-				dmgTaken;
-
-			//What % of our AC is the DMG?
-			var percentOfArmorDmgIs = Math.round((dmg / self.armor()) * 100);
-
-			if( percentOfArmorDmgIs < 100 ){
-
-				if( percentOfArmorDmgIs <= 25 ){
-					coefficientOfDmgToTake = 0;
-				}else{
-					coefficientOfDmgToTake = (50 - (((100 - percentOfArmorDmgIs) * 0.66))) / 100;
-				}
-
-			}else if( percentOfArmorDmgIs > 100 ){
-
-				if(percentOfArmorDmgIs >= 200){
-					coefficientOfDmgToTake = 1;
-				}else{
-					coefficientOfDmgToTake = 1 + (((100 - percentOfArmorDmgIs) * 0.5) / 100)
-				}
-
-			}else {
-				coefficientOfDmgToTake = 0.5;
+			for(i = 0; i < (self.armor() || 0); i++){
+				dmg = dmg * 0.95;
 			}
 
-			dmgTaken = Math.round(dmg * coefficientOfDmgToTake);
-
-			return dmgTaken;
+			return Math.round(dmg);
 		}
 
 		this.takeCombatAction = function(action, target, game){

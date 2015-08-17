@@ -1,28 +1,25 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/Ability',
+	'classes/OverworldAbility',
 	'Utils'
-], function($, ko, Ability, Utils){
+], function($, ko, OverworldAbility, Utils){
 
-	function OverworldAbility(data){
+	function PassiveAbility(data){
 
 		var self = this;
 
-		Ability.call(this, data);
+		OverworldAbility.call(this, data);
 
 		this.init = function(data){
-
-			self.buttonLabel = data.buttonLabel;
-			self.chanceOfEffect = (data.chanceOfEffect !== undefined) ? data.chanceOfEffect || 1;
 
 		}
 
 		this.init(data);
 	}
 
-	OverworldAbility.prototype = Object.create(Ability.prototype);
-	OverworldAbility.prototype.constructor = OverworldAbility;
+	PassiveAbility.prototype = Object.create(OverworldAbility.prototype);
+	PassiveAbility.prototype.constructor = PassiveAbility;
 
-	return OverworldAbility;
+	return PassiveAbility;
 });

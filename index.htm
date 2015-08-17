@@ -146,13 +146,13 @@
 											</div>
 										</div>
 										<div class="state-button-row">
-											<!-- Don't have anything to put here right now... -->
-											<!--<div class="state-button">
+											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
-													click: showSkillsArea,
-													text: 'View Skills/Stats'">
+													css: { disabled: foodAvailableForQuickEat() == 0 },
+													click: quickEatFood,
+													text: 'Eat Food (poorest first)'">
 												</button>
-											</div>-->
+											</div>
 										</div>
 									</div>
 									<div class="clear"></div>
@@ -336,6 +336,12 @@
 										<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.player().numPotionsAvailable() < 1 || $root.player().isDead() }, click: $root.useHealthPotion, text: 'Use Health Potion (' + $root.player().numPotionsAvailable() + ')'">Use Health Potion</button>
 										<span class="button-label">Consume a Health Potion (if any are in your inventory) and restore half your maximum HP</span>
 									</div>
+									<!-- ko if: !$root.currentEnemy().isDead() && !$root.player().isDead() -->
+									<div class="line">
+										<button type="button" class="btn btn-default" data-bind="click: $root.playerFlee">Flee!</button>
+										<span class="button-label">Swim away as fast as you possibly can. (The monster will remain where it is)</span>
+									</div>
+									<!-- /ko -->
 								</div>
 							</div>
 							<!-- end combat button area -->

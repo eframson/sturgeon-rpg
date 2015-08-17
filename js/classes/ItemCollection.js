@@ -112,6 +112,55 @@ define([
 			return self.items.removeAll();
 		}
 
+		this.getSortedFilteredItems = function(filterField, filterValue, sortField, sortDirection){
+
+			sortField = sortField || "id";
+			sortDirection = sortDirection || "ASC";
+
+			var filteredArray = self.items();
+
+			if(filterField){
+				filteredArray = $.grep(self.items(), function(elem, idx){
+					var itemFieldVal;
+					if(typeof elem[filterField] == 'function'){
+						itemFieldVal = elem[filterField]();
+					}else{
+						itemFieldVal = elem[filterField];
+					}
+
+					return itemFieldVal == filterValue;
+				});
+			}
+
+			if(filteredArray){
+				filteredArray.sort(function(left, right){
+					if(typeof left[sortField] == 'function'){
+						left = left[sortField]();
+					}else{
+						left = left[sortField];
+					}
+
+					if(typeof right[sortField] == 'function'){
+						right = right[sortField]();
+					}else{
+						right = right[sortField];
+					}
+
+					if(sortDirection == "DESC"){
+						return (left > right) ? -1 : 1 ;
+					}else{
+						return (left > right) ? 1 : -1 ;
+					}
+
+					if(left == right){
+						return 0;
+					}
+				});
+			}
+
+			return filteredArray;
+		}
+
 		this.getExportData = function(){
 
 			var exportObj = [];

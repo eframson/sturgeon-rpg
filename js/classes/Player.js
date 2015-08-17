@@ -325,7 +325,7 @@ define([
 			self.hasLeveledUp(true);
 			self.baseHp( self.baseHp() + 5 );
 			self.hp(self.maxHp());
-			self.skills().findFood( self.skillProgress().findFood() + 1 );
+			self.skillProgress().findFood( self.skillProgress().findFood() + 1 );
 			self.end( self.end() + 1 );
 
 			if( self.level() % 3 == 0){

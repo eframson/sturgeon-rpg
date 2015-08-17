@@ -10,37 +10,43 @@
 					"qual_10_1" : {
 						"id" : "qual_10_1",
 						"name" : "Grilled Halibut",
-						"quality" : "poor"
+						"quality" : "poor",
+						"isFood" : 1
 					},
 
 					"qual_10_2" : {
 						"id" : "qual_10_2",
 						"name" : "Bourbon-Glazed Salmon",
-						"quality" : "poor"
+						"quality" : "poor",
+						"isFood" : 1
 					},
 
 					"qual_20_1" : {
 						"id" : "qual_20_1",
 						"name" : "Shrimp Taco Salad",
-						"quality" : "poor"
+						"quality" : "poor",
+						"isFood" : 1
 					},
 
 					"qual_20_2" : {
 						"id" : "qual_20_2",
 						"name" : "Salmon Croquettes",
-						"quality" : "poor"
+						"quality" : "poor",
+						"isFood" : 1
 					},
 
 					"qual_30_1" : {
 						"id" : "qual_30_1",
 						"name" : "Seared Scallops",
-						"quality" : "poor"
+						"quality" : "poor",
+						"isFood" : 1
 					},
 
 					"qual_30_2" : {
 						"id" : "qual_30_2",
 						"name" : "Tuna Noodle Casserole",
-						"quality" : "poor"
+						"quality" : "poor",
+						"isFood" : 1
 					}
 
 				},
@@ -50,37 +56,43 @@
 					"qual_40_1" : {
 						"id" : "qual_40_1",
 						"name" : "Pan-Seared Halibut",
-						"quality" : "good"
+						"quality" : "good",
+						"isFood" : 1
 					},
 
 					"qual_40_2" : {
 						"id" : "qual_40_2",
 						"name" : "Lemon Pepper Shrimp",
-						"quality" : "good"
+						"quality" : "good",
+						"isFood" : 1
 					},
 
 					"qual_50_1" : {
 						"id" : "qual_50_1",
 						"name" : "Fish Tacos",
-						"quality" : "good"
+						"quality" : "good",
+						"isFood" : 1
 					},
 
 					"qual_50_2" : {
 						"id" : "qual_50_2",
 						"name" : "Crab Cakes",
-						"quality" : "good"
+						"quality" : "good",
+						"isFood" : 1
 					},
 
 					"qual_60_1" : {
 						"id" : "qual_60_1",
 						"name" : "Scallop Piccata",
-						"quality" : "good"
+						"quality" : "good",
+						"isFood" : 1
 					},
 
 					"qual_60_2" : {
 						"id" : "qual_60_2",
 						"name" : "Sesame-Crusted Tuna",
-						"quality" : "good"
+						"quality" : "good",
+						"isFood" : 1
 					}
 					
 				},
@@ -90,37 +102,43 @@
 					"qual_70_1" : {
 						"id" : "qual_70_1",
 						"name" : "Mussels in Broth",
-						"quality" : "great"
+						"quality" : "great",
+						"isFood" : 1
 					},
 
 					"qual_70_2" : {
 						"id" : "qual_70_2",
 						"name" : "Pan-Fried Trout",
-						"quality" : "great"
+						"quality" : "great",
+						"isFood" : 1
 					},
 
 					"qual_80_1" : {
 						"id" : "qual_80_1",
 						"name" : "Jerk-Rubbed Catfish",
-						"quality" : "great"
+						"quality" : "great",
+						"isFood" : 1
 					},
 
 					"qual_80_2" : {
 						"id" : "qual_80_2",
 						"name" : "Blackened Tilapia",
-						"quality" : "great"
+						"quality" : "great",
+						"isFood" : 1
 					},
 
 					"qual_90_1" : {
 						"id" : "qual_90_1",
 						"name" : "Baked Grouper",
-						"quality" : "great"
+						"quality" : "great",
+						"isFood" : 1
 					},
 
 					"qual_90_2" : {
 						"id" : "qual_90_2",
 						"name" : "Sauteed Tilapia",
-						"quality" : "great"
+						"quality" : "great",
+						"isFood" : 1
 					}
 					
 				},
@@ -130,13 +148,15 @@
 					"qual_100_1" : {
 						"id" : "qual_100_1",
 						"name" : "Shrimp-Stuffed Pasta",
-						"quality" : "exceptional"
+						"quality" : "exceptional",
+						"isFood" : 1
 					},
 
 					"qual_100_2" : {
 						"id" : "qual_100_2",
 						"name" : "Lobster Risotto",
-						"quality" : "exceptional"
+						"quality" : "exceptional",
+						"isFood" : 1
 					}
 					
 				}

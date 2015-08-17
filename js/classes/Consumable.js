@@ -12,7 +12,7 @@ define([
 		Item.call(this, data);
 
 		this.init = function(data){
-			//Nothing special here
+			self.isFood = data.isFood || 0;
 		}
 
 		this.init(data);

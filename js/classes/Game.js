@@ -401,6 +401,16 @@ define([
 
 				return buttons;
 			});
+
+			self.foodAvailableForQuickEat = ko.computed(function(){
+				if( self.player() && self.player().inventory ){
+					var foodItem = ko.utils.arrayFirst(self.player().inventory.items(), function(item){
+						return item instanceof Consumable;
+					});
+					return (foodItem) ? 1 : 0 ;
+				}
+				return 0;
+			});
 		}
 
 		this.initGame = function(gameData){
@@ -521,7 +531,6 @@ define([
 
 					self.level().scanSquaresNearPlayer(0);
 					self.level().revealSquaresNearPlayer(self.player().skills().visionRange());
-					self.level().drawMap();
 
 					var square = self.level().getSquare(newPos.x, newPos.y);
 
@@ -529,7 +538,7 @@ define([
 
 						self.handleSquareAction(square);
 
-						if(square.type != "exit" && square.type != "entrance"){
+						if(square.type != "exit" && square.type != "entrance" && square.type != "combat"){
 							square.setDone(true);
 						}
 					}
@@ -629,6 +638,10 @@ define([
 
 		}
 
+		this.playerFlee = function(game, event){
+			self.manageTransitionToView("combat","mainscreen", function(){ self.freezeMovement(false); });
+		}
+
 		this.playerAttacks = function(game, event){
 			self.doCombatRound("basic","attack");
 		}
@@ -708,6 +721,8 @@ define([
 
 		this.lootEnemy = function(){
 			self.freezeMovement(true);
+			var square = self.level().getActiveSquare();
+			square.isDone = 1;
 
 			var numLoots = 1 + Math.floor(self.level().levelNum() / 4);
 			var newLootItem;
@@ -723,6 +738,8 @@ define([
 			}
 
 			self.manageTransitionToView("combat","container");
+
+			self.level().drawMap();
 		}
 
 		this.leaveCombat = function(){
@@ -1299,7 +1316,7 @@ define([
 
 			if(square.isChallengeActive()){
 				self.fullScreenContent({
-					text: "The water around you grows chilly, and you are filled with a sense of foreboding. You think something big is coming your way...",
+					text: "The water around you grows chilly, and you are filled with a sense of foreboding. You think something big is coming your way...(you might want to save your game!)",
 					buttons: [
 						{
 							title : "Actually, on second thought...",
@@ -1331,7 +1348,7 @@ define([
 					currentLevel.isActive(false);
 					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
 					nextLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
-					self.level().scanSquaresNearPlayer();
+					//self.level().scanSquaresNearPlayer();
 					nextLevel.drawMap();
 					self.saveGame();
 				});
@@ -1745,7 +1762,7 @@ define([
 				if( numPotsLeft == 0 ){
 					self._resetActiveItem();
 				}
-			}else if(item.type == "consumables"){
+			}else if(item.isFood == 1){
 
 				srcNumLeft = self.removeActiveItem(game, event, 1);
 
@@ -1753,18 +1770,24 @@ define([
 					self._resetActiveItem();
 				}
 
-				var qualityPercentages = {
-					poor : 0.25,
-					good : 0.50,
-					great : 0.75,
-					exceptional : 1
-				}
-
-				self.player().restoreHealth( qualityPercentages[item.quality()], 1);
-
-				self.logMessage("Eating some food restored some of your HP!", "player");
+				self._playerEatFood(item.quality());
 
 			}
+
+		}
+
+		this._playerEatFood = function(quality){
+
+			var qualityPercentages = {
+				poor : 0.25,
+				good : 0.50,
+				great : 0.75,
+				exceptional : 1
+			}
+
+			self.player().restoreHealth( qualityPercentages[quality], 1);
+
+			self.logMessage("Eating some food restored some of your HP!", "player");
 
 		}
 
@@ -1919,6 +1942,7 @@ define([
 
 					self._resetActiveItem();
 					self.currentContainer.removeAll();
+					self.currentEnemy(undefined);
 					self.backButtonLabel("Back");
 
 					if(isNew == true){
@@ -1973,6 +1997,15 @@ define([
 					
 				});
 			});
+		}
+
+		this.quickEatFood = function(){
+			var sortedFilteredItems = self.player().inventory.getSortedFilteredItems("isFood", 1, "qualityModifier", "ASC");
+			var foodItem = sortedFilteredItems[0];
+
+			self.player().inventory.removeItem(foodItem, 1);
+
+			self._playerEatFood(foodItem.quality());
 		}
 
 		this.logMessage = function(msgText, cssClass){
@@ -2319,13 +2352,12 @@ Feeback/Ideas/Thoughts
 - Write combat simulator for testing balancing stuff
 - Shortcut to food
 - Reminder to save before bosses -OR- auto-save before bosses
-- Add "flee" option
 - Bosses every x levels + minibosses
 - Make difficulty scaling more gradual
 - Gradual boss difficulty scaling
 - Built-in unlimited level resets (w/some cost, e.g. - 25% of gp)
 - Obstacles/mazes/labyrinthine structure in levels
-- Always take *some* damage, always absorb *some* damage
+- Add settings view (quick eat: worst/best first, WASD keys)
 
 Ability
 - ID
