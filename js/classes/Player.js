@@ -8,16 +8,16 @@ define([
 	'classes/Armor',
 	'classes/Shield',
 	'classes/Weapon',
-	'classes/ActiveAbility',
+	'classes/ActiveAbilities/FindFood',
 
 	'Utils',
-], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, ActiveAbility, Utils){
+], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, FindFood, Utils){
 
 	function Player(playerData){
 
 		//Init
 		var self = this;
-		playerData = $.extend({equipment: { armor: {}, }, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array() }, playerData);
+		playerData = $.extend({equipment: { armor: {}, }, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array(), activeAbilities : {} }, playerData);
 
 		Entity.call(this, playerData);
 
@@ -42,6 +42,9 @@ define([
 
 				weapon : self._instantiateObservableIfSet(playerData.equipment.weapon, Weapon),
 				shield : self._instantiateObservableIfSet(playerData.equipment.shield, Shield),
+			});
+			self.activeAbilities = ko.observable({
+				findFood : new FindFood(playerData.activeAbilities.findFood || {}),
 			});
 			self.skills = ko.observable({
 				scanSquares : ko.observable(playerData.skills.scanSquares || 1),
