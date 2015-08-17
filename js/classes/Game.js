@@ -1099,7 +1099,7 @@ define([
 
 				var trainSkillString = Utils.chooseRandomly(
 					Array(
-						"findFood",
+						//"findFood",
 						"scanSquares"/*,
 						"str",
 						"dex",
@@ -1125,7 +1125,7 @@ define([
 					skillOrStat = "skill";
 				}else if(trainSkillString == "scanSquares"){
 					text += "get better at surveying your surroundings";
-					trainCost = (self.player().skills().scanSquares() * 1000);
+					trainCost = (self.player().skills().scanSquares() * 1500);
 					trainSkill = self.player().skills().scanSquares;
 					trainSkill = "scanSquares";
 					trainSkillSuccessDesc = "scan range";

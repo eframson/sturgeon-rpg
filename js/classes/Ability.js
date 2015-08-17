@@ -24,6 +24,10 @@ define([
 		}
 
 		this.init(data);
+
+		this.getTrainCost = function(){
+			self.skillLevel() * 1000;
+		}
 		
 		this.getExportData = function(){
 			

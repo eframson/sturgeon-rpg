@@ -8,9 +8,10 @@ define([
 	'classes/Armor',
 	'classes/Shield',
 	'classes/Weapon',
+	'classes/ActiveAbility',
 
 	'Utils',
-], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, Utils){
+], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, ActiveAbility, Utils){
 
 	function Player(playerData){
 
