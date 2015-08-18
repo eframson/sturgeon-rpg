@@ -594,24 +594,39 @@ define([
 			//Pick a monster ID randomly
 			var newMonsterID = Utils.chooseRandomly( availableMonsters );
 
+			//Get our base monster data
+			var baseMonsterObj = self.getMonsterDataByIdAndCategory(newMonsterID, "regular");
+
+			//Get some extra stuff we might want to set on our monster
+			var extraParamObj = {
+				level : self.level().levelNum(),
+				fullyDynamicStats : 1,
+				archetypeId : (encounterType == "boss" ? "boss" : undefined),
+				archetypeClass : (encounterType == "boss" ? "special" : undefined)
+			};
+
+			//Set up a new object to merge everything else into, otherwise VERY BAD THINGS HAPPEN (because JS passing objects by reference)
+			var newObj = {};
+			$.extend(
+				newObj,
+				baseMonsterObj
+			);
+			$.extend(
+				newObj,
+				extraParamObj
+			);
+
+			//Monstertiemz go!
 			self.currentEnemy(new Monster(
-				$.extend(
-					self.getMonsterDataByIdAndCategory(newMonsterID, "regular"),
-					{
-						level : self.level().levelNum(),
-						fullyDynamicStats : 1,
-						archetypeId : (encounterType == "boss" ? "boss" : undefined),
-						archetypeClass : (encounterType == "boss" ? "special" : undefined)
-					}
-				)
+				newObj
 			));
 
-			console.log("Init new monster. Monster has:");
+			/*console.log("Init new monster. Monster has:");
 			console.log("minDmg: " + self.currentEnemy().minDmg());
 			console.log("maxDmg: " + self.currentEnemy().maxDmg());
 			console.log("hit chance: " + self.currentEnemy().chanceToHit());
 			console.log("crit chance: " + self.currentEnemy().chanceToCrit());
-			console.log("max hp: " + self.currentEnemy().maxHp());
+			console.log("max hp: " + self.currentEnemy().maxHp());*/
 
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
@@ -2311,7 +2326,18 @@ define([
 
 		this.monsterTest = function(){
 			self.startCombat();
-			self.lootEnemy();
+			var i;
+			for(i=0; i < 100; i++){
+				self.startCombat();
+				console.log(game.currentEnemy().archetypeId);
+			}
+			//self.lootEnemy();
+		}
+
+		this.testGeneration = function(){
+			self.level().generateThisLevel(true);
+			self.level().scanSquaresNearPlayer( 10 );
+			self.level().drawMap();
 		}
 
 		self.init();
@@ -2427,7 +2453,8 @@ Bugs
 - Armor shows positive change if equipped when selected in container, then no change when added to inventory and selected (NOT REPRODUCIBLE)
 - Scrounging for food on combat/item/event squares maybe breaks?
 - Saving/loading in merchant/container screen doesn't work?
-- Bosses show up where they shouldn't
+- Monster square stays red/active if player leaves instead of loots
+- Squares get randomly grayed out after fleeing
 
 New Features/Game Improvements
 - Play sound on level up?

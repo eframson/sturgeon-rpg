@@ -49,6 +49,7 @@ define([
 
 
 				var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
+				self.archetypeId = newMonsterArchetypeId;
 				var archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 
 				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient);
