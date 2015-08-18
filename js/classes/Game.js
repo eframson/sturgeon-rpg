@@ -721,8 +721,14 @@ define([
 
 		this.lootEnemy = function(){
 			self.freezeMovement(true);
+			
 			var square = self.level().getActiveSquare();
-			square.isDone = 1;
+
+			if(square.type != "exit"){
+				square.setDone(true);
+			}else{
+				square.isChallengeActive(0);
+			}
 
 			var numLoots = 1 + Math.floor(self.level().levelNum() / 4);
 			var newLootItem;
@@ -1330,7 +1336,6 @@ define([
 							title : "Let's do this!",
 							action : function(){
 								self.manageTransitionToView("fullscreen","combat");
-								square.isChallengeActive(0);
 
 								self.startCombat("boss");
 							}
@@ -1348,7 +1353,7 @@ define([
 					currentLevel.isActive(false);
 					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
 					nextLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
-					//self.level().scanSquaresNearPlayer();
+					self.level().scanSquaresNearPlayer(0);
 					nextLevel.drawMap();
 					self.saveGame();
 				});
