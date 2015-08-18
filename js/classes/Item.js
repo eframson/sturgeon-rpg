@@ -39,13 +39,13 @@ define([
 
 		if(data.qualityModifier){
 			self.qualityModifier = data.qualityModifier;
-		}else if(self.quality == "poor"){
+		}else if(self.quality() == "poor"){
 			self.qualityModifier = 0.7;
-		}else if(self.quality == "good"){
+		}else if(self.quality() == "good"){
 			self.qualityModifier = 1;
-		}else if(self.quality == "great"){
+		}else if(self.quality() == "great"){
 			self.qualityModifier = 1.3;
-		}else if(self.quality == "exceptional"){
+		}else if(self.quality() == "exceptional"){
 			self.qualityModifier = 1.5;
 		}else {
 			self.qualityModifier = 1;

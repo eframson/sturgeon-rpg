@@ -20,7 +20,7 @@ define([
 
 			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 			
-			if(self.fullyDynamicStats){
+			if(self.fullyDynamicStats && self.isScaled() == 0){
 
 				var averages = Utils.calculateAveragesForLevel(self.level());
 				var avgPlayerHp = averages.avgPlayerHp;
@@ -43,6 +43,9 @@ define([
 
 					self.desc = magicDesc;
 				}
+
+				self.armorValue(Math.round(baseArmorValue));
+				self.isScaled(1);
 			}
 
 		}

@@ -738,10 +738,12 @@ define([
 			self.freezeMovement(true);
 			
 			var square = self.level().getActiveSquare();
+			var lootTable = "monster";
 
 			if(square.type != "exit"){
 				square.setDone(true);
 			}else{
+				lootTable = "boss";
 				square.isChallengeActive(0);
 			}
 
@@ -750,7 +752,7 @@ define([
 			self.currentContainer.removeAll(); //Make sure it's empty
 
 			for(var i=0; i < numLoots; i++){
-				newLootItem = self.generateRandomLootItem("monster");
+				newLootItem = self.generateRandomLootItem(lootTable);
 				self.currentContainer.addItem(newLootItem);
 			}
 
@@ -859,6 +861,10 @@ define([
 						"gear",
 					]
 				};
+			}else if( lootSet == "boss" ){
+				possibleItemTypes = {
+					100 : "gear"
+				};
 			}else{
 				possibleItemTypes = {
 					40 : [
@@ -965,6 +971,17 @@ define([
 
 				});
 
+				var quality = Utils.chooseRandomly([
+					"poor",
+					"good",
+					"great",
+					"exceptional"
+				]);
+
+				if(lootSet == "boss"){
+					quality = "exceptional";
+				}
+
 				if( gearType == "armor" ){
 
 					itemClass = "armor";
@@ -996,6 +1013,7 @@ define([
 
 				itemToAdd.fullyDynamicStats = 1;
 				itemToAdd.level = self.level().levelNum();
+				itemToAdd.quality = quality;
 				if(lootSet == "monster"){
 					itemToAdd.monsterLootCoefficient = self.currentEnemy().lootCoefficient();
 				}
@@ -2389,6 +2407,7 @@ Feeback/Ideas/Thoughts
 - Built-in unlimited level resets (w/some cost, e.g. - 25% of gp)
 - Obstacles/mazes/labyrinthine structure in levels
 - Add settings view (quick eat: worst/best first, WASD keys)
+- Investigate weapon stat creation/balancing
 
 Ability
 - ID
@@ -2452,7 +2471,6 @@ Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
 - Armor shows positive change if equipped when selected in container, then no change when added to inventory and selected (NOT REPRODUCIBLE)
 - Scrounging for food on combat/item/event squares maybe breaks?
-- Saving/loading in merchant/container screen doesn't work?
 - Monster square stays red/active if player leaves instead of loots
 - Squares get randomly grayed out after fleeing
 
