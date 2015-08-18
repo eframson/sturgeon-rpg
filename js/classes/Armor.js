@@ -17,6 +17,9 @@ define([
 			self.armorSlot = data.armorSlot || "body";
 			self.isArmor = true;
 			self.isEquippable = true;
+			self.canUpgrade = (data.canUpgrade !== undefined) ? data.canUpgrade : 1;
+			self.canBreakdown = (data.canBreakdown !== undefined) ? data.canBreakdown : 1;
+			self.pctOfAvgArmor = data.pctOfAvgArmor;
 
 			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 			
@@ -28,7 +31,10 @@ define([
 				var avgMonsterDmg = averages.avgMonsterDmg;
 				var baseArmorValue = averages.avgPlayerArmorValue;
 
-				baseArmorValue = baseArmorValue * self.qualityModifier;
+				baseArmorValue = baseArmorValue * self.pctOfAvgArmor * self.qualityModifier;
+				baseArmorValue = Math.round(baseArmorValue);
+				baseArmorValue = (baseArmorValue > 0) ? baseArmorValue : 1;
+				self.armorValue(baseArmorValue);
 				
 				self.buyValue( self.armorValue() * 100 );
 
@@ -44,7 +50,6 @@ define([
 					self.desc = magicDesc;
 				}
 
-				self.armorValue(Math.round(baseArmorValue));
 				self.isScaled(1);
 			}
 

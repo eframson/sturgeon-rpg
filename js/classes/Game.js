@@ -2327,14 +2327,206 @@ define([
 
 		}
 
-		this.testScalingWeapon = function(levelNum){
-			var itemToAdd = self.getAvailableItemById("melee_weapon_02", "weapon", 1);
-			itemToAdd.fullyDynamicStats = 1;
-			itemToAdd.level = levelNum;
-			var newItem = new Weapon(itemToAdd);
+		this.testScalingWeaponLoopAsCSV = function(){
+			var results = self.testScalingWeaponLoop();
 
-			console.log("minDmg: " + newItem.dmgMin());
-			console.log("maxDmg: " + newItem.dmgMax());
+			var qualities = [
+				"poor",
+				"good",
+				"great",
+				"exceptional"
+			];
+
+			//Order by level, quality, item ID
+			var line = "";
+			//var lines = [];
+			var lines;
+			var k;
+
+			$.each(results, function(idx, elem){
+				var lvlNum = (idx + 1);
+				var quality = "";
+				var itemName = "";
+
+				for(k = 0; k < qualities.length; k++){
+					quality = qualities[k];
+					
+					$.each(elem[quality], function(name, data){
+						itemName = name;
+
+						line = lvlNum + "," + quality + "," + itemName + "," + data.min + "," + data.max + "\n";
+
+						//lines.push(line);
+						lines += line;
+					});
+				}
+
+			});
+
+			console.log(lines);
+		}
+
+		this.testScalingWeaponLoop = function(){
+			var output = [];
+			var qualities = [
+				"poor",
+				"good",
+				"great",
+				"exceptional"
+			];
+			var i, k;
+			for(i = 1; i < 101; i++){
+				var objectForLevel = {};
+				for(k = 0; k < qualities.length; k++){
+					objectForLevel[qualities[k]] = self.testScalingWeapon(i, qualities[k]);
+				}
+				output.push(objectForLevel);
+			}
+			//console.log(output);
+			return output;
+		}
+
+		this.testScalingWeapon = function(levelNum, quality){
+			var itemOne = self.getAvailableItemById("melee_weapon_01", "weapon", 1),
+				itemTwo = self.getAvailableItemById("melee_weapon_02", "weapon", 1),
+				itemThree = self.getAvailableItemById("melee_weapon_04", "weapon", 1);
+
+			quality = quality || "poor";
+
+			itemOne.fullyDynamicStats = 1;
+			itemOne.level = levelNum;
+			itemOne.quality = quality;
+			itemTwo.fullyDynamicStats = 1;
+			itemTwo.level = levelNum;
+			itemTwo.quality = quality;
+			itemThree.fullyDynamicStats = 1;
+			itemThree.level = levelNum;
+			itemThree.quality = quality;
+			
+			var newItemOne = new Weapon(itemOne),
+				newItemTwo = new Weapon(itemTwo),
+				newItemThree = new Weapon(itemThree);
+
+			return {
+				"01" : {
+					"min" : newItemOne.dmgMin(),
+					"max" : newItemOne.dmgMax(),
+				},
+				"02" : {
+					"min" : newItemTwo.dmgMin(),
+					"max" : newItemTwo.dmgMax(),
+				},
+				"04" : {
+					"min" : newItemThree.dmgMin(),
+					"max" : newItemThree.dmgMax(),
+				},
+			}
+		}
+
+		this.testScalingArmorLoopAsCSV = function(){
+			var results = self.testScalingArmorLoop();
+
+			var qualities = [
+				"poor",
+				"good",
+				"great",
+				"exceptional"
+			];
+
+			//Order by level, quality, item ID
+			var line = "";
+			//var lines = [];
+			var lines;
+			var k;
+
+			$.each(results, function(idx, elem){
+				var lvlNum = (idx + 1);
+				var quality = "";
+				var itemName = "";
+
+				for(k = 0; k < qualities.length; k++){
+					quality = qualities[k];
+					
+					$.each(elem[quality], function(name, data){
+						itemName = name;
+
+						line = lvlNum + "," + quality + "," + itemName + "," + data.armor + "\n";
+
+						//lines.push(line);
+						lines += line;
+					});
+				}
+
+			});
+
+			console.log(lines);
+		}
+
+		this.testScalingArmorLoop = function(){
+			var output = [];
+			var qualities = [
+				"poor",
+				"good",
+				"great",
+				"exceptional"
+			];
+			var i, k;
+			for(i = 1; i < 101; i++){
+				var objectForLevel = {};
+				for(k = 0; k < qualities.length; k++){
+					objectForLevel[qualities[k]] = self.testScalingArmor(i, qualities[k]);
+				}
+				output.push(objectForLevel);
+			}
+			//console.log(output);
+			return output;
+		}
+
+		this.testScalingArmor = function(levelNum, quality){
+			var itemOne = self.getAvailableItemById("tail_armor_01", "armor", 1),
+				itemTwo = self.getAvailableItemById("fin_armor_01", "armor", 1),
+				itemThree = self.getAvailableItemById("body_armor_01", "armor", 1);
+				itemFour = self.getAvailableItemById("head_armor_01", "armor", 1);
+				
+
+			quality = quality || "poor";
+
+			itemOne.fullyDynamicStats = 1;
+			itemOne.level = levelNum;
+			itemOne.quality = quality;
+			itemTwo.fullyDynamicStats = 1;
+			itemTwo.level = levelNum;
+			itemTwo.quality = quality;
+			itemThree.fullyDynamicStats = 1;
+			itemThree.level = levelNum;
+			itemThree.quality = quality;
+			itemFour.fullyDynamicStats = 1;
+			itemFour.level = levelNum;
+			itemFour.quality = quality;
+			
+			var newItemOne = new Armor(itemOne),
+				newItemTwo = new Armor(itemTwo),
+				newItemThree = new Armor(itemThree),
+				newItemFour = new Armor(itemFour);
+
+			return {
+				"tail_armor_01" : {
+					"id"	: newItemOne.id,
+					"armor" : newItemOne.armorValue(),
+				},
+				"fin_armor_01" : {
+					"id"	: newItemTwo.id,
+					"armor" : newItemTwo.armorValue(),
+				},
+				"body_armor_01" : {
+					"id"	: newItemThree.id,
+					"armor" : newItemThree.armorValue(),
+				},
+				"head_armor_01" : {
+					"id"	: newItemFour.id,
+					"armor" : newItemFour.armorValue(),
+				},
+			}
 		}
 
 		this.testVisionRange = function(){
@@ -2466,6 +2658,8 @@ Perk Ideas
 - Better odds of winning gambling squares
 - Regain HP (more HP?) on lvl up
 - Passive HP regen
+- More contribution from armor
+- Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
 
 Bugs
 - Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
