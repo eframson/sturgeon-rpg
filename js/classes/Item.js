@@ -15,6 +15,7 @@ define([
 		this.id = data.id;
 		this.name = data.name;
 		this.type = data.type;
+		this.subtype = data.subtype;
 		this.slotsRequired = ( data.slotsRequired != undefined ) ? data.slotsRequired : 1;
 		this.stackable = ( data.stackable != undefined ) ? data.stackable : true;
 		this.qty = ko.observable(data.qty || 1);

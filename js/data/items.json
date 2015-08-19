@@ -163,10 +163,60 @@
 
 			},
 
+			"potions" : {
+
+				"trader" : {
+					"id" : "trader",
+					"name" : "Trader Finding Potion",
+					"desc" : "This vial contains a golden, shimmering liquid. Drinking it will cause the next purple square you visit to definitely contain a merchant.",
+					"slotsRequired" : 1,
+					"stackable" : 1,
+					"buyValue" : 250,
+					"subtype" : "event_square_override"
+				},
+
+				"trainer" : {
+					"id" : "trainer",
+					"name" : "Trainer Finding Potion",
+					"desc" : "This vial contains a chalky-looking tan liquid. Drinking it will cause the next purple square you visit to definitely contain a skill trainer.",
+					"slotsRequired" : 1,
+					"stackable" : 1,
+					"buyValue" : 250,
+					"subtype" : "event_square_override"
+				},
+
+				"health_potion" : {
+					"id" : "health_potion",
+					"name" : "Health Potion",
+					"desc" : "A flask filled with a refreshing draught that can re-invigorate and rejuvenate even the most badly wounded fish. Restores half your max HP. May be used during combat.",
+					"slotsRequired" : 1,
+					"stackable" : 1,
+					"buyValue" : 250
+				},
+
+				"cooldown_potion" : {
+					"id" : "cooldown_potion",
+					"name" : "Reset Cooldowns Potion",
+					"desc" : "This vial contains a fizzy, light-blue liquid. Drinking it will instantly refresh you, resetting your ability cooldowns.",
+					"slotsRequired" : 1,
+					"stackable" : 1,
+					"buyValue" : 250
+				},
+
+				"stat_potion" : {
+					"id" : "stat_potion",
+					"name" : "Mystery Potion",
+					"desc" : "A vial filled with a pearlescent, silver liquid. Drinking it will improve one of your stats at random.",
+					"slotsRequired" : 1,
+					"stackable" : 1,
+					"buyValue" : 1000
+				}
+
+			},
+
 			"biscuit_food" : {
 				"id" : "biscuit_food",
 				"name" : "Fish Biscuits",
-				"type" : "consumables",
 				"desc" : "Restores all HP when consumed. Fish Biscuits are small, compact wafers made of delicious wild berries, soy protein, bacon fat, and high fructose corn syrup. \"Fish Biscuits: They're what fish crave!\"<br />Cook thoroughly before eating. Do not consume while pregnant. Consult your doctor before use. Fish Biscuits cannot be used as a tourniquet, or during combat.",
 				"slotsRequired" : 1,
 				"stackable" : 1,
@@ -176,17 +226,15 @@
 			"reset_stone" : {
 				"id" : "reset_stone",
 				"name" : "Level Reset Stone",
-				"type" : "consumables",
 				"desc" : "A stone imbued with magical energies. It has the power to re-randomize the current dungeon level, letting you experience a brand new set of events, search for new treasures, and fight new monsters.",
 				"slotsRequired" : 1,
-				"stackable" : 0,
+				"stackable" : 1,
 				"buyValue" : 500
 			},
 
 			"health_potion" : {
 				"id" : "health_potion",
 				"name" : "Health Potion",
-				"type" : "consumables",
 				"desc" : "A flask filled with a refreshing draught that can re-invigorate and rejuvenate even the most badly wounded fish. Restores up to half your max HP. May be used during combat.",
 				"slotsRequired" : 1,
 				"stackable" : 1,

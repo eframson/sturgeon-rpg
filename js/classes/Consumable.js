@@ -9,6 +9,8 @@ define([
 
 		var self = this;
 
+		data.type = "consumables";
+
 		Item.call(this, data);
 
 		this.init = function(data){

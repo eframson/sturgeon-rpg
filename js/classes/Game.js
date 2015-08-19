@@ -934,56 +934,51 @@ define([
 
 			}else if(itemType == "misc"){
 
-				var miscType = Utils.doBasedOnPercent({
-					25 : [
-						"stone",
-						"food",
-						"weapon",
-						"armor",
-					]
-				});
+				var miscLootTypePossibilities = Array(
+					"potion",
+					"stone",
+					"scrap"
+				);
 
-				var scrapQty = Math.ceil(Utils.doRand(10,36) * qtyCoefficient);
-				if(lootSet == "monster"){
-					scrapQty = Math.round(scrapQty * self.currentEnemy().lootCoefficient());
+				if( lootSet != "trader" ){
+					miscLootTypePossibilities.push("food");
 				}
 
-				if( miscType == "armor" ){
+				var miscType = Utils.chooseRandomly(miscLootTypePossibilities);
 
-					itemToAdd = self.getAvailableItemById("armor_scraps", "crafting", scrapQty);
 
-				}else if( miscType == "weapon" ){
+				if( miscType == "potion" ){
 
-					itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", scrapQty);
+					itemClass = "consumable";
+					//Select a potion at random
+
+					var potion_id = Utils.chooseRandomly(self.itemDataCollection.getNode(["items", "consumables", "potions"], 1));
+
+					itemToAdd = self.itemDataCollection.getNode(["items", "consumables", "potions", potion_id])
+
+				}else if( miscType == "scrap" ){
+
+					var scrapQty = Math.ceil(Utils.doRand(10,36) * qtyCoefficient);
+					if(lootSet == "monster"){
+						scrapQty = Math.round(scrapQty * self.currentEnemy().lootCoefficient());
+					}
+
+					var scrapType = Utils.chooseRandomly(["armor_scraps","weapon_scraps"]);
+
+					itemToAdd = self.getAvailableItemById(scrapType, "crafting", scrapQty);
 
 				}else if( miscType == "stone" ){
+
+					itemClass = "consumable";
 
 					itemToAdd = self.getAvailableItemById("reset_stone", "consumables", 1);
 
 				}else if( miscType == "food" ){
 
-					var consumableType;
-					if( lootSet == "trader" ){
-						consumableType = "health_potion";
-					}else{
-						consumableType = Utils.doBasedOnPercent({
-							25 : "health_potion",
-							75 : "food",
-						});
-					}
-
-					if(consumableType == "health_potion"){
-						foodQty = Utils.doRand(1, (1 + Math.floor(self.level().levelNum() / 2) ));
-						if(lootSet == "monster"){
-							foodQty = Math.round(foodQty * self.currentEnemy().lootCoefficient());
-						}
-						itemToAdd = self.getAvailableItemById(consumableType, "consumables", foodQty);
-						itemToAdd = new Consumable(itemToAdd);
-					}else{
-						itemToAdd = self.getRandomScroungable();
-					}
-
 					itemClass = "consumable";
+
+					itemToAdd = self.getRandomScroungable(undefined, 1);
+
 				}
 
 			}else if(itemType == "gear"){
@@ -1054,6 +1049,8 @@ define([
 				newItem = new Armor(itemToAdd);
 			}else if(itemClass == "shield"){
 				newItem = new Shield(itemToAdd);
+			}else if(itemClass == "consumable"){
+				newItem = new Consumable(itemToAdd);
 			}else{
 				newItem = itemToAdd;
 			}
@@ -1841,6 +1838,34 @@ define([
 
 				self._playerEatFood(item.quality());
 
+			}else if(item.subtype == "event_square_override"){
+
+				srcNumLeft = self.removeActiveItem(game, event, 1);
+
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
+
+				self.eventSquareTypeOverride(item.id);
+
+				self.logMessage("You are confident that you will encounter the desired person at their earliest convenience.", "player");
+
+			}else if(item.id == "cooldown_potion"){
+
+				srcNumLeft = self.removeActiveItem(game, event, 1);
+
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
+
+				$.each(self.player().activeAbilities(), function(idx, skill){
+					skill.cooldown(0);
+				});
+
+				self.logMessage("Much like Madeline Kahn in Blazing Saddles, you feel wefweshed.", "player");
+
+			}else if(item.id == "stat_potion"){
+				self.logMessage("This hasn't been implented yet. However, you are confident it will happen...soon.", "player");
 			}
 
 		}
@@ -2141,7 +2166,7 @@ define([
 			});
 		}
 
-		this.getRandomScroungable = function(qualityCategory){
+		this.getRandomScroungable = function(qualityCategory, justData){
 
 			if(!qualityCategory){
 				qualityCategory = Utils.chooseRandomly([
@@ -2173,6 +2198,10 @@ define([
 				foodObj,
 				{ qty : qty, type : "consumables", desc : descString }
 			)
+
+			if(justData){
+				return itemData;
+			}
 			return new Consumable(itemData);
 		}
 
@@ -2352,8 +2381,6 @@ define([
 		}
 
 		this.testInventoryCapacity = function(levelNum){
-
-			console.log();
 
 			for(var i=0; i < self.player().inventoryMaxSlots(); i++){
 				var newLootItem = self.generateRandomLootItem();
@@ -2597,6 +2624,21 @@ define([
 			self.level().drawMap();
 		}
 
+		this.testPotions = function(){
+
+			var potion_ids = self.itemDataCollection.getNode(["items", "consumables", "potions"], 1);
+			var i;
+			var itemToAdd;
+
+			for(i = 0; i < potion_ids.length; i++){
+				var potion_id = potion_ids[i];
+				itemToAdd = self.itemDataCollection.getNode(["items", "consumables", "potions", potion_id]);
+				itemToAdd.qty = 2;
+				self.player().addItemToInventory( new Consumable(itemToAdd) );
+			}
+
+		}
+
 		self.init();
 
 	};
@@ -2623,9 +2665,7 @@ Feeback/Ideas/Thoughts
 - Choose perk on levelup
 - Purple square potions (drink and the next purple square will be an "x" type)
 - Stat enhancing potions
-- Level-bosses always have an exceptional piece of gear as loot
 - Give names to exceptional weapons
-- Make quality a more cohesive concept between item types
 - +1/2/3/etc. weapons? Maybe have some kind of defined "quality" measurements
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Balance item value + dmg/armor + num salvage
