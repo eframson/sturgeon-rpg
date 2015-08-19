@@ -162,11 +162,11 @@
 										</div>
 										<div class="state-button-row">
 											<span class="stat">Find Food:</span>
-											<span class="value" data-bind="text: $root.player().skills().findFood()"></span>
+											<span class="value" data-bind="text: $root.player().activeAbilities().findFood.skillLevel()"></span>
 										</div>
 										<div class="state-button-row">
 											<span class="stat">Scan Range:</span>
-											<span class="value" data-bind="text: $root.player().skills().scanSquares()"></span>
+											<span class="value" data-bind="text: $root.player().activeAbilities().scanSquares.skillLevel()"></span>
 										</div>
 									</div>
 									<div class="clear"></div>

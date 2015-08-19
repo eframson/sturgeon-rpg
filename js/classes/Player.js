@@ -20,7 +20,7 @@ define([
 
 		//Init
 		var self = this;
-		playerData = $.extend({equipment: { armor: {}, }, skills: {}, skillCooldowns : {}, skillProgress : {}, inventory : Array(), activeAbilities : {} }, playerData);
+		playerData = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {} }, playerData);
 
 		Entity.call(this, playerData);
 
@@ -51,21 +51,6 @@ define([
 			self.activeAbilities = ko.observable({
 				findFood : new FindFood(playerData.activeAbilities.findFood || self.skillDataCollection.getNode(["findFood"])),
 				scanSquares : new ScanSquares(playerData.activeAbilities.scanSquares || self.skillDataCollection.getNode(["scanSquares"])),
-			});
-			self.skills = ko.observable({
-				scanSquares : ko.observable(playerData.skills.scanSquares || 1),
-				findFood : ko.observable(playerData.skills.findFood || "poor"),
-				visionRange : ko.observable( (playerData.skills.visionRange != undefined) ? playerData.skills.visionRange : 0 ),
-			});
-			self.skillCooldowns = ko.observable({
-				scanSquares : ko.observable(playerData.skillCooldowns.scanSquares || 0),
-				findFood : ko.observable(playerData.skillCooldowns.findFood || 0),
-			});
-			self.skillProgress = ko.observable({
-				scanSquares : ko.observable(playerData.skillProgress.scanSquares || 0),
-				findFood : ko.observable(playerData.skillProgress.findFood || 0),
-				speed : ko.observable(playerData.skillProgress.speed || 0),
-
 			});
 			self.abilities = ko.observableArray(playerData.abilities || Array());
 			self.speed = ko.observable(playerData.speed || 2);
@@ -335,8 +320,9 @@ define([
 			self.hasLeveledUp(true);
 			self.baseHp( self.baseHp() + 5 );
 			self.hp(self.maxHp());
-			self.skillProgress().findFood( self.skillProgress().findFood() + 1 );
-			self.activeAbilities().findFood.doProgress();
+
+			self.activeAbilities().findFood.makeProgress(0);
+
 			self.end( self.end() + 1 );
 
 			if( self.level() % 3 == 0){
@@ -347,8 +333,6 @@ define([
 				self.speed( self.speed() + 1 );
 				self.inventoryMaxSlots( self.inventoryMaxSlots() + 1 );
 			}
-
-			self._updateFindFoodSkillIfProgressIsSufficient();
 			//Reset cooldowns on level up?
 		}
 
@@ -369,32 +353,6 @@ define([
 
 		this.hasWeapon = function(){
 			return !Utils.isEmptyObject( self.getEquippedWeapon() );
-		}
-
-		this._updateFindFoodSkillIfProgressIsSufficient = function(){
-			if(self.skillProgress().findFood() == 10){
-				self._levelUpFindFoodSkill();
-				self.skillProgress().findFood(0);
-			}
-		}
-
-		this._levelUpFindFoodSkill = function(){
-			var skillProgression = [
-				"poor",
-				"good",
-				"great",
-				"exceptional"
-			];
-
-			var currentSkill = self.skills().findFood();
-
-			var currentIdx = skillProgression.indexOf(currentSkill);
-
-			if(currentIdx < (skillProgression.length - 1)){
-				currentIdx++;
-				self.skills().findFood(skillProgression[currentIdx]);
-			}
-			
 		}
 
 		this.getExportData = function(){

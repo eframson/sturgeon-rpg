@@ -31,14 +31,7 @@ define([
 			var didHit = self.makeSkillAttempt();
 
 			//Make skill progress
-			self.makeProgress();
-
-			//Level skill up if progress is sufficient
-			if( self.isSkillProgressSufficientToLevel() && !delayLevelUp ){
-				self.levelUp();
-			}else if( self.isSkillProgressSufficientToLevel() ){
-				self.canLevelUp = 1;
-			}
+			self.makeProgress(delayLevelUp);
 			
 			//Return true/false on success/fail
 			return didHit;
@@ -49,8 +42,18 @@ define([
 			return (hitRoll <= self.chanceOfEffect) ? true : false ;
 		}
 
-		this.makeProgress = function(){
+		this.makeProgress = function(delayLevelUp){
+
+			delayLevelUp = (delayLevelUp != undefined) ? delayLevelUp : 1 ;
+
 			self.skillProgress( self.skillProgress() + 1 );
+
+			//Level skill up if progress is sufficient
+			if( self.isSkillProgressSufficientToLevel() && !delayLevelUp ){
+				self.levelUp();
+			}else if( self.isSkillProgressSufficientToLevel() ){
+				self.canLevelUp = 1;
+			}
 		}
 
 		this.isSkillProgressSufficientToLevel = function(){

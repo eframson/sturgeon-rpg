@@ -485,7 +485,7 @@ define([
 
 			self.player(player);
 
-			self.level().revealSquaresNearPlayer(player.skills().visionRange());
+			self.level().revealSquaresNearPlayer(0);
 			self.level().drawMap();
 
 			//Initialize our intro slides if this is a brand new game
@@ -548,7 +548,7 @@ define([
 					//self.evaluateIntermittentPassives();
 
 					self.level().scanSquaresNearPlayer(0);
-					self.level().revealSquaresNearPlayer(self.player().skills().visionRange());
+					self.level().revealSquaresNearPlayer(0);
 
 					var square = self.level().getSquare(newPos.x, newPos.y);
 
@@ -715,6 +715,16 @@ define([
 			}
 
 			if( self.currentEnemy().isDead() ){
+				//"Done" the square if it's not an exit square
+
+				var square = self.level().getActiveSquare();
+
+				if(square.type != "exit"){
+					square.setDone(true);
+				}else{
+					square.isChallengeActive(0);
+				}
+
 				self.player().addExp(self.currentEnemy().expValue());
 				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " XP!", "combat");
 
@@ -753,16 +763,12 @@ define([
 		}
 
 		this.lootEnemy = function(){
-			self.freezeMovement(true);
 			
 			var square = self.level().getActiveSquare();
 			var lootTable = "monster";
 
-			if(square.type != "exit"){
-				square.setDone(true);
-			}else{
+			if(square.type == "exit"){
 				lootTable = "boss";
-				square.isChallengeActive(0);
 			}
 
 			var numLoots = 1 + Math.floor(self.level().levelNum() / 4);
@@ -784,6 +790,7 @@ define([
 		}
 
 		this.leaveCombat = function(){
+			self.level().drawMap();
 			self.manageTransitionToView("combat","mainscreen", function(){ self.freezeMovement(false); });
 		}
 
@@ -1405,14 +1412,14 @@ define([
 				self.manageTransitionToView("mainscreen","mainscreen", function(){
 					self.backButtonLabel("Back");
 					self.freezeMovement(false);
+					self.saveGame();
 				}, function(){
 					nextLevel.isActive(true);
 					currentLevel.isActive(false);
 					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
-					nextLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
+					nextLevel.revealSquaresNearPlayer(0);
 					self.level().scanSquaresNearPlayer(0);
 					nextLevel.drawMap();
-					self.saveGame();
 				});
 			}
 
@@ -1442,7 +1449,7 @@ define([
 				prevLevel.isActive(true);
 				currentLevel.isActive(false);
 				prevLevel.setPlayerPos( prevLevel.exitSquare()[0], prevLevel.exitSquare()[1] );
-				prevLevel.revealSquaresNearPlayer(self.player().skills().visionRange());
+				prevLevel.revealSquaresNearPlayer(0);
 				prevLevel.drawMap();
 			});
 		}
@@ -2611,7 +2618,6 @@ define([
 /* TODOs
 
 Feeback/Ideas/Thoughts
-- Tighten up/standardize/streamline weapon dmg generation randomization (quality = random, bosses = always high quality, certain weapons do more than avg dmg, certain do less than avg [coefficient for that stuff], certain weapons might have a higher/lower min/max dmg [maybe less max + more min, or more max and less min])
 - Perks!
 - Choose class (i.e. - perk) on start?
 - Choose perk on levelup
@@ -2641,10 +2647,6 @@ Feeback/Ideas/Thoughts
 - Add settings view (quick eat: worst/best first, WASD keys)
 - Investigate weapon stat creation/balancing
 
-Ability
-- ID
-- Description
-- Name
 
 CombatAbility::Ability
 - Number of attacks/strikes/attempts
@@ -2661,16 +2663,6 @@ CombatEffect::Ability
 - Delay until effect can be applied again after expiration
 - doRound
 - Effect logic (??)
-
-OverworldAbility::Ability
-- Button label
-- Chance of effect
-
-ActiveAbility::OverworldAbility
-- Cooldown
-- Progression
-- doAbility
-- doOnSuccessfulActivation
 
 PassiveAbility::OverworldAbility
 - Permanent effect logic (??)
@@ -2691,7 +2683,6 @@ Perk Ideas
 - Increased hp gain on level up
 - No/reduced cooldown on scan
 - No/reduced cooldown on find food
-- Better odds of finding high quality food
 - Find more food
 - Better merchant prices when buying/selling
 - More scraps from salvaging
@@ -2702,11 +2693,9 @@ Perk Ideas
 - Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
 
 Bugs
-- Monsters sometimes have no loot? (NOT CURRENTLY REPRODUCIBLE)
+- Monsters sometimes have no loot? (NOT REPRODUCIBLE)
 - Armor shows positive change if equipped when selected in container, then no change when added to inventory and selected (NOT REPRODUCIBLE)
-- Scrounging for food on combat/item/event squares maybe breaks?
-- Monster square stays red/active if player leaves instead of loots
-- Squares get randomly grayed out after fleeing
+- Scrounging for food on combat/item/event squares maybe breaks? (NOT REPRODUCIBLE)
 
 New Features/Game Improvements
 - Play sound on level up?
