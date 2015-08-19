@@ -11,20 +11,6 @@ define([
 
 		ActiveAbility.call(this, data);
 
-		/*
-			self.id = data.id;
-			self.name = data.name || self.id;
-			self.description = data.description || self.name;
-			self.skillLevel = (data.skillLevel !== undefined) ? data.skillLevel : 1 ;
-			self.skillProgress = data.skillProgress || 0;
-			self.nextSkillLevelAtProgress = data.nextSkillLevelAtProgress || 10;
-			self.resetProgressOnSkillLevelUp = (data.resetProgressOnSkillLevelUp !== undefined) ? data.resetProgressOnSkillLevelUp : 1 ;
-			self.buttonLabel = data.buttonLabel;
-			self.chanceOfEffect = (data.chanceOfEffect !== undefined) ? data.chanceOfEffect : 1;
-			self.baseCooldown = data.baseCooldown || 0;
-			self.cooldown = data.cooldown || 0;
-		*/
-
 		this.init = function(data){
 
 			self.skillStages = [
@@ -36,22 +22,21 @@ define([
 
 		}
 
-		this.doAbility = function(){
-
-		}
-
-		this.doProgress = function(progressAmt){
-			progressAmt = progressAmt || 1;
-
-			self.skillProgress( self.skillProgress() + 1 );
-
-			if( self.skillProgress() == self.nextSkillLevelAtProgress() ){
-
+		this.doOnLevelUp = function(){
+			//Advance to next skill stage (if possible)
+			var idxOf = self.skillStages.indexOf(self.skillLevel());
+			if(idxOf < (self.skillStages.length - 1)){
+				idxOf++;
+				self.skillLevel( self.skillStages[idxOf] );
+			}else{
+				self.canTrainNextLevel(0);
+				self.didLevelUp = 0;
 			}
 		}
 
-		this.levelUp = function(){
-
+		this.getTrainCost = function(){
+			var baseCost = (self.skillStages.indexOf(self.skillLevel()) + 1) * 1000
+			return baseCost + ((self.skillProgress() + 1) * 200);
 		}
 
 		this.init(data);

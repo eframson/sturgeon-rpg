@@ -77,46 +77,63 @@ define([
 		this.defaultCooldown = 10;
 		this.playerActions = {
 			scanSquares: function(){
-				self.player().skillCooldowns().scanSquares(self.defaultCooldown);
-				self.level().scanSquaresNearPlayer( self.player().skills().scanSquares() );
-				self.level().drawMap();
-				self.player().skillProgress().scanSquares( self.player().skillProgress().scanSquares() + 1 );
-				self.logMessage("By holding very still and concentrating, you are able to thoroughly survey your surroundings.");
+				var scanSquareSkill = self.player().activeAbilities().scanSquares;
+				var success = scanSquareSkill.doSkill();
 
-				//Quick-and-dirty
-				if( self.player().skillProgress().scanSquares() > 0 && self.player().skillProgress().scanSquares() % 25 == 0 ){
-					self.player().skillProgress().scanSquares(0);
-					self.player().skills().scanSquares( self.player().skills().scanSquares() + 1 );
-					self.logMessage("Your skill in scanning has increased.");
+				if(success){ //Just a formality, should always succeed
+					self.level().scanSquaresNearPlayer( scanSquareSkill.skillLevel() );
+					self.level().drawMap();
+					self.logMessage("By holding very still and concentrating, you are able to thoroughly survey your surroundings.");
 				}
+
+				if( scanSquareSkill.canLevelUp){
+					scanSquareSkill.levelUp();
+
+					if(scanSquareSkill.didLevelUp){ //Did we actually improve our skill (i.e. - we're not maxed out)
+						scanSquareSkill.didLevelUp = 0; //Clear this out
+						self.logMessage("Your skill in scanning has increased.");
+					}
+					
+				}
+
 			},
 			findFood: function(){
 
-				self.player().skillCooldowns().findFood(self.defaultCooldown);
+				var findFoodSkill = self.player().activeAbilities().findFood;
+				var success = findFoodSkill.doSkill();
 
-				var findFoodSkill = self.player().skills().findFood();
+				var newFoodItem = false;
 
-				var consumableItem = self.getRandomScroungable(findFoodSkill);
+				if(success){ //Just a formality, should always succeed
+					newFoodItem = self.getRandomScroungable(findFoodSkill.skillLevel());
+				}
 
-				self.player().skillProgress().findFood( self.player().skillProgress().findFood() + 1 );
 				var message = "";
 
-				var qty = self.addFoodToPlayerInventory(consumableItem);
-
-				if(qty != false && qty > 0){
-					message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " food using your kick-ass mouth feelers.";
+				if(newFoodItem){ //Again, just a formality
+					var qty = self.addFoodToPlayerInventory(newFoodItem);
+					if(qty != false && qty > 0){
+						message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " food using your kick-ass mouth feelers.";
+					}else{
+						message = "You gracefully float to the bottom of the river and successfully scrounge up "
+								  + newFoodItem.qty() + " food using your kick-ass mouth feelers, but your inventory is full!";
+						self.freezeMovement(true);
+						self.showContainerWithContents([newFoodItem]);
+					}
 				}else{
-					message = "You gracefully float to the bottom of the river and successfully scrounge up "
-							  + consumableItem.qty() + " food using your kick-ass mouth feelers, but your inventory is full!";
-					self.freezeMovement(true);
-					self.showContainerWithContents([consumableItem]);
+					message = "You failed to find any food (this is probably a bug, you should always find food)";
 				}
 
 				self.logMessage(message);
 
-				if(self.player().skillProgress().findFood() == 10){ //Yeah this is duplicate code somewhat, fix later
-					self._updateFindFoodSkillIfProgressIsSufficient();
-					self.logMessage("Your skill in scrounging food has increased! You can now find " + self.player().skills().findFood() + " quality food.");
+				if( findFoodSkill.canLevelUp){
+					findFoodSkill.levelUp();
+
+					if(findFoodSkill.didLevelUp){ //Did we actually improve our skill (i.e. - we're not maxed out)
+						findFoodSkill.didLevelUp = 0; //Clear this out
+						self.logMessage("Your skill in scrounging food has increased! You can now find " + findFoodSkill.skillLevel() + " quality food.");
+					}
+					
 				}
 			}
 		};
@@ -527,7 +544,8 @@ define([
 
 				if(currentPos.x != newPos.x || currentPos.y != newPos.y){
 					self.updateCooldowns();
-					self.player().skillProgress().speed( self.player().skillProgress().speed() + 1 );
+					//Coming soon...
+					//self.evaluateIntermittentPassives();
 
 					self.level().scanSquaresNearPlayer(0);
 					self.level().revealSquaresNearPlayer(self.player().skills().visionRange());
@@ -552,10 +570,10 @@ define([
 		}
 
 		this.updateCooldowns = function(){
-			$.each(self.player().skillCooldowns(), function(skill, cooldown){
-				var cooldownValue = cooldown();
+			$.each(self.player().activeAbilities(), function(idx, skill){
+				var cooldownValue = skill.cooldown();
 				if(cooldownValue > 0){
-					cooldown(cooldownValue - 1);
+					skill.cooldown(cooldownValue - 1);
 				}
 			});
 		}
@@ -1136,16 +1154,24 @@ define([
 
 				var trainCost = 0;
 
+				var improvableStats = Array(
+					/*
+					"str",
+					"dex",
+					"end",
+					"speed",
+					"hp"
+					*/
+				);
+
+				$.each(self.player().activeAbilities(), function(idx, skill){
+					if(skill.canTrainNextLevel()){
+						improvableStats.push(skill.id)
+					}
+				});
+
 				var trainSkillString = Utils.chooseRandomly(
-					Array(
-						//"findFood",
-						"scanSquares"/*,
-						"str",
-						"dex",
-						"end",
-						"speed",
-						"hp"*/
-					)
+					improvableStats
 				);
 				var trainSkill;
 				var trainSkillAmt = 1;
@@ -1157,45 +1183,38 @@ define([
 
 				if(trainSkillString == "findFood"){
 					text += "get better at scrounging for food";
-					trainCost = (self.player().skills().findFood() + 1) * 10;
-					trainSkill = self.player().skills().findFood;
+					trainCost = self.player().activeAbilities().findFood.getTrainCost();
 					trainSkill = "findFood";
 					trainSkillSuccessDesc = "skill in finding food";
 					skillOrStat = "skill";
 				}else if(trainSkillString == "scanSquares"){
 					text += "get better at surveying your surroundings";
-					trainCost = (self.player().skills().scanSquares() * 1500);
-					trainSkill = self.player().skills().scanSquares;
+					trainCost = self.player().activeAbilities().scanSquares.getTrainCost();
 					trainSkill = "scanSquares";
 					trainSkillSuccessDesc = "scan range";
 					skillOrStat = "skill";
 				}else if( trainSkillString == "str" ){
 					text += "become stronger";
-					trainSkill = self.player().str;
 					trainSkill = "str";
 					trainCost = 800;
 					trainSkillSuccessDesc = "strength (STR)";
 				}else if( trainSkillString == "dex" ){
 					text += "become more agile";
-					trainSkill = self.player().dex;
 					trainSkill = "dex";
 					trainCost = 800;
 					trainSkillSuccessDesc = "dexterity (DEX)";
 				}else if( trainSkillString == "end" ){
 					text += "become more resilient";
-					trainSkill = self.player().end;
 					trainSkill = "end";
 					trainCost = 800;
 					trainSkillSuccessDesc = "endurance (END)";
 				}else if( trainSkillString == "speed" ){
 					text += "become quicker";
-					trainSkill = self.player().speed;
 					trainSkill = "speed";
 					trainCost = 800;
 					trainSkillSuccessDesc = "speed (SPD)";
 				}else if( trainSkillString == "hp" ){
 					text += "become tougher";
-					trainSkill = self.player().baseHp;
 					trainSkill = "baseHp";
 					trainCost = 800;
 					trainSkillAmt = 10;
@@ -1211,16 +1230,18 @@ define([
 
 							var gold = self.player().inventory.getItemByID("gold");
 							var trainSkill;
-							if(this.vars.skillOrStat == 'skill'){
-								trainSkill = self.player().skills()[this.vars.trainSkill];
-							}else if(this.vars.skillOrStat == 'stat'){
-								trainSkill = self.player()[this.vars.trainSkill];
-							}
+
 							gold.qty( gold.qty() - this.vars.trainCost );
 
-							trainSkill( trainSkill() + this.vars.trainSkillAmt );
-
-							self.logMessage("Your " + this.vars.trainSkillSuccessDesc + " has increased to " + trainSkill() + ( this.vars.trainSkillMax ? "/" + this.vars.trainSkillMax : "" ));
+							if(this.vars.skillOrStat == 'skill'){
+								trainSkill = self.player().activeAbilities()[this.vars.trainSkill];
+								trainSkill.makeProgress();
+								self.logMessage("Your " + this.vars.trainSkillSuccessDesc + " has increased slightly" );
+							}else if(this.vars.skillOrStat == 'stat'){
+								trainSkill = self.player()[this.vars.trainSkill];
+								trainSkill( trainSkill() + this.vars.trainSkillAmt );
+								self.logMessage("Your " + this.vars.trainSkillSuccessDesc + " has increased to " + trainSkill() + ( this.vars.trainSkillMax ? "/" + this.vars.trainSkillMax : "" ));
+							}
 
 							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
 
@@ -1252,8 +1273,11 @@ define([
 			}else if( eventType == "cooldown" ){
 
 				afterLoad = function(){
-					self.player().skillCooldowns().findFood(0);
-					self.player().skillCooldowns().scanSquares(0);
+
+					$.each(self.player().activeAbilities(), function(idx, skill){
+						skill.cooldown(0);
+					});
+
 					self.logMessage(text);
 				};
 
@@ -2207,6 +2231,10 @@ define([
 			return self.itemDataCollection.getNode(["items"], 1);
 		}
 
+		this.getAvailableArmorItemsBySlot = function(slot){
+			return self.itemDataCollection.getNodeFilteredByField(["items", "armor"], "armorSlot", slot, "id");
+		}
+
 		this.getAvailableMonsterIdsByMonsterCategory = function(category){
 			category = category || "regular";
 			return self.monsterDataCollection.getNode([category], 1);
@@ -2532,6 +2560,18 @@ define([
 		this.testVisionRange = function(){
 			self.level().scanSquaresNearPlayer( 10 );
 			self.level().drawMap();
+		}
+
+		this.testAverages = function(targetI){
+			targetI = targetI || 50;
+			var i;
+			var results = [];
+
+			for(i=0; i < targetI; i++){
+				results.push(Utils.calculateAveragesForLevel(i));
+			}
+
+			return results;
 		}
 
 		this.monsterTest = function(){

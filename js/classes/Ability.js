@@ -16,17 +16,19 @@ define([
 			self.id = data.id;
 			self.name = data.name || self.id;
 			self.description = data.description || self.name;
-			self.skillLevel = (data.skillLevel !== undefined) ? data.skillLevel : 1 ;
-			self.skillProgress = data.skillProgress || 0;
-			self.nextSkillLevelAtProgress = data.nextSkillLevelAtProgress || 10;
+			self.skillLevel = ko.observable((data.skillLevel !== undefined) ? data.skillLevel : 1 );
+			self.skillProgress = ko.observable(data.skillProgress || 0);
+			self.nextSkillLevelAtProgress = ko.observable(data.nextSkillLevelAtProgress || 10);
 			self.resetProgressOnSkillLevelUp = (data.resetProgressOnSkillLevelUp !== undefined) ? data.resetProgressOnSkillLevelUp : 1 ;
+			self.canTrainNextLevel = ko.observable( (data.canTrainNextLevel !== undefined) ? data.canTrainNextLevel : 1 );
 
 		}
 
 		this.init(data);
 
 		this.getTrainCost = function(){
-			self.skillLevel() * 1000;
+			//Should be overridden by child
+			return 0;
 		}
 		
 		this.getExportData = function(){

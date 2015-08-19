@@ -344,7 +344,29 @@
 				"id" : "tail_armor_02",
 				"name" : "Molted Mermaid Tail",
 				"type" : "armor",
-				"desc" : "Balsawood popsicle sticks, rubber-banded around your fin. It's not pretty, but it's something. +%armorValue% Armor when equipped",
+				"desc" : "The freshly molted tail of a mermaid. I bet you didn't even know they did that. Yeah, there's a lot of facts most people don't know about mermaids. +%armorValue% Armor when equipped",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorSlot" : "tail",
+				"pctOfAvgArmor" : 0.3
+			},
+
+			"tail_armor_03" : {
+				"id" : "tail_armor_03",
+				"name" : "Defective Jeans",
+				"type" : "armor",
+				"desc" : "Someone made these jeans very incorrectly. Fortunately, they happen to fit you perfectly! +%armorValue% Armor when equipped",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorSlot" : "tail",
+				"pctOfAvgArmor" : 0.3
+			},
+
+			"tail_armor_04" : {
+				"id" : "tail_armor_04",
+				"name" : "Barnacle Skirt",
+				"type" : "armor",
+				"desc" : "Say what you will, is it any weirder than 'meat dress'? That's what I thought. +%armorValue% Armor when equipped",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorSlot" : "tail",
@@ -360,8 +382,19 @@
 				"stackable" : 0,
 				"armorSlot" : "fin",
 				"minLevelRange" : 5,
-				"maxLevelRange" : 10,
 				"pctOfAvgArmor" : 0.3
+			},
+
+			"fin_armor_02" : {
+				"id" : "fin_armor_02",
+				"name" : "Plushy Fin-Mitts",
+				"type" : "armor",
+				"desc" : "Not very good at being armor, but great at being extremely comfortable. You could cuddle the whole world in these things! +%armorValue% Armor when equipped",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"armorSlot" : "fin",
+				"minLevelRange" : 5,
+				"pctOfAvgArmor" : 0.2
 			},
 
 			"body_armor_01" : {
@@ -383,7 +416,6 @@
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorSlot" : "body",
-				"maxLevelRange" : 5,
 				"pctOfAvgArmor" : 0.4
 			},
 			"body_armor_03" : {
@@ -395,7 +427,6 @@
 				"stackable" : 0,
 				"armorSlot" : "body",
 				"minLevelRange" : 5,
-				"maxLevelRange" : 10,
 				"pctOfAvgArmor" : 0.4
 			},
 

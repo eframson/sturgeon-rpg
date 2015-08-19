@@ -1,11 +1,29 @@
 {
 	"findFood" : {
 		"id" : "findFood",
-		"nameForDisplay" : "Find food",
-		"currentValue" : 20,
-		"maxValue" : 100,
-		"currentCooldown" : 0,
-		"cooldown" : 10
+		"name" : "Find Food",
+		"description" : "Scrounge along the bottom of the riverbed for any scraps of sustenance you can find.",
+		"skillLevel" : "poor",
+		"skillProgress" : 0,
+		"nextSkillLevelAtProgress" : 10,
+		"resetProgressOnSkillLevelUp" : 1,
+		"buttonLabel" : "Find Food",
+		"chanceOfEffect" : 100,
+		"baseCooldown" : 10,
+		"cooldown" : 0
+	},
 
+	"scanSquares" : {
+		"id" : "scanSquares",
+		"name" : "Scan Squares",
+		"description" : "Focus on your surroundings, revealing the contents of nearby squares.",
+		"skillLevel" : 1,
+		"skillProgress" : 0,
+		"nextSkillLevelAtProgress" : 10,
+		"resetProgressOnSkillLevelUp" : 1,
+		"buttonLabel" : "Scan Surroundings",
+		"chanceOfEffect" : 100,
+		"baseCooldown" : 10,
+		"cooldown" : 0
 	}
 }

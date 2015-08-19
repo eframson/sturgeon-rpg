@@ -112,10 +112,20 @@ define([
 			}
 			avgMonsterHp = Math.round( avgMonsterHp );
 			var avgPlayerDmgPerHit = Math.round(avgMonsterHp / 5);
-			//var avgMonsterDmgPerHit = Math.round(avgPlayerDmgPerHit / 2);
+
 			var avgMonsterDmgPerHit = Math.round( (avgPlayerHp / 10) + (levelNum * 1));
 
-			var avgPlayerArmorValue = Math.round(levelNum * 5);
+			var avgPlayerArmorValue;
+			
+			if(levelNum < 5){
+				avgPlayerArmorValue = Math.round(levelNum * 5);
+			}else if(levelNum < 10){
+				avgPlayerArmorValue = Math.round(levelNum * 4);
+			}else {
+				avgPlayerArmorValue = Math.round(levelNum * 3);
+			}
+
+			avgPlayerArmorValue = Math.round(avgPlayerArmorValue);
 
 			var averages = {
 				avgPlayerHp : avgPlayerHp,
@@ -126,6 +136,23 @@ define([
 			};
 
 			return averages;
+		},
+
+		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum){
+			var actualDmg;
+
+			if(levelNum < 5){
+				actualDmg = dmg * Math.pow(0.95, armor);
+			}else if(levelNum < 10){
+				actualDmg = dmg * Math.pow(0.97, armor);
+			}else if(levelNum < 20){
+				actualDmg = dmg * Math.pow(0.98, armor);
+			}else{
+				actualDmg = dmg * Math.pow(0.99, armor);
+			}
+			actualDmg = Math.round(actualDmg);
+
+			return actualDmg;
 		},
 
 		getExportDataFromObject : function(obj){

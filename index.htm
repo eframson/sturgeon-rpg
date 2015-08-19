@@ -118,8 +118,8 @@
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
 													click: playerActions.findFood,
-													text: 'Scrounge for food' + ( player().skillCooldowns().findFood() ? ' (' + player().skillCooldowns().findFood() + ')' : '' ),
-													css: { disabled : player().skillCooldowns().findFood() > 0 }">
+													text: player().activeAbilities().findFood.buttonLabel + ( player().activeAbilities().findFood.cooldown() > 0 ? ' (' + player().activeAbilities().findFood.cooldown() + ')' : '' ),
+													css: { disabled : player().activeAbilities().findFood.cooldown() > 0 }">
 												</button>
 											</div>
 										</div>
@@ -127,8 +127,8 @@
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
 													click: playerActions.scanSquares,
-													text: 'Scan surroundings' + ( player().skillCooldowns().scanSquares() ? ' (' + player().skillCooldowns().scanSquares() + ')' : '' ),
-													css: { disabled : player().skillCooldowns().scanSquares() > 0 }">
+													text: player().activeAbilities().scanSquares.buttonLabel + ( player().activeAbilities().scanSquares.cooldown() > 0 ? ' (' + player().activeAbilities().scanSquares.cooldown() + ')' : '' ),
+													css: { disabled : player().activeAbilities().scanSquares.cooldown() > 0 }">
 												</button>
 											</div>
 										</div>

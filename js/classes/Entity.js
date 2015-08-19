@@ -153,13 +153,8 @@ define([
 
 		}
 
-		this.calculateActualDmg = function(dmg){
-
-			for(i = 0; i < (self.armor() || 0); i++){
-				dmg = dmg * 0.95;
-			}
-
-			return Math.round(dmg);
+		this.calculateActualDmg = function(dmg, levelNum){
+			return Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum);
 		}
 
 		this.takeCombatAction = function(action, target, game){
@@ -282,7 +277,7 @@ define([
 					hitType = "miss";
 				}
 
-				var actualDmg = target.calculateActualDmg(dmgObject.dmgDealt);
+				var actualDmg = target.calculateActualDmg(dmgObject.dmgDealt, game.level().levelNum());
 
 				attackResults = {
 					attemptedDmg : dmgObject.dmgDealt,
