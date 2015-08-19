@@ -23,7 +23,7 @@ define([
 		this._sellValue = data.sellValue;
 		this.minLevelRange = data.minLevelRange || 1;
 		this.maxLevelRange = data.maxLevelRange;
-		this.canUpgrade = ( data.canUpgrade != undefined ) ? data.canUpgrade : 0;
+		this.canUpgrade = ko.observable(( data.canUpgrade != undefined ) ? data.canUpgrade : 0);
 		this.numUpgradesApplied = ko.observable(data.numUpgradesApplied || 0);
 		this.isArmor = false;
 		this.isShield = false;
@@ -60,7 +60,7 @@ define([
 		});
 
 		this.costForNextUpgradeLevel = ko.computed(function(){
-			if( self.canUpgrade ){
+			if( self.canUpgrade() ){
 				return (self.numUpgradesApplied() + 1) * 100;
 			}
 			return false;

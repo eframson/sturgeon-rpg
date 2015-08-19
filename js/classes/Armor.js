@@ -17,11 +17,12 @@ define([
 			self.armorSlot = data.armorSlot || "body";
 			self.isArmor = true;
 			self.isEquippable = true;
-			self.canUpgrade = (data.canUpgrade !== undefined) ? data.canUpgrade : 1;
 			self.canBreakdown = (data.canBreakdown !== undefined) ? data.canBreakdown : 1;
 			self.pctOfAvgArmor = data.pctOfAvgArmor;
 
 			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
+
+			self.canUpgrade((data.canUpgrade !== undefined) ? data.canUpgrade : 1);
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 

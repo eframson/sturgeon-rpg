@@ -1525,7 +1525,7 @@ define([
 				self.activeItem().canSell(1);
 			}
 
-			if( ( item.canUpgrade == 1 && (opts.moveDirection == "right" || self.rightColContent() == "equipment" ) ) || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
+			if( ( item.canUpgrade() == 1 && (opts.moveDirection == "right" || self.rightColContent() == "equipment" ) ) || ( opts.canUpgrade && opts.canUpgrade == 1 ) ){
 				self.activeItem().canUpgrade(1);
 			}
 
