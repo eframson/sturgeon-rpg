@@ -1,16 +1,20 @@
 define([
 	'jquery',
 	'knockout',
+	'classes/DataCollection',
 
+	'json!data/skills.json',
 	'Utils',
-], function($, ko, Utils){
+], function($, ko, DataCollection, skillDataFile, Utils){
 
 	function Entity(data){
 
 		//Init
 		var self = this;
 		data = data || {};
-		data.cooldowns = data.cooldowns | {};
+		data.cooldowns = data.cooldowns || {};
+
+		var skillDataCollection = new DataCollection(skillDataFile);
 
 		this.init = function(data){
 
@@ -34,122 +38,29 @@ define([
 				flurry : ko.observable(data.cooldowns.basic || 0)
 			});
 
-			self.activeEffects = ko.observable({
+			self.combatEffects = ko.observable({});
 
+			self.combatAbilities = ko.observable(data.combatAbilities || {});
+
+			self.activeCombatEffects = ko.computed(function(){
+				var combatEffectsArray = $.map(self.combatEffects(), function(elem, idx){
+					return elem;
+				});
+
+				var activeEffects = $.grep(combatEffectsArray, function(elem, idx){
+					return elem.isActive();
+				});
+
+				return activeEffects;
 			});
-
-			self.passiveEffects = ko.observableArray(data.passiveEffects || []);
 
 			self.isDead = ko.computed(function(){
 				return self.hp() < 1;
 			});
 
-		}
-
-		this.attacks = {
-
-			basic : {
-				numAttacks : 1,
-				chanceToHitCoefficient : 1,
-				chanceToCritCoefficient : 1,
-				dmgCoefficient : 1,
-				onHit : {
-
-				},
-				onMissEffect : {
-
-				},
-				baseCooldown : 0,
-				description : 'Strike your enemy with your currently equipped weapon (if any)',
-				buttonLabel : 'Attack',
-			},
-			debug_basic : {
-				numAttacks : 1,
-				chanceToHitCoefficient : 1,
-				chanceToCritCoefficient : 1,
-				dmgCoefficient : 1,
-				onHit : {
-
-				},
-				onMissEffect : {
-
-				},
-				baseCooldown : 0,
-				description : 'Strike your enemy with your currently equipped weapon (if any)',
-				buttonLabel : 'Attack',
-			},
-			flurry : {
-				numAttacks : 3,
-				chanceToHitCoefficient : 1,
-				chanceToCritCoefficient : 1,
-				dmgCoefficient : 0.3,
-				onHit : function(hitData){
-					var doExtraDmg = Utils.doBasedOnPercent({
-						30 : 1,
-						70 : 0
-					});
-
-					if(doExtraDmg){
-						hitData.dmgCoefficient = 1.5;
-					}
-				},
-				onMissEffect : {
-
-				},
-				baseCooldown : 2,
-				description : 'Make three quick attacks for 30% of normal damage each. Chance on hit to do 150% of normal damage.',
-				buttonLabel : 'Flurry',
-			},
-			npc_mighty : {
-				numAttacks : 1,
-				chanceToHitCoefficient : 1,
-				chanceToCritCoefficient : 1,
-				dmgCoefficient : 0.5,
-				onHit : function(hitData){
-					var doExtraDmg = Utils.doBasedOnPercent({
-						50 : 1
-					}, function(){
-						return 0;
-					});
-
-					if(doExtraDmg){
-						hitData.dmgCoefficient = 1.5;
-					}
-				},
-				onMissEffect : {
-
-				},
-			},
-			mighty : {
-				numAttacks : 1,
-				chanceToHitCoefficient : 0.5,
-				chanceToCritCoefficient : 1,
-				dmgCoefficient : 3.0,
-				onHit : {
-
-				},
-				onMissEffect : {
-
-				},
-				baseCooldown : 2,
-				description : '',
-				buttonLabel : 'Attack',
-			},
-			stun : {
-				numAttacks : 1,
-				chanceToHitCoefficient : 1,
-				chanceToCritCoefficient : 1,
-				dmgCoefficient : 0.5,
-				onHit : {
-
-				},
-				onMissEffect : {
-
-				},
-				baseCooldown : 3,
-				description : '',
-				buttonLabel : 'Attack',
-			}
+			self.canAct = ko.computed(function(){
+				return !self.hasActiveCombatEffect("stun");
+			});
 
 		}
 
@@ -182,118 +93,44 @@ define([
 
 		this.makeAttack = function(attackName, target, game){
 
-			var attackData = self.attacks[attackName];
+			//var attackData = self.attacks[attackName];
+			var combatAbility = self.combatAbilities()[attackName];
+			combatAbility.doAbility(self, target, game);
 
-			var numAttacks = attackData.numAttacks;
-			var chanceToHit = self.chanceToHit();
-			var chanceToCrit = self.chanceToCrit();
-			var dmgCoefficient = attackData.dmgCoefficient;
-			var onHit = attackData.onHit;
-			var onMissEffect = attackData.onMissEffect;
-			var baseCooldown = attackData.baseCooldown;
-			var chanceToCritCoefficient = attackData.chanceToCritCoefficient;
-			var chanceToHitCoefficient = attackData.chanceToHitCoefficient;
+		}
 
-			chanceToHit = Math.round(chanceToHit * chanceToHitCoefficient);
-			chanceToCrit = Math.round(chanceToCrit * chanceToCritCoefficient);
+		this.updatePassiveEffectsForRound = function(){
+			
+			$.each(self.combatEffects(), function(idx, effect){
 
-			if(attackName == 'debug_basic'){
-				console.log("chanceToHit: " + chanceToHit);
-				console.log("chanceToCrit: " + chanceToCrit);
+				if(effect.cooldown() > 0){
+					effect.cooldown( effect.cooldown() - 1 );
+
+					if(effect.cooldown() == 0){
+						effect.delayUntilNextApplication(effect.baseDelayUntilNextApplication());
+					}
+				}else if( effect.delayUntilNextApplication() > 0 ){
+					effect.delayUntilNextApplication(effect.delayUntilNextApplication() - 1);
+				}
+
+			});
+
+		}
+
+		this.applyCombatEffect = function(combatEffect){
+
+			existingEffect = self.combatEffects()[combatEffect.id];
+
+			if(existingEffect){
+
+				if(existingEffect.baseDelayUntilNextApplication() == 0){
+					existingEffect.cooldown(combatEffect.baseCooldown);
+				}
+
+			}else{
+				combatEffect.cooldown(combatEffect.baseCooldown);
+				self.combatEffects()[combatEffect.id] = combatEffect;
 			}
-
-			for(var i = 1; i <= numAttacks; i++){
-
-				var attackResults = Array();
-				var hitRoll = Utils.doRand(1, 101);
-				var didHit = (hitRoll <= chanceToHit) ? true : false ;
-				var hitType = "hit";
-				var dmgObject = {
-					dmgDealt : 0,
-					didCrit : 0,
-					dmgCoefficient : dmgCoefficient
-				}
-
-				if(attackName == 'debug_basic'){
-					console.log("hitRoll: " + hitRoll);
-				}
-
-				if(didHit){
-					var critRoll = Utils.doRand(1, 101);
-					var didCrit = (critRoll <= chanceToCrit) ? true : false ;
-
-					if(attackName == 'debug_basic'){
-						console.log("critRoll: " + critRoll);
-					}
-
-					if(didCrit){
-						dmgObject.dmgDealt = self.maxDmg();
-						hitType = "crit";
-						if(attackName == 'debug_basic'){
-							console.log("attack was critical");
-						}
-					}else{
-						dmgObject.dmgDealt = Utils.doRand( self.minDmg(), (self.maxDmg() + 1) );
-					}
-
-					if(attackName == 'debug_basic'){
-						console.log("dmgDealt: " + dmgObject.dmgDealt);
-					}
-
-					dmgObject.dmgDealt = dmgObject.dmgDealt * self.dmgCoefficient();
-
-					if(attackName == 'debug_basic'){
-						console.log("dmgDealt times attack entity dmg coefficient: " + dmgObject.dmgDealt);
-					}
-
-					if(typeof onHit === 'function'){
-						onHit(dmgObject);
-					}
-
-					if(attackName == 'debug_basic'){
-						console.log("dmgDeal after onHit: " + dmgObject.dmgDealt);
-					}
-
-					dmgObject.dmgDealt = dmgObject.dmgDealt * dmgObject.dmgCoefficient;
-
-					if(attackName == 'debug_basic'){
-						console.log("dmgDealt times attack dmg coefficient: " + dmgObject.dmgDealt);
-					}
-
-					dmgObject.dmgDealt = Math.ceil(dmgObject.dmgDealt);
-
-					if(attackName == 'debug_basic'){
-						console.log("dmgDealt after ceil: " + dmgObject.dmgDealt);
-					}
-
-					//Yes, we're making assumptions for now
-					dmgObject.dmgDealt += self.hasWeapon() ? self.getEquippedWeapon().extraDamage() : 0 ;
-
-					if(attackName == 'debug_basic'){
-						console.log("dmgDealt plus weapon damage: " + dmgObject.dmgDealt);
-					}
-
-				}else{
-					hitType = "miss";
-				}
-
-				var actualDmg = target.calculateActualDmg(dmgObject.dmgDealt, game.level().levelNum());
-
-				attackResults = {
-					attemptedDmg : dmgObject.dmgDealt,
-					actualDmg : actualDmg,
-					hitType : hitType,
-					attackType : attackName,
-				};
-
-				target.takeDmg(actualDmg);
-
-				self.cooldowns[attackName] = baseCooldown;
-
-				//Register the attack
-				game.registerAttack(self, target, attackResults);
-			}
-
 		}
 
 		this.takeDmg = function(dmg){
@@ -307,6 +144,14 @@ define([
 
 		this.hasWeapon = function(){
 			return false;
+		}
+
+		this.hasActiveCombatEffect = function(effect_id){
+			var activeEffect = $.grep(self.activeCombatEffects(), function(elem, idx){
+				return elem.id == effect_id;
+			});
+
+			return activeEffect.length > 0;
 		}
 
 		this.getEquippedWeapon = function(){

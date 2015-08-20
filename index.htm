@@ -331,6 +331,10 @@
 										<button type="button" class="btn btn-default" data-bind="click: $root.playerAttacks">Attack!</button>
 										<span class="button-label">Strike your enemy with your currently equipped weapon (if any)</span>
 									</div>
+									<div class="line">
+										<button type="button" class="btn btn-default" data-bind="click: $root.playerFlurry">Flurry</button>
+										<span class="button-label"></span>
+									</div>
 									<!-- /ko -->
 									<div class="line">
 										<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.player().numPotionsAvailable() < 1 || $root.player().isDead() }, click: $root.useHealthPotion, text: 'Use Health Potion (' + $root.player().numPotionsAvailable() + ')'">Use Health Potion</button>

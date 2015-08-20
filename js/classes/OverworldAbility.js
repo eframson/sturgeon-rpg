@@ -1,15 +1,15 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/Ability',
+	'classes/LevelableAbility',
 	'Utils'
-], function($, ko, Ability, Utils){
+], function($, ko, LevelableAbility, Utils){
 
 	function OverworldAbility(data){
 
 		var self = this;
 
-		Ability.call(this, data);
+		LevelableAbility.call(this, data);
 
 		this.init = function(data){
 
@@ -21,7 +21,7 @@ define([
 		this.init(data);
 	}
 
-	OverworldAbility.prototype = Object.create(Ability.prototype);
+	OverworldAbility.prototype = Object.create(LevelableAbility.prototype);
 	OverworldAbility.prototype.constructor = OverworldAbility;
 
 	return OverworldAbility;

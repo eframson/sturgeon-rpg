@@ -1,29 +1,149 @@
 {
-	"findFood" : {
-		"id" : "findFood",
-		"name" : "Find Food",
-		"description" : "Scrounge along the bottom of the riverbed for any scraps of sustenance you can find.",
-		"skillLevel" : "poor",
-		"skillProgress" : 0,
-		"nextSkillLevelAtProgress" : 10,
-		"resetProgressOnSkillLevelUp" : 1,
-		"buttonLabel" : "Find Food",
-		"chanceOfEffect" : 100,
-		"baseCooldown" : 10,
-		"cooldown" : 0
+	"active_abilities" : {
+
+		"findFood" : {
+			"id" : "findFood",
+			"name" : "Find Food",
+			"description" : "Scrounge along the bottom of the riverbed for any scraps of sustenance you can find.",
+			"skillLevel" : "poor",
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"buttonLabel" : "Find Food",
+			"chanceOfEffect" : 100,
+			"baseCooldown" : 10,
+			"cooldown" : 0
+		},
+
+		"scanSquares" : {
+			"id" : "scanSquares",
+			"name" : "Scan Squares",
+			"description" : "Focus on your surroundings, revealing the contents of nearby squares.",
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"buttonLabel" : "Scan Surroundings",
+			"chanceOfEffect" : 100,
+			"baseCooldown" : 10,
+			"cooldown" : 0
+		}
+
 	},
 
-	"scanSquares" : {
-		"id" : "scanSquares",
-		"name" : "Scan Squares",
-		"description" : "Focus on your surroundings, revealing the contents of nearby squares.",
-		"skillLevel" : 1,
-		"skillProgress" : 0,
-		"nextSkillLevelAtProgress" : 10,
-		"resetProgressOnSkillLevelUp" : 1,
-		"buttonLabel" : "Scan Surroundings",
-		"chanceOfEffect" : 100,
-		"baseCooldown" : 10,
-		"cooldown" : 0
+	"combat_abilities" : {
+		"stun" : {
+			"className" : "Stun",
+			"id" : "stun",
+			"name" : "Stun",
+			"description" : "A fin-strike directly to the side of the head. Stuns your enemy for two rounds.",
+			"buttonLabel" : "Stun",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 0,
+			"dmgCoefficient" : 0,
+			"baseCooldown" : 4,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"applyCombatEffectOnHit" : "stun",
+			"sortOrder" : 30
+		},
+
+		"basic_attack" : {
+			"className" : "BasicAttack",
+			"id" : "basic_attack",
+			"name" : "Attack",
+			"description" : "Strike your enemy with your currently equipped weapon (if any).",
+			"buttonLabel" : "Attack!",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 1,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 1
+		},
+
+		"npc_mighty" : {
+			"className" : "NpcMighty",
+			"id" : "npc_mighty",
+			"name" : "NPC Mighty",
+			"description" : "Strike your enemy with your currently equipped weapon (if any).",
+			"buttonLabel" : "",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 0.5,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0
+		},
+
+		"mighty" : {
+			"className" : "Mighty",
+			"id" : "mighty",
+			"name" : "Mighty",
+			"description" : "50% chance to hit for 300% of normal damage",
+			"buttonLabel" : "Mighty Swing",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 0.5,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 1,
+			"baseCooldown" : 2,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 20
+		},
+
+		"flurry" : {
+			"className" : "Flurry",
+			"id" : "flurry",
+			"name" : "Flurry",
+			"description" : "Make three quick attacks for 30% of normal damage each. Chance on hit to do 150% of normal damage.",
+			"buttonLabel" : "Flurry",
+			"numAttempts" : 3,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 0.3,
+			"baseCooldown" : 2,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 10
+		}
+
+	},
+
+	"combat_effects" : {
+		"stun" : {
+			"id" : "stun",
+			"name" : "Stunned",
+			"description" : "Stunned. Unable to act.",
+			"baseDuration" : 2,
+			"duration" : 0,
+			"baseDelayUntilNextApplication" : 4,
+			"delayUntilNextApplication" : 0,
+			"isActive" : 0
+		}
 	}
 }

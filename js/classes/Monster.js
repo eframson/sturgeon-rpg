@@ -5,8 +5,9 @@ define([
 	'classes/DataCollection',
 
 	'json!data/monsterarchetypes.json',
+	'json!data/skills.json',
 	'Utils',
-], function($, ko, Entity, DataCollection, monsterArchetypeDataFile, Utils){
+], function($, ko, Entity, DataCollection, monsterArchetypeDataFile, skillDataFile, Utils){
 
 	function Monster(monsterData){
 
@@ -15,6 +16,9 @@ define([
 		monsterData = monsterData || {};
 
 		Entity.call(this, monsterData);
+
+		var monsterArchetypeDataCollection = new DataCollection(monsterArchetypeDataFile);
+		var skillDataCollection = new DataCollection(skillDataFile);
 
 		this.init = function(monsterData){
 
@@ -36,7 +40,6 @@ define([
 			self.lootCoefficient = ko.observable(monsterData.lootCoefficient || 1);
 			self.chanceToCrit = ko.observable(monsterData.chanceToCrit || 0);
 
-			self.monsterArchetypeDataCollection = new DataCollection(monsterArchetypeDataFile);
 			self.availableAttacks = monsterData.availableAttacks || {};
 
 			if(self.fullyDynamicStats && !self.isScaled()){
@@ -70,6 +73,7 @@ define([
 				self.speed( self.level() );
 				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
 				
+				monsterData.availableCombatAbilities = archetypeData.availableCombatAbilities;
 				
 				self.name( self.name() + (archetypeData.displayString ? " " + archetypeData.displayString : "") );
 
@@ -90,20 +94,47 @@ define([
 
 			}
 
+			var abilityDataToLoad = [];
+			if(Utils.isEmptyObject(self.combatAbilities())){
+
+				$.each((monsterData.availableCombatAbilities || []), function(idx, elem){
+					var abilityData;
+					
+					abilityData = skillDataCollection.getNode(["combat_abilities", elem]);
+
+					abilityDataToLoad.push(abilityData);
+				});
+
+			}else{
+				abilityDataToLoad = $.map(self.combatAbilities(), function(elem, idx){
+					return elem;
+				});
+			}
+
+			$.each(abilityDataToLoad, function(idx, elem){
+
+				var className = elem.className;
+
+				require(["classes/CombatAbilities/" + className], function(newClassDefinition){
+					self.combatAbilities()[elem.id] = new newClassDefinition(elem);
+				});
+
+			});
+
 		}
 
 		this.getMonsterArchetypeById = function(archetypeID, archetypeClass){
-			return self.monsterArchetypeDataCollection.getNode([archetypeClass, archetypeID]);
+			return monsterArchetypeDataCollection.getNode([archetypeClass, archetypeID]);
 		}
 
 		this.getAvailableMonsterArchetypeIdsByClass = function(archetypeClass){
-			return self.monsterArchetypeDataCollection.getNode([archetypeClass], 1);
+			return monsterArchetypeDataCollection.getNode([archetypeClass], 1);
 		}
 
 		this._getAppropriateArchetypeIdForLevel = function(){
 
 			//Get a list of all monster archetypes
-			var allAvailableArchetypes = self.monsterArchetypeDataCollection.getNode([self.archetypeClass]);
+			var allAvailableArchetypes = monsterArchetypeDataCollection.getNode([self.archetypeClass]);
 
 			//Filter out by ones that shouldn't appear on the current level
 			allAvailableArchetypes = $.grep($.map(allAvailableArchetypes, function(obj, idx){ return obj }), function(elem, idx){

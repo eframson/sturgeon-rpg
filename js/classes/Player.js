@@ -10,23 +10,25 @@ define([
 	'classes/Weapon',
 	'classes/ActiveAbilities/FindFood',
 	'classes/ActiveAbilities/ScanSquares',
+	'classes/CombatAbilities/BasicAttack',
+	'classes/CombatAbilities/Flurry',
 	'classes/DataCollection',
 
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, FindFood, ScanSquares, DataCollection, skillDataFile, Utils){
+], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, FindFood, ScanSquares, BasicAttack, Flurry, DataCollection, skillDataFile, Utils){
 
 	function Player(playerData){
 
 		//Init
 		var self = this;
-		playerData = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {} }, playerData);
+		playerData = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {}, combatAbilities : {} }, playerData);
 
 		Entity.call(this, playerData);
 
-		self.skillDataCollection = new DataCollection(skillDataFile);
-
 		this.init = function(playerData){
+
+			self.skillDataCollection = new DataCollection(skillDataFile);
 
 			self.level = ko.observable(playerData.level || 1);
 			self.hp = ko.observable(playerData.hp || 0);
@@ -49,8 +51,13 @@ define([
 				shield : self._instantiateObservableIfSet(playerData.equipment.shield, Shield),
 			});
 			self.activeAbilities = ko.observable({
-				findFood : new FindFood(playerData.activeAbilities.findFood || self.skillDataCollection.getNode(["findFood"])),
-				scanSquares : new ScanSquares(playerData.activeAbilities.scanSquares || self.skillDataCollection.getNode(["scanSquares"])),
+				findFood : new FindFood(playerData.activeAbilities.findFood || self.skillDataCollection.getNode(["active_abilities","findFood"])),
+				scanSquares : new ScanSquares(playerData.activeAbilities.scanSquares || self.skillDataCollection.getNode(["active_abilities","scanSquares"])),
+			});
+			//Probably change this to be more like the way it works for monsters in terms of initting it
+			self.combatAbilities = ko.observable({
+				BasicAttack : new BasicAttack( playerData.combatAbilities.BasicAttack || self.skillDataCollection.getNode(["combat_abilities","basic_attack"]) ),
+				Flurry : new Flurry( playerData.combatAbilities.Flurry || self.skillDataCollection.getNode(["combat_abilities","flurry"]) ),
 			});
 			self.abilities = ko.observableArray(playerData.abilities || Array());
 			self.speed = ko.observable(playerData.speed || 2);

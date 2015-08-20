@@ -676,7 +676,11 @@ define([
 		}
 
 		this.playerAttacks = function(game, event){
-			self.doCombatRound("basic","attack");
+			self.doCombatRound("BasicAttack","attack");
+		}
+
+		this.playerFlurry = function(game, event){
+			self.doCombatRound("Flurry","attack");
 		}
 
 		this.doCombatRound = function(playerAction, playerActionType){
@@ -699,8 +703,10 @@ define([
 
 			var action = (goesFirst == "player") ? playerAction : monsterAction ;
 
-			//Attacker does something (optionally) to the defender, and UI is updated accordingly
-			attacker.takeCombatAction(action, defender, self);
+			if(attacker.canAct()){
+				//Attacker does something (optionally) to the defender, and UI is updated accordingly
+				attacker.takeCombatAction(action, defender, self);
+			}
 
 			//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
 			if(!defender.isDead()){
@@ -734,6 +740,13 @@ define([
 				}
 			}
 
+			if(!attacker.isDead()){
+				attacker.updatePassiveEffectsForRound();
+			}
+
+			if(!defender.isDead()){
+				defender.updatePassiveEffectsForRound();
+			}
 		}
 
 		this.registerAttack = function(attacker, defender, attackResults){
@@ -991,12 +1004,7 @@ define([
 
 				});
 
-				var quality = Utils.chooseRandomly([
-					"poor",
-					"good",
-					"great",
-					"exceptional"
-				]);
+				var quality = Utils.chooseRandomly(Utils.getPossibleQualities());
 
 				if(lootSet == "boss"){
 					quality = "exceptional";
@@ -1862,10 +1870,46 @@ define([
 					skill.cooldown(0);
 				});
 
-				self.logMessage("Much like Madeline Kahn in Blazing Saddles, you feel wefweshed.", "player");
+				self.logMessage("Much like Madeline Kahn in Blazing Saddles, you feel 'wefweshed.'", "player");
 
 			}else if(item.id == "stat_potion"){
-				self.logMessage("This hasn't been implented yet. However, you are confident it will happen...soon.", "player");
+
+				srcNumLeft = self.removeActiveItem(game, event, 1);
+
+				if(srcNumLeft == 0){
+					self._resetActiveItem();
+				}
+
+				//Choose a stat
+				var improvableStats = Array(
+					"str",
+					"dex",
+					"end",
+					"speed",
+					"baseHp"
+				);
+
+				var statStr = Utils.chooseRandomly(improvableStats);
+
+				//Improve it
+				var statToImprove = self.player()[statStr];
+				var improveAmt = 1;
+
+				if(statStr == "baseHp"){
+					improveAmt = 5;
+				}
+				statToImprove( statToImprove() + improveAmt );
+
+				if(statStr == "speed"){
+					statStr = "Speed";
+				}else if(statStr == 'baseHp'){
+					statStr = "HP";
+				}else{
+					statStr = statStr.toUpperCase();
+				}
+
+				//Output message
+				self.logMessage("Your " + statStr + " has increased by " + improveAmt + "!", "player");
 			}
 
 		}
@@ -2169,12 +2213,7 @@ define([
 		this.getRandomScroungable = function(qualityCategory, justData){
 
 			if(!qualityCategory){
-				qualityCategory = Utils.chooseRandomly([
-					"poor",
-					"good",
-					"great",
-					"exceptional"
-				]);
+				qualityCategory = Utils.chooseRandomly(Utils.getPossibleQualities());
 			}
 
 			var possibleFoods = self.itemDataCollection.getNode(["items", "consumables", "scroungables", qualityCategory], 1);
@@ -2392,12 +2431,7 @@ define([
 		this.testScalingWeaponLoopAsCSV = function(){
 			var results = self.testScalingWeaponLoop();
 
-			var qualities = [
-				"poor",
-				"good",
-				"great",
-				"exceptional"
-			];
+			var qualities = Utils.getPossibleQualities();
 
 			//Order by level, quality, item ID
 			var line = "";
@@ -2430,12 +2464,7 @@ define([
 
 		this.testScalingWeaponLoop = function(){
 			var output = [];
-			var qualities = [
-				"poor",
-				"good",
-				"great",
-				"exceptional"
-			];
+			var qualities = Utils.getPossibleQualities();
 			var i, k;
 			for(i = 1; i < 101; i++){
 				var objectForLevel = {};
@@ -2488,12 +2517,7 @@ define([
 		this.testScalingArmorLoopAsCSV = function(){
 			var results = self.testScalingArmorLoop();
 
-			var qualities = [
-				"poor",
-				"good",
-				"great",
-				"exceptional"
-			];
+			var qualities = Utils.getPossibleQualities();
 
 			//Order by level, quality, item ID
 			var line = "";
@@ -2526,12 +2550,7 @@ define([
 
 		this.testScalingArmorLoop = function(){
 			var output = [];
-			var qualities = [
-				"poor",
-				"good",
-				"great",
-				"exceptional"
-			];
+			var qualities = Utils.getPossibleQualities();
 			var i, k;
 			for(i = 1; i < 101; i++){
 				var objectForLevel = {};

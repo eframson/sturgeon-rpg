@@ -155,6 +155,16 @@ define([
 			return actualDmg;
 		},
 
+		getPossibleQualities : function(){
+			var qualities = [
+				"poor",
+				"good",
+				"great",
+				"exceptional"
+			];
+			return qualities;
+		},
+
 		getExportDataFromObject : function(obj){
 
 			var exportObj = {};
