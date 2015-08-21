@@ -8,64 +8,81 @@ define([
 	'classes/Armor',
 	'classes/Shield',
 	'classes/Weapon',
-	'classes/ActiveAbilities/FindFood',
-	'classes/ActiveAbilities/ScanSquares',
-	'classes/CombatAbilities/BasicAttack',
-	'classes/CombatAbilities/Flurry',
 	'classes/DataCollection',
 
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, FindFood, ScanSquares, BasicAttack, Flurry, DataCollection, skillDataFile, Utils){
+], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, DataCollection, skillDataFile, Utils){
 
-	function Player(playerData){
+	function Player(data){
 
 		//Init
 		var self = this;
-		playerData = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {}, combatAbilities : {} }, playerData);
+		data = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {}, combatAbilities : {} }, data);
 
-		Entity.call(this, playerData);
+		Entity.call(this, data);
 
-		this.init = function(playerData){
+		this.init = function(data){
 
 			self.skillDataCollection = new DataCollection(skillDataFile);
 
-			self.level = ko.observable(playerData.level || 1);
-			self.hp = ko.observable(playerData.hp || 0);
-			self.baseHp = ko.observable(playerData.baseHp || 20);
-			self.exp = ko.observable(playerData.exp || 0);
+			self.level = ko.observable(data.level || 1);
+			self.hp = ko.observable(data.hp || 0);
+			self.baseHp = ko.observable(data.baseHp || 20);
+			self.exp = ko.observable(data.exp || 0);
 			self.inventory = new ItemCollection(Array());
-			self.inventoryMaxSlots = ko.observable(playerData.inventoryMaxSlots || 5);
+			self.inventoryMaxSlots = ko.observable(data.inventoryMaxSlots || 5);
 			self.equipment = ko.observable({
 
 				armor : ko.observable({
 
-					head : self._instantiateObservableIfSet(playerData.equipment.armor.head, Armor),
-					fin : self._instantiateObservableIfSet(playerData.equipment.armor.fin, Armor),
-					body : self._instantiateObservableIfSet(playerData.equipment.armor.body, Armor),
-					tail : self._instantiateObservableIfSet(playerData.equipment.armor.tail, Armor)
+					head : self._instantiateObservableIfSet(data.equipment.armor.head, Armor),
+					fin : self._instantiateObservableIfSet(data.equipment.armor.fin, Armor),
+					body : self._instantiateObservableIfSet(data.equipment.armor.body, Armor),
+					tail : self._instantiateObservableIfSet(data.equipment.armor.tail, Armor)
 
 				}),
 
-				weapon : self._instantiateObservableIfSet(playerData.equipment.weapon, Weapon),
-				shield : self._instantiateObservableIfSet(playerData.equipment.shield, Shield),
+				weapon : self._instantiateObservableIfSet(data.equipment.weapon, Weapon),
+				shield : self._instantiateObservableIfSet(data.equipment.shield, Shield),
 			});
-			self.activeAbilities = ko.observable({
-				findFood : new FindFood(playerData.activeAbilities.findFood || self.skillDataCollection.getNode(["active_abilities","findFood"])),
-				scanSquares : new ScanSquares(playerData.activeAbilities.scanSquares || self.skillDataCollection.getNode(["active_abilities","scanSquares"])),
+
+			if(Utils.isEmptyObject(data.activeAbilities)){
+				data.activeAbilities = {
+					find_food: {},
+					scan_squares: {}
+				};
+			}
+
+			if(Utils.isEmptyObject(data.combatAbilities)){
+				data.combatAbilities = {
+					basic_attack: {},
+					flurry: {}
+				};
+			}
+
+			self.activeAbilities = ko.observable({});
+			self.combatAbilities = ko.observable({});
+
+			$.each(data.activeAbilities, function(idx, elem){
+
+				self.addActiveAbility(idx, elem);
+
 			});
-			//Probably change this to be more like the way it works for monsters in terms of initting it
-			self.combatAbilities = ko.observable({
-				BasicAttack : new BasicAttack( playerData.combatAbilities.BasicAttack || self.skillDataCollection.getNode(["combat_abilities","basic_attack"]) ),
-				Flurry : new Flurry( playerData.combatAbilities.Flurry || self.skillDataCollection.getNode(["combat_abilities","flurry"]) ),
+
+			$.each(data.combatAbilities, function(idx, elem){
+
+				self.addCombatAbility(idx, elem);
+
 			});
-			self.abilities = ko.observableArray(playerData.abilities || Array());
-			self.speed = ko.observable(playerData.speed || 2);
-			self.str = ko.observable(playerData.str || Utils.doRand(1,6));
-			self.dex = ko.observable(playerData.dex || Utils.doRand(1,6));
-			self.end = ko.observable(playerData.end || Utils.doRand(1,6));
-			self.baseChanceToCrit = ko.observable(playerData.baseChanceToCrit || 5);
-			self.hasLeveledUp = ko.observable(playerData.hasLeveledUp || false);
+
+
+			self.speed = ko.observable(data.speed || 2);
+			self.str = ko.observable(data.str || Utils.doRand(1,6));
+			self.dex = ko.observable(data.dex || Utils.doRand(1,6));
+			self.end = ko.observable(data.end || Utils.doRand(1,6));
+			self.baseChanceToCrit = ko.observable(data.baseChanceToCrit || 5);
+			self.hasLeveledUp = ko.observable(data.hasLeveledUp || false);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
@@ -73,11 +90,11 @@ define([
 			});
 
 			var itemArray = Array();
-			for(i = 0; i < playerData.inventory.length; i++){
-				if(playerData.inventory[i]._classNameForLoad){
-					itemArray.push(  eval("new " + playerData.inventory[i]._classNameForLoad +"(playerData.inventory[i])")  );
+			for(i = 0; i < data.inventory.length; i++){
+				if(data.inventory[i]._classNameForLoad){
+					itemArray.push(  eval("new " + data.inventory[i]._classNameForLoad +"(data.inventory[i])")  );
 				}else{
-					itemArray.push( new Item(playerData.inventory[i]) );
+					itemArray.push( new Item(data.inventory[i]) );
 				}
 			}
 			self.inventory.items(itemArray);
@@ -202,6 +219,44 @@ define([
 			if(self.hp() == 0){
 				self.hp( self.maxHp() );
 			}
+
+			self.activeAbilitiesIterable = ko.computed(function(){
+				return Utils.getObjectAsArrayIndexedByNumericalSortOrder(self.activeAbilities());
+			});
+			
+			self.combatAbilitiesIterable = ko.computed(function(){
+				return Utils.getObjectAsArrayIndexedByNumericalSortOrder(self.combatAbilities());
+			});
+		}
+
+		this.addActiveAbility = function(ability_id, abilityData){
+
+			if(Utils.isEmptyObject(abilityData)){
+				abilityData = self.skillDataCollection.getNode(["active_abilities", ability_id]);
+			}
+
+			var className = abilityData.className;
+
+			require(["classes/ActiveAbilities/" + className], function(newClassDefinition){
+				self.activeAbilities()[abilityData.id] = new newClassDefinition(abilityData);
+				self.activeAbilities.valueHasMutated();
+			});
+
+		}
+
+		this.addCombatAbility = function(ability_id, abilityData){
+
+			if(Utils.isEmptyObject(abilityData)){
+				abilityData = self.skillDataCollection.getNode(["combat_abilities", ability_id]);
+			}
+
+			var className = abilityData.className;
+
+			require(["classes/CombatAbilities/" + className], function(newClassDefinition){
+				self.combatAbilities()[abilityData.id] = new newClassDefinition(abilityData);
+				self.combatAbilities.valueHasMutated();
+			});
+
 		}
 
 		this.addItemToInventory = function(itemToAdd, ignoreInventoryConstraints){
@@ -322,13 +377,23 @@ define([
 			}
 		}
 
+		this.progressActiveAbilities = function(){
+
+			$.each(self.activeAbilities(), function(idx, ability){
+
+				ability.makeProgress(0);
+
+			});
+
+		}
+
 		this.levelUp = function(){
 			//Add stats
 			self.hasLeveledUp(true);
 			self.baseHp( self.baseHp() + 5 );
 			self.hp(self.maxHp());
 
-			self.activeAbilities().findFood.makeProgress(0);
+			self.progressActiveAbilities();
 
 			self.end( self.end() + 1 );
 
@@ -370,7 +435,7 @@ define([
 			exportObj._classNameForLoad = self.constructor.name;
 
 			for(prop in self){
-				if(prop != "inventory"){
+				if(prop != "inventory" && prop != "activeAbilities" && prop != "combatAbilities" && prop != "passiveEffects" && prop != "combatEffects"){
 					if ( typeof self[prop] !== 'function' ){
 						exportObj[prop] = self[prop];
 					}else if (ko.isObservable(self[prop])) {
@@ -380,6 +445,20 @@ define([
 			}
 
 			exportObj.inventory = self.inventory.getExportData();
+
+			exportObj.activeAbilities = {};
+			$.each(self.activeAbilities(), function(idx, ability){
+
+				exportObj.activeAbilities[idx] = ability.getExportData();
+
+			});
+
+			exportObj.combatAbilities = {};
+			$.each(self.combatAbilities(), function(idx, ability){
+
+				exportObj.combatAbilities[idx] = ability.getExportData();
+
+			});
 
 			return ko.mapping.toJS( exportObj );
 
@@ -400,7 +479,7 @@ define([
 			return ko.observable(obj !== undefined && !Utils.isEmptyObject(obj) ? new className(obj) : {});
 		}
 
-		self.init(playerData);
+		self.init(data);
 	}
 
 	Player.prototype = Object.create(Entity.prototype);

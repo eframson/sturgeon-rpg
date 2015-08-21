@@ -62,44 +62,33 @@ define([
 				return !self.hasActiveCombatEffect("stun");
 			});
 
+			self.combatEffectsIterable = ko.computed(function(){
+				return $.map(self.combatEffects(), function(elem, idx){
+					return elem;
+				});
+				//return Utils.getObjectAsArrayIndexedByNumericalSortOrder(self.combatAbilities());
+			});
+
 		}
 
 		this.calculateActualDmg = function(dmg, levelNum){
 			return Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum);
 		}
 
-		this.takeCombatAction = function(action, target, game){
+		this.takeCombatAction = function(abilityId, target, game){
 
-			var actionType = action.actionType;
-
-			if(actionType == 'attack'){
-
-				var attackName = action.actionName;
-
-				self.makeAttack(attackName, target, game);
-
-
-			}else if(actionType == 'ability'){
-
-				//Figure this out later
-
-			}else if(actionType == 'item'){
-
-				//Figure this out later too!
-
-			}
+			self.makeAttack(abilityId, target, game);
 
 		}
 
-		this.makeAttack = function(attackName, target, game){
+		this.makeAttack = function(abilityId, target, game){
 
-			//var attackData = self.attacks[attackName];
-			var combatAbility = self.combatAbilities()[attackName];
+			var combatAbility = self.combatAbilities()[abilityId];
 			combatAbility.doAbility(self, target, game);
 
 		}
 
-		this.updatePassiveEffectsForRound = function(){
+		this.updateCombatEffectsForRound = function(){
 			
 			$.each(self.combatEffects(), function(idx, effect){
 
@@ -117,6 +106,33 @@ define([
 
 		}
 
+		this.updateActiveAbilityCooldownsForRound = function(){
+
+			$.each(self.combatAbilities(), function(idx, ability){
+
+				if(ability.cooldown() > 0){
+					ability.cooldown( ability.cooldown() - 1 );
+				}
+
+			});
+
+		}
+
+		this.resetActiveAbilityCooldowns = function(){
+			
+			$.each(self.combatAbilities(), function(idx, ability){
+
+				ability.cooldown( 0 );
+			});
+
+		}
+
+		this.resetCombatEffects = function(){
+
+			self.combatEffects({});
+
+		}
+
 		this.applyCombatEffect = function(combatEffect){
 
 			existingEffect = self.combatEffects()[combatEffect.id];
@@ -131,6 +147,8 @@ define([
 				combatEffect.cooldown(combatEffect.baseCooldown);
 				self.combatEffects()[combatEffect.id] = combatEffect;
 			}
+
+			self.combatEffects.valueHasMutated();
 		}
 
 		this.takeDmg = function(dmg){

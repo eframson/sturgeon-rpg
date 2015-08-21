@@ -17,6 +17,7 @@ define([
 			self.cooldown = ko.observable(data.cooldown || 0);
 			self.didLevelUp = 0;
 			self.canLevelUp = 0;
+			self.sortOrder = data.sortOrder;
 
 		}
 

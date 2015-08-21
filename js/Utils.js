@@ -155,6 +155,41 @@ define([
 			return actualDmg;
 		},
 
+		getObjectAsArrayIndexedByNumericalSortOrder : function(object, sortFieldName){
+
+			sortFieldName = sortFieldName || "sortOrder";
+
+			var outputArray = $.map(object, function(elem, idx){
+				return elem;
+			});
+
+			outputArray.sort(function(left, right){
+				if(typeof left[sortFieldName] == 'function'){
+					left = left[sortFieldName]();
+				}else{
+					left = left[sortFieldName];
+				}
+
+				if(typeof right[sortFieldName] == 'function'){
+					right = right[sortFieldName]();
+				}else{
+					right = right[sortFieldName];
+				}
+
+				left = parseInt(left);
+				right = parseInt(right);
+
+				return (left > right) ? 1 : -1 ;
+
+				if(left == right){
+					return 0;
+				}
+			});
+
+			return outputArray;
+
+		},
+
 		getPossibleQualities : function(){
 			var qualities = [
 				"poor",

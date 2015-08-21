@@ -76,8 +76,8 @@ define([
 
 		this.defaultCooldown = 10;
 		this.playerActions = {
-			scanSquares: function(){
-				var scanSquareSkill = self.player().activeAbilities().scanSquares;
+			scan_squares : function(){
+				var scanSquareSkill = self.player().activeAbilities()["scan_squares"];
 				var success = scanSquareSkill.doSkill();
 
 				if(success){ //Just a formality, should always succeed
@@ -97,9 +97,9 @@ define([
 				}
 
 			},
-			findFood: function(){
+			find_food : function(){
 
-				var findFoodSkill = self.player().activeAbilities().findFood;
+				var findFoodSkill = self.player().activeAbilities()["find_food"];
 				var success = findFoodSkill.doSkill();
 
 				var newFoodItem = false;
@@ -607,6 +607,9 @@ define([
 
 		this.startCombat = function(encounterType){
 
+			self.player().resetActiveAbilityCooldowns();
+			self.player().resetCombatEffects();
+
 			var availableMonsters = self.getAvailableMonsterIdsByMonsterCategory("regular");
 			
 			//Pick a monster ID randomly
@@ -675,44 +678,32 @@ define([
 			self.manageTransitionToView("combat","mainscreen", function(){ self.freezeMovement(false); });
 		}
 
-		this.playerAttacks = function(game, event){
-			self.doCombatRound("BasicAttack","attack");
+		this.playerAttacks = function(ability, event){
+			self.doCombatRound(ability.id);
 		}
 
-		this.playerFlurry = function(game, event){
-			self.doCombatRound("Flurry","attack");
-		}
-
-		this.doCombatRound = function(playerAction, playerActionType){
+		this.doCombatRound = function(playerAbilityId){
 
 			var goesFirst = self.getGoesFirst();
 			var attacker = (goesFirst == "player") ? self.player() : self.currentEnemy() ;
 			var defender = (goesFirst == "player") ? self.currentEnemy() : self.player() ;
 
-			var monsterAttackName = Utils.doBasedOnPercent(
+			var monsterAbilityId = Utils.doBasedOnPercent(
 				self.currentEnemy().availableAttacks
 			);
-			var monsterAction = {
-				actionName : monsterAttackName,
-				actionType : "attack"
-			};
-			var playerAction = {
-				actionName : playerAction,
-				actionType : playerActionType
-			};
 
-			var action = (goesFirst == "player") ? playerAction : monsterAction ;
+			var abilityId = (goesFirst == "player") ? playerAbilityId : monsterAbilityId ;
 
 			if(attacker.canAct()){
 				//Attacker does something (optionally) to the defender, and UI is updated accordingly
-				attacker.takeCombatAction(action, defender, self);
+				attacker.takeCombatAction(abilityId, defender, self);
 			}
 
 			//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
 			if(!defender.isDead()){
 
-				action = (goesFirst == "player") ? monsterAction : playerAction ;
-				defender.takeCombatAction(action, attacker, self);
+				abilityId = (goesFirst == "player") ? monsterAbilityId : playerAbilityId ;
+				defender.takeCombatAction(abilityId, attacker, self);
 
 			}
 
@@ -740,13 +731,13 @@ define([
 				}
 			}
 
-			if(!attacker.isDead()){
-				attacker.updatePassiveEffectsForRound();
-			}
+			$.each([attacker,defender], function(idx, entity){
+				if(!entity.isDead()){
+					entity.updateCombatEffectsForRound();
+					entity.updateActiveAbilityCooldownsForRound();
+				}
+			});
 
-			if(!defender.isDead()){
-				defender.updatePassiveEffectsForRound();
-			}
 		}
 
 		this.registerAttack = function(attacker, defender, attackResults){
@@ -822,6 +813,12 @@ define([
 				self.setFullscreenContentFromSlideId(slideID);
 				$FULL_SCREEN_NOTICE_DIV.fadeIn(BASE_FADEIN_SPEED);
 			});
+		}
+
+		this.useActiveAbility = function(ability, event){
+
+			self.playerActions[ability.id]();
+
 		}
 
 		this.showContainerWithContents = function(itemArray){
@@ -1193,13 +1190,13 @@ define([
 
 				text = "You encounter a wise old hermit crab who offers to teach you how to ";
 
-				if(trainSkillString == "findFood"){
+				if(trainSkillString == "find_food"){
 					text += "get better at scrounging for food";
 					trainCost = self.player().activeAbilities().findFood.getTrainCost();
 					trainSkill = "findFood";
 					trainSkillSuccessDesc = "skill in finding food";
 					skillOrStat = "skill";
-				}else if(trainSkillString == "scanSquares"){
+				}else if(trainSkillString == "scan_squares"){
 					text += "get better at surveying your surroundings";
 					trainCost = self.player().activeAbilities().scanSquares.getTrainCost();
 					trainSkill = "scanSquares";

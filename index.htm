@@ -114,24 +114,17 @@
 										<div class="state-button-row">
 											<h3>Abilities</h3>
 										</div>
+										<!-- ko foreach: $root.player().activeAbilitiesIterable() -->
 										<div class="state-button-row">
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
-													click: playerActions.findFood,
-													text: player().activeAbilities().findFood.buttonLabel + ( player().activeAbilities().findFood.cooldown() > 0 ? ' (' + player().activeAbilities().findFood.cooldown() + ')' : '' ),
-													css: { disabled : player().activeAbilities().findFood.cooldown() > 0 }">
+													click: $root.useActiveAbility,
+													text: buttonLabel + ( cooldown() > 0 ? ' (' + cooldown() + ')' : '' ),
+													css: { disabled : cooldown() > 0 }">
 												</button>
 											</div>
 										</div>
-										<div class="state-button-row">
-											<div class="state-button">
-												<button type="button" class="btn btn-default" data-bind="
-													click: playerActions.scanSquares,
-													text: player().activeAbilities().scanSquares.buttonLabel + ( player().activeAbilities().scanSquares.cooldown() > 0 ? ' (' + player().activeAbilities().scanSquares.cooldown() + ')' : '' ),
-													css: { disabled : player().activeAbilities().scanSquares.cooldown() > 0 }">
-												</button>
-											</div>
-										</div>
+										<!-- /ko -->
 									</div>
 									<div class="state-button-col with-left-padding">
 										<div class="state-button-row">
@@ -160,14 +153,12 @@
 										<div class="state-button-row">
 											<h3>Skill Proficiencies</h3>
 										</div>
-										<div class="state-button-row">
-											<span class="stat">Find Food:</span>
-											<span class="value" data-bind="text: $root.player().activeAbilities().findFood.skillLevel()"></span>
-										</div>
-										<div class="state-button-row">
-											<span class="stat">Scan Range:</span>
-											<span class="value" data-bind="text: $root.player().activeAbilities().scanSquares.skillLevel()"></span>
-										</div>
+										<!-- ko foreach: $root.player().activeAbilitiesIterable() -->
+											<div class="state-button-row">
+												<span class="stat" data-bind="text: $data.name + ':'"></span>
+												<span class="value" data-bind="text: $data.skillLevel()"></span>
+											</div>
+										<!-- /ko -->
 									</div>
 									<div class="clear"></div>
 								</div>
@@ -327,14 +318,18 @@
 										<span class="button-label"></span>
 									</div>
 									<!-- ko if: !$root.currentEnemy().isDead() && !$root.player().isDead() -->
-									<div class="line">
-										<button type="button" class="btn btn-default" data-bind="click: $root.playerAttacks">Attack!</button>
-										<span class="button-label">Strike your enemy with your currently equipped weapon (if any)</span>
-									</div>
-									<div class="line">
-										<button type="button" class="btn btn-default" data-bind="click: $root.playerFlurry">Flurry</button>
-										<span class="button-label"></span>
-									</div>
+
+										<!-- ko foreach: $root.player().combatAbilitiesIterable() -->
+										<div class="line">
+											<button type="button" class="btn btn-default" data-bind="
+												click: $root.playerAttacks,
+												text: buttonLabel + ( cooldown() > 0 ? ' (' + cooldown() + ')' : '' ),
+												css: { disabled : cooldown() > 0 }
+											"></button>
+											<span class="button-label" data-bind="text: $data.description"></span>
+										</div>
+										<!-- /ko -->
+
 									<!-- /ko -->
 									<div class="line">
 										<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.player().numPotionsAvailable() < 1 || $root.player().isDead() }, click: $root.useHealthPotion, text: 'Use Health Potion (' + $root.player().numPotionsAvailable() + ')'">Use Health Potion</button>

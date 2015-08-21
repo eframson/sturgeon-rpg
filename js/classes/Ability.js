@@ -16,6 +16,7 @@ define([
 			self.id = data.id;
 			self.name = data.name || self.id;
 			self.description = data.description || self.name;
+			self.className = data.className;
 
 		}
 
