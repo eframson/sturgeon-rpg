@@ -47,7 +47,9 @@ require([
 
 	$(document).ready(function(){
 
-		//Show our content now that everything's loaded
+		//Hide the loader now that everything's...well, loaded
+		$("#loading").addClass("hidden");
+		//Sneakily switch our hidden elements to a jQuery hide/show instead of CSS class
 		$(".hidden").hide().removeClass("hidden");
 
 		game = new Game();
