@@ -292,8 +292,6 @@
 				"stackable" : 0,
 				"handsRequired" : 1,
 				"maxLevelRange" : 4,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1,
 				"minDmgPctOfAvg" : 0.5,
 				"maxDmgPctOfAvg" : 1.0
 			},
@@ -306,8 +304,6 @@
 				"stackable" : 0,
 				"handsRequired" : 1,
 				"maxLevelRange" : 4,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1,
 				"minDmgPctOfAvg" : 0.6,
 				"maxDmgPctOfAvg" : 1.2
 			},
@@ -319,8 +315,6 @@
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 1,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1
 			},
 			"melee_weapon_04" : {
 				"id" : "melee_weapon_04",
@@ -330,8 +324,6 @@
 				"slotsRequired" : 2,
 				"stackable" : 0,
 				"handsRequired" : 2,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1,
 				"minDmgPctOfAvg" : 0.9,
 				"maxDmgPctOfAvg" : 1.4
 			},
@@ -343,8 +335,6 @@
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 1,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1
 			},
 			"melee_weapon_05" : {
 				"id" : "melee_weapon_05",
@@ -354,8 +344,6 @@
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 2,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1,
 				"minDmgPctOfAvg" : 0.9,
 				"maxDmgPctOfAvg" : 1.4
 			},
@@ -367,8 +355,6 @@
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 2,
-				"canUpgrade" : 1,
-				"canBreakdown" : 1,
 				"minDmgPctOfAvg" : 0.9,
 				"maxDmgPctOfAvg" : 1.4
 			}

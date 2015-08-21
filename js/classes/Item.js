@@ -24,7 +24,6 @@ define([
 		this._sellValue = data.sellValue;
 		this.minLevelRange = data.minLevelRange || 1;
 		this.maxLevelRange = data.maxLevelRange;
-		this.canUpgrade = ko.observable(( data.canUpgrade != undefined ) ? data.canUpgrade : 0);
 		this.numUpgradesApplied = ko.observable(data.numUpgradesApplied || 0);
 		this.isArmor = false;
 		this.isShield = false;
@@ -33,10 +32,15 @@ define([
 		this.attributesImprovedByLastCrafting = "";
 		this.uniqueID = (data.uniqueID || Utils.uniqueID());
 		this.isScaled = ko.observable(data.isScaled || 0);
-		this.canBreakdown = data.canBreakdown || false;
 		this.isEquipped = ko.observable(false);
 		this.quality = ko.observable(data.quality || "good"); //poor, good, great, exceptional
-		self.qualityModifier = undefined;
+		this.qualityModifier = undefined;
+		this.hasQuality = (data.hasQuality !== undefined) ? data.hasQuality : 1;
+
+		this.canEquip = ko.observable( (data.canEquip !== undefined) ? data.canEquip : 0 );
+		this.canBreakdown = ko.observable( (data.canBreakdown !== undefined) ? data.canBreakdown : 0 );
+		this.canUse = ko.observable( (data.canUse !== undefined) ? data.canUse : 0 );
+		this.canUpgrade = ko.observable( (data.canUpgrade !== undefined) ? data.canUpgrade : 0 );
 
 		if(data.qualityModifier){
 			self.qualityModifier = data.qualityModifier;
@@ -58,6 +62,14 @@ define([
 			}
 			var buyValue = self.buyValue();
 			return Math.ceil(buyValue / 2);
+		});
+
+		this.canSell = ko.computed(function(){
+			return self.sellValue() > 0;
+		});
+
+		this.canBuy = ko.computed(function(){
+			return self.buyValue() > 0;
 		});
 
 		this.costForNextUpgradeLevel = ko.computed(function(){

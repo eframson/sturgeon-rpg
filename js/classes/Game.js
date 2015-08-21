@@ -214,9 +214,9 @@ define([
 			}, self);
 
 			self._activeItemCanBeUpgraded = ko.computed(function(){
-				if( self.activeItem().actualItem() instanceof Armor ){
+				if( self.activeItem().actualItem().upgradedWithScrapType == "armor" ){
 					return self.player().armorScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
-				}else if( self.activeItem().actualItem() instanceof Weapon ){
+				}else if( self.activeItem().actualItem().upgradedWithScrapType == "weapon" ){
 					return self.player().weaponScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
 				}
 				return false;
@@ -2713,8 +2713,6 @@ define([
 Feeback/Ideas/Thoughts
 - Perks!
 - Choose perk on levelup
-- Purple square potions (drink and the next purple square will be an "x" type)
-- Stat enhancing potions
 - Give names to exceptional weapons
 - +1/2/3/etc. weapons? Maybe have some kind of defined "quality" measurements
 - Gambling squares! X gold for Y nice thing, Z chance of success
@@ -2727,8 +2725,6 @@ Feeback/Ideas/Thoughts
 - Think about floor as a whole instead of just fight-to-fight
 - Battle arena event?
 - Write combat simulator for testing balancing stuff
-- Shortcut to food
-- Reminder to save before bosses -OR- auto-save before bosses
 - Bosses every x levels + minibosses
 - Make difficulty scaling more gradual
 - Gradual boss difficulty scaling

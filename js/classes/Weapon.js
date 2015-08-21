@@ -1,17 +1,20 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/Item',
+	'classes/GearItem',
 	'Utils'
-], function($, ko, Item, Utils){
+], function($, ko, GearItem, Utils){
 
 	function Weapon(data){
 
 		var self = this;
 
-		Item.call(this, data);
+		data.upgradedWithScrapType = "weapon";
+
+		GearItem.call(this, data);
 
 		this.init = function(data){
+			
 			self.level = ko.observable(data.level || 1);
 			self.dmgMin = ko.observable(data.dmgMin || 0);
 			self.dmgMax = ko.observable(data.dmgMax || 1);
@@ -69,7 +72,7 @@ define([
 		this.init(data);
 	}
 	
-	Weapon.prototype = Object.create(Item.prototype);
+	Weapon.prototype = Object.create(GearItem.prototype);
 	Weapon.prototype.constructor = Weapon;
 
 	return Weapon;

@@ -308,7 +308,12 @@ button:focus {
 	background-color: #EDEEF7;
 	overflow: auto;
 	padding-bottom: 10px;
-	/*box-shadow: 0px 2px 10px 2px #0C1762;*/
+	/* box-shadow: 0px 2px 10px 2px #0C1762;
+	box-shadow: 1px 1px 7px 2px #A2A2A2;
+	box-shadow: inset 0px 1px 8px 1px rgba(0,0,0,0.75);
+	#6F6F6F
+	rgba(0,0,0,0.5) */
+
 }
 
 .map-buttons .map-button-cluster h3 {
