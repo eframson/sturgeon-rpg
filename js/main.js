@@ -83,6 +83,7 @@ require([
 });
 
 window.onerror = function(errorText, fileName, lineNo){
+	$("#myModal .modal-header .modal-title").html('Error');
 	$("#myModal .modal-body").html(
 		'Please copy and send the following error text:' +
 		'<br/><br/>message: ' + errorText +

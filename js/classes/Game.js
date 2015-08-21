@@ -32,6 +32,11 @@ define([
 
 		var self = this;
 
+		this.modalWindow = $('#myModal');
+		this.modalWindow.on('hidden.bs.modal', function (e) {
+			self.modalHidden();
+		});
+
 		this.itemDataCollection = new DataCollection(itemDataFile);
 		this.monsterDataCollection = new DataCollection(monsterDataFile);
 
@@ -179,6 +184,10 @@ define([
 			self.backButtonLabel = ko.observable("Back");
 			self.isNew = ko.observable(true);
 			self.eventSquareTypeOverride = ko.observable(undefined);
+			self.modalWindowTitle = ko.observable("A Header");
+			self.modalWindowText = ko.observable("");
+			self.showModalClose = ko.observable(true);
+			self.showModalWindowFooter = ko.observable(true);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -422,7 +431,7 @@ define([
 			self.foodAvailableForQuickEat = ko.computed(function(){
 				if( self.player() && self.player().inventory ){
 					var foodItem = ko.utils.arrayFirst(self.player().inventory.items(), function(item){
-						return item instanceof Consumable;
+						return item.isFood == 1;
 					});
 					return (foodItem) ? 1 : 0 ;
 				}
@@ -727,6 +736,7 @@ define([
 
 				if( self.player().hasLeveledUp() ){
 					self.player().hasLeveledUp(false);
+					self.showLevelUpModal();
 					self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
 				}
 			}
@@ -799,9 +809,11 @@ define([
 		}
 
 		this.hideModal = function(viewModel, event){
-			self.modalIsShown = false;
-			$('#myModal').modal('hide');
-			$('#myModal .modal-content').hide();
+			self.modalWindow.modal('hide');
+		}
+
+		this.showModal = function(viewModel, event){
+			self.modalWindow.modal('show');
 		}
 
 		this.setFullscreenContentFromSlideId = function(slideID){
@@ -2335,6 +2347,29 @@ define([
 			return self.monsterDataCollection.getNode([category, monsterId]);
 		}
 
+		this.showLevelUpModal = function(){
+			var options = {
+				backdrop: 'static',
+				keyboard: false
+			}
+
+			//self.showModalClose(false);
+
+			self.modalWindowTitle("Woohoo!");
+			self.showModalWindowFooter(false);
+			self.modalWindowText("You have leveled up! At some point there will be more content here, but for now...yay!");
+			self.showModal(options);
+		}
+
+		this.modalHidden = function(){
+			self.modalWindowTitle("");
+			self.modalWindowText("");
+			self.showModalClose(true);
+			self.showModalWindowFooter(true);
+			self.modalWindow.data('bs.modal').options.backdrop = true;
+			self.modalWindow.data('bs.modal').options.keyboard = true;
+		}
+
 		this._getSrcCollectionForActiveItem = function(){
 			
 			var srcCollection = self.player().inventory;
@@ -2677,7 +2712,6 @@ define([
 
 Feeback/Ideas/Thoughts
 - Perks!
-- Choose class (i.e. - perk) on start?
 - Choose perk on levelup
 - Purple square potions (drink and the next purple square will be an "x" type)
 - Stat enhancing potions
@@ -2704,21 +2738,6 @@ Feeback/Ideas/Thoughts
 - Investigate weapon stat creation/balancing
 
 
-CombatAbility::Ability
-- Number of attacks/strikes/attempts
-- Chance to hit/coefficient
-- Chance to crit/coefficient
-- Dmg/coefficient
-- On hit effect
-- On miss effect
-- Cooldown
-- Button label
-
-CombatEffect::Ability
-- Duration
-- Delay until effect can be applied again after expiration
-- doRound
-- Effect logic (??)
 
 PassiveAbility::OverworldAbility
 - Permanent effect logic (??)
@@ -2756,11 +2775,7 @@ Bugs
 New Features/Game Improvements
 - Play sound on level up?
 - Minor sound FX on square events
-- Give player persistent porta-stash as of lvl 5+? Maybe drops from boss or something; boss is triggered when player tries to exit the level
 - Attacks to add:
-Flurry of Blows: 3x attacks, 30% chance to hit, 200% of normal dmg, 3 rd cooldown
-Mighty Strike: 1x attack, 50% chance to hit, 300% of normal dmg, 2 rd cooldown
-Gut Punch: 1x attack, 50% chance to hit, 50% of normal dmg, stuns for two rounds (effective immediately if applicable), 2 rd cooldown
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
 
 Code Improvements

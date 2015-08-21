@@ -43,12 +43,13 @@
 
 		    <div class="modal-content massupdate">
 			    <div class="modal-header">
-			        <button type="button" class="close" data-bind="click: hideModal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-			        <h4 class="modal-title">Error</h4>
+			        <button type="button" class="close" data-bind="click: hideModal, visible: showModalClose"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+			        <h4 class="modal-title" data-bind="text: modalWindowTitle">Error</h4>
 			    </div>
-				<div class="modal-body">
+				<div class="modal-body" data-bind="html: modalWindowText">
 				</div>
-				<div class="modal-footer">
+				<div class="modal-footer" data-bind="visible: showModalWindowFooter">
+					<p class="small">(Click anywhere outside this box to dismiss this message)</p>
 				</div>
 		    </div>
 

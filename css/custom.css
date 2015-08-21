@@ -95,6 +95,9 @@ button:focus {
 	overflow-y: scroll;
 	max-height: 500px;
 }
+.small {
+	font-size: 12px;
+}
 
 .growl {
 	opacity: 1.0;
