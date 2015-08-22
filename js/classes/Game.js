@@ -1207,13 +1207,13 @@ define([
 
 				if(trainSkillString == "find_food"){
 					text += "get better at scrounging for food";
-					trainCost = self.player().activeAbilities().findFood.getTrainCost();
+					trainCost = self.player().activeAbilities()["find_food"].getTrainCost();
 					trainSkill = "findFood";
 					trainSkillSuccessDesc = "skill in finding food";
 					skillOrStat = "skill";
 				}else if(trainSkillString == "scan_squares"){
 					text += "get better at surveying your surroundings";
-					trainCost = self.player().activeAbilities().scanSquares.getTrainCost();
+					trainCost = self.player().activeAbilities()["scan_squares"].getTrainCost();
 					trainSkill = "scanSquares";
 					trainSkillSuccessDesc = "scan range";
 					skillOrStat = "skill";
