@@ -214,10 +214,13 @@ define([
 			}, self);
 
 			self._activeItemCanBeUpgraded = ko.computed(function(){
-				if( self.activeItem().actualItem().upgradedWithScrapType == "armor" ){
-					return self.player().armorScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
-				}else if( self.activeItem().actualItem().upgradedWithScrapType == "weapon" ){
-					return self.player().weaponScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
+
+				if( self.activeItem().actualItem() ){
+					if( self.activeItem().actualItem().upgradedWithScrapType == "armor" ){
+						return self.player().armorScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
+					}else if( self.activeItem().actualItem().upgradedWithScrapType == "weapon" ){
+						return self.player().weaponScraps() >= self.activeItem().actualItem().costForNextUpgradeLevel();
+					}
 				}
 				return false;
 			});
@@ -1514,7 +1517,7 @@ define([
 		}
 
 		this.setContainerItemAsActiveItem = function(item, e){
-			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0, showQty: true}, item, e);
+			self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUse : 0, showQty: true, canBreakdown : 0}, item, e);
 		}
 
 		this.setInventoryItemAsActiveItem = function(item, e){
@@ -1552,7 +1555,8 @@ define([
 				self.activeItem().canUnEquip(1);
 			}
 
-			if( ( item.canBreakdown == 1 && (opts.moveDirection == "right" || self.rightColContent() == "equipment" ) ) || ( opts.canBreakdown && opts.canBreakdown == 1 ) ){
+			//If item can be salvaged and we are in one of the contexts where salvage is allowed
+			if( ( item.canBreakdown() == 1 && (opts.moveDirection == "right" || self.rightColContent() == "equipment" ) ) || ( opts.canBreakdown && opts.canBreakdown == 1 ) ){
 				self.activeItem().canBreakdown(1);
 			}
 
@@ -1692,7 +1696,7 @@ define([
 
 			var item = self.activeItem().actualItem(),
 				itemToAdd,
-				scrapQty = (item.level() * 50) + (item.numUpgradesApplied() * 50);
+				scrapQty = item.salvageValue() + (item.numUpgradesApplied() * 50);
 
 			if( item instanceof Armor ){
 				itemToAdd = self.getAvailableItemById("armor_scraps", "crafting", scrapQty);
@@ -2453,10 +2457,17 @@ define([
 
 		this.testInventoryCapacity = function(levelNum){
 
+			var currentLevelNum = self.level().levelNum();
+			levelNum = levelNum || currentLevelNum;
+
+			self.level().levelNum(levelNum);
+
 			for(var i=0; i < self.player().inventoryMaxSlots(); i++){
 				var newLootItem = self.generateRandomLootItem();
 				self.player().addItemToInventory( newLootItem, 1 );
 			}
+
+			self.level().levelNum(currentLevelNum);
 
 		}
 

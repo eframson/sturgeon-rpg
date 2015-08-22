@@ -74,7 +74,7 @@ define([
 
 		this.costForNextUpgradeLevel = ko.computed(function(){
 			if( self.canUpgrade() ){
-				return (self.numUpgradesApplied() + 1) * 100;
+				return Utils.scrapCostForUpgradeLevel(self.numUpgradesApplied() + 1);
 			}
 			return false;
 		});
@@ -110,6 +110,7 @@ define([
 		this.scaleStatsForLevel = function(levelNum){
 			//This should be overridden in a child class
 		}
+
 	}
 
 	/*Item.prototype._applyUpgrade = function(){

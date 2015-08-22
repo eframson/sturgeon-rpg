@@ -216,6 +216,10 @@ define([
 
 		},
 
+		scrapCostForUpgradeLevel : function(targetUpgradeLevel){
+			return targetUpgradeLevel * 100;
+		},
+
 		isEmptyObject : function(obj){
 			return Object.keys(obj).length === 0;
 		},

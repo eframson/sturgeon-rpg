@@ -17,6 +17,9 @@ define([
 
 		this.init = function(data){
 			self.upgradedWithScrapType = data.upgradedWithScrapType;
+			self.salvageValue = ko.computed(function(){
+				return Math.round(self.buyValue() / 10);
+			});
 		}
 
 		this.init(data);
