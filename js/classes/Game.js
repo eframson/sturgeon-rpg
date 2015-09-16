@@ -2725,7 +2725,6 @@ Feeback/Ideas/Thoughts
 - Perks!
 - Choose perk on levelup
 - Give names to exceptional weapons
-- +1/2/3/etc. weapons? Maybe have some kind of defined "quality" measurements
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Balance item value + dmg/armor + num salvage
 - More consistent gold from monsters?
@@ -2775,25 +2774,20 @@ Perk Ideas
 - Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
 
 Bugs
-- Monsters sometimes have no loot? (NOT REPRODUCIBLE)
-- Armor shows positive change if equipped when selected in container, then no change when added to inventory and selected (NOT REPRODUCIBLE)
-- Scrounging for food on combat/item/event squares maybe breaks? (NOT REPRODUCIBLE)
+- combatAbility.doAbility sometimes breaks?
 
 New Features/Game Improvements
 - Play sound on level up?
 - Minor sound FX on square events
-- Attacks to add:
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
 
 Code Improvements
 - Create EquippableItem subclass or something
-- Implement class for Skills to get them more cohesive
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
 - Standardize the way objects are saved
 
 UI Improvements
 - Color code combat log messages
-- More obvious when level up
 - Dynamic container name
 - Keyboard shortcuts for "continue" buttons
 - Add combat loots to message log

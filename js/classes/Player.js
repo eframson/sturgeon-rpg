@@ -123,11 +123,15 @@ define([
 				return Math.ceil(self.str() * 1.2);
 			});
 
+			this.hasWeapon = ko.computed(function(){
+				return !Utils.isEmptyObject( self.getEquippedWeapon() );
+			});
+
 			this.minDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
 				var minDmg = self.baseMinDmg();
-				if( !Utils.isEmptyObject(self.equipment().weapon()) ){
-					minDmg += self.equipment().weapon().dmgMin();
+				if( self.hasWeapon() ){
+					minDmg += self.getEquippedWeapon().dmgMin();
 				}
 				return minDmg;
 			});
@@ -135,10 +139,17 @@ define([
 			this.maxDmg = ko.computed(function(){
 				//Eventually let's add STR to this value
 				var maxDmg = self.baseMaxDmg();
-				if( !Utils.isEmptyObject(self.equipment().weapon()) ){
-					maxDmg += self.equipment().weapon().dmgMax();
+				if( self.hasWeapon() ){
+					maxDmg += self.getEquippedWeapon().dmgMax();
 				}
 				return maxDmg;
+			});
+
+			this.bonusDmg = ko.computed(function(){
+				if( self.hasWeapon() ){
+					return self.getEquippedWeapon().extraDamage();
+				}
+				return 0;
 			});
 
 			this.totalArmor = ko.computed(function(){
@@ -421,10 +432,6 @@ define([
 			toRestoreAmt = (toRestoreAmt <= (maxHp - hp)) ? toRestoreAmt : (maxHp - hp) ;
 
 			self.hp( hp + toRestoreAmt );
-		}
-
-		this.hasWeapon = function(){
-			return !Utils.isEmptyObject( self.getEquippedWeapon() );
 		}
 
 		this.getExportData = function(){

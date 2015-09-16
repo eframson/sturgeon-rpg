@@ -59,6 +59,12 @@ define([
 					self.desc = magicDesc;
 				}
 
+				if(self.quality() == "exceptional"){
+					var bonusDmg = Utils.doRand(1, (self.level() + 1));
+					self.extraDamage(bonusDmg);
+					self.name = self.name + " +" + self.extraDamage();
+				}
+
 				self.isScaled(1);
 			}
 		}

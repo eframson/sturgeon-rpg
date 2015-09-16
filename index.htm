@@ -75,18 +75,18 @@
 					<div class="col-md-1 with-left-padding"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().level()"></span></div>
 					<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().hp() + '/' + player().maxHp()"></span></div>
 					<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
-					<div class="col-md-1"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg()"></span></div>
+					<div class="col-md-2"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg() + ( player().bonusDmg() > 0 ? ' (+' + player().bonusDmg() + ')' : '' )"></span></div>
 					<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().str()"></span></div>
 					<div class="col-md-1"><span class="stat-label">DEX</span><span class="stat-value" data-bind="text: player().dex()"></span></div>
 					<div class="col-md-1"><span class="stat-label">END</span><span class="stat-value" data-bind="text: player().end()"></span></div>
 					<div class="col-md-1"><span class="stat-label">SPD</span><span class="stat-value" data-bind="text: player().speed()"></span></div>
 
 
-					<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
-					<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>
+					<!--<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>-->
+					<!--<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>-->
 
 
-					<div class="col-md-1"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().exp() + '/' + player().expRequiredForNextLevel()"></span></div>
+					<div class="col-md-2"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().exp() + '/' + player().expRequiredForNextLevel()"></span></div>
 					<div class="col-md-1 with-right-padding"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 				</div>
 				<!-- end stat row header row -->
@@ -246,7 +246,9 @@
 								<div class="clear"></div>
 
 								<div class="inner" data-bind="css: { hidden: activeItem().desc() == '', equipped: activeItem().actualItem() && activeItem().actualItem().isEquipped() == true }">
+
 									<div class="desc" data-bind="html: activeItem().desc()"></div>
+
 									<!-- ko if: activeItem().actualItem() -->
 
 										<!-- ko if: activeItem().actualItem().id != 'gold' -->
@@ -273,6 +275,13 @@
 										<div class="line">
 											<span class="stat">DMG:</span>
 											<span class="value" data-bind="text: activeItem().actualItem().dmgMin() + ' - ' + activeItem().actualItem().dmgMax() + ( activeItem().actualItem().numUpgradesApplied() > 0 ? ' (Improved)' : '')"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: activeItem().actualItem().extraDamage && typeof activeItem().actualItem().extraDamage === 'function' && activeItem().actualItem().extraDamage() > 0 -->
+										<div class="line">
+											<span class="stat">Bonus DMG:</span>
+											<span class="value" data-bind="text: activeItem().actualItem().extraDamage()"></span>
 										</div>
 										<!-- /ko -->
 

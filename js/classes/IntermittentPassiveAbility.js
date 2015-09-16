@@ -17,7 +17,7 @@ define([
 
 		}
 
-		this.doForRound - function(){
+		this.doForRound = function(){
 
 		}
 
