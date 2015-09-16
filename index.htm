@@ -180,7 +180,7 @@
 									<!-- /ko -->
 									<!-- ko foreach: $root.player().inventory.items() -->
 									<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
-										<span class="item" data-bind="text: $data.name"></span>
+										<span class="item" data-bind="html: ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name)"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
 									</div>
 									<!-- /ko -->
@@ -299,10 +299,17 @@
 										</div>
 										<!-- /ko -->
 
-										<!-- ko if: activeItem().actualItem().quality && typeof activeItem().actualItem().quality === 'function' -->
+										<!-- ko if: activeItem().actualItem().hasQuality -->
 										<div class="line">
 											<span class="stat">Quality:</span>
 											<span class="value" data-bind="text: activeItem().actualItem().quality()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: activeItem().actualItem().level && typeof activeItem().actualItem().level === 'function' -->
+										<div class="line">
+											<span class="stat">Item Level: </span>
+											<span class="value" data-bind="text: activeItem().actualItem().level()"></span>
 										</div>
 										<!-- /ko -->
 

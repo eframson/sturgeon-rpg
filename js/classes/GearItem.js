@@ -12,6 +12,7 @@ define([
 		data.canEquip = (data.canEquip !== undefined) ? data.canEquip : 1;
 		data.canBreakdown = (data.canBreakdown !== undefined) ? data.canBreakdown : 1;
 		data.canUpgrade = (data.canUpgrade !== undefined) ? data.canUpgrade : 1;
+		data.hasQuality = 1;
 
 		Item.call(this, data);
 
@@ -20,6 +21,7 @@ define([
 			self.salvageValue = ko.computed(function(){
 				return Math.round(self.buyValue() / 10);
 			});
+			self.namedItem = ko.observable(data.namedItem || 0);
 		}
 
 		this.init(data);

@@ -2,10 +2,14 @@ define([
 	'jquery',
 	'knockout',
 	'classes/GearItem',
+	'classes/DataCollection',
+	'json!data/items.json',
 	'Utils'
-], function($, ko, GearItem, Utils){
+], function($, ko, GearItem, DataCollection, itemDataFile, Utils){
 
 	function Weapon(data){
+
+		this.itemDataCollection = new DataCollection(itemDataFile);
 
 		var self = this;
 
@@ -26,6 +30,7 @@ define([
 			self.minDmgPctOfAvg = data.minDmgPctOfAvg || 0.7;
 			self.maxDmgPctOfAvg = data.maxDmgPctOfAvg || 1.3;
 			self.monsterLootCoefficient = data.monsterLootCoefficient || 1;
+			self.subtype = data.subtype;
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 				var averages = Utils.calculateAveragesForLevel(self.level());
@@ -62,6 +67,10 @@ define([
 				if(self.quality() == "exceptional"){
 					var bonusDmg = Utils.doRand(1, (self.level() + 1));
 					self.extraDamage(bonusDmg);
+					Utils.doBasedOnPercent({ 25 : function(){
+						self.name = Utils.chooseRandomly(self.itemDataCollection.getNode(["items", "exceptional_weapon_names", self.subtype]));
+						self.namedItem(1);
+					}});
 					self.name = self.name + " +" + self.extraDamage();
 				}
 

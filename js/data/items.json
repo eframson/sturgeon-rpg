@@ -287,6 +287,7 @@
 				"id" : "melee_weapon_01",
 				"name" : "Crude Shiv (1H)",
 				"type" : "weapon",
+				"subtype" : "thrusting",
 				"desc" : "A sharpened piece of fish bone. Clearly whoever made this was significantly luckier than whomever it came from. +%dmgMin% - %dmgMax% DMG when equipped ",
 				"slotsRequired" : 1,
 				"stackable" : 0,
@@ -299,6 +300,7 @@
 				"id" : "melee_weapon_02",
 				"name" : "Razor Sharp Dagger (1H)",
 				"type" : "weapon",
+				"subtype" : "slashing",
 				"desc" : "A shiny dagger. You could fillet someone with this. Careful not to cut yourself on the blade. +%dmgMin% - %dmgMax% DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
@@ -311,6 +313,7 @@
 				"id" : "melee_weapon_03",
 				"name" : "Short Sword (1H)",
 				"type" : "weapon",
+				"subtype" : "slashing",
 				"desc" : "It's like a dagger, but longer. +%dmgMin% - %dmgMax% DMG when equipped. STAB ALL THE THINGS.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
@@ -320,6 +323,7 @@
 				"id" : "melee_weapon_04",
 				"name" : "Greatsword (2H)",
 				"type" : "weapon",
+				"subtype" : "slashing",
 				"desc" : "A very large sword. Requires both fins to wield. Good news, though: it does +%dmgMin% - %dmgMax% DMG when equipped. Enjoy your murder spree!",
 				"slotsRequired" : 2,
 				"stackable" : 0,
@@ -331,15 +335,17 @@
 				"id" : "melee_weapon_05",
 				"name" : "Misericorde (1H)",
 				"type" : "weapon",
+				"subtype" : "thrusting",
 				"desc" : "A knife with a long, narrow blade. Stick them with the pointy end. +%dmgMin% - %dmgMax% DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 1
 			},
-			"melee_weapon_05" : {
-				"id" : "melee_weapon_05",
+			"melee_weapon_06" : {
+				"id" : "melee_weapon_06",
 				"name" : "Longsword (2H)",
 				"type" : "weapon",
+				"subtype" : "slashing",
 				"desc" : "A two-finned weapon with a straight, 43-inch long, double-edged steel blade. Only a foot shorter than Peter Dinklage, and much deadlier. Although Peter is a much better actor, so there's that. +%dmgMin% - %dmgMax% DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
@@ -347,10 +353,11 @@
 				"minDmgPctOfAvg" : 0.9,
 				"maxDmgPctOfAvg" : 1.4
 			},
-			"melee_weapon_06" : {
-				"id" : "melee_weapon_06",
+			"melee_weapon_07" : {
+				"id" : "melee_weapon_07",
 				"name" : "Swordchucks (2H)",
 				"type" : "weapon",
+				"subtype" : "bashing",
 				"desc" : "\"Swordchucks, yo! I'd be like Bruce Lee meets Musashi! Only Better! God, I'm so BRILLIANT!\" +%dmgMin% - %dmgMax% DMG when equipped.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
@@ -516,6 +523,129 @@
 				"pctOfAvgArmor" : 0.4
 			}
 
+		},
+
+		"exceptional_weapon_names" : {
+
+			"thrusting" : [
+				"The Corkscrew",
+				"Gungnir",
+				"Gae Bulg",
+				"Spear of Lugh",
+				"Rhongomiant",
+				"Tonbogiri",
+				"Lance of Olyndicus",
+				"Aiglos",
+				"Amenonuhoko",
+				"Ascalon",
+				"Nihongo",
+				"Areadbhair",
+				"Yueyachan"
+			],
+
+			"slashing" : [
+				"Nemo's Machete",
+				"Warglaives of Finzinoth",
+				"Thunderfury, Blessed Blade of the Finseeker",
+				"Skofnung",
+				"Hrunting",
+				"Naegling",
+				"Dyrnwyn",
+				"Shamshir-e Zomorrodnegar",
+				"Tyrfing",
+				"Caladbolg",
+				"Moralltach",
+				"Beagalltach",
+				"Fragarach",
+				"Excalibur",
+				"Carnwennan",
+				"Joyeuse",
+				"Almace",
+				"Durendal",
+				"Kusanagi",
+				"Colada",
+				"Anaklusmos",
+				"Charon's Claw",
+				"Vorpal Sword",
+				"Anglachel",
+				"Glamdring",
+				"Orcrist",
+				"Caudimordax",
+				"Umbra",
+				"Crocea Mors",
+				"Taming Sari"
+			],
+
+			"bashing" : [
+				"Fin-ter of Atiesh",
+				"Wirt's Third Fin",
+				"Ruyi Jingu Bang",
+				"Sharur",
+				"Vajra",
+				"Mjolnir",
+				"Hammer of Kharas",
+				"Mace of Cuthbert",
+				"Caduceus",
+				"Gambanteinn",
+				"Thyrsus",
+				"Ukonvasara",
+				"Yagrush",
+				"Ayamur",
+				"Kaladanda"
+			]
+		},
+
+		"exceptional_armor_names" : {
+
+			"tail" : [
+				"Girdle of Hippolyta",
+				"Hide of Leviathan",
+				"Nemean Lion Hide",
+				"Flippers of Vidarr",
+				"Talaria",
+				"Ousibuyunlu",
+				"Seven-league Flippers",
+				"Helskor",
+				"Nabrok"
+			],
+
+			"fin" : [
+				"Pais Badarn Beisrydd",
+				"Jarngreipr",
+				"Andvaranaut",
+				"Draupnir",
+				"Sviagris",
+				"Adamant Gauntlets"
+			],
+
+			"body" : [
+				"Scales of Justice",
+				"Tri-Speckled Shell of Sumeria",
+				"Kavacha",
+				"Babr-e Bayan",
+				"Mantle of Arthur",
+				"Tarnkappe",
+				"Megingjord"
+			],
+
+			"head" : [
+				"Goswhit",
+				"Helm of Darkness",
+				"Helmet of Rostam",
+				"Tarnhelm",
+				"Poseidon's Goggles"
+			],
+
+			"shield" : [
+				"Tenacious De-fin-der",
+				"Portable Dam",
+				"Aegis",
+				"Priwen",
+				"Shield of El Cid",
+				"Shield of Ajax",
+				"Svalinn",
+				"Srivatsa"
+			]
 		}
 	}
 }

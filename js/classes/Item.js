@@ -35,7 +35,7 @@ define([
 		this.isEquipped = ko.observable(false);
 		this.quality = ko.observable(data.quality || "good"); //poor, good, great, exceptional
 		this.qualityModifier = undefined;
-		this.hasQuality = (data.hasQuality !== undefined) ? data.hasQuality : 1;
+		this.hasQuality = (data.hasQuality !== undefined) ? data.hasQuality : 0;
 
 		this.canEquip = ko.observable( (data.canEquip !== undefined) ? data.canEquip : 0 );
 		this.canBreakdown = ko.observable( (data.canBreakdown !== undefined) ? data.canBreakdown : 0 );

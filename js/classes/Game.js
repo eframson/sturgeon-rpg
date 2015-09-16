@@ -2701,6 +2701,34 @@ define([
 
 		}
 
+		this.testWeapons = function(levelNum, quality, quantity){
+
+			levelNum = levelNum || 1;
+			quality = quality || "exceptional";
+			quantity = quantity || 4;
+
+			var i;
+			for(i = 0; i < quantity; i++){
+
+				var weaponId,
+					itemToAdd,
+					newItem;
+
+				var availableWeapons = self.getAvailableItemIdsByTypeForLevel("weapon", self.level().levelNum());
+				weaponId = Utils.chooseRandomly( availableWeapons );
+
+				itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
+
+				itemToAdd.fullyDynamicStats = 1;
+				itemToAdd.level = levelNum;
+				itemToAdd.quality = quality;
+				newItem = new Weapon(itemToAdd);
+
+				self.player().addItemToInventory( newItem, 1 );
+			}
+
+		}
+
 		self.init();
 
 	};
