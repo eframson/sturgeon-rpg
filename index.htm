@@ -333,7 +333,7 @@
 											<span class="value" data-bind="text:
 												activeItem().moveDirection() == 'left' &&
 												rightColContent() == 'merchant' ?
-													activeItem().actualItem().buyValue() + ' GP' :
+													( $root.player().hasPassiveAbility('improved_barter') ? Math.floor(activeItem().actualItem().buyValue() / 2) : activeItem().actualItem().buyValue() ) + ' GP' :
 													(activeItem().actualItem().sellValue() + ' GP' + (activeItem().actualItem().qty() > 1 ?
 														' ea. (' + (activeItem().actualItem().qty() * activeItem().actualItem().sellValue()) + ' GP total)' :
 														''))"></span>
@@ -365,6 +365,12 @@
 										<div class="line">
 											<span class="stat">If Equipped:</span>
 											<span class="value" data-bind="html: getEquipChangeText()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: unEquipNotice() -->
+										<div class="line">
+											<span class="value small" data-bind="html: '<em>' + unEquipNotice() + '</em>'"></span>
 										</div>
 										<!-- /ko -->
 
@@ -438,6 +444,14 @@
 										<!-- /ko -->
 
 										<!-- ko if: activeSkill().canPurchase == 1 -->
+
+											<!-- ko if: activeSkill().requiredLevel !== undefined -->
+											<div class="line">
+												<span class="stat">Level Requirement:</span>
+												<span class="value" data-bind="html: (activeSkill().requiredLevel > 0 ? activeSkill().requiredLevel : 'None')"></span>
+											</div>
+											<!-- /ko -->
+
 											<button class="btn btn-default skill-control" data-bind="css: { disabled: canPurchaseActiveSkill() == 0 }, click: purchaseActiveSkill, text: 'Purchase (1 pt.)'"></button>
 										<!-- /ko -->
 										
@@ -482,13 +496,18 @@
 										<button type="button" class="btn btn-default" data-bind="click: $root.playerFlee">Flee!</button>
 										<span class="button-label">Swim away as fast as you possibly can. (The monster will remain where it is)</span>
 									</div>
+
+									<div class="line">
+										<button type="button" class="btn btn-default" data-bind="click: $root.playerPass">Pass</button>
+										<span class="button-label">Take no action during the next combat round</span>
+									</div>
 									<!-- /ko -->
 								</div>
 							</div>
 							<!-- end combat button area -->
 
 							<!-- start fullscreen content area -->
-							<div class="full-screen-row full-screen-notice" data-bind="with: fullScreenContent, css: { hidden: centerColContent() != 'fullscreen_content' }">
+							<div class="full-screen-row full-screen-notice x-wide-center" data-bind="with: fullScreenContent, css: { hidden: centerColContent() != 'fullscreen_content' }">
 
 								<div class="notice-text">
 									<div data-bind="html: text"></div>
@@ -627,7 +646,7 @@
 								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
 										<span class="item" data-bind="text: $data.name"></span>
-										<span class="qty" data-bind="text: $data.buyValue() + ' GP'"></span>
+										<span class="qty" data-bind="text: ( $root.player().hasPassiveAbility('improved_barter') ? Math.floor($data.buyValue() / 2) : $data.buyValue() ) + ' GP'"></span>
 									</div>
 								</div>
 

@@ -111,6 +111,10 @@ define([
 
 				if(success){ //Just a formality, should always succeed
 					newFoodItem = self.getRandomScroungable(findFoodSkill.skillLevel());
+
+					if( self.player().hasPassiveAbility("improved_gold_finding") ){
+						newFoodItem.qty = newFoodItem.qty * 2;
+					}
 				}
 
 				var message = "";
@@ -282,7 +286,7 @@ define([
 
 							buttons.push({
 								css: defaultCss + (( self.player().gp() < actualItem.buyValue() ) ? " disabled" : ""),
-								text: "Buy (" + actualItem.buyValue() + " GP)",
+								text: "Buy (" + (self.player().hasPassiveAbility('improved_barter') ? Math.floor(actualItem.buyValue() / 2) : actualItem.buyValue() ) + " GP)",
 								click: self.buyActiveItem
 							});
 
@@ -440,6 +444,43 @@ define([
 					return (foodItem) ? 1 : 0 ;
 				}
 				return 0;
+			});
+
+			self.unEquipNotice = ko.computed(function(){
+				if( self.activeItem().actualItem() && self.activeItem().actualItem().isEquippable ){
+					var actualItem = self.activeItem().actualItem();
+
+					if( actualItem instanceof Shield ){
+						var equippedWeapon = self.player().getEquippedWeapon();
+
+						if( !Utils.isEmptyObject(equippedWeapon) && equippedWeapon.handsRequired == 2 ){
+							return "Equipping this shield will unequip your current 2H weapon";
+						}
+
+					}else if( actualItem instanceof Weapon && actualItem.handsRequired == 2){
+						var equippedShield = self.player().getEquippedShield();
+						var equippedWeapon = self.player().getEquippedWeapon();
+						var items = [];
+						var itemString = "";
+
+						if( !Utils.isEmptyObject(equippedShield) ){
+							items.push("shield");
+
+							if( !Utils.isEmptyObject(equippedWeapon) ){
+								items.push("weapon");
+							}
+						}
+
+						itemString = items.join(" and ");
+
+						if(items.length > 0){
+							return "Equipping this 2H weapon will unequip your current " + itemString;
+						}
+
+						return false;
+						
+					}
+				}
 			});
 		}
 
@@ -712,6 +753,10 @@ define([
 			self.doCombatRound(ability.id);
 		}
 
+		this.playerPass = function(){
+			self.doCombatRound();
+		}
+
 		this.doCombatRound = function(playerAbilityId){
 
 			var goesFirst = self.getGoesFirst();
@@ -724,7 +769,7 @@ define([
 
 			var abilityId = (goesFirst == "player") ? playerAbilityId : monsterAbilityId ;
 
-			if(attacker.canAct()){
+			if(attacker.canAct() && abilityId !== undefined){
 				//Attacker does something (optionally) to the defender, and UI is updated accordingly
 				attacker.takeCombatAction(abilityId, defender, self);
 			}
@@ -733,8 +778,11 @@ define([
 			if(!defender.isDead()){
 
 				abilityId = (goesFirst == "player") ? monsterAbilityId : playerAbilityId ;
-				defender.takeCombatAction(abilityId, attacker, self);
 
+				if( defender.canAct() && abilityId !== undefined ){
+					defender.takeCombatAction(abilityId, attacker, self);
+				}
+				
 			}
 
 			if( self.player().isDead() ){
@@ -785,8 +833,12 @@ define([
 			}
 
 			if(attackResults.hitType != 'miss'){
-				self.showDamage(animateSection);
 				self.logMessage(combatLogString + ( attackResults.hitType == 'crit' ? ' critically' : '' ) + " struck for " + attackResults.actualDmg + " points of damage! An additional " + (attackResults.attemptedDmg - attackResults.actualDmg) + " points were absorbed by armor.", "combat");
+				if( attackResults.actualDmg > 0 ){
+					self.showDamage(animateSection);
+				}else{
+					self.showNonDamage(animateSection);
+				}
 			}else{
 				if(animateSection == "enemy"){
 					self.logMessage('You try to strike the enemy, but miss!','combat');
@@ -972,6 +1024,10 @@ define([
 
 				if(lootSet == "monster"){
 					goldAmt = Math.round(goldAmt * self.currentEnemy().lootCoefficient());
+				}else{
+					if( self.player().hasPassiveAbility("improved_gold_finding") ){
+						goldAmt = goldAmt * 2;
+					}
 				}
 
 				itemToAdd = self.getAvailableItemById("gold", "currency", goldAmt);
@@ -1005,6 +1061,10 @@ define([
 					var scrapQty = Math.ceil(Utils.doRand(10,36) * qtyCoefficient);
 					if(lootSet == "monster"){
 						scrapQty = Math.round(scrapQty * self.currentEnemy().lootCoefficient());
+					}
+
+					if( self.player().hasPassiveAbility("improved_scrap_finding") ){
+						scrapQty = scrapQty * 2;
 					}
 
 					var scrapType = Utils.chooseRandomly(["armor_scraps","weapon_scraps"]);
@@ -1764,9 +1824,14 @@ define([
 			var moveTo = self.player().inventory;
 
 			var gold = moveTo.getItemByID("gold");
+			var itemCost = item.buyValue();
 
-			if(gold && gold.qty() >= item.buyValue()){
-				gold.qty( gold.qty() - item.buyValue() );
+			if( self.player().hasPassiveAbility("improved_barter") ){
+				itemCost = Math.floor(itemCost / 2);
+			}
+
+			if(gold && gold.qty() >= itemCost){
+				gold.qty( gold.qty() - itemCost );
 
 				var newItem = Utils.cloneObject(item);
 				newItem.qty(1);
@@ -1861,7 +1926,7 @@ define([
 				}
 
 				self.level().generateThisLevel(true);
-				self.level().revealSquaresNearPlayer(self.player().skills().visionRange());
+				self.level().revealSquaresNearPlayer(0);
 				self.level().drawMap();
 
 				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. " +
@@ -2117,7 +2182,7 @@ define([
 		}
 
 		this.canPurchaseActiveSkill = function(){
-			if(self.activeSkill().canPurchase == 1 && self.player().availablePerkPoints() > 0){
+			if(self.activeSkill().canPurchase == 1 && self.player().availablePerkPoints() > 0 && self.player().level() >= self.activeSkill().requiredLevel){
 				return true;
 			}
 			return false;
@@ -2853,11 +2918,8 @@ Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 
 UI Improvements
-- Flash HP in red if dmg done, gray if no dmg
-- Add perks screen where existing perks can be viewed and new perks can be chosen
 - Add settings screen (control default quick eat behavior, WSAD keys as shortcuts)
 - Dynamic container name
-- Show that a 2H and a shield can't be equipped at the same time
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
@@ -2868,8 +2930,6 @@ Bugs
 - combatAbility.doAbility sometimes breaks?
 
 Game Ideas
-- Perks!
-- Choose perk on levelup
 - Obstacles/mazes/labyrinthine structure in levels
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
@@ -2911,17 +2971,16 @@ Misc. Thoughts
 	- doOnSuccessfulApplication
 
 	Perk Ideas
-	- Increased hp gain on level up
+	- More scraps from salvaging
 	- No/reduced cooldown on scan
 	- No/reduced cooldown on find food
-	- Find more food
 	- Better merchant prices when buying/selling
-	- More scraps from salvaging
 	- Better odds of winning gambling squares
 	- Regain HP (more HP?) on lvl up
 	- Passive HP regen
 	- More contribution from armor
 	- Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
+	- Sword 'n' Board (don't know what it does yet, but we need to have one called this!)
 
 Feedback
 - Think about floor as a whole instead of just fight-to-fight

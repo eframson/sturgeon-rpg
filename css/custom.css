@@ -623,3 +623,8 @@ button:focus {
 .file-upload {
 	visibility: hidden;
 }
+
+.x-wide-center {
+	width: 500px;
+	margin-left: -75px;
+}

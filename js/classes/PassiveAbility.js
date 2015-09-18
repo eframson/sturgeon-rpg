@@ -12,7 +12,7 @@ define([
 		OverworldAbility.call(this, data);
 
 		this.init = function(data){
-
+			self.requiredLevel = data.requiredLevel || 0;
 		}
 
 		this.applyEffect = function(){

@@ -19,6 +19,7 @@ define([
 			self.nextSkillLevelAtProgress = ko.observable(data.nextSkillLevelAtProgress || 10);
 			self.resetProgressOnSkillLevelUp = (data.resetProgressOnSkillLevelUp !== undefined) ? data.resetProgressOnSkillLevelUp : 1 ;
 			self.canTrainNextLevel = ko.observable( (data.canTrainNextLevel !== undefined) ? data.canTrainNextLevel : 1 );
+			self.requiredLevel = data.requiredLevel || 0;
 
 		}
 

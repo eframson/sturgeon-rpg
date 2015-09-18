@@ -55,7 +55,8 @@
 			"canTrainNextLevel" : 0,
 			"applyCombatEffectOnHit" : "stun",
 			"sortOrder" : 30,
-			"canPurchase" : 1
+			"canPurchase" : 1,
+			"requiredLevel" : 5
 		},
 
 		"basic_attack" : {
@@ -116,7 +117,8 @@
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
 			"sortOrder" : 20,
-			"canPurchase" : 1
+			"canPurchase" : 1,
+			"requiredLevel" : 0
 		},
 
 		"flurry" : {
@@ -137,7 +139,8 @@
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
 			"sortOrder" : 10,
-			"canPurchase" : 1
+			"canPurchase" : 1,
+			"requiredLevel" : 0
 		}
 
 	},
@@ -163,7 +166,8 @@
 			"name" : "Improved Endurance",
 			"description" : "Doubles effect of END on Max HP.",
 			"chanceOfEffect" : 100,
-			"canPurchase" : 1
+			"canPurchase" : 1,
+			"requiredLevel" : 0
 		},
 
 		"improved_dexterity" : {
@@ -172,7 +176,8 @@
 			"name" : "Improved Dexterity",
 			"description" : "Doubles effect of DEX on base AC.",
 			"chanceOfEffect" : 100,
-			"canPurchase" : 1
+			"canPurchase" : 1,
+			"requiredLevel" : 0
 		},
 
 		"improved_criticals" : {
@@ -181,7 +186,8 @@
 			"name" : "Improved Criticals",
 			"description" : "Doubles base crit strike chance (5% > 10%).",
 			"chanceOfEffect" : 100,
-			"canPurchase" : 1
+			"canPurchase" : 1,
+			"requiredLevel" : 0
 		},
 
 		"improved_hp_leveling" : {
@@ -190,7 +196,58 @@
 			"name" : "Healthier Leveling",
 			"description" : "Doubles HP gained when leveling up (5 > 10). Additionally, leveling up now restores 100% of your HP.",
 			"chanceOfEffect" : 100,
-			"canPurchase" : 1
+			"canPurchase" : 1,
+			"requiredLevel" : 0
+		},
+
+		"improved_food_scrounging" : {
+			"className" : "ImprovedFoodScrounging",
+			"id" : "improved_food_scrounging",
+			"name" : "Improved Food Scrounging",
+			"description" : "Doubles amount of food found when scrounging for food.",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1,
+			"requiredLevel" : 0
+		},
+
+		"improved_gold_finding" : {
+			"className" : "ImprovedGoldFinding",
+			"id" : "improved_gold_finding",
+			"name" : "Improved Gold Finding",
+			"description" : "Doubles amount of gold found from treasure squares.",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1,
+			"requiredLevel" : 0
+		},
+
+		"improved_scrap_finding" : {
+			"className" : "ImprovedScrapFinding",
+			"id" : "improved_scrap_finding",
+			"name" : "Improved Scrap Finding",
+			"description" : "Doubles amount of scrap received from treasure squares and monsters.",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1,
+			"requiredLevel" : 0
+		},
+
+		"armor_master" : {
+			"className" : "ArmorMaster",
+			"id" : "armor_master",
+			"name" : "Master of Armor",
+			"description" : "You unlock the secrets of wearing armor, doubling its overal effectiveness.",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1,
+			"requiredLevel" : 0
+		},
+
+		"improved_barter" : {
+			"className" : "ImprovedBarter",
+			"id" : "improved_barter",
+			"name" : "Silver-tongued",
+			"description" : "You become better at haggling, cajoling, coercing, fin-twisting, and persuading. You now receive a 50% discount from merchants when buying items.",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1,
+			"requiredLevel" : 0
 		}
 
 	}

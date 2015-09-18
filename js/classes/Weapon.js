@@ -72,6 +72,7 @@ define([
 						self.namedItem(1);
 					}});
 					self.name = self.name + " +" + self.extraDamage();
+					//TODO: Increase buy/sell value based on extra damage amount (dmg amount * level ?)
 				}
 
 				self.isScaled(1);

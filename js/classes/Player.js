@@ -160,10 +160,11 @@ define([
 			});
 
 			this.totalArmor = ko.computed(function(){
-				var armorValue = Math.floor(self.dex() / 2);
+				var baseArmorValue = Math.floor(self.dex() / 2);
+				var itemArmorValue = 0;
 
 				if( self.hasPassiveAbility("improved_dexterity") ){
-					armorValue = armorValue * 2;
+					baseArmorValue = baseArmorValue * 2;
 				}
 
 				var armorSlots = self.equipment().armor();
@@ -171,16 +172,20 @@ define([
 				for(slot in armorSlots){
 
 					if( !Utils.isEmptyObject( armorSlots[slot]() ) ){
-						armorValue += armorSlots[slot]().armorValue();
+						itemArmorValue += armorSlots[slot]().armorValue();
 					}
 
 				}
 
 				if( !Utils.isEmptyObject(self.equipment().shield()) ){
-					armorValue += self.equipment().shield().armorValue();
+					itemArmorValue += self.equipment().shield().armorValue();
 				}
 
-				return armorValue;
+				if(self.hasPassiveAbility("armor_master")){
+					itemArmorValue = itemArmorValue * 2;
+				}
+
+				return (baseArmorValue + itemArmorValue);
 			});
 
 			self.armor = self.totalArmor;
