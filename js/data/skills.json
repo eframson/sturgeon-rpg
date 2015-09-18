@@ -75,7 +75,8 @@
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
-			"sortOrder" : 1
+			"sortOrder" : 1,
+			"showLevelInformation" : 0
 		},
 
 		"npc_mighty" : {
@@ -161,10 +162,24 @@
 			"id" : "improved_endurance",
 			"name" : "Improved Endurance",
 			"description" : "Doubles effect of END on Max HP",
-			"skillLevel" : 1,
-			"skillProgress" : 0,
-			"nextSkillLevelAtProgress" : 0,
-			"resetProgressOnSkillLevelUp" : 0,
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1
+		},
+
+		"improved_dexterity" : {
+			"className" : "ImprovedDexterity",
+			"id" : "improved_dexterity",
+			"name" : "Improved Dexterity",
+			"description" : "Doubles effect of DEX on base AC",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1
+		},
+
+		"improved_criticals" : {
+			"className" : "ImprovedCriticals",
+			"id" : "improved_criticals",
+			"name" : "Improved Criticals",
+			"description" : "Doubles base crit strike chance (5% > 10%)",
 			"chanceOfEffect" : 100,
 			"canPurchase" : 1
 		}

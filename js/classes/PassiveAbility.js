@@ -15,6 +15,11 @@ define([
 
 		}
 
+		this.applyEffect = function(){
+			//This should be implemented by a child class
+			return 1;
+		}
+
 		this.init(data);
 	}
 

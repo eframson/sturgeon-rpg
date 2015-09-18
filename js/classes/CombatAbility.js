@@ -33,6 +33,7 @@ define([
 			self.applyCombatEffectOnCrit = data.applyCombatEffectOnCrit || undefined;
 			self.applyCombatEffectOnMiss = data.applyCombatEffectOnMiss || undefined;
 			self.sortOrder = data.sortOrder;
+			self.showLevelInformation = ko.observable(data.showLevelInformation !== undefined ? data.showLevelInformation : 1);
 
 		}
 

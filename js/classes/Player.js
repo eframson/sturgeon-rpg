@@ -162,6 +162,10 @@ define([
 			this.totalArmor = ko.computed(function(){
 				var armorValue = Math.floor(self.dex() / 2);
 
+				if( self.hasPassiveAbility("improved_dexterity") ){
+					armorValue = armorValue * 2;
+				}
+
 				var armorSlots = self.equipment().armor();
 
 				for(slot in armorSlots){
@@ -212,7 +216,13 @@ define([
 			});
 
 			self.maxHp = ko.computed(function(){
-				return self.baseHp() + (self.end() * 2);
+				var hpFromEnd = self.end() * 2;
+
+				if( self.hasPassiveAbility("improved_endurance") ){
+					hpFromEnd = hpFromEnd * 2;
+				}
+
+				return self.baseHp() + hpFromEnd;
 			});
 
 			self.expRequiredForNextLevel = ko.computed(function(){
@@ -230,7 +240,13 @@ define([
 			});
 
 			this.chanceToCrit = ko.computed(function(){
-				return self.baseChanceToCrit() + self.dex();
+				var baseChance = self.baseChanceToCrit();
+
+				if( self.hasPassiveAbility("improved_criticals") ){
+					baseChance = baseChance * 2;
+				}
+
+				return baseChance + self.dex();
 			});
 
 			this.getAvailableActiveAbilities = ko.computed(function(){
@@ -335,7 +351,7 @@ define([
 
 			var className = abilityData.className;
 
-			require(["classes/CombatAbilities/" + className], function(newClassDefinition){
+			require(["classes/PassiveAbilities/" + className], function(newClassDefinition){
 				self.passiveAbilities()[abilityData.id] = new newClassDefinition(abilityData);
 				self.passiveAbilities.valueHasMutated();
 			});
@@ -492,6 +508,13 @@ define([
 				passiveAbilities.push(ability);
 			});
 			return passiveAbilities;
+		}
+
+		this.hasPassiveAbility = function(ability_id){
+			if( self.passiveAbilities()[ability_id] !== undefined ){
+				return true;
+			}
+			return false;
 		}
 
 		this.levelUp = function(){

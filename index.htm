@@ -408,24 +408,31 @@
 
 										<!-- ko if: typeof activeSkill().getExportData === 'function' -->
 
-											<!-- ko if: activeSkill().skillLevel !== undefined -->
+											<!-- ko if: activeSkill().skillLevel !== undefined && activeSkill().showLevelInformation !== undefined && activeSkill().showLevelInformation() == 1 -->
 											<div class="line">
 												<span class="stat">Skill level:</span>
 												<span class="value" data-bind="html: activeSkill().skillLevel()"></span>
 											</div>
 											<!-- /ko -->
 
-											<!-- ko if: activeSkill().skillProgress !== undefined -->
+											<!-- ko if: activeSkill().skillProgress !== undefined && activeSkill().showLevelInformation !== undefined && activeSkill().showLevelInformation() == 1 -->
 											<div class="line">
 												<span class="stat">Skill progress:</span>
 												<span class="value" data-bind="html: activeSkill().skillProgress() + '/' + activeSkill().nextSkillLevelAtProgress()"></span>
 											</div>
 											<!-- /ko -->
 
+											<!-- ko if: activeSkill().baseCooldown !== undefined && activeSkill().baseCooldown > 0 -->
+											<div class="line">
+												<span class="stat">Base cooldown:</span>
+												<span class="value" data-bind="html: activeSkill().baseCooldown"></span>
+											</div>
+											<!-- /ko -->
+
 										<!-- /ko -->
 
 										<!-- ko if: activeSkill().canPurchase == 1 -->
-											<button class="btn btn-default skill-control" data-bind="css: { disabled: canPurchaseActiveSkill() == 0 }, click: purchaseActiveSkill, text: 'Purchase'"></button>
+											<button class="btn btn-default skill-control" data-bind="css: { disabled: canPurchaseActiveSkill() == 0 }, click: purchaseActiveSkill, text: 'Purchase (1 pt.)'"></button>
 										<!-- /ko -->
 										
 									</div>
@@ -610,7 +617,7 @@
 							<!-- start available skills area -->
 							<div class="available-skills" data-bind="css: { hidden: rightColContent() != 'skills' }" >
 
-								<h3>Available Skills/Abilities</h3>
+								<h3>Unlearned Abilities <span data-bind="text: '(' + player().availablePerkPoints() + ' pt' + ( player().availablePerkPoints() == 1 ? '' : 's' ) + ' avail.)'"></span></h3>
 
 								<div class="lines">
 

@@ -2895,9 +2895,6 @@ Misc. Thoughts
 	- doOnSuccessfulApplication
 
 	Perk Ideas
-	- Increase effectiveness of dex stat's contribution to armor value
-	- Increased crit chance
-	- Some/Increased contribution of end stat's contribution to max hp
 	- Increased hp gain on level up
 	- No/reduced cooldown on scan
 	- No/reduced cooldown on find food
