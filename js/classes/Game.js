@@ -2971,12 +2971,9 @@ Misc. Thoughts
 	- doOnSuccessfulApplication
 
 	Perk Ideas
-	- More scraps from salvaging
 	- No/reduced cooldown on scan
 	- No/reduced cooldown on find food
-	- Better merchant prices when buying/selling
 	- Better odds of winning gambling squares
-	- Regain HP (more HP?) on lvl up
 	- Passive HP regen
 	- More contribution from armor
 	- Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
