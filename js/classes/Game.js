@@ -627,6 +627,14 @@ define([
 			}
 		}
 
+		self.showNonDamage = function(which){
+			if(which == "enemy"){
+				$(".combat.enemy .hp").stop(false, true).effect("highlight", { color: "#cecece" }, 800);
+			}else if(which == "player"){
+				$(".combat.player .hp").stop(false, true).effect("highlight", { color: "#cecece" }, 800);
+			}
+		}
+
 		this.startCombat = function(encounterType){
 
 			self.player().resetActiveAbilityCooldowns();
@@ -780,11 +788,12 @@ define([
 				self.showDamage(animateSection);
 				self.logMessage(combatLogString + ( attackResults.hitType == 'crit' ? ' critically' : '' ) + " struck for " + attackResults.actualDmg + " points of damage! An additional " + (attackResults.attemptedDmg - attackResults.actualDmg) + " points were absorbed by armor.", "combat");
 			}else{
-				if(defender instanceof Monster){
+				if(animateSection == "enemy"){
 					self.logMessage('You try to strike the enemy, but miss!','combat');
-				}else if(defender instanceof Player){
+				}else if(animateSection == "player"){
 					self.logMessage('The enemy tries to strike you, but misses!','combat');
 				}
+				self.showNonDamage(animateSection);
 			}
 
 		}
@@ -1666,22 +1675,29 @@ define([
 
 				var existingMinDmg = 0;
 				var existingMaxDmg = 0;
+				var existingBonusDmg = 0;
 				var minDmgChange = 0;
 				var maxDmgChange = 0;
+				var bonusDmgChange = 0;
 
 				if( !Utils.isEmptyObject(self.player().getEquippedWeapon()) ){
 					existingMinDmg = self.player().getEquippedWeapon().dmgMin();
 					existingMaxDmg = self.player().getEquippedWeapon().dmgMax();
+					existingBonusDmg = self.player().getEquippedWeapon().extraDamage();
 				}
 
 				minDmgChange = actualItem.dmgMin() - existingMinDmg;
 				maxDmgChange = actualItem.dmgMax() - existingMaxDmg;
+				bonusDmgChange = actualItem.extraDamage() - existingBonusDmg;
 
 				minDmgChange = ( minDmgChange < 0 ) ? "<span class='negative'>" + minDmgChange + "</span>" : ( minDmgChange > 0 ? "<span class='positive'>+" + minDmgChange + "</span>" : "+" + minDmgChange ) ; //show 0 change as "+0"
 
 				maxDmgChange = ( maxDmgChange < 0 ) ? "<span class='negative'>" + maxDmgChange + "</span>" : ( maxDmgChange > 0 ? "<span class='positive'>+" + maxDmgChange + "</span>" : "+" + maxDmgChange ) ; //show 0 change as "+0"
 
-				changeString = minDmgChange + " - " + maxDmgChange + " DMG";
+				bonusDmgChange = ( bonusDmgChange < 0 ) ? "<span class='negative'>" + bonusDmgChange + "</span>" : ( bonusDmgChange > 0 ? "<span class='positive'>+" + bonusDmgChange + "</span>" : "+" + bonusDmgChange ) ; //show 0 change as "+0"
+				bonusDmgChange = " (" + bonusDmgChange + ")";
+
+				changeString = minDmgChange + " - " + maxDmgChange + (existingBonusDmg > 0 || actualItem.extraDamage() > 0 ? bonusDmgChange : '') + " DMG";
 
 			}else if( actualItem instanceof Armor){
 
@@ -2418,8 +2434,8 @@ define([
 			//Prepare our stat notification
 			var statChanges = '';
 
-			statChanges += 'Your HP has been restored';
-			statChanges += '<br/>Your max HP has increased by 5';
+			statChanges += ( self.player().hasPassiveAbility("improved_hp_leveling") ? 'Your HP has been fully restored' : 'Up to half of your max HP has been restored' );
+			statChanges += '<br/>Your max HP has increased by ' + ( self.player().hasPassiveAbility("improved_hp_leveling") ? 10 : 5 );
 			statChanges += '<br/>Your Endurance (END) has increased by 1';
 
 			if( self.player().level() % 3 == 0){

@@ -402,7 +402,7 @@ button:focus {
 	padding-right: 0;
 }
 
-.inventory .lines,
+.inventory .lines .line,
 .container-ui .container-ui-inner-container,
 .merchant .container-ui-inner-container,
 .known-skills .lines,
@@ -423,9 +423,16 @@ button:focus {
 	padding: 5px 10px 5px 10px;
 }
 
+.inventory .line.section-header,
+.container-ui .line.section-header,
+.merchant .line.section-header,
 .known-skills .line.section-header,
 .available-skills .line.section-header {
 	font-weight: bold;
+}
+
+.inventory .line.empty.section-header {
+	background-color: rgba(1,1,1,0);
 }
 
 .known-skills .line.empty,

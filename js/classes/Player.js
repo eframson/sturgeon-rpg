@@ -520,8 +520,24 @@ define([
 		this.levelUp = function(){
 			//Add stats
 			self.hasLeveledUp(true);
-			self.baseHp( self.baseHp() + 5 );
-			self.hp(self.maxHp());
+
+			var hpGainPerLevel = 5;
+			var restoreHpTo;
+
+			if( self.hasPassiveAbility("improved_hp_leveling") ){
+				hpGainPerLevel = hpGainPerLevel * 2;
+			}
+
+			self.baseHp( self.baseHp() + hpGainPerLevel );
+			restoreHpTo = Math.floor( self.maxHp() / 2 );
+
+			if( self.hasPassiveAbility("improved_hp_leveling") ){
+				restoreHpTo = self.maxHp();
+			}
+
+			restoreHpTo = ( self.hp() < restoreHpTo ? restoreHpTo : self.hp() );
+
+			self.hp(restoreHpTo);
 
 			self.progressActiveAbilities();
 

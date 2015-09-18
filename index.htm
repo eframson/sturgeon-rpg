@@ -186,6 +186,12 @@
 										<span class="item">Your inventory is empty</span>
 									</div>
 									<!-- /ko -->
+									<!-- ko if: $root.player().inventory.items().length > 1 || ($root.player().inventory.items().length == 1 && $root.player().gp() == 0) -->
+									<div class="line empty section-header">
+										<span class="item">Item</span>
+										<span class="qty">Qty</span>
+									</div>
+									<!-- /ko -->
 									<!-- ko foreach: $root.player().inventory.items() -->
 									<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
 										<span class="item" data-bind="html: ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name)"></span>
@@ -583,6 +589,13 @@
 								</div>
 								<!-- /ko -->
 
+								<!-- ko if: $root.currentContainer.items().length > 0 -->
+								<div class="line empty section-header">
+									<span class="item">Item</span>
+									<span class="qty">Qty</span>
+								</div>
+								<!-- /ko -->
+
 								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
 										<span class="item" data-bind="text: $data.name"></span>
@@ -601,6 +614,13 @@
 								<!-- ko if: $root.currentContainer.items().length == 0 -->
 								<div class="line empty">
 									<span class="item">The merchant has no goods for sale</span>
+								</div>
+								<!-- /ko -->
+
+								<!-- ko if: $root.currentContainer.items().length > 0 -->
+								<div class="line empty section-header">
+									<span class="item">Item</span>
+									<span class="qty">Cost</span>
 								</div>
 								<!-- /ko -->
 

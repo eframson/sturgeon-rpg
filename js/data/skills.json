@@ -161,7 +161,7 @@
 			"className" : "ImprovedEndurance",
 			"id" : "improved_endurance",
 			"name" : "Improved Endurance",
-			"description" : "Doubles effect of END on Max HP",
+			"description" : "Doubles effect of END on Max HP.",
 			"chanceOfEffect" : 100,
 			"canPurchase" : 1
 		},
@@ -170,7 +170,7 @@
 			"className" : "ImprovedDexterity",
 			"id" : "improved_dexterity",
 			"name" : "Improved Dexterity",
-			"description" : "Doubles effect of DEX on base AC",
+			"description" : "Doubles effect of DEX on base AC.",
 			"chanceOfEffect" : 100,
 			"canPurchase" : 1
 		},
@@ -179,7 +179,16 @@
 			"className" : "ImprovedCriticals",
 			"id" : "improved_criticals",
 			"name" : "Improved Criticals",
-			"description" : "Doubles base crit strike chance (5% > 10%)",
+			"description" : "Doubles base crit strike chance (5% > 10%).",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1
+		},
+
+		"improved_hp_leveling" : {
+			"className" : "ImprovedHPLeveling",
+			"id" : "improved_hp_leveling",
+			"name" : "Healthier Leveling",
+			"description" : "Doubles HP gained when leveling up (5 > 10). Additionally, leveling up now restores 100% of your HP.",
 			"chanceOfEffect" : 100,
 			"canPurchase" : 1
 		}
