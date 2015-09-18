@@ -148,6 +148,14 @@
 												</button>
 											</div>
 										</div>
+										<div class="state-button-row">
+											<div class="state-button">
+												<button type="button" class="btn btn-default" data-bind="
+													click: showPerks,
+													text: (player().availablePerkPoints() > 0 ? 'Buy' : 'View') + ' Perks' + (player().availablePerkPoints() > 0 ? ' (' + player().availablePerkPoints() + ' pt. avail.)' : '')">
+												</button>
+											</div>
+										</div>
 									</div>
 									<div class="clear"></div>
 									<div class="state-button-col full-width player-skills">
@@ -157,7 +165,7 @@
 										<!-- ko foreach: $root.player().activeAbilitiesIterable() -->
 											<div class="state-button-row">
 												<span class="stat" data-bind="text: $data.name + ':'"></span>
-												<span class="value" data-bind="text: $data.skillLevel()"></span>
+												<span class="value" data-bind="text: $data.skillLevel() + ' (progress: ' + $data.skillProgress() + '/' + $data.nextSkillLevelAtProgress() + ')'"></span>
 											</div>
 										<!-- /ko -->
 									</div>
@@ -187,6 +195,68 @@
 								</div>
 							</div>
 							<!-- end inventory area -->
+
+							<!-- start known skills area -->
+							<div class="known-skills" data-bind="css: { hidden: leftColContent() != 'skills' }">
+								
+								<h3>Current Perks/Known Skills</h3>
+
+								<div class="lines">
+									
+									<div class="line empty section-header">
+										<span class="item">Active Abilities</span>
+									</div>
+
+									<!-- ko if: $root.player().getActiveAbilities().length == 0 -->
+									<div class="line empty">
+										<span class="item">You haven't learned any active abilities yet</span>
+									</div>
+									<!-- /ko -->
+
+									<!-- ko foreach: $root.player().getActiveAbilities() -->
+									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
+										<span class="item" data-bind="html: $data.name"></span>
+										<span class="level" data-bind="text: $data.skillLevel()"></span>
+									</div>
+									<!-- /ko -->
+
+									<div class="line empty section-header">
+										<span class="item">Passive Abilities</span>
+									</div>
+
+									<!-- ko if: $root.player().getPassiveAbilities().length == 0 -->
+									<div class="line empty">
+										<span class="item">You haven't learned any passive abilities yet</span>
+									</div>
+									<!-- /ko -->
+
+									<!-- ko foreach: $root.player().getPassiveAbilities() -->
+									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
+										<span class="item" data-bind="html: $data.name"></span>
+										<span class="level"></span>
+									</div>
+									<!-- /ko -->
+
+									<div class="line empty section-header">
+										<span class="item">Combat Abilities</span>
+									</div>
+
+									<!-- ko if: $root.player().getCombatAbilities().length == 0 -->
+									<div class="line empty">
+										<span class="item">You haven't learned any active abilities yet</span>
+									</div>
+									<!-- /ko -->
+
+									<!-- ko foreach: $root.player().getCombatAbilities() -->
+									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
+										<span class="item" data-bind="html: $data.name"></span>
+										<span class="level" data-bind="text: $data.skillLevel()"></span>
+									</div>
+									<!-- /ko -->
+
+								</div>
+							</div>
+							<!-- end known skills area -->
 
 							<!-- start player combat area -->
 							<div class="combat player" data-bind="if: currentEnemy(), css: { hidden: leftColContent() != 'combat_player' }">
@@ -322,6 +392,48 @@
 								</div>
 							</div>
 							<!-- end inventory/equipment/merchant item description area -->
+
+							<!-- start skill description area -->
+							<div class="skill-desc" data-bind="css: { hidden: centerColContent() != 'skills' }">
+
+								<button class="btn btn-default back" type="button" data-bind="click: showContentArea, css: { disabled: player().inventorySlotsOccupied() > player().inventoryMaxSlots() }"><span data-bind="text: backButtonLabel()"></span></button>
+
+								<div class="clear"></div>
+
+								<!-- ko if: activeSkill() !== undefined -->
+
+									<div class="inner" data-bind="css: { known: typeof activeSkill().getExportData === 'function' }"><!-- relying on getExportData here is a quick hack -->
+
+										<div class="desc" data-bind="html: activeSkill().description"></div>
+
+										<!-- ko if: typeof activeSkill().getExportData === 'function' -->
+
+											<!-- ko if: activeSkill().skillLevel !== undefined -->
+											<div class="line">
+												<span class="stat">Skill level:</span>
+												<span class="value" data-bind="html: activeSkill().skillLevel()"></span>
+											</div>
+											<!-- /ko -->
+
+											<!-- ko if: activeSkill().skillProgress !== undefined -->
+											<div class="line">
+												<span class="stat">Skill progress:</span>
+												<span class="value" data-bind="html: activeSkill().skillProgress() + '/' + activeSkill().nextSkillLevelAtProgress()"></span>
+											</div>
+											<!-- /ko -->
+
+										<!-- /ko -->
+
+										<!-- ko if: activeSkill().canPurchase == 1 -->
+											<button class="btn btn-default skill-control" data-bind="css: { disabled: canPurchaseActiveSkill() == 0 }, click: purchaseActiveSkill, text: 'Purchase'"></button>
+										<!-- /ko -->
+										
+									</div>
+
+								<!-- /ko -->
+								<div class="clear"></div>
+							</div>
+							<!-- end skill description area -->
 
 							<!-- start combat button area -->
 							<div class="combat combat-buttons" data-bind="if: currentEnemy(), css: { hidden: centerColContent() != 'combat_buttons' }">
@@ -494,6 +606,66 @@
 
 							</div>
 							<!-- end merchant area -->
+
+							<!-- start available skills area -->
+							<div class="available-skills" data-bind="css: { hidden: rightColContent() != 'skills' }" >
+
+								<h3>Available Skills/Abilities</h3>
+
+								<div class="lines">
+
+									<div class="line empty section-header">
+										<span class="item">Active Abilities</span>
+									</div>
+
+									<!-- ko if: $root.player().getAvailableActiveAbilities().length == 0 -->
+									<div class="line empty">
+										<span class="item">There are no available active abilities to learn</span>
+									</div>
+									<!-- /ko -->
+
+									<!-- ko foreach: $root.player().getAvailableActiveAbilities() -->
+									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
+										<span class="item" data-bind="text: $data.name"></span>
+									</div>
+									<!-- /ko -->
+
+									<div class="line empty section-header">
+										<span class="item">Passive Abilities</span>
+									</div>
+
+									<!-- ko if: $root.player().getAvailablePassiveAbilities().length == 0 -->
+									<div class="line empty">
+										<span class="item">There are no available passive abilities to learn</span>
+									</div>
+									<!-- /ko -->
+
+									<!-- ko foreach: $root.player().getAvailablePassiveAbilities() -->
+									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
+										<span class="item" data-bind="text: $data.name"></span>
+									</div>
+									<!-- /ko -->
+
+									<div class="line empty section-header">
+										<span class="item">Combat Abilities</span>
+									</div>
+
+									<!-- ko if: $root.player().getAvailableCombatAbilities().length == 0 -->
+									<div class="line empty">
+										<span class="item">There are no available combat abilities to learn</span>
+									</div>
+									<!-- /ko -->
+
+									<!-- ko foreach: $root.player().getAvailableCombatAbilities() -->
+									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
+										<span class="item" data-bind="text: $data.name"></span>
+									</div>
+									<!-- /ko -->
+
+								</div>
+
+							</div>
+							<!-- end available skills area -->
 
 							<!-- start monster combat area -->
 							<div class="combat enemy" data-bind="if: currentEnemy(), css: { hidden: rightColContent() != 'combat_enemy' }">

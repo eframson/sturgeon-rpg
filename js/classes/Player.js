@@ -18,7 +18,7 @@ define([
 
 		//Init
 		var self = this;
-		data = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {}, combatAbilities : {} }, data);
+		data = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {}, combatAbilities : {}, passiveAbilities : {} }, data);
 
 		Entity.call(this, data);
 
@@ -57,12 +57,13 @@ define([
 			if(Utils.isEmptyObject(data.combatAbilities)){
 				data.combatAbilities = {
 					basic_attack: {},
-					flurry: {}
+					//flurry: {}
 				};
 			}
 
 			self.activeAbilities = ko.observable({});
 			self.combatAbilities = ko.observable({});
+			self.passiveAbilities = ko.observable({});
 
 			$.each(data.activeAbilities, function(idx, elem){
 
@@ -76,6 +77,11 @@ define([
 
 			});
 
+			$.each(data.passiveAbilities, function(idx, elem){
+
+				self.addPassiveAbility(idx, elem);
+
+			});
 
 			self.speed = ko.observable(data.speed || 2);
 			self.str = ko.observable(data.str || Utils.doRand(1,6));
@@ -83,6 +89,7 @@ define([
 			self.end = ko.observable(data.end || Utils.doRand(1,6));
 			self.baseChanceToCrit = ko.observable(data.baseChanceToCrit || 5);
 			self.hasLeveledUp = ko.observable(data.hasLeveledUp || false);
+			self.availablePerkPoints = ko.observable(data.availablePerkPoints || 0);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
@@ -226,10 +233,55 @@ define([
 				return self.baseChanceToCrit() + self.dex();
 			});
 
-			//Actual init stuff
-			if(self.hp() == 0){
-				self.hp( self.maxHp() );
-			}
+			this.getAvailableActiveAbilities = ko.computed(function(){
+				var abilityData = self.skillDataCollection.getNode(["active_abilities"]);
+				var availableAbilities = [];
+
+				$.each(abilityData, function(idx, ability){
+
+					if( self.activeAbilities()[ability.id] === undefined && ability.canPurchase == 1 ){
+						ability.node_path = "active_abilities";
+						availableAbilities.push(ability);
+					}
+
+				});
+
+				return availableAbilities;
+			});
+
+			this.getAvailableCombatAbilities = ko.computed(function(){
+				var abilityData = self.skillDataCollection.getNode(["combat_abilities"]);
+				var availableAbilities = [];
+
+				$.each(abilityData, function(idx, ability){
+
+					if( self.combatAbilities()[ability.id] === undefined && ability.canPurchase == 1 ){
+						ability.node_path = "combat_abilities";
+						availableAbilities.push(ability);
+					}
+
+				});
+
+				return availableAbilities;
+			});
+
+			this.getAvailablePassiveAbilities = ko.computed(function(){
+				var abilityData = self.skillDataCollection.getNode(["passive_abilities"]);
+				var availableAbilities = [];
+
+				$.each(abilityData, function(idx, ability){
+
+					if( self.passiveAbilities()[ability.id] === undefined && ability.canPurchase == 1 ){
+						ability.node_path = "passive_abilities";
+						availableAbilities.push(ability);
+					}
+
+				});
+
+				return availableAbilities;
+			});
+
+			
 
 			self.activeAbilitiesIterable = ko.computed(function(){
 				return Utils.getObjectAsArrayIndexedByNumericalSortOrder(self.activeAbilities());
@@ -238,6 +290,11 @@ define([
 			self.combatAbilitiesIterable = ko.computed(function(){
 				return Utils.getObjectAsArrayIndexedByNumericalSortOrder(self.combatAbilities());
 			});
+
+			//Actual init stuff
+			if(self.hp() == 0){
+				self.hp( self.maxHp() );
+			}
 		}
 
 		this.addActiveAbility = function(ability_id, abilityData){
@@ -266,6 +323,21 @@ define([
 			require(["classes/CombatAbilities/" + className], function(newClassDefinition){
 				self.combatAbilities()[abilityData.id] = new newClassDefinition(abilityData);
 				self.combatAbilities.valueHasMutated();
+			});
+
+		}
+
+		this.addPassiveAbility = function(ability_id, abilityData){
+
+			if(Utils.isEmptyObject(abilityData)){
+				abilityData = self.skillDataCollection.getNode(["passive_abilities", ability_id]);
+			}
+
+			var className = abilityData.className;
+
+			require(["classes/CombatAbilities/" + className], function(newClassDefinition){
+				self.passiveAbilities()[abilityData.id] = new newClassDefinition(abilityData);
+				self.passiveAbilities.valueHasMutated();
 			});
 
 		}
@@ -392,10 +464,34 @@ define([
 
 			$.each(self.activeAbilities(), function(idx, ability){
 
-				ability.makeProgress(0);
+				ability.makeProgress();
 
 			});
 
+		}
+
+		this.getActiveAbilities = function(){
+			var activeAbilities = [];
+			$.each(self.activeAbilities(), function(idx, ability){
+				activeAbilities.push(ability);
+			});
+			return activeAbilities;
+		}
+
+		this.getCombatAbilities = function(){
+			var combatAbilities = [];
+			$.each(self.combatAbilities(), function(idx, ability){
+				combatAbilities.push(ability);
+			});
+			return combatAbilities;
+		}
+
+		this.getPassiveAbilities = function(){
+			var passiveAbilities = [];
+			$.each(self.passiveAbilities(), function(idx, ability){
+				passiveAbilities.push(ability);
+			});
+			return passiveAbilities;
 		}
 
 		this.levelUp = function(){
@@ -415,6 +511,7 @@ define([
 			if( self.level() % 4 == 0){
 				self.speed( self.speed() + 1 );
 				self.inventoryMaxSlots( self.inventoryMaxSlots() + 1 );
+				self.availablePerkPoints( self.availablePerkPoints() + 1 );
 			}
 			//Reset cooldowns on level up?
 		}
@@ -442,7 +539,7 @@ define([
 			exportObj._classNameForLoad = self.constructor.name;
 
 			for(prop in self){
-				if(prop != "inventory" && prop != "activeAbilities" && prop != "combatAbilities" && prop != "passiveEffects" && prop != "combatEffects"){
+				if(prop != "inventory" && prop != "activeAbilities" && prop != "combatAbilities" && prop != "passiveAbilities" && prop != "combatEffects"){
 					if ( typeof self[prop] !== 'function' ){
 						exportObj[prop] = self[prop];
 					}else if (ko.isObservable(self[prop])) {
@@ -464,6 +561,13 @@ define([
 			$.each(self.combatAbilities(), function(idx, ability){
 
 				exportObj.combatAbilities[idx] = ability.getExportData();
+
+			});
+
+			exportObj.passiveAbilities = {};
+			$.each(self.passiveAbilities(), function(idx, ability){
+
+				exportObj.passiveAbilities[idx] = ability.getExportData();
 
 			});
 

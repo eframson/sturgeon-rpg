@@ -385,7 +385,9 @@ button:focus {
 .container-ui h3,
 .inventory h3,
 .merchant h3,
-.map-buttons h3 {
+.map-buttons h3,
+.known-skills h3,
+.available-skills h3 {
 	padding-left: 0px;
 	margin-top: 8px;
 }
@@ -393,32 +395,50 @@ button:focus {
 .inventory,
 .container-ui,
 .equipment,
-.merchant {
+.merchant,
+.known-skills,
+.available-skills {
 	padding-left: 0;
 	padding-right: 0;
 }
 
 .inventory .lines,
 .container-ui .container-ui-inner-container,
-.merchant .container-ui-inner-container {
+.merchant .container-ui-inner-container,
+.known-skills .lines,
+.available-skills .lines {
 	background-color: #F0ECE6;
 }
 
-.equipment .equipment-inner-container{
+.equipment .equipment-inner-container {
 	background-color: #E7E6F0;
 }
 
 .inventory .line,
 .container-ui .line,
 .equipment .line,
-.merchant .line {
+.merchant .line,
+.known-skills .line,
+.available-skills .line {
 	padding: 5px 10px 5px 10px;
+}
+
+.known-skills .line.section-header,
+.available-skills .line.section-header {
+	font-weight: bold;
+}
+
+.known-skills .line.empty,
+.available-skills .line.empty {
+	font-style: italic;
 }
 
 .inventory .line:not(.empty),
 .container-ui .line:not(.empty),
 .equipment .line:not(.empty),
-.merchant .line:not(.empty) {
+.merchant .line:not(.empty),
+.known-skills .line:not(.empty),
+.available-skills .line:not(.empty) {
 	cursor: pointer;
 }
 
@@ -427,7 +447,11 @@ button:focus {
 .container-ui .line:not(.empty):hover,
 .container-ui .line:not(.empty).selected,
 .merchant .line:not(.empty):hover,
-.merchant .line:not(.empty).selected {
+.merchant .line:not(.empty).selected,
+.known-skills .line:not(.empty):hover,
+.known-skills .line:not(.empty).selected,
+.available-skills .line:not(.empty):hover,
+.available-skills .line:not(.empty).selected {
 	background-color: #EDC78E;
 }
 
@@ -438,7 +462,9 @@ button:focus {
 
 .inventory .line:not(.empty):active,
 .container-ui .line:not(.empty):active,
-.merchant .line:not(.empty):active {
+.merchant .line:not(.empty):active,
+.known-skills .line:not(.empty):active,
+.available-skills .line:not(.empty):active {
 	background-color: #F6D8AC;
 }
 
@@ -448,7 +474,9 @@ button:focus {
 
 .inventory .qty,
 .container-ui .qty,
-.merchant .qty {
+.merchant .qty,
+.known-skills .level,
+.available-skills .level {
 	float: right;
 	clear: both;
 }
@@ -463,29 +491,37 @@ button:focus {
 	display: inline-block;
 }
 
-.item-desc .inner{
+.item-desc .inner,
+.skill-desc .inner {
 	background-color: #ECECEC;
 	/*background-color: #F0ECE6;*/
 	padding: 5px 10px 5px 10px;
 	margin: 10px 0px 0px 0px;
 }
 
-.item-desc .inner.equipped {
+.item-desc .inner.equipped,
+.skill-desc .inner.known {
 	background-color: #E7E6F0;
 }
 
-.item-desc button.inventory-control {
-	width: 168px;
+.item-desc button.inventory-control,
+.skill-desc button.skill-control {
 	margin-top: 10px;
 	font-size: 12px;
 }
 
-.item-desc .line .stat {
+.item-desc button.inventory-control {
+	width: 168px;
+}
+
+.item-desc .line .stat,
+.skill-desc .line .stat {
 	font-weight: bold;
 	line-height: 14px;
 }
 
-.item-desc .back {
+.item-desc .back,
+.skill-desc .back {
 	float: left;
 }
 

@@ -176,6 +176,7 @@ define([
 				moveDirection : ko.observable("right"),
 				actualItem : ko.observable(undefined),
 			});
+			self.activeSkill = ko.observable(undefined);
 			self.arrowKeysControlPlayerPos = ko.observable(true);
 			self.rightColContent = ko.observable("equipment");
 			self.freezeMovement = ko.observable(false);
@@ -597,6 +598,13 @@ define([
 			
 		}
 
+		this.showPerks = function(){
+
+			self.freezeMovement(true);
+			self.manageTransitionToView("mainscreen","skills");
+			
+		}
+
 		this.showContentArea = function(){
 			
 			if(self.level().getActiveSquare().type == 'exit'){
@@ -606,6 +614,8 @@ define([
 					self.freezeMovement(false);
 				});
 			}
+
+			self.activeSkill(undefined);
 
 		}
 
@@ -1346,6 +1356,12 @@ define([
 						self.player().addExp(statIncreaseAmt);
 					}
 					self.logMessage(text);
+
+					if( self.player().hasLeveledUp() ){
+						self.player().hasLeveledUp(false);
+						self.showLevelUpModal();
+						self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
+					}
 				};
 
 				buttons = new Array(
@@ -2067,6 +2083,42 @@ define([
 			return false;
 		}
 
+		this._shouldSkillBeSelected = function(skill){
+			//If a skill is actually active
+			if( self.activeSkill() != undefined ){
+
+				if(self.activeSkill().id == skill.id){
+					return true;
+				}
+				return false;
+
+			}
+			return false;
+		}
+
+		this.setSkillAsActiveSkill = function(skill, e){
+			self.activeSkill(skill);
+		}
+
+		this.canPurchaseActiveSkill = function(){
+			if(self.activeSkill().canPurchase == 1 && self.player().availablePerkPoints() > 0){
+				return true;
+			}
+			return false;
+		}
+
+		this.purchaseActiveSkill = function(){
+			if( self.activeSkill().node_path == 'active_abilities' ){
+				self.player().addActiveAbility(self.activeSkill().id, self.activeSkill());
+			}else if( self.activeSkill().node_path == 'combat_abilities' ){
+				self.player().addCombatAbility(self.activeSkill().id, self.activeSkill());
+			}else if( self.activeSkill().node_path == 'passive_abilities' ){
+				self.player().addPassiveAbility(self.activeSkill().id, self.activeSkill());
+			}
+			self.player().availablePerkPoints( self.player().availablePerkPoints() - 1 );
+			self.activeSkill(undefined);
+		}
+
 		this.showSkillsArea = function(){
 			self.manageTransitionToView("mainscreen","skills");
 		}
@@ -2127,6 +2179,12 @@ define([
 					self.leftColContent(undefined);
 					self.centerColContent("fullscreen_content");
 					self.rightColContent(undefined);
+				}
+			}else if(toArea == "skills"){
+				midTransitionCallback = function(){
+					self.leftColContent("skills");
+					self.centerColContent("skills");
+					self.rightColContent("skills");
 				}
 			}
 
@@ -2357,11 +2415,37 @@ define([
 				keyboard: false
 			}
 
+			//Prepare our stat notification
+			var statChanges = '';
+
+			statChanges += 'Your HP has been restored';
+			statChanges += '<br/>Your max HP has increased by 5';
+			statChanges += '<br/>Your Endurance (END) has increased by 1';
+
+			if( self.player().level() % 3 == 0){
+				statChanges += '<br/>Your Strength (STR) has increased by 1';
+				statChanges += '<br/>Your Dexterity (DEX) has increased by 1';
+			}
+			if( self.player().level() % 4 == 0){
+				statChanges += '<br/>Your Speed (SPD) has increased by 1';
+				statChanges += '<br/>Your Inventory capacity has increased by 1';
+				statChanges += '<br/>You have 1 new perk point to spend';
+			}
+
+			$.each(self.player().activeAbilities(), function(idx, ability){
+
+				if(ability.canLevelUp){
+					ability.levelUp();
+					statChanges += '<br/>Your ' + ability.name + ' ability has leveled up!';
+				}
+
+			});
+
 			//self.showModalClose(false);
 
 			self.modalWindowTitle("Woohoo!");
 			self.showModalWindowFooter(false);
-			self.modalWindowText("You have leveled up! At some point there will be more content here, but for now...yay!");
+			self.modalWindowText("You have leveled up!<br/><br/>" + statChanges);
 			self.showModal(options);
 		}
 
@@ -2747,84 +2831,87 @@ define([
 
 	return Game;
 
-/* TODOs
+/*
 
-Feeback/Ideas/Thoughts
-- Perks!
-- Choose perk on levelup
-- Give names to exceptional weapons
-- Gambling squares! X gold for Y nice thing, Z chance of success
-- Balance item value + dmg/armor + num salvage
-- More consistent gold from monsters?
-- Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
-- Either remove "scan" or make it more useful
-- Show dmg taken next to player/monster HP counter
-- Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever)
-- Think about floor as a whole instead of just fight-to-fight
-- Battle arena event?
-- Write combat simulator for testing balancing stuff
-- Bosses every x levels + minibosses
-- Make difficulty scaling more gradual
-- Gradual boss difficulty scaling
-- Built-in unlimited level resets (w/some cost, e.g. - 25% of gp)
-- Obstacles/mazes/labyrinthine structure in levels
-- Add settings view (quick eat: worst/best first, WASD keys)
-- Investigate weapon stat creation/balancing
+Game Improvements
+- Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 
+UI Improvements
+- Flash HP in red if dmg done, gray if no dmg
+- Add perks screen where existing perks can be viewed and new perks can be chosen
+- Add settings screen (control default quick eat behavior, WSAD keys as shortcuts)
+- Dynamic container name
+- Show that a 2H and a shield can't be equipped at the same time
+- Show that a weapon will take up x number of backpack slots
+- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
-
-PassiveAbility::OverworldAbility
-- Permanent effect logic (??)
-
-IntermittentPassiveAbility::PassiveAbility
-- Num rounds delay between attempts
-- doRound
-- doOnSuccessfulApplication
-
-
-
-
-
-Perk Ideas
-- Increase effectiveness of dex stat's contribution to armor value
-- Increased crit chance
-- Some/Increased contribution of end stat's contribution to max hp
-- Increased hp gain on level up
-- No/reduced cooldown on scan
-- No/reduced cooldown on find food
-- Find more food
-- Better merchant prices when buying/selling
-- More scraps from salvaging
-- Better odds of winning gambling squares
-- Regain HP (more HP?) on lvl up
-- Passive HP regen
-- More contribution from armor
-- Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
+Code Improvements
+- Standardize the way objects are saved
 
 Bugs
 - combatAbility.doAbility sometimes breaks?
 
-New Features/Game Improvements
+Game Ideas
+- Perks!
+- Choose perk on levelup
+- Obstacles/mazes/labyrinthine structure in levels
+- Gambling squares! X gold for Y nice thing, Z chance of success
+- Allow certain weapons to be wielded 1H or 2H (for more dmg)
+- More consistent gold from monsters?
+- Battle arena event?
+- Bosses every x levels + minibosses in between
+- Gradually scale overall difficulty over first X levels (5?)
+- Gradually scale up boss difficulty over first X levels (5?)
+
+UI Ideas
+- Add labels in top row of containers
+- Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Play sound on level up?
 - Minor sound FX on square events
-- Allow certain weapons to be wielded 1H or 2H (for more dmg)
-
-Code Improvements
-- Create EquippableItem subclass or something
-- Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
-- Standardize the way objects are saved
-
-UI Improvements
-- Color code combat log messages
-- Dynamic container name
-- Keyboard shortcuts for "continue" buttons
-- Add combat loots to message log
+- Make log filterable
+- Color code log
+- Add loot acquisition to log
 - More obvious turn-based combat (visual delay between parts of a round?)
 - Allow for a variable number of items to be purchased from merchant
-- Show that a 2H and a shield can't be equipped at the same time
-- Show that a weapon will take up x number of backpack slots
-- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
-- Make it more obvious when active item is equipped (so accidental salvage isn't as easy)
+- Show dmg taken next to player/monster HP counter
+- Add help/feedback interface
+- Keyboard shortcuts for "continue" buttons
+
+Code Ideas
+- Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
+- Write combat simulator for testing balancing stuff
+
+Misc. Thoughts
+- Either remove "scan" or make it more useful (discuss current implementation with Matt)
+- Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever) (discuss with Matt)
+- Balance item value + dmg/armor + num salvage (discuss with Matt)
+
+	PassiveAbility::OverworldAbility
+	- Permanent effect logic (??)
+
+	IntermittentPassiveAbility::PassiveAbility
+	- Num rounds delay between attempts
+	- doRound
+	- doOnSuccessfulApplication
+
+	Perk Ideas
+	- Increase effectiveness of dex stat's contribution to armor value
+	- Increased crit chance
+	- Some/Increased contribution of end stat's contribution to max hp
+	- Increased hp gain on level up
+	- No/reduced cooldown on scan
+	- No/reduced cooldown on find food
+	- Find more food
+	- Better merchant prices when buying/selling
+	- More scraps from salvaging
+	- Better odds of winning gambling squares
+	- Regain HP (more HP?) on lvl up
+	- Passive HP regen
+	- More contribution from armor
+	- Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
+
+Feedback
+- Think about floor as a whole instead of just fight-to-fight
 
 */
 

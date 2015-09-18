@@ -13,7 +13,6 @@ define([
 
 		this.init = function(data){
 
-			self.buttonLabel = data.buttonLabel;
 			self.chanceOfEffect = (data.chanceOfEffect !== undefined) ? data.chanceOfEffect : 1;
 
 		}

@@ -13,6 +13,7 @@ define([
 
 		this.init = function(data){
 
+			self.buttonLabel = data.buttonLabel;
 			self.baseCooldown = data.baseCooldown || 0;
 			self.cooldown = ko.observable(data.cooldown || 0);
 			self.didLevelUp = 0;

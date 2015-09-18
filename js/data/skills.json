@@ -54,7 +54,8 @@
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
 			"applyCombatEffectOnHit" : "stun",
-			"sortOrder" : 30
+			"sortOrder" : 30,
+			"canPurchase" : 1
 		},
 
 		"basic_attack" : {
@@ -113,7 +114,8 @@
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
-			"sortOrder" : 20
+			"sortOrder" : 20,
+			"canPurchase" : 1
 		},
 
 		"flurry" : {
@@ -133,7 +135,8 @@
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
-			"sortOrder" : 10
+			"sortOrder" : 10,
+			"canPurchase" : 1
 		}
 
 	},
@@ -149,5 +152,23 @@
 			"delayUntilNextApplication" : 0,
 			"isActive" : 0
 		}
+	},
+
+	"passive_abilities" : {
+
+		"improved_endurance" : {
+			"className" : "ImprovedEndurance",
+			"id" : "improved_endurance",
+			"name" : "Improved Endurance",
+			"description" : "Doubles effect of END on Max HP",
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 0,
+			"resetProgressOnSkillLevelUp" : 0,
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1
+		}
+
 	}
+
 }
