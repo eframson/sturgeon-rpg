@@ -85,11 +85,23 @@ require([
 window.onerror = function(errorText, fileName, lineNo){
 	$("#myModal .modal-header .modal-title").html('Error');
 	$("#myModal .modal-body").html(
-		'Please copy and send the following error text:' +
+		'An error has occurred:' +
 		'<br/><br/>message: ' + errorText +
 		'<br/>url: ' + fileName +
 		'<br/>line: ' + lineNo +
 		'<br/><br/>Now reload the page or try loading a previous save'
 	);
 	$('#myModal').modal('show');
+
+	var data = {
+		msg : errorText,
+		url : fileName,
+		line : lineNo
+	};
+
+	$.ajax({
+		url : 'send_error.php',
+		method : 'POST',
+		data : data
+	});
 }

@@ -2927,7 +2927,7 @@ Code Improvements
 - Standardize the way objects are saved
 
 Bugs
-- combatAbility.doAbility sometimes breaks?
+
 
 Game Ideas
 - Obstacles/mazes/labyrinthine structure in levels
