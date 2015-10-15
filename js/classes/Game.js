@@ -2894,6 +2894,48 @@ define([
 
 		}
 
+		this.testArmor = function(levelNum, quality, quantity){
+
+			levelNum = levelNum || 1;
+			quality = quality || "exceptional";
+			quantity = quantity || 4;
+
+			var i;
+			for(i = 0; i < quantity; i++){
+
+				var armorId,
+					itemToAdd,
+					newItem;
+
+				var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
+				var availableShields = self.getAvailableItemIdsByTypeForLevel("shield", self.level().levelNum());
+				var availableItems = availableArmor.concat(availableShields);
+				console.log(availableShields);
+				armorOrShieldId = Utils.chooseRandomly( availableItems );
+
+				var isArmorOrShield = 'armor';
+				itemToAdd = self.getAvailableItemById(armorOrShieldId, "armor", 1);
+
+				if(itemToAdd === undefined){
+					isArmorOrShield = 'shield';
+					itemToAdd = self.getAvailableItemById(armorOrShieldId, "shield", 1);
+				}
+
+				itemToAdd.fullyDynamicStats = 1;
+				itemToAdd.level = levelNum;
+				itemToAdd.quality = quality;
+
+				if( isArmorOrShield == 'armor' ){
+					newItem = new Armor(itemToAdd);
+				}else{
+					newItem = new Shield(itemToAdd);
+				}
+
+				self.player().addItemToInventory( newItem, 1 );
+			}
+
+		}
+
 		self.init();
 
 	};

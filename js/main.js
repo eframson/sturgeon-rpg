@@ -76,7 +76,7 @@ require([
 		});
 
 		$("button.btn").click(function(){
-			this.blur();
+			jQuery(this).blur();
 		});
 	});
 
@@ -93,10 +93,19 @@ window.onerror = function(errorText, fileName, lineNo){
 	);
 	$('#myModal').modal('show');
 
+	var exportData;
+	try {
+	   exportData = game.getExportData();
+	}
+	catch (e) {
+	   exportData = {};
+	}
+
 	var data = {
 		msg : errorText,
 		url : fileName,
-		line : lineNo
+		line : lineNo,
+		stateData : exportData
 	};
 
 	$.ajax({
