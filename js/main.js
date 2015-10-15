@@ -78,6 +78,11 @@ require([
 		$("button.btn").click(function(){
 			jQuery(this).blur();
 		});
+
+		if( window.location.hash == '#konami' ){
+			game.manageTransitionToView("fullscreen","mainscreen");
+			game.isNew(false);
+		}
 	});
 
 });

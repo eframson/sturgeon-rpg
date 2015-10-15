@@ -525,7 +525,7 @@ define([
 			}else{
 
 				player = new Player( {str: 3, dex: 2, end: 2} );
-				level = new Level({ genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
+				level = new Level({ numSquares : 15, genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
 				self.levels.push(level);
 
 			}
@@ -2910,7 +2910,7 @@ define([
 				var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
 				var availableShields = self.getAvailableItemIdsByTypeForLevel("shield", self.level().levelNum());
 				var availableItems = availableArmor.concat(availableShields);
-				console.log(availableShields);
+				
 				armorOrShieldId = Utils.chooseRandomly( availableItems );
 
 				var isArmorOrShield = 'armor';
