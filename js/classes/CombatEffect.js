@@ -15,27 +15,37 @@ define([
 
 			self.duration = ko.observable(data.duration || 0);
 			self.baseDuration = data.baseDuration || 0;
-			self.isActive = ko.observable(data.isActive || 0);
 			self.delayUntilNextApplication = ko.observable(data.delayUntilNextApplication || 0);
 			self.baseDelayUntilNextApplication = data.baseDelayUntilNextApplication || 0;
-			//self.effect = data.effect || undefined; //This way??
+			
+			self.isActive = ko.computed(function(){
+				return self.duration() > 0;
+			});
 
 		}
 
 		this.doRound = function(){
 
 			if(self.duration() > 0){
+
+				if(self.duration() == 1){
+					self.delayUntilNextApplication(self.baseDelayUntilNextApplication);
+				}
+
 				self.duration( self.duration() - 1 );
 			}
-			
-			if(self.duration() == 0){
-				self.isActive(0);
+
+			if( self.isActive() == 0 && self.delayUntilNextApplication() > 0 ){
+				self.delayUntilNextApplication( self.delayUntilNextApplication() - 1 );
 			}
 		}
 
 		this.applyEffect = function(){
-			self.isActive(1);
-			self.duration( self.baseDuration );
+			
+			if(self.delayUntilNextApplication() == 0){
+				self.duration( self.baseDuration );
+			}
+
 		}
 
 		/*

@@ -12,7 +12,7 @@ define([
 		CombatAbility.call(this, data);
 
 		this.init = function(data){
-
+			
 		}
 
 		this.doOnLevelUp = function(){

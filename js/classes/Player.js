@@ -57,6 +57,8 @@ define([
 			if(Utils.isEmptyObject(data.combatAbilities)){
 				data.combatAbilities = {
 					basic_attack: {},
+					//stun : {},
+					//mighty : {},
 					//flurry: {}
 				};
 			}

@@ -11,12 +11,14 @@ define([
 	'classes/ItemCollection',
 	'classes/DataCollection',
 	'classes/Monster',
+	'classes/CombatEffect',
 	'json!data/items.json',
 	'json!data/monsters.json',
+	'json!data/skills.json',
 	'Utils',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, itemDataFile, monsterDataFile, Utils) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils) {
 
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
 	var $MAIN_CONTENT_DIV = $(".main-content-row");
@@ -39,6 +41,7 @@ define([
 
 		this.itemDataCollection = new DataCollection(itemDataFile);
 		this.monsterDataCollection = new DataCollection(monsterDataFile);
+		this.skillDataCollection = new DataCollection(skillDataFile);
 
 		this.player = undefined;
 		this.slides = {
@@ -193,12 +196,10 @@ define([
 			self.modalWindowText = ko.observable("");
 			self.showModalClose = ko.observable(true);
 			self.showModalWindowFooter = ko.observable(true);
+			self.disablePlayerCombatButtons = ko.observable(false);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
-			/*self.leftColContent = ko.observable("player_controls");
-			self.centerColContent = ko.observable("map_controls");
-			self.rightColContent = ko.observable("map");*/
 			self.leftColContent = ko.observable(undefined);
 			self.centerColContent = ko.observable("fullscreen_content");
 			self.rightColContent = ko.observable(undefined);
@@ -754,7 +755,7 @@ define([
 		}
 
 		this.playerPass = function(){
-			self.doCombatRound();
+			self.doCombatRound("pass");
 		}
 
 		this.doCombatRound = function(playerAbilityId){
@@ -769,9 +770,10 @@ define([
 
 			var abilityId = (goesFirst == "player") ? playerAbilityId : monsterAbilityId ;
 
-			if(attacker.canAct() && abilityId !== undefined){
+			if(abilityId !== undefined){
 				//Attacker does something (optionally) to the defender, and UI is updated accordingly
 				attacker.takeCombatAction(abilityId, defender, self);
+				attacker.updateCombatEffectsForRound();
 			}
 
 			//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
@@ -779,8 +781,9 @@ define([
 
 				abilityId = (goesFirst == "player") ? monsterAbilityId : playerAbilityId ;
 
-				if( defender.canAct() && abilityId !== undefined ){
+				if( abilityId !== undefined ){
 					defender.takeCombatAction(abilityId, attacker, self);
+					defender.updateCombatEffectsForRound();
 				}
 				
 			}
@@ -812,11 +815,20 @@ define([
 
 			$.each([attacker,defender], function(idx, entity){
 				if(!entity.isDead()){
-					entity.updateCombatEffectsForRound();
 					entity.updateActiveAbilityCooldownsForRound();
 				}
 			});
 
+		}
+
+		this.registerCombatEffectApplication = function(attacker, defender, combatEffectToApply){
+			var msg;
+			if(defender instanceof Player){
+				msg = "You are ";
+			}else{
+				msg = "The enemy is ";
+			}
+			self.logMessage(msg + 'now affected by: ' + combatEffectToApply.name,'combat');
 		}
 
 		this.registerAttack = function(attacker, defender, attackResults){
@@ -2936,6 +2948,12 @@ define([
 
 		}
 
+		this.testApplyEffectToPlayer = function(combat_effect_id){
+			combat_effect_id = combat_effect_id || 'stun';
+			combatEffectToApply = new CombatEffect(self.skillDataCollection.getNode(["combat_effects", combat_effect_id]));
+			self.player().applyCombatEffect(combatEffectToApply);
+		}
+
 		self.init();
 
 	};
@@ -2960,6 +2978,9 @@ Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 
 UI Improvements
+- Add flag for enabling/disabling combat buttons
+- Check if player is stunned before allowing non-pass actions
+- Show HP bar!!!!
 - Add settings screen (control default quick eat behavior, WSAD keys as shortcuts)
 - Dynamic container name
 - Show that a weapon will take up x number of backpack slots
@@ -2969,7 +2990,7 @@ Code Improvements
 - Standardize the way objects are saved
 
 Bugs
-
+- Sometimes combat effects don't apply (NOT CURRENTLY REPRODUCIBLE)
 
 Game Ideas
 - Obstacles/mazes/labyrinthine structure in levels

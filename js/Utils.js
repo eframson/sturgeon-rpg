@@ -85,7 +85,8 @@ define([
 			return opts[randIdx];
 		},
 		
-		failureMsg : function(messageString){
+		//Commented out until I actually use it
+		/*failureMsg : function(messageString){
 			displayMessage(messageString, "error", "Oh no!", 8000);
 		},
 		
@@ -97,7 +98,7 @@ define([
 			type = type || "warning";
 		
 			$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
-		},
+		},*/
 
 		calculateAveragesForLevel : function(levelNum) {
 

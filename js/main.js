@@ -8,15 +8,20 @@ var requireJSConfig = {
 	paths : {
 		knockout : 'knockout-3.3.0.debug',
 		jquery : 'jquery-2.1.3.min',
+		jqueryui : 'jquery-ui.min',
 		bootstrap : 'bootstrap.min',
 		text : 'text',
 		json : 'json',
 	},
 	shim : {
-		bootstrap : ["jquery"],
-		"jquery.caret.min" : ["jquery"],
-		"jquery.growl" : ["jquery"],
-		"jquery.animateNumbers" : ["jquery"],
+		knockout : ["jquery"],
+		jqueryui : ["knockout"],
+		bootstrap : ["jqueryui"],
+		"jquery.animateNumbers" : ["jqueryui"],
+		"knockout-bootstrap.min" : { deps: ["knockout", "bootstrap"] },
+		"knockout.mapping-latest" : ["knockout"],
+		//"jquery.caret.min" : ["jquery"],
+		//"jquery.growl" : ["jquery"],
 	},
 };
 
@@ -27,19 +32,18 @@ if(!window.DEBUG){
 requirejs.config(requireJSConfig);
 
 require([
-	'jquery',
 	'knockout',
+	'jquery',
 	'classes/Game',
 	'knockout.mapping-latest',
 
 	'bootstrap',
-	'jquery-ui.min',
-	'jquery.caret.min',
-	'select2.min',
-	'jquery.growl',
-	'FileSaver.min',
-	'Utils',
-], function($, ko, Game, mapping){
+	'jqueryui',
+	//'jquery.caret.min',
+	//'select2.min',
+	//'jquery.growl',
+	'knockout-bootstrap.min',
+], function(ko, $, Game, mapping){
 	
 	ko_global = ko;
 	ko_global.maping = mapping;

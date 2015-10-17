@@ -21,10 +21,10 @@
 		<!--<link href="css/jquery-ui.theme.min.css" rel="stylesheet">-->
 
 		<!-- Select2 -->
-		<link href="css/select2.min.css" rel="stylesheet">
+		<!-- <link href="css/select2.min.css" rel="stylesheet"> -->
 
 		<!-- jQuery Growl -->
-		<link href="css/jquery.growl.css" rel="stylesheet">
+		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
 		<link href="css/custom.css" rel="stylesheet">
@@ -266,19 +266,85 @@
 
 							<!-- start player combat area -->
 							<div class="combat player" data-bind="if: currentEnemy(), css: { hidden: leftColContent() != 'combat_player' }">
-								<div class="header">You</div>
-								<div class="lines">
-									
-									<div class="line">
-										<span class="stat">HP:</span>
-										<span class="value hp" data-bind="animateNumbers: $root.player().hp()"></span>
+								<div class="player-info">
+									<div class="header">You</div>
+									<div class="lines stats">
+										
+										<div class="line">
+											<span class="stat">HP:</span>
+											<span class="value hp" data-bind="animateNumbers: $root.player().hp()"></span>
+										</div>
+										<div class="line">
+											<span class="stat">Speed:</span>
+											<span class="value" data-bind="text: $root.player().speed()"></span>
+										</div>
+										
 									</div>
-									<div class="line">
-										<span class="stat">Speed:</span>
-										<span class="value" data-bind="text: $root.player().speed()"></span>
-									</div>
-									
 								</div>
+
+								<div class="active-effects-section">
+									<div class="effects-header">
+										<div class="header">Active Effects</div>
+										<!-- ko if: $root.player().activeCombatEffects().length > 0 -->
+											<div class="small">(Mouseover to see description)</div>
+										<!-- /ko -->
+									</div>
+									<div class="lines active-effects">
+
+										<!-- ko if: $root.player().activeCombatEffects().length > 0 -->
+										<div class="line empty section-header">
+											<span class="item">Name</span>
+											<span class="value">Duration</span>
+										</div>
+										<!-- /ko -->
+										
+										<!-- ko foreach: $root.player().activeCombatEffects() -->
+										<div class="line" data-bind="tooltip: {title : $data.description, placement: 'top', container : 'body'}">
+											<span class="item" data-bind="html: $data.name"></span>
+											<span class="value" data-bind="text: $data.duration()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: $root.player().activeCombatEffects().length == 0 -->
+										<div class="line empty">
+											<span class="item">(No combat effects are currently active)</span>
+										</div>
+										<!-- /ko -->
+										
+									</div>
+								</div>
+
+								<div class="temporary-immunity-section">
+									<div class="effects-header">
+										<div class="header">Temporary Immunities</div>
+										<!-- ko if: $root.player().immuneCombatEffects().length > 0 -->
+											<div class="small">(Mouseover to see description)</div>
+										<!-- /ko -->
+									</div>
+									<div class="lines active-effects">
+
+										<!-- ko if: $root.player().immuneCombatEffects().length > 0 -->
+										<div class="line empty section-header">
+											<span class="item">Name</span>
+											<span class="value">Duration</span>
+										</div>
+										<!-- /ko -->
+										
+										<!-- ko foreach: $root.player().immuneCombatEffects() -->
+										<div class="line" data-bind="tooltip: {title : $data.description, placement: 'top', container : 'body'}">
+											<span class="item" data-bind="html: $data.name"></span>
+											<span class="value" data-bind="text: $data.delayUntilNextApplication()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: $root.player().immuneCombatEffects().length == 0 -->
+										<div class="line empty">
+											<span class="item">(No temporary immunities)</span>
+										</div>
+										<!-- /ko -->
+									</div>
+								</div>
+
 							</div>
 							<!-- end player combat area -->
 
@@ -480,26 +546,28 @@
 											<button type="button" class="btn btn-default" data-bind="
 												click: $root.playerAttacks,
 												text: buttonLabel + ( cooldown() > 0 ? ' (' + cooldown() + ')' : '' ),
-												css: { disabled : cooldown() > 0 }
+												css: { disabled : cooldown() > 0 || $root.disablePlayerCombatButtons() == 1 || $root.player().canAct() == 0 }
 											"></button>
 											<span class="button-label" data-bind="text: $data.description"></span>
 										</div>
 										<!-- /ko -->
 
 									<!-- /ko -->
+									<!-- ko if: !$root.player().isDead() -->
 									<div class="line">
-										<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.player().numPotionsAvailable() < 1 || $root.player().isDead() }, click: $root.useHealthPotion, text: 'Use Health Potion (' + $root.player().numPotionsAvailable() + ')'">Use Health Potion</button>
+										<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.player().numPotionsAvailable() < 1 || $root.disablePlayerCombatButtons() == 1 || $root.player().canAct() == 0 }, click: $root.useHealthPotion, text: 'Use Health Potion (' + $root.player().numPotionsAvailable() + ')'">Use Health Potion</button>
 										<span class="button-label">Consume a Health Potion (if any are in your inventory) and restore half your maximum HP</span>
 									</div>
+									<!-- /ko -->
 									<!-- ko if: !$root.currentEnemy().isDead() && !$root.player().isDead() -->
 									<div class="line">
-										<button type="button" class="btn btn-default" data-bind="click: $root.playerFlee">Flee!</button>
-										<span class="button-label">Swim away as fast as you possibly can. (The monster will remain where it is)</span>
+										<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.disablePlayerCombatButtons() == 1 }, click: $root.playerPass">Pass</button>
+										<span class="button-label">Take no action during the next combat round</span>
 									</div>
 
 									<div class="line">
-										<button type="button" class="btn btn-default" data-bind="click: $root.playerPass">Pass</button>
-										<span class="button-label">Take no action during the next combat round</span>
+										<button type="button" class="btn btn-default" data-bind="css: { disabled: $root.disablePlayerCombatButtons() == 1 || $root.player().canAct() == 0 }, click: $root.playerFlee">Flee!</button>
+										<span class="button-label">Swim away as fast as you possibly can. (The monster will remain where it is)</span>
 									</div>
 									<!-- /ko -->
 								</div>
@@ -715,20 +783,87 @@
 
 							<!-- start monster combat area -->
 							<div class="combat enemy" data-bind="if: currentEnemy(), css: { hidden: rightColContent() != 'combat_enemy' }">
-								<div class="header" data-bind="text: $root.currentEnemy().name()"></div>
-								<div class="lines">
-									
-									<div class="line">
-										<span class="stat">HP:</span>
-										<span class="value hp" data-bind="animateNumbers: $root.currentEnemy().hp()"></span>
+								<div class="enemy-info">
+									<div class="header" data-bind="text: $root.currentEnemy().name()"></div>
+									<div class="lines stats">
+										
+										<div class="line">
+											<span class="stat">HP:</span>
+											<span class="value hp" data-bind="animateNumbers: $root.currentEnemy().hp()"></span>
+										</div>
+										<div class="line">
+											<span class="stat">Speed:</span>
+											<span class="value" data-bind="text: $root.currentEnemy().speed()"></span>
+										</div>
+										
 									</div>
-									<div class="line">
-										<span class="stat">Speed:</span>
-										<span class="value" data-bind="text: $root.currentEnemy().speed()"></span>
-									</div>
-									
+									<div class="desc" data-bind="text: $root.currentEnemy().desc()"></div>
 								</div>
-								<div class="desc" data-bind="text: $root.currentEnemy().desc()"></div>
+
+								<div class="active-effects-section">
+									<div class="effects-header">
+										<div class="header">Active Effects</div>
+										<!-- ko if: $root.currentEnemy().activeCombatEffects().length > 0 -->
+											<div class="small">(Mouseover to see description)</div>
+										<!-- /ko -->
+									</div>
+									<div class="lines active-effects">
+
+										<!-- ko if: $root.currentEnemy().activeCombatEffects().length > 0 -->
+										<div class="line empty section-header">
+											<span class="item">Name</span>
+											<span class="value">Duration</span>
+										</div>
+										<!-- /ko -->
+										
+										<!-- ko foreach: $root.currentEnemy().activeCombatEffects() -->
+										<div class="line" data-bind="tooltip: {title : $data.description, placement: 'top', container : 'body'}">
+											<span class="item" data-bind="html: $data.name"></span>
+											<span class="value" data-bind="text: $data.duration()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: $root.currentEnemy().activeCombatEffects().length == 0 -->
+										<div class="line empty">
+											<span class="item">(No combat effects are currently active)</span>
+										</div>
+										<!-- /ko -->
+										
+									</div>
+								</div>
+
+								<div class="temporary-immunity-section">
+									<div class="effects-header">
+										<div class="header">Temporary Immunities</div>
+										<!-- ko if: $root.currentEnemy().immuneCombatEffects().length > 0 -->
+											<div class="small">(Mouseover to see description)</div>
+										<!-- /ko -->
+									</div>
+									<div class="lines active-effects">
+
+										<!-- ko if: $root.currentEnemy().immuneCombatEffects().length > 0 -->
+										<div class="line empty section-header">
+											<span class="item">Name</span>
+											<span class="value">Duration</span>
+										</div>
+										<!-- /ko -->
+										
+										<!-- ko foreach: $root.currentEnemy().immuneCombatEffects() -->
+										<div class="line" data-bind="tooltip: {title : $data.description, placement: 'top', container : 'body'}">
+											<span class="item" data-bind="html: $data.name"></span>
+											<span class="value" data-bind="text: $data.delayUntilNextApplication()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: $root.currentEnemy().immuneCombatEffects().length == 0 -->
+										<div class="line empty">
+											<span class="item">(No temporary immunities)</span>
+										</div>
+										<!-- /ko -->
+									</div>
+								</div>
+
+								
 							</div>
 							<!-- end monster combat area -->
 

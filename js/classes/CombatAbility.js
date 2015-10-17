@@ -3,10 +3,11 @@ define([
 	'knockout',
 	'classes/LevelableAbility',
 	'classes/DataCollection',
+	'classes/CombatEffect',
 
 	'json!data/skills.json',
 	'Utils'
-], function($, ko, LevelableAbility, DataCollection, skillDataFile, Utils){
+], function($, ko, LevelableAbility, DataCollection, CombatEffect, skillDataFile, Utils){
 
 	function CombatAbility(data){
 
@@ -24,7 +25,7 @@ define([
 			/*self.chanceToHit = data.chanceToHit || undefined;
 			self.chanceToCrit = data.chanceToCrit || undefined;*/
 			self.dmg = data.dmg || undefined;
-			self.dmgCoefficient = data.dmgCoefficient || 1;
+			self.dmgCoefficient = data.dmgCoefficient !== undefined ? data.dmgCoefficient : 1;
 			self.chanceToHitCoefficient = data.chanceToHitCoefficient || 1;
 			self.chanceToCritCoefficient = data.chanceToCritCoefficient || 1;
 			self.baseCooldown = data.baseCooldown || 0;
@@ -93,6 +94,10 @@ define([
 					//Add any +x damage from the attacker's equipped weapon
 					dmgObject.dmgDealt += attacker.hasWeapon() ? attacker.getEquippedWeapon().extraDamage() : 0 ;
 
+					if( defender.hasActiveCombatEffect("cracked") ){
+						dmgObject.dmgDealt = Math.round(dmgObject.dmgDealt * 1.2);
+					}
+
 					//Calculate the actual damage done to the target, applying any armor/other mitigation effects
 					actualDmg = defender.calculateActualDmg(dmgObject.dmgDealt, game.level().levelNum());
 
@@ -127,7 +132,7 @@ define([
 				}
 
 				if(combatEffectToApply){
-					combatEffectToApply = self.skillDataCollection.getNode(["combat_effects", combatEffectToApply]);
+					combatEffectToApply = new CombatEffect(self.skillDataCollection.getNode(["combat_effects", combatEffectToApply]));
 					defender.applyCombatEffect(combatEffectToApply);
 					game.registerCombatEffectApplication(attacker, defender, combatEffectToApply);
 				}

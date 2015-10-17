@@ -54,6 +54,18 @@ define([
 				return activeEffects;
 			});
 
+			self.immuneCombatEffects = ko.computed(function(){
+				var combatEffectsArray = $.map(self.combatEffects(), function(elem, idx){
+					return elem;
+				});
+
+				var activeEffects = $.grep(combatEffectsArray, function(elem, idx){
+					return elem.delayUntilNextApplication() > 0;
+				});
+
+				return activeEffects;
+			});
+
 			self.isDead = ko.computed(function(){
 				return self.hp() < 1;
 			});
@@ -72,12 +84,16 @@ define([
 		}
 
 		this.calculateActualDmg = function(dmg, levelNum){
-			return Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum);
+			var baseDmg = Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum);
+
+			return baseDmg;
 		}
 
 		this.takeCombatAction = function(abilityId, target, game){
 
-			self.makeAttack(abilityId, target, game);
+			if(self.canAct() && abilityId != 'pass'){
+				self.makeAttack(abilityId, target, game);
+			}
 
 		}
 
@@ -92,15 +108,7 @@ define([
 			
 			$.each(self.combatEffects(), function(idx, effect){
 
-				if(effect.cooldown() > 0){
-					effect.cooldown( effect.cooldown() - 1 );
-
-					if(effect.cooldown() == 0){
-						effect.delayUntilNextApplication(effect.baseDelayUntilNextApplication());
-					}
-				}else if( effect.delayUntilNextApplication() > 0 ){
-					effect.delayUntilNextApplication(effect.delayUntilNextApplication() - 1);
-				}
+				effect.doRound();
 
 			});
 
@@ -135,18 +143,14 @@ define([
 
 		this.applyCombatEffect = function(combatEffect){
 
-			existingEffect = self.combatEffects()[combatEffect.id];
+			var existingEffect = self.combatEffects()[combatEffect.id];
 
-			if(existingEffect){
-
-				if(existingEffect.baseDelayUntilNextApplication() == 0){
-					existingEffect.cooldown(combatEffect.baseCooldown);
-				}
-
-			}else{
-				combatEffect.cooldown(combatEffect.baseCooldown);
+			if(existingEffect == undefined){
 				self.combatEffects()[combatEffect.id] = combatEffect;
+				existingEffect = self.combatEffects()[combatEffect.id];
 			}
+			
+			existingEffect.applyEffect();
 
 			self.combatEffects.valueHasMutated();
 		}

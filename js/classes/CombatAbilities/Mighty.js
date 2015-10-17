@@ -17,15 +17,15 @@ define([
 
 		this.onHit = function(hitData){
 
-			var doExtraDmg = Utils.doBasedOnPercent({
+			/*var doExtraDmg = Utils.doBasedOnPercent({
 				50 : 1
 			}, function(){
 				return 0;
 			});
 
 			if(doExtraDmg){
-				hitData.dmgCoefficient = 3;
-			}
+				hitData.dmgCoefficient = 1.5;
+			}*/
 
 		}
 

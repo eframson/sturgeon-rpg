@@ -427,7 +427,8 @@ button:focus {
 .container-ui .line.section-header,
 .merchant .line.section-header,
 .known-skills .line.section-header,
-.available-skills .line.section-header {
+.available-skills .line.section-header,
+.active-effects .line.section-header {
 	font-weight: bold;
 }
 
@@ -458,7 +459,8 @@ button:focus {
 .known-skills .line:not(.empty):hover,
 .known-skills .line:not(.empty).selected,
 .available-skills .line:not(.empty):hover,
-.available-skills .line:not(.empty).selected {
+.available-skills .line:not(.empty).selected,
+.active-effects .line:not(.empty):hover {
 	background-color: #EDC78E;
 }
 
@@ -483,7 +485,8 @@ button:focus {
 .container-ui .qty,
 .merchant .qty,
 .known-skills .level,
-.available-skills .level {
+.available-skills .level,
+.active-effects .value {
 	float: right;
 	clear: both;
 }
@@ -581,11 +584,35 @@ button:focus {
 	width: 90px;
 }
 
-.combat.enemy {
-	background-color: #FFF5F5;
+.combat.enemy .effects-header .small,
+.combat.player .effects-header .small {
+	font-style: italic;
+	display: inline;
+	font-weight: normal;
 }
-.combat.player {
-	background-color: #DDEDDD;
+
+.combat.enemy .effects-header .header,
+.combat.player .effects-header .header {
+	display: inline;
+}
+
+.combat.enemy .enemy-info{
+	/* background-color: #FFF5F5; */
+	/* background-color: #9D0A0E; */
+	background-color: #e07678;
+}
+.combat.player .player-info{
+	/* background-color: #DDEDDD; */
+	/* background-color: #748C4F; */
+	background-color: #c5dd9b;
+}
+
+.combat .lines.stats .line:last-child {
+	margin-bottom: 10px;
+}
+
+.combat .lines.active-effects .line:not(.empty) {
+	cursor: pointer;
 }
 
 .full-screen-notice {
@@ -652,5 +679,12 @@ https://color.adobe.com/Fall-stream-color-theme-2482148/
 #525956
 #5D7362
 #97A699
+
+https://color.adobe.com/stream-color-theme-6170456/
+#283040
+#728EA6
+#F2F2F2
+#6C733D
+#8C7961
 
 */
