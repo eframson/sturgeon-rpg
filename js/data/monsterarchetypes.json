@@ -12,10 +12,12 @@
 			"lootCoefficient" : 1.0,
 			"chanceOfEpicLoot" : 0.0,
 			"availableCombatAbilities" : [
-				"basic_attack"
+				"basic_attack",
+				"stun"
 			],
 			"attacks" : {
-				"100" : "basic_attack"
+				"basic_attack" : "50",
+				"stun" : "50"
 			},
 			"appearsOnLevel" : 1,
 			"qualityOdds" : {
@@ -41,7 +43,7 @@
 				"npc_mighty"
 			],
 			"attacks" : {
-				"100" : "npc_mighty"
+				"npc_mighty" : "100"
 			},
 			"appearsOnLevel" : 1,
 			"qualityOdds" : {

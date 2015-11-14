@@ -764,9 +764,7 @@ define([
 			var attacker = (goesFirst == "player") ? self.player() : self.currentEnemy() ;
 			var defender = (goesFirst == "player") ? self.currentEnemy() : self.player() ;
 
-			var monsterAbilityId = Utils.doBasedOnPercent(
-				self.currentEnemy().availableAttacks
-			);
+			var monsterAbilityId = self.currentEnemy().selectCombatAbility();
 
 			var abilityId = (goesFirst == "player") ? playerAbilityId : monsterAbilityId ;
 
@@ -2987,7 +2985,7 @@ UI Improvements
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Code Improvements
-- Standardize the way objects are saved
+- Standardize the way objects are saved (done already?)
 
 Bugs
 - Sometimes combat effects don't apply (NOT CURRENTLY REPRODUCIBLE)
@@ -3003,7 +3001,6 @@ Game Ideas
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI Ideas
-- Add labels in top row of containers
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Play sound on level up?
 - Minor sound FX on square events
@@ -3017,6 +3014,7 @@ UI Ideas
 - Keyboard shortcuts for "continue" buttons
 
 Code Ideas
+- Make Gold a "stat" rather than an inventory item?
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
 - Write combat simulator for testing balancing stuff
 

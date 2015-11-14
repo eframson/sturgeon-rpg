@@ -139,16 +139,6 @@ define([
 			}
 		}
 
-		/*
-		//Maybe this way?
-		this.onHitEffect = function(){
-
-		}
-
-		this.onMissEffect = function(){
-
-		}
-		*/
 	}
 
 	CombatAbility.prototype = Object.create(LevelableAbility.prototype);

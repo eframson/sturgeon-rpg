@@ -48,13 +48,6 @@ define([
 
 		}
 
-		/*
-		//Or this way??
-		this.effectLogic = function(){
-
-		}
-		*/
-
 		this.init(data);
 	}
 

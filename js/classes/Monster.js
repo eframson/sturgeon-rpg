@@ -121,6 +121,98 @@ define([
 
 			});
 
+			self.combatAbilityIdsOffCooldown = ko.computed(function(){
+				var combatAbilitiesArray = $.map(self.combatAbilities(), function(elem, idx){
+					return elem;
+				});
+
+				var availableCombatAbilities = $.grep(combatAbilitiesArray, function(elem, idx){
+					return elem.cooldown() == 0;
+				});
+
+				var availableCombatAbilities = $.map(availableCombatAbilities, function(elem, idx){
+					return elem.id;
+				});
+
+				return availableCombatAbilities;
+			});
+
+			self.combatAbilityIdsOnCooldown = ko.computed(function(){
+				var combatAbilitiesArray = $.map(self.combatAbilities(), function(elem, idx){
+					return elem;
+				});
+
+				var unavailableCombatAbilities = $.grep(combatAbilitiesArray, function(elem, idx){
+					return elem.cooldown() > 0;
+				});
+
+				var unavailableCombatAbilities = $.map(unavailableCombatAbilities, function(elem, idx){
+					return elem.id;
+				});
+
+				return unavailableCombatAbilities;
+			});
+
+		}
+
+		this.selectCombatAbility = function(){
+
+			var baseAvailableAttacks = {};
+			var monsterAbilityId = undefined;
+			var totalProbabilityToRedistribute = 0;
+
+			//From the available combat abilities, find the ones that are not currently valid
+			var abilityIdsOnCooldown = self.combatAbilityIdsOnCooldown();
+
+			//Combine their probabilities
+			$.each((abilityIdsOnCooldown || []), function(idx, abilityId){
+				totalProbabilityToRedistribute += self.availableAttacks[abilityId];
+			});
+
+			//If we have probabilities to redistribute
+			if(totalProbabilityToRedistribute > 0){
+				//Count the number of valid abilities
+				var numberToRedistributeTo = self.combatAbilityIdsOffCooldown().length;
+				if(numberToRedistributeTo > 0){
+
+					var floatingProbabilityPerAbility = (totalProbabilityToRedistribute / numberToRedistributeTo);
+					var floorProbabilityPerAbility = Math.floor(floatingProbabilityPerAbility);
+					var remainderToDistribute = (floatingProbabilityPerAbility > floorProbabilityPerAbility) ? 1 : 0 ;
+
+					//Take the combined probability total and divvy it up among the remaining valid abilities
+					$.each(self.combatAbilityIdsOffCooldown(), function(idx, abilityId){
+						baseAvailableAttacks[abilityId] = floorProbabilityPerAbility + self.availableAttacks[abilityId];
+
+						//If there is a remainder, add the floor on all but one, and add floor + 1 on the last one (or first one or whatever)
+						if(idx == (self.combatAbilityIdsOffCooldown().length - 1) ){
+							baseAvailableAttacks[abilityId] = baseAvailableAttacks[abilityId] + remainderToDistribute;
+						}
+					});
+					
+				}
+				monsterAbilityId = 'pass';
+				//If there are none left, pass (leave ability ID set as undef)
+			}
+
+			baseAvailableAttacks = self.availableAttacks;
+
+			//Swap the keys and values
+				//If the resulting object would have two keys with the same name (i.e. - two abilities with the same % chance), they need to be made into an array
+
+			//From the resulting probability list, choose one appropriately and return its ID
+
+			if(monsterAbilityId != 'pass'){
+
+				var monsterAbilityId = Utils.doBasedOnPercent(
+					baseAvailableAttacks
+				);
+
+				return monsterAbilityId;
+
+			}else{
+				return undefined;
+			}
+
 		}
 
 		this.getMonsterArchetypeById = function(archetypeID, archetypeClass){
