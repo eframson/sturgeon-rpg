@@ -269,6 +269,10 @@
 								<div class="player-info">
 									<div class="header">You</div>
 									<div class="lines stats">
+
+										<div class="line">
+											<div id="playerhpbar" class="hpbar"><div data-bind="text: playerHpBarDisplayValue"></div></div>
+										</div>
 										
 										<div class="line">
 											<span class="stat">HP:</span>
@@ -786,6 +790,10 @@
 								<div class="enemy-info">
 									<div class="header" data-bind="text: $root.currentEnemy().name()"></div>
 									<div class="lines stats">
+
+										<div class="line">
+											<div id="enemyhpbar" class="hpbar"><div data-bind="text: enemyHpBarDisplayValue"></div></div>
+										</div>
 										
 										<div class="line">
 											<span class="stat">HP:</span>
@@ -889,8 +897,6 @@
 				</div>
 			</div>
 			<!-- end message log area -->
-
-			<input class="file-upload" type="file" name="Import Saved Game" id="importSavedGame" accept=".json" />
 		</div><!-- /.container -->
 
 		<!-- Bootstrap core JavaScript

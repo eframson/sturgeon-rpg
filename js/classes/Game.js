@@ -204,6 +204,11 @@ define([
 			self.centerColContent = ko.observable("fullscreen_content");
 			self.rightColContent = ko.observable(undefined);
 
+			self.playerHpBarElem = $("#playerhpbar");
+			self.enemyHpBarElem = $("#enemyhpbar");
+			self.playerHpBarDisplayValue = ko.observable();
+			self.enemyHpBarDisplayValue = ko.observable();
+
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
 
@@ -677,6 +682,13 @@ define([
 			}
 		}
 
+		this.resetHpBars = function(){
+			//Rather an unfortunate hack atm...this should probably be dynamic, or at least using a constant or observable from somewhere...
+			self.playerHpBarElem.find('div').width( 368 );
+			self.enemyHpBarElem.find('div').width( 368 );
+			self.playerHpBarDisplayValue(self.player().hp());
+		}
+
 		this.startCombat = function(encounterType){
 
 			self.player().resetActiveAbilityCooldowns();
@@ -713,6 +725,8 @@ define([
 			self.currentEnemy(new Monster(
 				newObj
 			));
+
+			self.enemyHpBarDisplayValue( self.currentEnemy().hp() );
 
 			/*console.log("Init new monster. Monster has:");
 			console.log("minDmg: " + self.currentEnemy().minDmg());
@@ -833,19 +847,32 @@ define([
 
 			var combatLogString = "";
 			var animateSection = "";
+			var hpBarElem = "";
+			var maxHp = defender.maxHp();
+			var currentHp = defender.hp();
+			var hpBarId;
 
 			if(defender instanceof Monster){
 				combatLogString = "The enemy is";
 				animateSection = "enemy";
+				hpBarElem = self.enemyHpBarElem;
 			}else if(defender instanceof Player){
 				combatLogString = "You are";
 				animateSection = "player";
+				hpBarElem = self.playerHpBarElem;
 			}
+			hpBarId = '#' + animateSection + 'hpbar';
 
 			if(attackResults.hitType != 'miss'){
 				self.logMessage(combatLogString + ( attackResults.hitType == 'crit' ? ' critically' : '' ) + " struck for " + attackResults.actualDmg + " points of damage! An additional " + (attackResults.attemptedDmg - attackResults.actualDmg) + " points were absorbed by armor.", "combat");
 				if( attackResults.actualDmg > 0 ){
 					self.showDamage(animateSection);
+
+					var hpBarTargetPercent = currentHp / maxHp;
+					//Rather an unfortunate hack atm...this should probably be dynamic, or at least using a constant or observable from somewhere...
+					var progressBarWidth = hpBarTargetPercent * 368;
+					$(hpBarId).find('div').animate({ width: progressBarWidth }, 500).html(currentHp);
+
 				}else{
 					self.showNonDamage(animateSection);
 				}
@@ -1189,6 +1216,7 @@ define([
 					{
 						title : "Continue",
 						action : function(){
+							self.resetHpBars();
 							self.manageTransitionToView("fullscreen","combat");
 
 							/*self.spcAction = function(){
@@ -2985,7 +3013,10 @@ UI Improvements
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Code Improvements
+- Prevent enemy HP from going below 0
+- Figure out why self.blahHpBar reference doesn't work...maybe needs to be an observable?
 - Standardize the way objects are saved (done already?)
+- Write custom binding to update/animate HP bars automatically (as that's basically what knockout is FOR, dum-dum)
 
 Bugs
 - Sometimes combat effects don't apply (NOT CURRENTLY REPRODUCIBLE)

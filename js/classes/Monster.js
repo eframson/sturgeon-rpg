@@ -51,7 +51,8 @@ define([
 				var avgMonsterDmg = averages.avgMonsterDmg;
 
 
-				var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
+				//var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
+				var newMonsterArchetypeId = "basic";
 				self.archetypeId = newMonsterArchetypeId;
 				var archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 
@@ -117,6 +118,7 @@ define([
 
 				require(["classes/CombatAbilities/" + className], function(newClassDefinition){
 					self.combatAbilities()[elem.id] = new newClassDefinition(elem);
+					self.combatAbilities.valueHasMutated();
 				});
 
 			});
@@ -166,7 +168,7 @@ define([
 
 			//Combine their probabilities
 			$.each((abilityIdsOnCooldown || []), function(idx, abilityId){
-				totalProbabilityToRedistribute += self.availableAttacks[abilityId];
+				totalProbabilityToRedistribute += parseInt(self.availableAttacks[abilityId]);
 			});
 
 			//If we have probabilities to redistribute
@@ -181,7 +183,7 @@ define([
 
 					//Take the combined probability total and divvy it up among the remaining valid abilities
 					$.each(self.combatAbilityIdsOffCooldown(), function(idx, abilityId){
-						baseAvailableAttacks[abilityId] = floorProbabilityPerAbility + self.availableAttacks[abilityId];
+						baseAvailableAttacks[abilityId] = floorProbabilityPerAbility + parseInt(self.availableAttacks[abilityId]);
 
 						//If there is a remainder, add the floor on all but one, and add floor + 1 on the last one (or first one or whatever)
 						if(idx == (self.combatAbilityIdsOffCooldown().length - 1) ){
@@ -189,22 +191,35 @@ define([
 						}
 					});
 					
+				}else{
+					//If there are none left, pass (leave ability ID set as undef)
+					monsterAbilityId = 'pass';
 				}
-				monsterAbilityId = 'pass';
-				//If there are none left, pass (leave ability ID set as undef)
-			}
-
-			baseAvailableAttacks = self.availableAttacks;
+			}else{
+				baseAvailableAttacks = self.availableAttacks;
+			}			
 
 			//Swap the keys and values
-				//If the resulting object would have two keys with the same name (i.e. - two abilities with the same % chance), they need to be made into an array
-
+			var probabilityIndexedAttacks = {};
+			$.each(baseAvailableAttacks, function(abilityId, probability){
+				if(probabilityIndexedAttacks[probability] === undefined){
+					probabilityIndexedAttacks[probability] = abilityId;
+				}else if(probabilityIndexedAttacks[probability] !== undefined){
+					//If the resulting object would have two keys with the same name (i.e. - two abilities with the same % chance), they need to be made into an array
+					if( probabilityIndexedAttacks[probability] instanceof Array ){
+						probabilityIndexedAttacks[probability].push(abilityId);
+					}else{
+						probabilityIndexedAttacks[probability] = [ probabilityIndexedAttacks[probability], abilityId ];
+					}
+				}
+			});
+			
 			//From the resulting probability list, choose one appropriately and return its ID
 
 			if(monsterAbilityId != 'pass'){
 
 				var monsterAbilityId = Utils.doBasedOnPercent(
-					baseAvailableAttacks
+					probabilityIndexedAttacks
 				);
 
 				return monsterAbilityId;
