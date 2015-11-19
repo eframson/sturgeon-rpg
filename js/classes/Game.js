@@ -204,10 +204,9 @@ define([
 			self.centerColContent = ko.observable("fullscreen_content");
 			self.rightColContent = ko.observable(undefined);
 
-			self.playerHpBarElem = $("#playerhpbar");
-			self.enemyHpBarElem = $("#enemyhpbar");
-			self.playerHpBarDisplayValue = ko.observable();
-			self.enemyHpBarDisplayValue = ko.observable();
+			self.hpBarBaseWidth = 368;
+			self.playerHpBarWidth = ko.observable(self.hpBarBaseWidth);
+			self.enemyHpBarWidth = ko.observable(self.hpBarBaseWidth);
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -683,10 +682,8 @@ define([
 		}
 
 		this.resetHpBars = function(){
-			//Rather an unfortunate hack atm...this should probably be dynamic, or at least using a constant or observable from somewhere...
-			self.playerHpBarElem.find('div').width( 368 );
-			self.enemyHpBarElem.find('div').width( 368 );
-			self.playerHpBarDisplayValue(self.player().hp());
+			self.playerHpBarWidth = ko.observable(self.hpBarBaseWidth);
+			self.enemyHpBarWidth = ko.observable(self.hpBarBaseWidth);
 		}
 
 		this.startCombat = function(encounterType){
@@ -725,8 +722,6 @@ define([
 			self.currentEnemy(new Monster(
 				newObj
 			));
-
-			self.enemyHpBarDisplayValue( self.currentEnemy().hp() );
 
 			/*console.log("Init new monster. Monster has:");
 			console.log("minDmg: " + self.currentEnemy().minDmg());
@@ -847,21 +842,16 @@ define([
 
 			var combatLogString = "";
 			var animateSection = "";
-			var hpBarElem = "";
 			var maxHp = defender.maxHp();
 			var currentHp = defender.hp();
-			var hpBarId;
 
 			if(defender instanceof Monster){
 				combatLogString = "The enemy is";
 				animateSection = "enemy";
-				hpBarElem = self.enemyHpBarElem;
 			}else if(defender instanceof Player){
 				combatLogString = "You are";
 				animateSection = "player";
-				hpBarElem = self.playerHpBarElem;
 			}
-			hpBarId = '#' + animateSection + 'hpbar';
 
 			if(attackResults.hitType != 'miss'){
 				self.logMessage(combatLogString + ( attackResults.hitType == 'crit' ? ' critically' : '' ) + " struck for " + attackResults.actualDmg + " points of damage! An additional " + (attackResults.attemptedDmg - attackResults.actualDmg) + " points were absorbed by armor.", "combat");
@@ -870,8 +860,8 @@ define([
 
 					var hpBarTargetPercent = currentHp / maxHp;
 					//Rather an unfortunate hack atm...this should probably be dynamic, or at least using a constant or observable from somewhere...
-					var progressBarWidth = hpBarTargetPercent * 368;
-					$(hpBarId).find('div').animate({ width: progressBarWidth }, 500).html(currentHp);
+					var progressBarWidth = hpBarTargetPercent * self.hpBarBaseWidth;
+					self[animateSection + 'HpBarWidth'](progressBarWidth);
 
 				}else{
 					self.showNonDamage(animateSection);
@@ -2993,6 +2983,15 @@ define([
 		},
 		update: function(element, valueAccessor){
 			$(element).stop(false, true).animateNumbers(valueAccessor(), false, 300);
+		}
+	}
+
+	ko.bindingHandlers.animateWidth = {
+		init: function(element, valueAccessor){
+			$(element).width(valueAccessor());
+		},
+		update: function(element, valueAccessor){
+			$(element).stop(false, true).animate({ width: valueAccessor() }, 500);
 		}
 	}
 

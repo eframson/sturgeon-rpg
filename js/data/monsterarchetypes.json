@@ -12,12 +12,10 @@
 			"lootCoefficient" : 1.0,
 			"chanceOfEpicLoot" : 0.0,
 			"availableCombatAbilities" : [
-				"basic_attack",
-				"stun"
+				"basic_attack"
 			],
 			"attacks" : {
-				"basic_attack" : "50",
-				"stun" : "50"
+				"basic_attack" : "100"
 			},
 			"appearsOnLevel" : 1,
 			"qualityOdds" : {
@@ -39,7 +37,6 @@
 			"lootCoefficient" : 1.5,
 			"chanceOfEpicLoot" : 0.0,
 			"availableCombatAbilities" : [
-				"basic_attack",
 				"npc_mighty"
 			],
 			"attacks" : {
@@ -122,7 +119,10 @@
 				"flurry"
 			],
 			"attacks" : {
-				"100" : "flurry"
+				"50" : [
+					"basic_attack",
+					"flurry"
+				]
 			},
 			"appearsOnLevel" : 2,
 			"qualityOdds" : {
@@ -172,10 +172,12 @@
 			"xpCoefficient" : 2.0,
 			"lootCoefficient" : 3.0,
 			"availableCombatAbilities" : [
-				"basic_attack"
+				"basic_attack",
+				"stun"
 			],
 			"attacks" : {
-				"100" : "basic_attack"
+				"70" : "basic_attack",
+				"30" : "stun"
 			},
 			"qualityOdds" : {
 				"100" : "exceptional"

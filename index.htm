@@ -269,14 +269,13 @@
 								<div class="player-info">
 									<div class="header">You</div>
 									<div class="lines stats">
-
-										<div class="line">
-											<div id="playerhpbar" class="hpbar"><div data-bind="text: playerHpBarDisplayValue"></div></div>
-										</div>
 										
 										<div class="line">
 											<span class="stat">HP:</span>
-											<span class="value hp" data-bind="animateNumbers: $root.player().hp()"></span>
+											<!--<span class="value hp" data-bind="animateNumbers: $root.player().hp()"></span>-->
+										</div>
+										<div class="line">
+											<div id="playerhpbar" class="hpbar"><div data-bind="animateWidth: $root.playerHpBarWidth(), animateNumbers: $root.player().hp()"></div></div>
 										</div>
 										<div class="line">
 											<span class="stat">Speed:</span>
@@ -790,14 +789,13 @@
 								<div class="enemy-info">
 									<div class="header" data-bind="text: $root.currentEnemy().name()"></div>
 									<div class="lines stats">
-
-										<div class="line">
-											<div id="enemyhpbar" class="hpbar"><div data-bind="text: enemyHpBarDisplayValue"></div></div>
-										</div>
 										
 										<div class="line">
 											<span class="stat">HP:</span>
-											<span class="value hp" data-bind="animateNumbers: $root.currentEnemy().hp()"></span>
+											<!--<span class="value hp" data-bind="animateNumbers: $root.currentEnemy().hp()"></span>-->
+										</div>
+										<div class="line">
+											<div id="enemyhpbar" class="hpbar"><div data-bind="animateWidth: $root.enemyHpBarWidth(), animateNumbers: $root.currentEnemy().hp()"></div></div>
 										</div>
 										<div class="line">
 											<span class="stat">Speed:</span>
