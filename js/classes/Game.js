@@ -1053,7 +1053,7 @@ define([
 
 				goldAmt = Math.ceil(goldAmt * qtyCoefficient);
 
-				if(lootSet == "monster"){
+				if(lootSet == "monster" || lootSet == "boss"){
 					goldAmt = Math.round(goldAmt * self.currentEnemy().lootCoefficient());
 				}else{
 					if( self.player().hasPassiveAbility("improved_gold_finding") ){
@@ -1090,7 +1090,7 @@ define([
 				}else if( miscType == "scrap" ){
 
 					var scrapQty = Math.ceil(Utils.doRand(10,36) * qtyCoefficient);
-					if(lootSet == "monster"){
+					if(lootSet == "monster" || lootSet == "boss"){
 						scrapQty = Math.round(scrapQty * self.currentEnemy().lootCoefficient());
 					}
 
@@ -1129,7 +1129,7 @@ define([
 				var quality = Utils.chooseRandomly(Utils.getPossibleQualities());
 
 				if(lootSet == "boss"){
-					quality = "exceptional";
+					quality = "great";
 				}
 
 				if( gearType == "armor" ){
@@ -1162,7 +1162,7 @@ define([
 				}
 
 				itemToAdd.fullyDynamicStats = 1;
-				itemToAdd.level = self.level().levelNum();
+				itemToAdd.level = (lootSet == "boss" ? (self.level().levelNum() + 1) : self.level().levelNum() );
 				itemToAdd.quality = quality;
 				if(lootSet == "monster"){
 					itemToAdd.monsterLootCoefficient = self.currentEnemy().lootCoefficient();
@@ -3044,6 +3044,7 @@ UI Improvements
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Code Improvements
+- Figure out some way of selectively forcing object reload from *.jsons
 - Show "level" column header in known skills section
 - Prevent enemy HP from going below 0 (maybe)
 - Standardize the way objects are saved (done already?)
