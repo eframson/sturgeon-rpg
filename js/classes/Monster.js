@@ -129,7 +129,9 @@ define([
 				});
 
 				var availableCombatAbilities = $.grep(combatAbilitiesArray, function(elem, idx){
-					return elem.cooldown() == 0;
+					if (elem.cooldown !== undefined && typeof elem.cooldown === "function"){
+						return elem.cooldown() == 0;
+					}
 				});
 
 				var availableCombatAbilities = $.map(availableCombatAbilities, function(elem, idx){
@@ -145,7 +147,9 @@ define([
 				});
 
 				var unavailableCombatAbilities = $.grep(combatAbilitiesArray, function(elem, idx){
-					return elem.cooldown() > 0;
+					if (elem.cooldown !== undefined && typeof elem.cooldown === "function"){
+						return elem.cooldown() > 0;
+					}
 				});
 
 				var unavailableCombatAbilities = $.map(unavailableCombatAbilities, function(elem, idx){

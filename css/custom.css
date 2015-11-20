@@ -575,7 +575,10 @@ button:focus {
 
 .combat .header {
 	font-size: 20px;
+	line-height: 20px;
 	font-weight: bold;
+	margin-left: 10px;
+	margin-top: 10px;
 }
 
 .combat .stat {
@@ -596,15 +599,25 @@ button:focus {
 	display: inline;
 }
 
-.combat.enemy .enemy-info{
+.combat.enemy .enemy-info,
+.combat.player .player-info {
+	overflow: hidden;
+}
+
+.combat.enemy .enemy-info {
 	/* background-color: #FFF5F5; */
 	/* background-color: #9D0A0E; */
 	background-color: #e07678;
 }
-.combat.player .player-info{
+.combat.player .player-info {
 	/* background-color: #DDEDDD; */
 	/* background-color: #748C4F; */
 	background-color: #c5dd9b;
+}
+
+.combat .lines {
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
 .combat .lines.stats .line:last-child {
@@ -620,7 +633,7 @@ button:focus {
 	height: 22px;
 	border: 1px solid #111;
 	background-color: #ECECEC;
-	margin-left: 10px;
+	/*margin-left: 10px;*/
 }
 
 .combat .lines .hpbar div {

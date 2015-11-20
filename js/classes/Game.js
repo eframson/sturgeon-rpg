@@ -3005,20 +3005,16 @@ Game Improvements
 UI Improvements
 - Add flag for enabling/disabling combat buttons
 - Check if player is stunned before allowing non-pass actions
-- Show HP bar!!!!
 - Add settings screen (control default quick eat behavior, WSAD keys as shortcuts)
 - Dynamic container name
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Code Improvements
-- Prevent enemy HP from going below 0
-- Figure out why self.blahHpBar reference doesn't work...maybe needs to be an observable?
+- Prevent enemy HP from going below 0 (maybe)
 - Standardize the way objects are saved (done already?)
-- Write custom binding to update/animate HP bars automatically (as that's basically what knockout is FOR, dum-dum)
 
 Bugs
-- Sometimes combat effects don't apply (NOT CURRENTLY REPRODUCIBLE)
 
 Game Ideas
 - Obstacles/mazes/labyrinthine structure in levels
