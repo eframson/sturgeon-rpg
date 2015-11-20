@@ -51,8 +51,7 @@ define([
 				var avgMonsterDmg = averages.avgMonsterDmg;
 
 
-				//var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
-				var newMonsterArchetypeId = "basic";
+				var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
 				self.archetypeId = newMonsterArchetypeId;
 				var archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 
@@ -222,7 +221,7 @@ define([
 
 			if(monsterAbilityId != 'pass'){
 
-				var monsterAbilityId = Utils.doBasedOnPercent(
+				monsterAbilityId = Utils.doBasedOnPercent(
 					probabilityIndexedAttacks
 				);
 

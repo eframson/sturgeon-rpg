@@ -198,6 +198,7 @@ define([
 			self.showModalWindowFooter = ko.observable(true);
 			self.disablePlayerCombatButtons = ko.observable(false);
 			self.quickEatPriority = ko.observable("asc");
+			self.autoSaveBeforeBosses = ko.observable(1);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -515,6 +516,9 @@ define([
 				self.backButtonLabel(gameData.backButtonLabel);
 				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
 				self.quickEatPriority(gameData.quickEatPriority);
+				self.playerHpBarWidth(gameData.playerHpBarWidth);
+				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
+				self.autoSaveBeforeBosses(gameData.autoSaveBeforeBosses);
 
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
@@ -539,7 +543,7 @@ define([
 			}
 
 			//Whether this is a new or existing game, make sure we have the next level preloaded
-			var newLevel = self.level().generateNextLevelIfNotSet();
+			var newLevel = self.level().generateNextLevelIfNotSet({ numSquares : 15 });
 
 			if( newLevel ){
 				self.levels.push(newLevel);
@@ -684,11 +688,6 @@ define([
 			}
 		}
 
-		this.resetHpBars = function(){
-			self.playerHpBarWidth = ko.observable(self.hpBarBaseWidth);
-			self.enemyHpBarWidth = ko.observable(self.hpBarBaseWidth);
-		}
-
 		this.startCombat = function(encounterType){
 
 			self.player().resetActiveAbilityCooldowns();
@@ -735,6 +734,10 @@ define([
 
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
+
+			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
+			self.playerHpBarWidth(playerHpBarWidth);
+			self.enemyHpBarWidth(self.hpBarBaseWidth);
 		}
 
 		this.getGoesFirst = function(){
@@ -861,9 +864,7 @@ define([
 				if( attackResults.actualDmg > 0 ){
 					self.showDamage(animateSection);
 
-					var hpBarTargetPercent = currentHp / maxHp;
-					//Rather an unfortunate hack atm...this should probably be dynamic, or at least using a constant or observable from somewhere...
-					var progressBarWidth = hpBarTargetPercent * self.hpBarBaseWidth;
+					var progressBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(currentHp, maxHp);
 					self[animateSection + 'HpBarWidth'](progressBarWidth);
 
 				}else{
@@ -1209,7 +1210,6 @@ define([
 					{
 						title : "Continue",
 						action : function(){
-							self.resetHpBars();
 							self.manageTransitionToView("fullscreen","combat");
 
 							/*self.spcAction = function(){
@@ -1534,6 +1534,10 @@ define([
 							action : function(){
 								self.manageTransitionToView("fullscreen","combat");
 
+								if(self.autoSaveBeforeBosses() == true){
+									self.saveGame();
+								}
+
 								self.startCombat("boss");
 							}
 						}
@@ -1545,7 +1549,9 @@ define([
 				self.manageTransitionToView("mainscreen","mainscreen", function(){
 					self.backButtonLabel("Back");
 					self.freezeMovement(false);
-					self.saveGame();
+					if(self.autoSaveBeforeBosses() == true){
+						self.saveGame();
+					}
 				}, function(){
 					nextLevel.isActive(true);
 					currentLevel.isActive(false);
@@ -2374,7 +2380,10 @@ define([
 				currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
 				currentContainer : self.currentContainer.getExportData(),
 				arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
-				quickEatPriority : self.quickEatPriority()
+				quickEatPriority : self.quickEatPriority(),
+				playerHpBarWidth : self.playerHpBarWidth(),
+				enemyHpBarWidth : self.enemyHpBarWidth(),
+				autoSaveBeforeBosses : self.autoSaveBeforeBosses(),
 			}
 
 			for(i=0; i < self.levels().length; i++){
@@ -2585,6 +2594,13 @@ define([
 				return true;
 			}
 			return false;
+		}
+
+		this._calculateHpBarWidthForGivenCurrentAndMaxHp = function(current, max){
+			var hpBarTargetPercent = current / max;
+			//It would be nice if the max width could be dynamically calculated...
+			var progressBarWidth = hpBarTargetPercent * self.hpBarBaseWidth;
+			return progressBarWidth;
 		}
 
 		this.testPotion = function(){
@@ -3018,6 +3034,7 @@ Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 
 UI Improvements
+- Show slot that armor applies to when active item
 - Dynamic container name
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
@@ -3027,6 +3044,7 @@ Code Improvements
 - Standardize the way objects are saved (done already?)
 
 Bugs
+- If a boss square was declined and the player stays on the square and accesses inventory or skills, hitting "back" will re-show the dialog
 
 Game Ideas
 - Obstacles/mazes/labyrinthine structure in levels
@@ -3061,22 +3079,14 @@ Misc. Thoughts
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever) (discuss with Matt)
 - Balance item value + dmg/armor + num salvage (discuss with Matt)
 
-	PassiveAbility::OverworldAbility
-	- Permanent effect logic (??)
-
-	IntermittentPassiveAbility::PassiveAbility
-	- Num rounds delay between attempts
-	- doRound
-	- doOnSuccessfulApplication
-
-	Perk Ideas
-	- No/reduced cooldown on scan
-	- No/reduced cooldown on find food
-	- Better odds of winning gambling squares
-	- Passive HP regen
-	- More contribution from armor
-	- Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
-	- Sword 'n' Board (don't know what it does yet, but we need to have one called this!)
+Perk Ideas
+- No/reduced cooldown on scan
+- No/reduced cooldown on find food
+- Better odds of winning gambling squares
+- Passive HP regen
+- More contribution from armor
+- Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
+- Sword 'n' Board (don't know what it does yet, but we need to have one called this!)
 
 Feedback
 - Think about floor as a whole instead of just fight-to-fight

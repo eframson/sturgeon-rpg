@@ -66,7 +66,7 @@
 				"basic_attack"
 			],
 			"attacks" : {
-				"100" : "basic_attack"
+				"basic_attack" : "100"
 			},
 			"appearsOnLevel" : 1,
 			"qualityOdds" : {
@@ -92,7 +92,7 @@
 				"basic_attack"
 			],
 			"attacks" : {
-				"100" : "basic_attack"
+				"basic_attack" : "100"
 			},
 			"appearsOnLevel" : 1,
 			"qualityOdds" : {
@@ -119,10 +119,8 @@
 				"flurry"
 			],
 			"attacks" : {
-				"50" : [
-					"basic_attack",
-					"flurry"
-				]
+				"basic_attack" : "50",
+				"flurry" : "50"
 			},
 			"appearsOnLevel" : 2,
 			"qualityOdds" : {
@@ -151,7 +149,7 @@
 				"basic_attack"
 			],
 			"attacks" : {
-				"100" : "basic_attack"
+				"basic_attack" : "100"
 			},
 			"qualityOdds" : {
 				"10" : "exceptional",
@@ -176,8 +174,8 @@
 				"stun"
 			],
 			"attacks" : {
-				"70" : "basic_attack",
-				"30" : "stun"
+				"basic_attack" : "70",
+				"stun" : "30"
 			},
 			"qualityOdds" : {
 				"100" : "exceptional"

@@ -626,8 +626,13 @@ define([
 
 		this.generateNextLevelIfNotSet = function(levelData){
 
-			if( levelData == undefined || levelData.levelNum == undefined ){
-				levelData = { levelNum : (self.levelNum() + 1) };
+			if(levelData == undefined){
+				levelData = {};
+			}
+			if( levelData.levelNum == undefined ){
+				$.extend(levelData, {
+					levelNum : (self.levelNum() + 1)
+				}, levelData);
 			}
 
 			if(self.nextLevelID() == undefined){

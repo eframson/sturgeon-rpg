@@ -623,7 +623,7 @@ button:focus {
 	background-color: #c5dd9b;
 }
 
-.combat .lines {
+.combat .lines, .combat .desc {
 	margin-left: 10px;
 	margin-right: 10px;
 }
