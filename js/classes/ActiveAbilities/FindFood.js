@@ -35,8 +35,9 @@ define([
 		}
 
 		this.getTrainCost = function(){
-			var baseCost = (self.skillStages.indexOf(self.skillLevel()) + 1) * 1000
-			return baseCost + ((self.skillProgress() + 1) * 200);
+			/*var baseCost = (self.skillStages.indexOf(self.skillLevel()) + 1) * 1000
+			return baseCost + ((self.skillProgress() + 1) * 200);*/
+			return (300 * self.skillLevel());
 		}
 
 		this.init(data);

@@ -2542,6 +2542,9 @@ define([
 			statChanges += '<br/>Your max HP has increased by ' + ( self.player().hasPassiveAbility("improved_hp_leveling") ? 10 : 5 );
 			statChanges += '<br/>Your Endurance (END) has increased by 1';
 
+			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
+			self.playerHpBarWidth(playerHpBarWidth);
+
 			if( self.player().level() % 3 == 0){
 				statChanges += '<br/>Your Strength (STR) has increased by 1';
 				statChanges += '<br/>Your Dexterity (DEX) has increased by 1';
@@ -3032,6 +3035,7 @@ define([
 
 Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
+- Make skill trainers cost less, OR improve base skill rather than progress
 
 UI Improvements
 - Show slot that armor applies to when active item
@@ -3040,6 +3044,7 @@ UI Improvements
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Code Improvements
+- Show "level" column header in known skills section
 - Prevent enemy HP from going below 0 (maybe)
 - Standardize the way objects are saved (done already?)
 

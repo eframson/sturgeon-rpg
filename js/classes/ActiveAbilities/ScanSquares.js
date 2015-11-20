@@ -27,7 +27,7 @@ define([
 		}
 
 		this.getTrainCost = function(){
-			return (self.skillLevel() + 1) * 1000;
+			return (500 * self.skillLevel());
 		}
 
 		this.init(data);
