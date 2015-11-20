@@ -142,9 +142,9 @@
 										<div class="state-button-row">
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
-													css: { disabled: foodAvailableForQuickEat() == 0 },
+													css: { disabled: foodAvailableForQuickEat() == 0 || player().maxHp() == player().hp() },
 													click: quickEatFood,
-													text: 'Eat Food (poorest first)'">
+													text: 'Eat Food (' + (quickEatPriority() == 'asc' ? 'poorest' : 'best') + ' first)'">
 												</button>
 											</div>
 										</div>
@@ -168,6 +168,14 @@
 												<span class="value" data-bind="text: $data.skillLevel() + ' (progress: ' + $data.skillProgress() + '/' + $data.nextSkillLevelAtProgress() + ')'"></span>
 											</div>
 										<!-- /ko -->
+									</div>
+									<div class="clear"></div>
+									<div class="state-button-col full-width settings">
+										<div class="state-button-row">
+											<button type="button" class="btn btn-default" data-bind="click: showSettingsArea">
+												<span class="glyphicon glyphicon-cog"></span>
+											</button>
+										</div>
 									</div>
 									<div class="clear"></div>
 								</div>
@@ -351,6 +359,30 @@
 							</div>
 							<!-- end player combat area -->
 
+							<!-- start settings area -->
+							<div class="settings" data-bind="css: { hidden: leftColContent() != 'settings' }">
+								<div class="lines form-group">
+									<label for="arrowKeysControlPlayerPos">WASD keys control player movement:</label>
+									<select class="form-control" data-bind="value: arrowKeysControlPlayerPos" id="arrowKeysControlPlayerPos">
+										<option value="1">Yes</option>
+										<option value="0">No</option>
+									</select>
+									<!--<input type="" id=""/>-->
+								</div>
+								<div class="lines form-group">
+									<label for="quickEatPriority">Quick eat priority:</label>
+									<select class="form-control" data-bind="value: quickEatPriority" id="quickEatPriority">
+										<option value="asc">Poorest first</option>
+										<option value="desc">Best first</option>
+									</select>
+									<!--<input type="" id=""/>-->
+								</div>
+								<div class="lines">
+									<div class="line">NOTE: All changes saved automatically</div>
+								</div>
+							</div>
+							<!-- end settings area -->
+
 						</div>
 
 					</div>
@@ -374,9 +406,9 @@
 										<button type="button" class="btn btn-default right" data-bind="click: $root.movePlayerRight">Right</button>
 									</div>
 									<button type="button" class="btn btn-default down" data-bind="click: $root.movePlayerDown">Downstream</button>
-									<div class="arrow-keys-checkbox">
+									<!--<div class="arrow-keys-checkbox">
 										<input type="checkbox" data-bind="checked: arrowKeysControlPlayerPos" />WASD keys control player movement
-									</div>
+									</div>-->
 								</div>
 							</div>
 							<!-- end map button area -->

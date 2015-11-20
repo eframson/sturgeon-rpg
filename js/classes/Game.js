@@ -115,7 +115,7 @@ define([
 				if(success){ //Just a formality, should always succeed
 					newFoodItem = self.getRandomScroungable(findFoodSkill.skillLevel());
 
-					if( self.player().hasPassiveAbility("improved_gold_finding") ){
+					if( self.player().hasPassiveAbility("improved_food_scrounging") ){
 						newFoodItem.qty = newFoodItem.qty * 2;
 					}
 				}
@@ -197,6 +197,7 @@ define([
 			self.showModalClose = ko.observable(true);
 			self.showModalWindowFooter = ko.observable(true);
 			self.disablePlayerCombatButtons = ko.observable(false);
+			self.quickEatPriority = ko.observable("asc");
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -512,6 +513,8 @@ define([
 				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
 				self.freezeMovement(gameData.freezeMovement);
 				self.backButtonLabel(gameData.backButtonLabel);
+				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
+				self.quickEatPriority(gameData.quickEatPriority);
 
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
@@ -2228,10 +2231,6 @@ define([
 			self.activeSkill(undefined);
 		}
 
-		this.showSkillsArea = function(){
-			self.manageTransitionToView("mainscreen","skills");
-		}
-
 		this.manageTransitionToView = function(fromArea, toArea, afterTransitionCallback, extraMidTransitionCallback){
 
 			var midTransitionCallback;
@@ -2240,17 +2239,13 @@ define([
 			if(toArea == "equipment"){
 				//For now it's assumed that one can only get here from Main Screen...
 				midTransitionCallback = function(){
-					self.leftColContent("inventory");
-					self.centerColContent("item_desc");
-					self.rightColContent("equipment");
+					self.setSectionContents("inventory", "item_desc", "equipment");
 				}
 			}else if(toArea == "mainscreen"){
 				//Make sure we capture this value now, in case it changes later
 				var isNew = self.isNew();
 				midTransitionCallback = function(){
-					self.leftColContent("player_controls");
-					self.centerColContent("map_controls");
-					self.rightColContent("map");
+					self.setSectionContents("player_controls", "map_controls", "map");
 
 					self._resetActiveItem();
 					self.currentContainer.removeAll();
@@ -2265,39 +2260,39 @@ define([
 			}else if(toArea == "combat"){
 				//For now it's assumed that one can only get here from Fullscreen Message...
 				midTransitionCallback = function(){
-					self.leftColContent("combat_player");
-					self.centerColContent("combat_buttons");
-					self.rightColContent("combat_enemy");
+					self.setSectionContents("combat_player", "combat_buttons", "combat_enemy");
 				}
 			}else if(toArea == "container"){
 				midTransitionCallback = function(){
-					self.leftColContent("inventory");
-					self.centerColContent("item_desc");
-					self.rightColContent("container");
+					self.setSectionContents("inventory", "item_desc", "container");
 				}
 			}else if(toArea == "merchant"){
 				//For now it's assumed that one can only get here from Fullscreen Message...
 				midTransitionCallback = function(){
-					self.leftColContent("inventory");
-					self.centerColContent("item_desc");
-					self.rightColContent("merchant");
+					self.setSectionContents("inventory", "item_desc", "merchant");
 				}
 			}else if(toArea == "fullscreen"){
 				//We're assuming that the fullscreen content has already been set...
 				midTransitionCallback = function(){
-					self.leftColContent(undefined);
-					self.centerColContent("fullscreen_content");
-					self.rightColContent(undefined);
+					self.setSectionContents(undefined, "fullscreen_content", undefined);
 				}
 			}else if(toArea == "skills"){
 				midTransitionCallback = function(){
-					self.leftColContent("skills");
-					self.centerColContent("skills");
-					self.rightColContent("skills");
+					self.setSectionContents( "skills", "skills", "skills" );
+				}
+			}else if(toArea == "settings"){
+				midTransitionCallback = function(){
+					self.setSectionContents( "settings", "skills", undefined );
 				}
 			}
 
 			self.replaceMainScreenContent(function() { midTransitionCallback(); extraMidTransitionCallback(); }, afterTransitionCallback);
+		}
+
+		this.setSectionContents = function(left, center, right){
+			self.leftColContent(left);
+			self.centerColContent(center);
+			self.rightColContent(right);
 		}
 
 		this.replaceMainScreenContent = function(midTransitionCallback, postTransitionCallback){
@@ -2317,8 +2312,13 @@ define([
 			});
 		}
 
+		this.showSettingsArea = function(){
+			self.manageTransitionToView("mainscreen","settings");
+		}
+
 		this.quickEatFood = function(){
-			var sortedFilteredItems = self.player().inventory.getSortedFilteredItems("isFood", 1, "qualityModifier", "ASC");
+			var sortOrder = (self.quickEatPriority() == 'asc') ? 'ASC' : 'DESC' ;
+			var sortedFilteredItems = self.player().inventory.getSortedFilteredItems("isFood", 1, "qualityModifier", sortOrder);
 			var foodItem = sortedFilteredItems[0];
 
 			self.player().inventory.removeItem(foodItem, 1);
@@ -2372,7 +2372,9 @@ define([
 				freezeMovement		: self.freezeMovement(),
 				backButtonLabel : self.backButtonLabel(),
 				currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
-				currentContainer : self.currentContainer.getExportData()
+				currentContainer : self.currentContainer.getExportData(),
+				arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
+				quickEatPriority : self.quickEatPriority()
 			}
 
 			for(i=0; i < self.levels().length; i++){
@@ -2970,6 +2972,19 @@ define([
 			self.player().applyCombatEffect(combatEffectToApply);
 		}
 
+		this.testFood = function(){
+
+			var newFoodItem = self.getRandomScroungable("poor");
+			self.player().addItemToInventory( newFoodItem );
+			newFoodItem = self.getRandomScroungable("good");
+			self.player().addItemToInventory( newFoodItem );
+			newFoodItem = self.getRandomScroungable("great");
+			self.player().addItemToInventory( newFoodItem );
+			newFoodItem = self.getRandomScroungable("exceptional");
+			self.player().addItemToInventory( newFoodItem );
+
+		}
+
 		self.init();
 
 	};
@@ -3003,9 +3018,6 @@ Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 
 UI Improvements
-- Add flag for enabling/disabling combat buttons
-- Check if player is stunned before allowing non-pass actions
-- Add settings screen (control default quick eat behavior, WSAD keys as shortcuts)
 - Dynamic container name
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped

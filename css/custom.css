@@ -240,6 +240,14 @@ button:focus {
 	margin-top: 10px;
 }
 
+.content-area .player-controls .state-button-col.settings {
+	float: right;
+}
+
+.content-area .player-controls .state-button-col.settings .state-button-row button span {
+	font-size: 20px;
+}
+
 .message-log {
 	margin-top: 15px;
 	padding: 15px;

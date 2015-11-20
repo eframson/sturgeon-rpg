@@ -61,7 +61,7 @@ require([
 		ko.applyBindings(game);
 		
 		$(document).keydown(function(e){
-			if( game.arrowKeysControlPlayerPos() ){
+			if( game.arrowKeysControlPlayerPos() == true ){
 
 				if(e.keyCode == 65){
 					game.aAction();
