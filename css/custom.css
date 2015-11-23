@@ -248,6 +248,10 @@ button:focus {
 	font-size: 20px;
 }
 
+.leftcol .leftcol-inner > .settings .line {
+	font-style: italic;
+}
+
 .message-log {
 	margin-top: 15px;
 	padding: 15px;

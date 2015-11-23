@@ -469,53 +469,55 @@ define([
 				var numNonEmpty = 0;
 
 				var bounds = self._getQuadBounds(q);
+				var possibleEntranceExitX = playerPos.x;
+				var possibleEntranceExitY = playerPos.y;
 
-				for(x = bounds.minX; x < bounds.maxX; x++){
-					for(y = bounds.minY; y < bounds.maxY; y++){
+				if(q == entranceQuadNum || q == exitQuadNum){
+					while( possibleEntranceExitX == playerPos.x && possibleEntranceExitY == playerPos.y ){
+						possibleEntranceExitX = Utils.doRand(bounds.minX, bounds.maxX);
+						possibleEntranceExitY = Utils.doRand(bounds.minY, bounds.maxY);
+					}
 
-						var type = "empty";
-						var cumePercent = 0;
+					var entranceExitSquare = self.grid[ possibleEntranceExitX ][ possibleEntranceExitY ]
 
-						if(Utils.doRand(0,99) < genOpts.percentEmpty && (genOpts.maxNonEmptyPerQuad == 0 || numNonEmpty <= genOpts.maxNonEmptyPerQuad) && (x != playerPos.x && y != playerPos.y)){
+					if( q == entranceQuadNum && self.entranceSquare().length == 0 ){
 
-							//This *should* automatically put the percentages in the correct (ASC) order
-							var type = Utils.doBasedOnPercent(genOpts.genPercents);
+						entranceExitSquare.setType("entrance");
+						entranceExitSquare.notEmpty = true;
+						self.entranceSquare([ entranceExitSquare.x, entranceExitSquare.y ]);
 
-							self.grid[x][y].notEmpty = true;
+					}else if( q == exitQuadNum && self.exitSquare().length == 0 ){
 
-							numNonEmpty++;
-						}else{
-							if( exitQuadNum == q ){
-								potentialExits.push([x, y]);
-							}else if( entranceQuadNum == q ){
-								potentialEntrances.push([x, y]);
-							}
-						}
+						entranceExitSquare.setType("exit");
+						entranceExitSquare.notEmpty = true;
+						entranceExitSquare.isChallengeActive(1);
+						self.exitSquare([ entranceExitSquare.x, entranceExitSquare.y ]);
 
-						self.grid[x][y].setType(type);
 					}
 				}
 
-				var squareIdx,
-					squarePos;
-				//Place an entrance and exit, if applicable
-				if(genOpts.quadsWithPotentialExits.length > 0 && self.exitSquare().length == 0 && potentialExits.length > 0){
+				for(x = bounds.minX; x <= bounds.maxX; x++){
+					for(y = bounds.minY; y <= bounds.maxY; y++){
 
-					squareIdx = Utils.doRand(0, potentialExits.length);
-					squarePos = potentialExits[squareIdx];
-					self.grid[ squarePos[0] ][ squarePos[1] ].setType("exit");
-					self.grid[ squarePos[0] ][ squarePos[1] ].isChallengeActive(1);
-					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
-					self.exitSquare([ squarePos[0], squarePos[1] ]);
-				}
+						//If the current square is not the player position, and it doesn't already have something in it
+						if( !(x == playerPos.x && y == playerPos.y) && !self.grid[x][y].notEmpty){
 
-				if(genOpts.quadsWithPotentialEntrances.length > 0 && self.entranceSquare().length == 0 && potentialEntrances.length > 0){
+							var type = "empty";
 
-					squareIdx = Utils.doRand(0, potentialEntrances.length);
-					squarePos = potentialEntrances[squareIdx];
-					self.grid[ squarePos[0] ][ squarePos[1] ].setType("entrance");
-					self.grid[ squarePos[0] ][ squarePos[1] ].notEmpty = true;
-					self.entranceSquare([ squarePos[0], squarePos[1] ]);
+							if(Utils.doRand(0,99) < genOpts.percentEmpty && (genOpts.maxNonEmptyPerQuad == 0 || numNonEmpty <= genOpts.maxNonEmptyPerQuad)){
+
+								//This *should* automatically put the percentages in the correct (ASC) order
+								var type = Utils.doBasedOnPercent(genOpts.genPercents);
+
+								self.grid[x][y].notEmpty = true;
+
+								numNonEmpty++;
+							}
+
+							self.grid[x][y].setType(type);
+
+						}
+					}
 				}
 
 			}
@@ -647,8 +649,13 @@ define([
 
 		this.generatePrevLevelIfNotSet = function(levelData){
 
-			if( levelData == undefined || levelData.levelNum == undefined ){
-				levelData = { levelNum : (self.levelNum() - 1) };
+			if(levelData == undefined){
+				levelData = {};
+			}
+			if( levelData.levelNum == undefined ){
+				$.extend(levelData, {
+					levelNum : (self.levelNum() - 1)
+				}, levelData);
 			}
 
 			if(self.prevLevelID() == undefined){

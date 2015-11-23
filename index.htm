@@ -375,7 +375,6 @@
 										<option value="asc">Poorest first</option>
 										<option value="desc">Best first</option>
 									</select>
-									<!--<input type="" id=""/>-->
 								</div>
 								<div class="lines form-group">
 									<label for="autoSaveBeforeBosses">Auto-save before bosses and level transitions:</label>
@@ -383,7 +382,27 @@
 										<option value="1">Yes</option>
 										<option value="0">No</option>
 									</select>
-									<!--<input type="" id=""/>-->
+								</div>
+								<div class="lines">
+									<div class="line divider">Level generation options (applies only to new or reset levels)</div>
+								</div>
+								<div class="lines form-group">
+									<label for="pctEmptySquares">Percent of grid squares that contain something:</label>
+									<select class="form-control" data-bind="value: pctEmptySquares" id="pctEmptySquares">
+										<option value="1">Few</option>
+										<option value="2">Half</option>
+										<option value="3">Most</option>
+										<option value="4">ALL (Only for the truly insane!)</option>
+									</select>
+								</div>
+								<div class="lines form-group">
+									<label for="monsterSquareRates">How many non-empty grid squares should have monsters:</label>
+									<select class="form-control" data-bind="value: monsterSquareRates" id="monsterSquareRates">
+										<option value="1">Few</option>
+										<option value="2">Half</option>
+										<option value="3">Most</option>
+										<option value="4">ALL (no traders, trainers, OR item squares)</option>
+									</select>
 								</div>
 								<div class="lines">
 									<div class="line">NOTE: All changes saved automatically</div>

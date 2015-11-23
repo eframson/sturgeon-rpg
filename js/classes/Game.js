@@ -199,6 +199,8 @@ define([
 			self.disablePlayerCombatButtons = ko.observable(false);
 			self.quickEatPriority = ko.observable("asc");
 			self.autoSaveBeforeBosses = ko.observable(1);
+			self.pctEmptySquares = ko.observable(2);
+			self.monsterSquareRates = ko.observable(2);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -519,6 +521,8 @@ define([
 				self.playerHpBarWidth(gameData.playerHpBarWidth);
 				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
 				self.autoSaveBeforeBosses(gameData.autoSaveBeforeBosses);
+				self.monsterSquareRates(gameData.monsterSquareRates);
+				self.pctEmptySquares(gameData.pctEmptySquares);
 
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
@@ -537,13 +541,13 @@ define([
 			}else{
 
 				player = new Player( {str: 3, dex: 2, end: 2} );
-				level = new Level({ numSquares : 15, genOpts : { quadsWithPotentialEntrances : [] }, isActive : true });
+				level = new Level( self._getNewLevelParams( { genOpts : { quadsWithPotentialEntrances : [] }, isActive : true } ) );
 				self.levels.push(level);
 
 			}
 
 			//Whether this is a new or existing game, make sure we have the next level preloaded
-			var newLevel = self.level().generateNextLevelIfNotSet({ numSquares : 15 });
+			var newLevel = self.level().generateNextLevelIfNotSet(self._getNewLevelParams());
 
 			if( newLevel ){
 				self.levels.push(newLevel);
@@ -1506,7 +1510,7 @@ define([
 
 			if(self.level().nextLevelID() == undefined){
 
-				var newLevel = self.level().generateNextLevelIfNotSet();
+				var newLevel = self.level().generateNextLevelIfNotSet(self._getNewLevelParams());
 
 				if( newLevel ){
 					self.levels.push(newLevel);
@@ -1571,7 +1575,7 @@ define([
 			//This is unlikely, but we'd better account for it just to be safe
 			if(self.level().prevLevelID() == undefined){
 
-				var newLevel = self.level().generatePrevLevelIfNotSet();
+				var newLevel = self.level().generatePrevLevelIfNotSet(self._getNewLevelParams());
 
 				if( newLevel ){
 					self.levels.push(newLevel);
@@ -2384,6 +2388,8 @@ define([
 				playerHpBarWidth : self.playerHpBarWidth(),
 				enemyHpBarWidth : self.enemyHpBarWidth(),
 				autoSaveBeforeBosses : self.autoSaveBeforeBosses(),
+				monsterSquareRates : self.monsterSquareRates(),
+				pctEmptySquares : self.pctEmptySquares(),
 			}
 
 			for(i=0; i < self.levels().length; i++){
@@ -2590,6 +2596,82 @@ define([
 			}
 
 			return srcCollection;
+		}
+
+		this._getNewLevelParams = function(overrideWithObj){
+			var params = {};
+			var genOptsOverrideObj = undefined;
+			overrideWithObj = overrideWithObj || {};
+
+			if(overrideWithObj.genOpts !== undefined){
+				genOptsOverrideObj = overrideWithObj.genOpts;
+				delete overrideWithObj.genOpts;
+			}
+
+			params.numSquares = 15;
+
+			$.extend(
+				params,
+				overrideWithObj
+			);
+
+			params.genOpts = self._getLevelGenOpts(genOptsOverrideObj);
+
+			return params;
+		}
+
+		this._getLevelGenOpts = function(overrideWithObj){
+			var opts = {};
+			overrideWithObj = overrideWithObj || {};
+
+			if(self.pctEmptySquares() == 1){
+				opts.percentEmpty = 25;
+			}else if(self.pctEmptySquares() == 2){
+				opts.percentEmpty = 50;
+			}else if(self.pctEmptySquares() == 3){
+				opts.percentEmpty = 75;
+			}else if(self.pctEmptySquares() == 4){
+				opts.percentEmpty = 100;
+			}else{
+				opts.percentEmpty = 50;
+			}
+
+			if(self.monsterSquareRates() == 1){
+				opts.genPercents = {
+					25 : "combat",
+					33 : "item",
+					42 : "event",
+				};
+			}else if(self.monsterSquareRates() == 2){
+				opts.genPercents = {
+					50 : "combat",
+					20 : "item",
+					30 : "event",
+				};
+			}else if(self.monsterSquareRates() == 3){
+				opts.genPercents = {
+					75 : "combat",
+					8 : "item",
+					17 : "event",
+				};
+			}else if(self.monsterSquareRates() == 4){
+				opts.genPercents = {
+					100 : "combat",
+				};
+			}else{
+				opts.genPercents = {
+					50 : "combat",
+					20 : "item",
+					30 : "event",
+				};
+			}
+
+			$.extend(
+				opts,
+				overrideWithObj
+			);
+
+			return opts;
 		}
 
 		this._itemCanAppearForLevel = function(item, level){
