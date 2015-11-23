@@ -404,9 +404,9 @@
 										<option value="4">ALL (no traders, trainers, OR item squares)</option>
 									</select>
 								</div>
-								<div class="lines">
+								<!--<div class="lines">
 									<div class="line">NOTE: All changes saved automatically</div>
-								</div>
+								</div>-->
 							</div>
 							<!-- end settings area -->
 
@@ -650,6 +650,20 @@
 
 							</div>
 							<!-- end fullscreen content area -->
+
+							<!-- start settings area -->
+							<div class="settings-buttons" data-bind="css: { hidden: centerColContent() != 'settings' }">
+
+								<div class="back"><button class="btn btn-default" type="button" data-bind="click: backFromSettings"><span data-bind="text: 'Back'"></span></button></div>
+
+								<div class="saved-pref-notice hidden"><span class="">Saved!</span></div>
+
+								<div class="save"><button class="btn btn-default" type="button" data-bind="click: savePrefs"><span>Save Preferences</span></button></div>
+
+								<div class="clear"></div>
+
+							</div>
+							<!-- end settings area -->
 
 						</div>
 

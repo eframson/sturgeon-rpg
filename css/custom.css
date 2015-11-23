@@ -552,6 +552,23 @@ button:focus {
 	clear: right;
 }
 
+.settings-buttons .back {
+	float: left;
+}
+
+.settings-buttons .saved-pref-notice {
+	float: left;
+	margin-left: 110px;
+	margin-top: 7px;
+	text-align: right;
+	font-weight: bold;
+	color: #5cb85c;
+}
+
+.settings-buttons .save {
+	float: right;
+}
+
 .equipment {
 	padding-left: 0px;
 }

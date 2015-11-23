@@ -69,9 +69,7 @@ define([
 			self.grid = gridArray;
 
 			if(!self.hasGenerated){
-				self._generateGrid();
-				self._populateGrid();
-				self.hasGenerated = true;
+				self.generateThisLevel();
 			}
 		}
 
@@ -610,20 +608,13 @@ define([
 			isRegenerate = ( isRegenerate == undefined ) ? false : isRegenerate ;
 
 			if(isRegenerate){
-				self.entranceSquare.removeAll();
-				self.exitSquare.removeAll();
-				self._doForEachGridSquare(function(gridSquare){
-					gridSquare.setScanned(false);
-					gridSquare.setVisibility(false);
-					gridSquare.setDone(false);
-				});
-
-				if(self.levelNum() == 1){
-					self.genOpts.quadsWithPotentialEntrances = [];
-				}
+				self.entranceSquare([]);
+				self.exitSquare([]);
 			}
 
+			self._generateGrid();
 			self._populateGrid();
+			self.hasGenerated = 1;
 		}
 
 		this.generateNextLevelIfNotSet = function(levelData){

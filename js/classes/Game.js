@@ -20,11 +20,13 @@ define([
 	'jquery.animateNumbers'
 ], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils) {
 
+	//Can these be knockout custom bindings? Some of them, surely...
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
 	var $MAIN_CONTENT_DIV = $(".main-content-row");
 	var $PLAYER_STAT_HEADER = $(".player-stat-row");
 	var $MESSAGE_LOG = $(".log-area");
 	var $SAVED_NOTICE = $(".saved-notice");
+	var $SAVED_PREF_NOTICE = $(".saved-pref-notice");
 	var BASE_FADEOUT_SPEED = 600;
 	var BASE_FADEIN_SPEED = 400;
 	var FAST_FADEOUT_SPEED = 300;
@@ -149,6 +151,8 @@ define([
 				}
 			}
 		};
+
+		this.temporaryPreferenceStorage = {};
 		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
@@ -202,6 +206,7 @@ define([
 			self.pctEmptySquares = ko.observable(2);
 			self.monsterSquareRates = ko.observable(2);
 			self.temporarilyDisableActiveSquare = ko.observable(0);
+			self.resetPreferences = ko.observable(1);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -494,10 +499,33 @@ define([
 			});
 		}
 
+		this.initPrefs = function(prefData){
+			if(prefData != undefined){
+				if( prefData.arrowKeysControlPlayerPos !== undefined ){
+					self.arrowKeysControlPlayerPos(prefData.arrowKeysControlPlayerPos);
+				}
+				if( prefData.quickEatPriority !== undefined ){
+					self.quickEatPriority(prefData.quickEatPriority);
+				}
+				if( prefData.autoSaveBeforeBosses !== undefined ){
+					self.autoSaveBeforeBosses(prefData.autoSaveBeforeBosses);
+				}
+				if( prefData.monsterSquareRates !== undefined ){
+					self.monsterSquareRates(prefData.monsterSquareRates);
+				}
+				if( prefData.pctEmptySquares !== undefined ){
+					self.pctEmptySquares(prefData.pctEmptySquares);
+				}
+			}
+		}
+
 		this.initGame = function(gameData){
 
 			var level;
 			var player;
+
+			var savedPrefData = self.loadPrefs();
+			self.initPrefs(savedPrefData);
 
 			if(gameData != undefined){
 
@@ -517,13 +545,8 @@ define([
 				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
 				self.freezeMovement(gameData.freezeMovement);
 				self.backButtonLabel(gameData.backButtonLabel);
-				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
-				self.quickEatPriority(gameData.quickEatPriority);
 				self.playerHpBarWidth(gameData.playerHpBarWidth);
 				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
-				self.autoSaveBeforeBosses(gameData.autoSaveBeforeBosses);
-				self.monsterSquareRates(gameData.monsterSquareRates);
-				self.pctEmptySquares(gameData.pctEmptySquares);
 
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
@@ -576,17 +599,6 @@ define([
 
 		this.addFoodToPlayerInventory = function(consumableItem){
 			return self.player().addItemToInventory( consumableItem );
-		}
-
-		this.loadFromData = function(gameData){
-			
-			if(gameData == undefined){
-				return false;
-			}
-
-			$.when($MAIN_CONTENT_DIV.add($PLAYER_STAT_HEADER).add($MESSAGE_LOG).fadeOut(FAST_FADEOUT_SPEED)).done(function(){
-				self.initGame(gameData);
-			});
 		}
 
 		this.movePlayerUp = function(){
@@ -672,7 +684,7 @@ define([
 			if(self.level().getActiveSquare().type == 'exit' && self.temporarilyDisableActiveSquare() == 0){
 				self.squareExitAction();
 			}else{
-				self.manageTransitionToView("equipment","mainscreen", function(){
+				self.manageTransitionToView(undefined,"mainscreen", function(){
 					self.freezeMovement(false);
 				});
 			}
@@ -1975,12 +1987,7 @@ define([
 					self._resetActiveItem();
 				}
 
-				self.level().generateThisLevel(true);
-				self.level().revealSquaresNearPlayer(0);
-				self.level().drawMap();
-
-				self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. " +
-								"With a quick glance around, you see that nothing is as it was just a few moments before.", "player");
+				self._activateResetStone();
 
 			}else if(item.id == "health_potion"){
 
@@ -2074,6 +2081,24 @@ define([
 
 		}
 
+		this.showSettingsArea = function(){
+			self.temporaryPreferenceStorage = self.getPrefData();
+			self.manageTransitionToView("mainscreen","settings");
+		}
+
+		this.backFromSettings = function(){
+
+			if(self.resetPreferences()){
+				self.initPrefs(self.temporaryPreferenceStorage);
+			}else{
+				self.resetPreferences(1);
+			}
+
+			self.temporaryPreferenceStorage = {};
+
+			self.showContentArea();
+		}
+
 		this._playerEatFood = function(quality){
 
 			var qualityPercentages = {
@@ -2087,6 +2112,15 @@ define([
 
 			self.logMessage("Eating some food restored some of your HP!", "player");
 
+		}
+
+		this._activateResetStone = function(){
+			self.level().generateThisLevel(true);
+			self.level().revealSquaresNearPlayer(0);
+			self.level().drawMap();
+
+			self.logMessage("The magical powers of the stone are expended, and it crumbles into dust before your very eyes. " +
+							"With a quick glance around, you see that nothing is as it was just a few moments before.", "player");
 		}
 
 		this.upgradeActiveItem = function(game, event){
@@ -2301,7 +2335,7 @@ define([
 				}
 			}else if(toArea == "settings"){
 				midTransitionCallback = function(){
-					self.setSectionContents( "settings", "skills", undefined );
+					self.setSectionContents( "settings", "settings", undefined );
 				}
 			}
 
@@ -2331,10 +2365,6 @@ define([
 			});
 		}
 
-		this.showSettingsArea = function(){
-			self.manageTransitionToView("mainscreen","settings");
-		}
-
 		this.quickEatFood = function(){
 			var sortOrder = (self.quickEatPriority() == 'asc') ? 'ASC' : 'DESC' ;
 			var sortedFilteredItems = self.player().inventory.getSortedFilteredItems("isFood", 1, "qualityModifier", sortOrder);
@@ -2360,7 +2390,7 @@ define([
 		}
 
 		this.loadGame = function(){
-			self.loadFromData(JSON.parse(localStorage.getItem("saveData"), function(k, v){
+			self.loadGameFromData(JSON.parse(localStorage.getItem("saveData"), function(k, v){
 				if(v.constructor == String && v.match(/^function \(/)){
 					eval("var rehydratedFunction = " + v);
 					return rehydratedFunction;
@@ -2377,34 +2407,65 @@ define([
 			$SAVED_NOTICE.delay(800).fadeOut(600);
 		}
 
-		this.getExportData = function(){
+		this.loadPrefs = function(hideAnim){
+			var prefData = JSON.parse(localStorage.getItem("prefData"));
+			return prefData || false;
+		}
+
+		this.savePrefs = function(){
+			var prefData = self.getExportData(true);
+			localStorage.setItem("prefData", prefData);
+
+			self.temporaryPreferenceStorage = self.getPrefData();
+
+			$SAVED_PREF_NOTICE.finish().show();
+			$SAVED_PREF_NOTICE.delay(800).fadeOut(600);
+		}
+
+		this.getPrefData = function(){
 			var exportObj = {
-				player 				: self.player().getExportData(),
-				levels 				: Array(),
-				leftColContent 		: self.leftColContent(),
-				centerColContent 	: self.centerColContent(),
-				rightColContent		: self.rightColContent(),
-				fullScreenContent 	: self.fullScreenContent(),
-				isNew				: self.isNew(),
-				logMessages			: self.logMessages(),
-				arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
-				freezeMovement		: self.freezeMovement(),
-				backButtonLabel : self.backButtonLabel(),
-				currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
-				currentContainer : self.currentContainer.getExportData(),
 				arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
 				quickEatPriority : self.quickEatPriority(),
-				playerHpBarWidth : self.playerHpBarWidth(),
-				enemyHpBarWidth : self.enemyHpBarWidth(),
 				autoSaveBeforeBosses : self.autoSaveBeforeBosses(),
 				monsterSquareRates : self.monsterSquareRates(),
 				pctEmptySquares : self.pctEmptySquares(),
-			}
+			};
+			return exportObj;
+		}
 
-			for(i=0; i < self.levels().length; i++){
-				var thisLevel = self.levels()[i];
+		this.getExportData = function(justPrefs){
+			
+			justPrefs = (justPrefs === undefined) ? 0 : justPrefs ;
 
-				exportObj.levels.push(thisLevel.getExportData());
+			var exportObj = self.getPrefData();
+
+			if(justPrefs == false){
+				$.extend(
+					exportObj,
+					{
+						player 				: self.player().getExportData(),
+						levels 				: Array(),
+						leftColContent 		: self.leftColContent(),
+						centerColContent 	: self.centerColContent(),
+						rightColContent		: self.rightColContent(),
+						fullScreenContent 	: self.fullScreenContent(),
+						isNew				: self.isNew(),
+						logMessages			: self.logMessages(),
+						arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
+						freezeMovement		: self.freezeMovement(),
+						backButtonLabel : self.backButtonLabel(),
+						currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
+						currentContainer : self.currentContainer.getExportData(),
+						playerHpBarWidth : self.playerHpBarWidth(),
+						enemyHpBarWidth : self.enemyHpBarWidth(),
+					}
+				);
+
+				for(i=0; i < self.levels().length; i++){
+					var thisLevel = self.levels()[i];
+
+					exportObj.levels.push(thisLevel.getExportData());
+				}
 			}
 
 			return JSON.stringify(exportObj, function(k, v){
@@ -2413,6 +2474,17 @@ define([
 				}else{
 					return v;
 				}
+			});
+		}
+
+		this.loadGameFromData = function(gameData){
+			
+			if(gameData == undefined){
+				return false;
+			}
+
+			$.when($MAIN_CONTENT_DIV.add($PLAYER_STAT_HEADER).add($MESSAGE_LOG).fadeOut(FAST_FADEOUT_SPEED)).done(function(){
+				self.initGame(gameData);
 			});
 		}
 
@@ -3093,6 +3165,11 @@ define([
 			newFoodItem = self.getRandomScroungable("exceptional");
 			self.player().addItemToInventory( newFoodItem );
 
+		}
+
+		this.testResetLevel = function(){
+			self._activateResetStone();
+			self.testVisionRange();
 		}
 
 		self.init();
