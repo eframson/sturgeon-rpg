@@ -201,6 +201,7 @@ define([
 			self.autoSaveBeforeBosses = ko.observable(1);
 			self.pctEmptySquares = ko.observable(2);
 			self.monsterSquareRates = ko.observable(2);
+			self.temporarilyDisableActiveSquare = ko.observable(0);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -613,7 +614,11 @@ define([
 				var newPos = self.level().movePlayer(direction, 1);
 
 				if(currentPos.x != newPos.x || currentPos.y != newPos.y){
+					
+					self.temporarilyDisableActiveSquare(0);
+
 					self.updateCooldowns();
+
 					//Coming soon...
 					//self.evaluateIntermittentPassives();
 
@@ -664,7 +669,7 @@ define([
 
 		this.showContentArea = function(){
 			
-			if(self.level().getActiveSquare().type == 'exit'){
+			if(self.level().getActiveSquare().type == 'exit' && self.temporarilyDisableActiveSquare() == 0){
 				self.squareExitAction();
 			}else{
 				self.manageTransitionToView("equipment","mainscreen", function(){
@@ -766,6 +771,7 @@ define([
 		}
 
 		this.playerFlee = function(game, event){
+			self.temporarilyDisableActiveSquare(1);
 			self.manageTransitionToView("combat","mainscreen", function(){ self.freezeMovement(false); });
 		}
 
@@ -1523,7 +1529,7 @@ define([
 
 			if(square.isChallengeActive()){
 				self.fullScreenContent({
-					text: "The water around you grows chilly, and you are filled with a sense of foreboding. You think something big is coming your way...(you might want to save your game!)",
+					text: "The water around you grows chilly, and you are filled with a sense of foreboding. You think something big is coming your way...",
 					buttons: [
 						{
 							title : "Actually, on second thought...",
@@ -1531,6 +1537,8 @@ define([
 								self.manageTransitionToView("fullscreen","mainscreen");
 
 								self.freezeMovement(false);
+
+								self.temporarilyDisableActiveSquare(1);
 							}
 						},
 						{
@@ -1563,6 +1571,7 @@ define([
 					nextLevel.revealSquaresNearPlayer(0);
 					self.level().scanSquaresNearPlayer(0);
 					nextLevel.drawMap();
+					self.temporarilyDisableActiveSquare(0);
 				});
 			}
 
@@ -3118,6 +3127,7 @@ define([
 Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 - Make skill trainers cost less, OR improve base skill rather than progress
+- Save user preferences separately, and load automatically
 
 UI Improvements
 - Show slot that armor applies to when active item
@@ -3132,7 +3142,6 @@ Code Improvements
 - Standardize the way objects are saved (done already?)
 
 Bugs
-- If a boss square was declined and the player stays on the square and accesses inventory or skills, hitting "back" will re-show the dialog
 
 Game Ideas
 - Obstacles/mazes/labyrinthine structure in levels
