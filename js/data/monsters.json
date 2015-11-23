@@ -89,6 +89,30 @@
 			"id" : "monster_15",
 			"name" : "Sea Nettle Jellyfish",
 			"desc" : "Sea nettles have a distinctive golden-brown bell with a reddish tint. The bell can grow to be larger than one meter in diameter in the wild, though most are less than 50 cm across. The long, spiraling, white oral arms and the 24 undulating maroon tentacles may trail behind as far as 15 feet. For humans, its sting is often irritating, but rarely dangerous. You're about to find out what happens to sturgeons, however."
+		},
+
+		"monster_16" : {
+			"id" : "monster_16",
+			"name" : "Royal Starfish",
+			"desc" : "This vividly colored species is found along the east coast of North America, primarily in the southeast. While it can live at depths of up to 700 feet, it mostly hangs out at around 70-100 feet deep. Unlike many other species of starfish, the royal starfish eats its prey whole...and while it normally dines on mollusks, this one is trying to expand its palate...to sturgeon!!! Dun-dun-DUNNNNN!!"
+		},
+
+		"monster_17" : {
+			"id" : "monster_17",
+			"name" : "Crown-of-thorns Starfish",
+			"desc" : "The spines covering its upper surface are venomous, which aid it in its quest for world domination. As one of the largest starfish in the world, it has a voracious appetite. When numbers are low, crown-of-thorns starfish help boost the biodiversity of coral reefs by preying on the fastest growing coral species. But if their populations become too high, they can wreak havoc on coral reefs. Their population booms are due in part from human fishing of their natural predators, the humphead wrasse and triton snail. See? There's something called a \"Humphead.\" And you thought you had a rough time in school."
+		},
+
+		"monster_18" : {
+			"id" : "monster_18",
+			"name" : "\"Smasher\" Mantis Shrimp",
+			"desc" : "The mantis shrimp is a type of marine crustacean. They sport powerful claws that they use to attack and kill prey by spearing, stunning, or dismemberment. These aggressive and typically solitary sea creatures spend most of their time hiding in rock formations or burrowing intricate passageways in the sea bed. They rarely exit their homes except to feed and relocate. Smashers possess a much more developed \"club,\" which is used to bludgeon and smash their meals apart. They strike by rapidly unfolding and swinging their raptorial claws at the prey, and are capable of inflicting serious damage. \"The mantis shrimp is the harbinger of blood-soaked rainbows.\" - The Oatmeal"
+		},
+
+		"monster_19" : {
+			"id" : "monster_19",
+			"name" : "\"Spearer\" Mantis Shrimp",
+			"desc" : "The mantis shrimp is a type of marine crustacean. They sport powerful claws that they use to attack and kill prey by spearing, stunning, or dismemberment. These aggressive and typically solitary sea creatures spend most of their time hiding in rock formations or burrowing intricate passageways in the sea bed. They rarely exit their homes except to feed and relocate. Spearers are armed with spiny appendages topped with barbed tips, which used to stab and snag prey. They strike by rapidly unfolding and swinging their raptorial claws at the prey, and are capable of inflicting serious damage. \"The mantis shrimp is the harbinger of blood-soaked rainbows.\" - The Oatmeal"
 		}
 	},
 
