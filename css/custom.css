@@ -205,7 +205,7 @@ button:focus {
 }
 
 .content-area .state-controls .state-button-row {
-	overflow: auto;
+	overflow: hidden;
 }
 
 .content-area .state-controls .state-button-row:not(:first-child) {

@@ -23,6 +23,7 @@ var requireJSConfig = {
 		//"jquery.caret.min" : ["jquery"],
 		//"jquery.growl" : ["jquery"],
 	},
+	waitSeconds : 10,
 };
 
 if(!window.DEBUG){
