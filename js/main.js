@@ -1,3 +1,4 @@
+cont BUILD_VERSION = TEST;
 var game = undefined;
 var ko_global = undefined;
 
@@ -27,7 +28,7 @@ var requireJSConfig = {
 };
 
 if(!window.DEBUG){
-	requireJSConfig.urlArgs = "bust=" + (new Date()).getTime();
+	requireJSConfig.urlArgs = "bust=" + BUILD_VERSION;
 }
 
 requirejs.config(requireJSConfig);

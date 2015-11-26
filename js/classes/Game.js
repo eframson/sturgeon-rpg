@@ -3219,6 +3219,7 @@ Code Improvements
 - Standardize the way objects are saved (done already?)
 
 Bugs
+- Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 
 Game Ideas
 - Obstacles/mazes/labyrinthine structure in levels
