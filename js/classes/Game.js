@@ -3201,6 +3201,18 @@ define([
 
 /*
 
+LINKS FOR RESEARCH:
+http://jsfiddle.net/tPm3s/1/ (http://stackoverflow.com/questions/23530756/maze-recursive-division-algorithm-design)
+http://weblog.jamisbuck.org/2011/1/12/maze-generation-recursive-division-algorithm
+http://weblog.jamisbuck.org/2015/1/15/better-recursive-division-algorithm.html
+
+http://weblog.jamisbuck.org/2011/2/7/maze-generation-algorithm-recap
+http://dstromberg.com/2013/07/tutorial-random-maze-generation-algorithm-in-javascript/
+
+https://github.com/felipecsl/random-maze-generator
+http://stackoverflow.com/questions/16150255/javascript-maze-generator
+http://xefer.com//maze-generator
+
 Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 - Make skill trainers cost less, OR improve base skill rather than progress
