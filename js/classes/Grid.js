@@ -78,12 +78,14 @@ define([
 
 			var width 		 = (maxX - minX),
 				height 		 = (maxY - minY),
-				divisionAxis = ( (width > height) ? "vertical" : "horizontal" );
+				divisionAxis = ( (width > height) ? "vertical" : "horizontal" ),
+				minWidth 	 = 2,
+				minHeight 	 = 2;
 
 			//OPTIONAL: randomly choose vertical/horizontal direction if dimensions are square
 
 			//If space is greater than the minimum size to make a division
-			if(width >= 2 && height >= 2){
+			if(width >= minWidth && height >= minHeight){
 
 				var minBounds = ( divisionAxis == "vertical" ? minX : minY ),
 					maxBounds = ( divisionAxis == "vertical" ? maxX : maxY ),
@@ -153,7 +155,22 @@ define([
 			}
 		}
 
-		
+		this.dumpVisualRepresentation = function(){
+			var outputString = "";
+
+			for(row = self.gridBounds.minX; row <= self.gridBounds.maxX; row++){
+				for(col = self.gridBounds.minY; col <= self.gridBounds.maxY; col++){
+					if(self.grid[row][col] != "W"){
+						outputString += " ";
+					}else{
+						outputString += "O";
+					}
+				}
+				outputString += "\n";
+			}
+
+			console.log(outputString);
+		}		
 
 		/*this.init = function(gridData){
 
