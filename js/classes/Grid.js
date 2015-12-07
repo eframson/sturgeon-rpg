@@ -83,6 +83,7 @@ define([
 				minHeight 	 = 2;
 
 			//OPTIONAL: randomly choose vertical/horizontal direction if dimensions are square
+			//OPTIONAL: randomly choose minimum width/height (2x2 or 3x3)
 
 			//If space is greater than the minimum size to make a division
 			if(width >= minWidth && height >= minHeight){
@@ -170,7 +171,62 @@ define([
 			}
 
 			console.log(outputString);
-		}		
+		}
+
+		this.generateAndDrawMap = function(){
+			self._fillInGridWalls();
+			self.drawMap();
+		}
+
+		this.drawMap = function(){
+
+			//var $map = $("#map");
+			var canvas = document.getElementById("map-canvas");
+			var context = canvas.getContext("2d");
+			var totalWidth = canvas.width;
+			var totalHeight = canvas.height;
+
+			//Obviously hook these up better, derp
+			var squareWidth = Math.floor(totalWidth / (self.gridBounds.maxX + 1));
+			var squareHeight = Math.floor(totalHeight / (self.gridBounds.maxY + 1));
+
+			//RESET THE CANVAS EACH TIME
+			// Store the current transformation matrix
+			context.save();
+
+			// Use the identity matrix while clearing the canvas
+			context.setTransform(1, 0, 0, 1, 0, 0);
+			context.clearRect(0, 0, canvas.width, canvas.height);
+
+			// Restore the transform
+			context.restore();
+
+			var lightFill = '#658DA6';
+			var darkFill = '#436073';
+			var text = "";
+
+			$.each(self.grid, function(row_num, row){
+
+				$.each(row, function(col_num, cell){
+
+					var square = self.grid[row_num][col_num];
+					//var square = self.getSquare(col_num, row_num);
+
+					if(square == "W"){
+						fillStyle = darkFill;
+					}else{
+						fillStyle = lightFill;
+					}
+
+					context.fillStyle = fillStyle;
+					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
+
+				});
+			});
+
+			context.save(); // save state
+
+		}
 
 		/*this.init = function(gridData){
 
