@@ -20,6 +20,14 @@ define([
 				gridData.grid = Array();
 			}
 
+			self.numSquares = gridData.numSquares || 15;
+			self.gridBounds = gridData.gridBounds || {
+				minX: 0,
+				maxX: (self.numSquares - 1),
+				minY: 0,
+				maxY: (self.numSquares - 1),
+			};
+
 			self.grid = gridData.grid;
 
 			if(self.grid.length == 0){
@@ -31,7 +39,106 @@ define([
 		}
 
 		this._fillInGridWalls = function(){
-			//Put logic here as detauled in pseudocode below here
+			//Set up a grid
+			self._generateGrid();
+
+			//Add borders
+			self._addPerimeterBorders();
+
+			//Add divisions(center area of grid)
+			//(Account for borders
+			self.addDivisions((self.gridBounds.minX + 1), (self.gridBounds.maxX - 1), (self.gridBounds.minY + 1), (self.gridBounds.maxY - 1));
+
+			//Add divisions =
+
+				//If space is greater than the minimum size to make a division
+
+				//For space, divide vertically or horizontally <--
+				//											     |
+				//For each half, perpendicularly, ----------------
+
+			//Divide =
+
+				//If division is horizontal
+					//Choose random Y (always in an even-numbered position)
+					//Length is minX to maxX
+
+				//If division is vertical
+					//Choose random X (always in an even-numbered position)
+					//Length is minY to maxY
+
+				//"Draw" line
+					//Pick random square and "draw" hole (always in odd-numbered position?)
+
+
+
+		}
+
+		this.addDivisions = function(minX, maxX, minY, maxY){
+
+			var width 		 = (maxX - minX),
+				height 		 = (maxY - minY),
+				divisionAxis = ( (width > height) ? "vertical" : "horizontal" );
+
+			//OPTIONAL: randomly choose vertical/horizontal direction if dimensions are square
+
+			//If space is greater than the minimum size to make a division
+			if(width >= 2 && height >= 2){
+
+				var minBounds = ( divisionAxis == "vertical" ? minX : minY ),
+					maxBounds = ( divisionAxis == "vertical" ? maxX : maxY ),
+					lengthMinBounds = ( divisionAxis == "vertical" ? minY : minX ),
+					lengthMaxBounds = ( divisionAxis == "vertical" ? maxY : maxX );
+				//Dividing by two, getting the floor, and multiplying the result by two should guarantee us an even number.
+				var wallPosition = Math.floor(Utils.doRand( minBounds, (maxBounds + 1) ) / 2) * 2;
+				//console.log(wallPosition);
+				//Dividing by two, getting the floor, multiplying the result by two, and adding 1 should guarantee us an odd number.
+				var doorPosition = (Math.floor(Utils.doRand( lengthMinBounds, (lengthMaxBounds + 1) ) / 2) * 2) + 1;
+				//console.log(doorPosition);
+
+				var i;
+
+				if( divisionAxis == "vertical" ){
+					//x = wallPosition
+					//y = lengthMinBounds to lengthMaxBounds (except doorPosition)
+					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
+						if( i != doorPosition ){
+							self.grid[i][wallPosition] = "W";
+						}
+					}
+					self.addDivisions((wallPosition + 1), maxX, minY, maxY);
+					self.addDivisions(minX, (wallPosition - 1), minY, maxY);
+				}else{
+					//y = wallPosition
+					//x = lengthMinBounds to lengthMaxBounds (except doorPosition)
+					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
+						if( i != doorPosition ){
+							self.grid[wallPosition][i] = "W";
+						}
+					}
+					self.addDivisions(minX, maxX, (wallPosition + 1), maxY);
+					self.addDivisions(minX, maxX, minY, (wallPosition - 1));
+				}
+
+				//For space, divide vertically or horizontally <--
+				//											     |
+				//For each half, perpendicularly, ----------------
+
+			}
+
+		}
+
+		this._addPerimeterBorders = function(){
+			var row,
+				col;
+			for(row = self.gridBounds.minX; row <= self.gridBounds.maxX; row++){
+				for(col = self.gridBounds.minY; col <= self.gridBounds.maxY; col++){
+					if(row == self.gridBounds.minX || row == self.gridBounds.maxX || col == self.gridBounds.minY || col == self.gridBounds.maxY ){
+						//Fill in as wall
+						self.grid[row][col] = "W"; //Placeholder, verifying that logic works properly
+					}
+				}
+			}			
 		}
 
 		//Set up a grid
@@ -46,66 +153,9 @@ define([
 			}
 		}
 
-		//Add borders
-
-		//Add divisions(center of grid)
-
-		//Add divisions =
-
-			//If space is greater than the minimum size to make a division
-
-			//For space, divide vertically or horizontally <--
-			//											     |
-			//For each half, perpendicularly, ----------------
-
-		//Divide =
-
-			//If division is horizontal
-				//Choose random Y (always in an even-numbered position)
-				//Length is minX to maxX
-
-			//If division is vertical
-				//Choose random X (always in an even-numbered position)
-				//Length is minY to maxY
-
-			//"Draw" line
-				//Pick random square and "draw" hole (always in odd-numbered position?)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 		
 
-
-
-		
-
-		this.init = function(gridData){
+		/*this.init = function(gridData){
 
 			self.genOpts = {};
 			$.extend(self.genOpts, {
@@ -166,12 +216,12 @@ define([
 
 		this._populateGrid = function(){
 			//Generate things a quad at a time
-			/*
+			*//*
 				//Quad order is:
 				1 , 2
 				3 , 4
 			*/
-			var genOpts = self.genOpts;
+			/*var genOpts = self.genOpts;
 			var playerPos = self.getPlayerPos();
 			var potentialExits = Array(),
 				potentialEntrances = Array(),
@@ -347,7 +397,7 @@ define([
 			exportObj.grid = exportGrid;
 
 			return exportObj;
-		}
+		}*/
 
 		this.init(gridData);
 

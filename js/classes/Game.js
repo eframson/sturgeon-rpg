@@ -16,9 +16,10 @@ define([
 	'json!data/monsters.json',
 	'json!data/skills.json',
 	'Utils',
+	'classes/Grid',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils, Grid) {
 
 	//Can these be knockout custom bindings? Some of them, surely...
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
@@ -164,6 +165,9 @@ define([
 		this.init = function(){
 			self.initObservables();
 			self.initGame();
+			//References for debugging
+			self.newGrid = new Grid();
+			self.Utils = Utils;
 		}
 
 		this.initObservables = function(){
