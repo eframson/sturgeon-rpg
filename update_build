@@ -3,5 +3,5 @@
 NOW=`date +%s`
 sed -E -i '' 's/BUILD_VERSION = .+;/BUILD_VERSION = '$NOW';/' js/main.js
 git add js/main.js
-git commit -m 'Automatically updated build version'
-git status
+#git commit -m 'Automatically updated build version'
+#git status
