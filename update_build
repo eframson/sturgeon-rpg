@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /usr/local/var/www/htdocs/sturgeon
+#cd /usr/local/var/www/htdocs/sturgeon
 NOW=`date +%s`
 sed -E -i '' 's/BUILD_VERSION = .+;/BUILD_VERSION = '$NOW';/' js/main.js
 git add js/main.js
