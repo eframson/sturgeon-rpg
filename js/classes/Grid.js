@@ -76,11 +76,13 @@ define([
 
 		this.addDivisions = function(minX, maxX, minY, maxY){
 
+			var minSquareForDivision = Utils.doRand(2,6);
+			//var minSquareForDivision = 6;
 			var width 		 = (maxX - minX),
 				height 		 = (maxY - minY),
 				divisionAxis = ( (width > height) ? "vertical" : "horizontal" ),
-				minWidth 	 = 2,
-				minHeight 	 = 2;
+				minWidth 	 = minSquareForDivision,
+				minHeight 	 = minSquareForDivision;
 
 			//OPTIONAL: randomly choose vertical/horizontal direction if dimensions are square
 			//OPTIONAL: randomly choose minimum width/height (2x2 or 3x3)
@@ -98,6 +100,14 @@ define([
 				//Dividing by two, getting the floor, multiplying the result by two, and adding 1 should guarantee us an odd number.
 				var doorPosition = (Math.floor(Utils.doRand( lengthMinBounds, (lengthMaxBounds + 1) ) / 2) * 2) + 1;
 				//console.log(doorPosition);
+
+				//Let's make sure that we don't put things in the wrong place
+				if( wallPosition == 0 ){
+					wallPosition+=2;
+				}
+				if(doorPosition == 0){
+					doorPosition+=1;
+				}
 
 				var i;
 
