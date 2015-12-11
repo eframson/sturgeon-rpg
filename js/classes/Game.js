@@ -1584,7 +1584,7 @@ define([
 					nextLevel.isActive(true);
 					currentLevel.isActive(false);
 					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
-					nextLevel.revealSquaresNearPlayer(0);
+					nextLevel.revealSquaresNearPlayer(1);
 					self.level().scanSquaresNearPlayer(0);
 					nextLevel.drawMap();
 					self.temporarilyDisableActiveSquare(0);
