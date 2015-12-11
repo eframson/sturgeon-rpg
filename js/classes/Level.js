@@ -844,7 +844,8 @@ define([
 		}
 
 		this.revealMap = function(){
-			self.revealSquaresNearPlayer(50);
+			self.scanSquaresNearPlayer(15);
+			self.revealSquaresNearPlayer(15);
 			self.drawMap();
 		}
 

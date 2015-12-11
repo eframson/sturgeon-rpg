@@ -583,7 +583,7 @@ define([
 
 			self.player(player);
 
-			self.level().revealSquaresNearPlayer(0);
+			self.level().revealSquaresNearPlayer(1);
 			self.level().drawMap();
 
 			//Initialize our intro slides if this is a brand new game
@@ -639,7 +639,7 @@ define([
 					//self.evaluateIntermittentPassives();
 
 					self.level().showSquaresNearPlayer(1);
-					self.level().revealSquaresNearPlayer(0);
+					self.level().scanSquaresNearPlayer(0);
 
 					var square = self.level().getSquare(newPos.x, newPos.y);
 
@@ -3224,13 +3224,14 @@ Game Improvements
 
 UI Improvements
 - Show slot that armor applies to when active item
+- More detail about how much HP food will restore
+- More detail about how much HP food or leveling up restored
 - Dynamic container name
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Code Improvements
 - Figure out some way of selectively forcing object reload from *.jsons
-- Show "level" column header in known skills section
 - Prevent enemy HP from going below 0 (maybe)
 - Standardize the way objects are saved (done already?)
 
