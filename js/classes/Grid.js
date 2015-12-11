@@ -45,66 +45,52 @@ define([
 			//Add borders
 			self._addPerimeterBorders();
 
-			//Add divisions(center area of grid)
-			//(Account for borders
+			//Recursively add linear dividing walls to the remaining area of the map
 			self.addDivisions((self.gridBounds.minX + 1), (self.gridBounds.maxX - 1), (self.gridBounds.minY + 1), (self.gridBounds.maxY - 1));
-
-			//Add divisions =
-
-				//If space is greater than the minimum size to make a division
-
-				//For space, divide vertically or horizontally <--
-				//											     |
-				//For each half, perpendicularly, ----------------
-
-			//Divide =
-
-				//If division is horizontal
-					//Choose random Y (always in an even-numbered position)
-					//Length is minX to maxX
-
-				//If division is vertical
-					//Choose random X (always in an even-numbered position)
-					//Length is minY to maxY
-
-				//"Draw" line
-					//Pick random square and "draw" hole (always in odd-numbered position?)
-
-
-
 		}
 
 		this.addDivisions = function(minX, maxX, minY, maxY){
 
+			//Randomize "room" size
 			var minSquareForDivision = Utils.doRand(2,6);
-			//var minSquareForDivision = 6;
+
+			//Set up vars
 			var width 		 = (maxX - minX),
 				height 		 = (maxY - minY),
-				divisionAxis = ( (width > height) ? "vertical" : "horizontal" ),
+				divisionAxis = "",
 				minWidth 	 = minSquareForDivision,
 				minHeight 	 = minSquareForDivision;
 
-			//OPTIONAL: randomly choose vertical/horizontal direction if dimensions are square
-			//OPTIONAL: randomly choose minimum width/height (2x2 or 3x3)
+			if(width == height){
+				//Randomly choose vertical/horizontal direction if dimensions are square
+				divisionAxis = Utils.chooseRandomly(["vertical","horizontal"]);
+			}else{
+				//Otherwise, divide vertically if room is wider than it is tall,
+				//and divide horizontally if room is taller than it is wide
+				divisionAxis = ( (width > height) ? "vertical" : "horizontal" );
+			}
 
 			//If space is greater than the minimum size to make a division
 			if(width >= minWidth && height >= minHeight){
 
+				//Set up vars
 				var minBounds = ( divisionAxis == "vertical" ? minX : minY ),
 					maxBounds = ( divisionAxis == "vertical" ? maxX : maxY ),
 					lengthMinBounds = ( divisionAxis == "vertical" ? minY : minX ),
 					lengthMaxBounds = ( divisionAxis == "vertical" ? maxY : maxX );
 				//Dividing by two, getting the floor, and multiplying the result by two should guarantee us an even number.
 				var wallPosition = Math.floor(Utils.doRand( minBounds, (maxBounds + 1) ) / 2) * 2;
-				//console.log(wallPosition);
 				//Dividing by two, getting the floor, multiplying the result by two, and adding 1 should guarantee us an odd number.
 				var doorPosition = (Math.floor(Utils.doRand( lengthMinBounds, (lengthMaxBounds + 1) ) / 2) * 2) + 1;
-				//console.log(doorPosition);
 
-				//Let's make sure that we don't put things in the wrong place
+				//Because we're taking the floor, it's possible to end up with a value of 0,
+				//which is a problem, because that's where our border walls are!
+
+				//Let's make sure that we don't try and put a wall over the top or left border walls
 				if( wallPosition == 0 ){
 					wallPosition+=2;
 				}
+				//Let's also make sure we don't try and put a door in the top or left border walls either
 				if(doorPosition == 0){
 					doorPosition+=1;
 				}
@@ -112,49 +98,47 @@ define([
 				var i;
 
 				if( divisionAxis == "vertical" ){
-					//x = wallPosition
-					//y = lengthMinBounds to lengthMaxBounds (except doorPosition)
+					//For each square in the wall's line, mark the square as a wall (unless it's a door)
 					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
 						if( i != doorPosition ){
-							self.grid[i][wallPosition] = "W";
+							self.grid[i][wallPosition].isWall = true;
+							self.grid[i][wallPosition].notEmpty = true;
 						}
 					}
+					//For the remaining spaces on either side of the wall, divide them as well
 					self.addDivisions((wallPosition + 1), maxX, minY, maxY);
 					self.addDivisions(minX, (wallPosition - 1), minY, maxY);
 				}else{
-					//y = wallPosition
-					//x = lengthMinBounds to lengthMaxBounds (except doorPosition)
+					//For each square in the wall's line, mark the square as a wall (unless it's a door)
 					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
 						if( i != doorPosition ){
-							self.grid[wallPosition][i] = "W";
+							self.grid[wallPosition][i].isWall = true;
+							self.grid[wallPosition][i].notEmpty = true;
 						}
 					}
+					//For the remaining spaces on either side of the wall, divide them as well
 					self.addDivisions(minX, maxX, (wallPosition + 1), maxY);
 					self.addDivisions(minX, maxX, minY, (wallPosition - 1));
 				}
-
-				//For space, divide vertically or horizontally <--
-				//											     |
-				//For each half, perpendicularly, ----------------
 
 			}
 
 		}
 
 		this._addPerimeterBorders = function(){
-			var row,
-				col;
+			var row, col;
 			for(row = self.gridBounds.minX; row <= self.gridBounds.maxX; row++){
 				for(col = self.gridBounds.minY; col <= self.gridBounds.maxY; col++){
 					if(row == self.gridBounds.minX || row == self.gridBounds.maxX || col == self.gridBounds.minY || col == self.gridBounds.maxY ){
 						//Fill in as wall
-						self.grid[row][col] = "W"; //Placeholder, verifying that logic works properly
+						self.grid[row][col].isWall = true;
+						self.grid[row][col].notEmpty = true;
 					}
 				}
 			}			
 		}
 
-		//Set up a grid
+		//Set up the array representing our 2D grid
 		this._generateGrid = function(){
 			for(x = self.gridBounds.minX; x <= self.gridBounds.maxX; x++){
 				for(y = self.gridBounds.minY; y <= self.gridBounds.maxY; y++){
@@ -171,7 +155,7 @@ define([
 
 			for(row = self.gridBounds.minX; row <= self.gridBounds.maxX; row++){
 				for(col = self.gridBounds.minY; col <= self.gridBounds.maxY; col++){
-					if(self.grid[row][col] != "W"){
+					if(self.grid[row][col].isWall == false){
 						outputString += " ";
 					}else{
 						outputString += "O";
@@ -186,6 +170,7 @@ define([
 		this.generateAndDrawMap = function(){
 			self._fillInGridWalls();
 			self.drawMap();
+			self.dumpVisualRepresentation();
 		}
 
 		this.drawMap = function(){
@@ -237,250 +222,6 @@ define([
 			context.save(); // save state
 
 		}
-
-		/*this.init = function(gridData){
-
-			self.genOpts = {};
-			$.extend(self.genOpts, {
-				genPercents : {
-					50 : "combat",
-					20 : "item",
-					30 : "event",
-				},
-				percentEmpty : 50,
-				quadsWithPotentialExits: [1, 2],
-				quadsWithPotentialEntrances: [3, 4],
-			}, (gridData.genOpts || {}));
-			self.numSquares = gridData.numSquares || 10;
-			self.gridBounds = gridData.gridBounds || {
-				minX: 0,
-				maxX: (self.numSquares - 1),
-				minY: 0,
-				maxY: (self.numSquares - 1),
-			};
-			self.quadBounds = gridData.quadBounds || {};
-			self.grid = Array();
-
-			var gridArray = Array();
-			for(y = 0; y < gridData.grid.length; y++){
-				for(x = 0; x < gridData.grid[y].length; x++){
-
-					if(gridArray[y] == undefined){
-						gridArray[y] = Array();
-					}
-
-					gridArray[y].push( new GridSquare(gridData.grid[y][x]) );
-				}
-			}
-			self.grid = gridArray;
-
-			if(!self.hasGenerated){
-				self.generateThisLevel();
-			}
-		}
-
-		this.getSquare = function(x, y){
-			if(x == undefined || y == undefined){
-				return false;
-			}
-			return self.grid[x][y];
-		}
-
-		this._generateGrid = function(){
-			for(x = self.gridBounds.minX; x <= self.gridBounds.maxX; x++){
-				for(y = self.gridBounds.minY; y <= self.gridBounds.maxY; y++){
-					if(self.grid[x] == undefined){
-						self.grid[x] = Array();
-					}
-					self.grid[x][y] = new GridSquare({x : x, y : y});
-				}
-			}
-		}
-
-		this._populateGrid = function(){
-			//Generate things a quad at a time
-			*//*
-				//Quad order is:
-				1 , 2
-				3 , 4
-			*/
-			/*var genOpts = self.genOpts;
-			var playerPos = self.getPlayerPos();
-			var potentialExits = Array(),
-				potentialEntrances = Array(),
-				q,
-				entranceQuadNum,
-				exitQuadNum;
-
-			//Choose one quad or the other off-the-bat, and then randomize its position inside that
-			entranceQuadNum = ( genOpts.quadsWithPotentialEntrances.length > 0 ) ? genOpts.quadsWithPotentialEntrances[Utils.doRand(0, genOpts.quadsWithPotentialEntrances.length)] : 0;
-			exitQuadNum = ( genOpts.quadsWithPotentialExits.length > 0 ) ? genOpts.quadsWithPotentialExits[Utils.doRand(0, genOpts.quadsWithPotentialExits.length)] : 0;
-
-			for(q=1; q <= 4; q++){
-
-				var numNonEmpty = 0;
-
-				var bounds = self._getQuadBounds(q);
-				var possibleEntranceExitX = playerPos.x;
-				var possibleEntranceExitY = playerPos.y;
-
-				if(q == entranceQuadNum || q == exitQuadNum){
-					while( possibleEntranceExitX == playerPos.x && possibleEntranceExitY == playerPos.y ){
-						possibleEntranceExitX = Utils.doRand(bounds.minX, bounds.maxX);
-						possibleEntranceExitY = Utils.doRand(bounds.minY, bounds.maxY);
-					}
-
-					var entranceExitSquare = self.grid[ possibleEntranceExitX ][ possibleEntranceExitY ]
-
-					if( q == entranceQuadNum && self.entranceSquare().length == 0 ){
-
-						entranceExitSquare.setType("entrance");
-						entranceExitSquare.notEmpty = true;
-						self.entranceSquare([ entranceExitSquare.x, entranceExitSquare.y ]);
-
-					}else if( q == exitQuadNum && self.exitSquare().length == 0 ){
-
-						entranceExitSquare.setType("exit");
-						entranceExitSquare.notEmpty = true;
-						entranceExitSquare.isChallengeActive(1);
-						self.exitSquare([ entranceExitSquare.x, entranceExitSquare.y ]);
-
-					}
-				}
-
-				for(x = bounds.minX; x <= bounds.maxX; x++){
-					for(y = bounds.minY; y <= bounds.maxY; y++){
-
-						//If the current square is not the player position, and it doesn't already have something in it
-						if( !(x == playerPos.x && y == playerPos.y) && !self.grid[x][y].notEmpty){
-
-							var type = "empty";
-
-							if(Utils.doRand(0,99) < genOpts.percentEmpty && (genOpts.maxNonEmptyPerQuad == 0 || numNonEmpty <= genOpts.maxNonEmptyPerQuad)){
-
-								//This *should* automatically put the percentages in the correct (ASC) order
-								var type = Utils.doBasedOnPercent(genOpts.genPercents);
-
-								self.grid[x][y].notEmpty = true;
-
-								numNonEmpty++;
-							}
-
-							self.grid[x][y].setType(type);
-
-						}
-					}
-				}
-
-			}
-
-		}
-
-		this._getQuadBounds = function(quadNum) {
-
-			var bounds = {
-				minX : undefined,
-				maxX : undefined,
-				minY : undefined,
-				maxY : undefined,
-			};
-
-			var medX = Math.floor(this.gridBounds.maxX / 2);
-			var medY = Math.floor(this.gridBounds.maxY / 2);
-
-			if( quadNum == 1 ){
-
-				if(self.quadBounds[1] == undefined){
-
-					bounds.minX = this.gridBounds.minX;
-					bounds.maxX = medX;
-					bounds.minY = this.gridBounds.minY;
-					bounds.maxY = medY;
-
-					self.quadBounds[1] = bounds;
-				}
-				return self.quadBounds[1];
-
-			}else if( quadNum == 2 ){
-
-				if(self.quadBounds[2] == undefined){
-
-					bounds.minX = medX;
-					bounds.maxX = this.gridBounds.maxX;
-					bounds.minY = this.gridBounds.minY;
-					bounds.maxY = medY;
-
-					self.quadBounds[2] = bounds;
-				}
-				return self.quadBounds[2];
-
-			}else if( quadNum == 3 ){
-
-				if(self.quadBounds[3] == undefined){
-
-					bounds.minX = this.gridBounds.minX;
-					bounds.maxX = medX;
-					bounds.minY = medY;
-					bounds.maxY = this.gridBounds.maxY;
-
-					self.quadBounds[3] = bounds;
-				}
-				return self.quadBounds[3];
-
-			}else if( quadNum == 4 ){
-
-				if(self.quadBounds[4] == undefined){
-
-					bounds.minX = medX;
-					bounds.maxX = this.gridBounds.maxX;
-					bounds.minY = medY;
-					bounds.maxY = this.gridBounds.maxY;
-
-					self.quadBounds[4] = bounds;
-				}
-				return self.quadBounds[4];
-			}
-
-			return false;
-
-		}
-
-		this._doForEachGridSquare = function(action){
-			if( action == undefined || typeof action !== 'function' ){
-				return false;
-			}
-
-			for(y = 0; y < self.grid.length; y++){
-				for(x = 0; x < self.grid[y].length; x++){
-					action(self.grid[y][x]);
-				}
-			}
-
-		}
-
-		this.getExportData = function(){
-
-			var exportObj = ko.mapping.toJS({
-				levelNum : self.levelNum,
-				gridBounds : self.gridBounds,
-				quadBounds : self.quadBounds,
-			});
-
-			var exportGrid = Array();
-
-			for(row = 0; row < self.grid.length; row++){
-				for(col = 0; col < self.grid[row].length; col++){
-					if(exportGrid[row] == undefined){
-						exportGrid[row] = Array();
-					}
-					exportGrid[row][col] = self.grid[row][col].getExportData();
-				}
-			}
-
-			exportObj.grid = exportGrid;
-
-			return exportObj;
-		}*/
 
 		this.init(gridData);
 

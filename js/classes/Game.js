@@ -638,7 +638,7 @@ define([
 					//Coming soon...
 					//self.evaluateIntermittentPassives();
 
-					self.level().scanSquaresNearPlayer(0);
+					self.level().showSquaresNearPlayer(1);
 					self.level().revealSquaresNearPlayer(0);
 
 					var square = self.level().getSquare(newPos.x, newPos.y);
@@ -3220,7 +3220,7 @@ http://xefer.com//maze-generator
 Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 - Make skill trainers cost less, OR improve base skill rather than progress
-- Save user preferences separately, and load automatically
+- Add intermittent passives?
 
 UI Improvements
 - Show slot that armor applies to when active item
@@ -3238,7 +3238,6 @@ Bugs
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 
 Game Ideas
-- Obstacles/mazes/labyrinthine structure in levels
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
 - More consistent gold from monsters?
