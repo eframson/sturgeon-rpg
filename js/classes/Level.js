@@ -182,7 +182,7 @@ define([
 			if(x == undefined || y == undefined){
 				return false;
 			}
-			return self.grid[x][y];
+			return self.grid[y][x];
 		}
 
 		this.getActiveSquare = function(){
@@ -244,6 +244,8 @@ define([
 
 							if(square.isWall){
 								fillStyle = "#152026";
+							//}else if(square.isDoor){
+								//fillStyle = "#FF0000";
 							}else{
 								if(odd_row){
 
@@ -505,7 +507,7 @@ define([
 						possibleEntranceExitY = Utils.doRand(bounds.minY, bounds.maxY);
 					}
 
-					var entranceExitSquare = self.grid[ possibleEntranceExitX ][ possibleEntranceExitY ]
+					var entranceExitSquare = self.getSquare(possibleEntranceExitX, possibleEntranceExitY);
 
 					if( q == entranceQuadNum && self.entranceSquare().length == 0 ){
 
@@ -759,6 +761,8 @@ define([
 						if( i != doorPosition ){
 							self.grid[i][wallPosition].isWall = true;
 							self.grid[i][wallPosition].notEmpty = true;
+						}else{
+							self.grid[i][wallPosition].isDoor = true;
 						}
 					}
 					//For the remaining spaces on either side of the wall, divide them as well
@@ -770,6 +774,8 @@ define([
 						if( i != doorPosition ){
 							self.grid[wallPosition][i].isWall = true;
 							self.grid[wallPosition][i].notEmpty = true;
+						}else{
+							self.grid[wallPosition][i].isDoor = true;
 						}
 					}
 					//For the remaining spaces on either side of the wall, divide them as well
