@@ -242,11 +242,13 @@ define([
 
 						if(square.isVisible){
 
-							if(square.isWall){
+							if(square.isWall && square.isDoor){
+								fillStyle = "#00FF00";
+							}else if(square.isWall){
 								fillStyle = "#152026";
-							//}else if(square.isDoor){
-								//fillStyle = "#FF0000";
-							}else{
+							}/*else if(square.isDoor){
+								fillStyle = "#FF0000";
+							}*/else{
 								if(odd_row){
 
 									if(col_num % 2){
@@ -713,8 +715,8 @@ define([
 			var minSquareForDivision = Utils.doRand(2,6);
 
 			//Set up vars
-			var width 		 = (maxX - minX),
-				height 		 = (maxY - minY),
+			var width 		 = (maxX - minX) + 1,
+				height 		 = (maxY - minY) + 1,
 				divisionAxis = "",
 				minWidth 	 = minSquareForDivision,
 				minHeight 	 = minSquareForDivision;
@@ -745,11 +747,11 @@ define([
 				//which is a problem, because that's where our border walls are!
 
 				//Let's make sure that we don't try and put a wall over the top or left border walls
-				if( wallPosition == 0 ){
+				if( wallPosition < minBounds ){
 					wallPosition+=2;
 				}
 				//Let's also make sure we don't try and put a door in the top or left border walls either
-				if(doorPosition == 0){
+				if(doorPosition < lengthMinBounds){
 					doorPosition+=1;
 				}
 
@@ -761,8 +763,15 @@ define([
 						if( i != doorPosition ){
 							self.grid[i][wallPosition].isWall = true;
 							self.grid[i][wallPosition].notEmpty = true;
+
+							if( self.grid[i][wallPosition].isDoor == true ){
+								console.log('trying to make a door a wall');
+							}
 						}else{
 							self.grid[i][wallPosition].isDoor = true;
+							if( self.grid[i][wallPosition].isWall == true ){
+								console.log('trying to make a wall a door');
+							}
 						}
 					}
 					//For the remaining spaces on either side of the wall, divide them as well
@@ -774,8 +783,14 @@ define([
 						if( i != doorPosition ){
 							self.grid[wallPosition][i].isWall = true;
 							self.grid[wallPosition][i].notEmpty = true;
+							if( self.grid[wallPosition][i].isDoor == true ){
+								console.log('trying to make a door a wall');
+							}
 						}else{
 							self.grid[wallPosition][i].isDoor = true;
+							if( self.grid[wallPosition][i].isWall == true ){
+								console.log('trying to make a wall a door');
+							}
 						}
 					}
 					//For the remaining spaces on either side of the wall, divide them as well
