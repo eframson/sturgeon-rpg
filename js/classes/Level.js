@@ -56,14 +56,14 @@ define([
 			self.avgDmgPerHit = levelData.avgDmgPerHit || (self.levelNum * 2);
 
 			var gridArray = Array();
-			for(y = 0; y < levelData.grid.length; y++){
-				for(x = 0; x < levelData.grid[y].length; x++){
+			for(row_num = 0; row_num < levelData.grid.length; row_num++){
+				for(col_num = 0; col_num < levelData.grid[row_num].length; col_num++){
 
-					if(gridArray[y] == undefined){
-						gridArray[y] = Array();
+					if(gridArray[row_num] == undefined){
+						gridArray[row_num] = Array();
 					}
 
-					gridArray[y].push( new GridSquare(levelData.grid[y][x]) );
+					gridArray[row_num][col_num] = new GridSquare(levelData[row_num][col_num]);
 				}
 			}
 			self.grid = gridArray;
@@ -178,6 +178,9 @@ define([
 			return this.getPlayerPos();
 		}
 
+		//getSquare is designed to be called with X and Y coordinates
+		//Because of the nature of how the array is stored, a value like 1,4 (x = 1, y = 4) actually correlates to
+		//self.grid[y][x], because with the array the axes are flipped
 		this.getSquare = function(x, y){
 			if(x == undefined || y == undefined){
 				return false;
@@ -463,12 +466,12 @@ define([
 
 		//Set up the array representing our 2D grid
 		this._generateGrid = function(){
-			for(x = self.gridBounds.minX; x <= self.gridBounds.maxX; x++){
-				for(y = self.gridBounds.minY; y <= self.gridBounds.maxY; y++){
-					if(self.grid[x] == undefined){
-						self.grid[x] = Array();
+			for(row_num = self.gridBounds.minY; row_num <= self.gridBounds.maxY; row_num++){
+				for(col_num = self.gridBounds.minX; col_num <= self.gridBounds.maxX; col_num++){
+					if(self.grid[row_num] == undefined){
+						self.grid[row_num] = Array();
 					}
-					self.grid[x][y] = new GridSquare({x : x, y : y});
+					self.grid[row_num][col_num] = new GridSquare({x : col_num, y : row_num});
 				}
 			}
 		}
@@ -531,7 +534,7 @@ define([
 					for(y = bounds.minY; y <= bounds.maxY; y++){
 
 						//If the current square is not the player position, and it doesn't already have something in it
-						if( !(x == playerPos.x && y == playerPos.y) && !self.grid[x][y].notEmpty){
+						if( !(x == playerPos.x && y == playerPos.y) && !self.getSquare(x,y).notEmpty){
 
 							var type = "empty";
 
@@ -540,12 +543,12 @@ define([
 								//This *should* automatically put the percentages in the correct (ASC) order
 								var type = Utils.doBasedOnPercent(genOpts.genPercents);
 
-								self.grid[x][y].notEmpty = true;
+								self.getSquare(x,y).notEmpty = true;
 
 								numNonEmpty++;
 							}
 
-							self.grid[x][y].setType(type);
+							self.getSquare(x,y).setType(type);
 
 						}
 					}
@@ -624,7 +627,8 @@ define([
 
 		}
 
-		this._doForEachGridSquare = function(action){
+		//Commenting out until I have a use for it -- NEEDS TO BE UPDATED TO REFERENCE COLS/ROWS!
+		/*this._doForEachGridSquare = function(action){
 			if( action == undefined || typeof action !== 'function' ){
 				return false;
 			}
@@ -635,7 +639,7 @@ define([
 				}
 			}
 
-		}
+		}*/
 
 		this.generateThisLevel = function(isRegenerate, doDraw){
 			isRegenerate = ( isRegenerate == undefined ) ? false : isRegenerate ;
@@ -761,15 +765,15 @@ define([
 					//For each square in the wall's line, mark the square as a wall (unless it's a door)
 					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
 						if( i != doorPosition ){
-							self.grid[i][wallPosition].isWall = true;
-							self.grid[i][wallPosition].notEmpty = true;
+							self.getSquare(wallPosition, i).isWall = true;
+							self.getSquare(wallPosition, i).notEmpty = true;
 
-							if( self.grid[i][wallPosition].isDoor == true ){
+							if( self.getSquare(wallPosition, i).isDoor == true ){
 								console.log('trying to make a door a wall');
 							}
 						}else{
-							self.grid[i][wallPosition].isDoor = true;
-							if( self.grid[i][wallPosition].isWall == true ){
+							self.getSquare(wallPosition, i).isDoor = true;
+							if( self.getSquare(wallPosition, i).isWall == true ){
 								console.log('trying to make a wall a door');
 							}
 						}
@@ -781,14 +785,14 @@ define([
 					//For each square in the wall's line, mark the square as a wall (unless it's a door)
 					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
 						if( i != doorPosition ){
-							self.grid[wallPosition][i].isWall = true;
-							self.grid[wallPosition][i].notEmpty = true;
-							if( self.grid[wallPosition][i].isDoor == true ){
+							self.getSquare(i, wallPosition).isWall = true;
+							self.getSquare(i, wallPosition).notEmpty = true;
+							if( self.getSquare(i, wallPosition).isDoor == true ){
 								console.log('trying to make a door a wall');
 							}
 						}else{
-							self.grid[wallPosition][i].isDoor = true;
-							if( self.grid[wallPosition][i].isWall == true ){
+							self.getSquare(i, wallPosition).isDoor = true;
+							if( self.getSquare(i, wallPosition).isWall == true ){
 								console.log('trying to make a wall a door');
 							}
 						}
@@ -804,12 +808,12 @@ define([
 
 		this._addPerimeterBorders = function(){
 			var row, col;
-			for(row = self.gridBounds.minX; row <= self.gridBounds.maxX; row++){
-				for(col = self.gridBounds.minY; col <= self.gridBounds.maxY; col++){
+			for(row = self.gridBounds.minY; row <= self.gridBounds.maxY; row++){
+				for(col = self.gridBounds.minX; col <= self.gridBounds.maxX; col++){
 					if(row == self.gridBounds.minX || row == self.gridBounds.maxX || col == self.gridBounds.minY || col == self.gridBounds.maxY ){
 						//Fill in as wall
-						self.grid[row][col].isWall = true;
-						self.grid[row][col].notEmpty = true;
+						self.getSquare(col, row).isWall = true;
+						self.getSquare(col, row).notEmpty = true;
 					}
 				}
 			}			
@@ -818,9 +822,9 @@ define([
 		this.dumpVisualRepresentation = function(){
 			var outputString = "";
 
-			for(row = self.gridBounds.minX; row <= self.gridBounds.maxX; row++){
-				for(col = self.gridBounds.minY; col <= self.gridBounds.maxY; col++){
-					if(self.grid[row][col].isWall == false){
+			for(row = self.gridBounds.minY; row <= self.gridBounds.maxY; row++){
+				for(col = self.gridBounds.minX; col <= self.gridBounds.maxX; col++){
+					if(self.getSquare(col, row).isWall == false){
 						outputString += " ";
 					}else{
 						outputString += "O";

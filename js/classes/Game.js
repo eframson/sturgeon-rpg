@@ -3221,6 +3221,8 @@ Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 - Make skill trainers cost less, OR improve base skill rather than progress
 - Add intermittent passives?
+- Don't allow scanning through walls?
+- Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
 
 UI Improvements
 - Show slot that armor applies to when active item
@@ -3236,7 +3238,11 @@ Code Improvements
 - Standardize the way objects are saved (done already?)
 
 Bugs
+- Advance to next level, spawn in corner instead of on level entrance square
+- Mystery potion triggering reset stone effect? -OR- Finding food, full inventory, going back, level reset
+- After level reset, player spawned on wall
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
+- Went to previous level, did not start on exit square
 
 Game Ideas
 - Gambling squares! X gold for Y nice thing, Z chance of success
