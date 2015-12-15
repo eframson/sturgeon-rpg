@@ -651,6 +651,9 @@ define([
 
 			self._generateGrid();
 			self._fillInGridWalls();
+			if(isRegenerate){
+				self.playerPos = self.pickPlayerStartCorner();
+			}
 			self._populateGrid();
 			self.hasGenerated = 1;
 

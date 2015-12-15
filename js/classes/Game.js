@@ -3243,6 +3243,7 @@ Bugs
 - After level reset, player spawned on wall
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - Went to previous level, did not start on exit square
+- After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 Game Ideas
 - Gambling squares! X gold for Y nice thing, Z chance of success
