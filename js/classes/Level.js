@@ -34,7 +34,6 @@ define([
 				quadsWithPotentialEntrances: [3, 4],
 			}, (levelData.genOpts || {}));
 			self.numSquares = levelData.numSquares || 10;
-			self.playerPos = levelData.playerPos || [4, 4];
 			self.levelNum = ko.observable(levelData.levelNum || 1);
 			self.gridBounds = levelData.gridBounds || {
 				minX: 0,
@@ -43,6 +42,7 @@ define([
 				maxY: (self.numSquares - 1),
 			};
 			self.quadBounds = levelData.quadBounds || {};
+			self.playerPos = levelData.playerPos || self.pickPlayerStartCorner();
 			self.grid = Array();
 			self.nextLevelID = ko.observable( levelData.nextLevelID || undefined );
 			self.prevLevelID = ko.observable( levelData.prevLevelID || undefined );
@@ -56,20 +56,38 @@ define([
 			self.avgDmgPerHit = levelData.avgDmgPerHit || (self.levelNum * 2);
 
 			var gridArray = Array();
-			for(y = 0; y < levelData.grid.length; y++){
-				for(x = 0; x < levelData.grid[y].length; x++){
+			for(row_num = 0; row_num < levelData.grid.length; row_num++){
+				for(col_num = 0; col_num < levelData.grid[row_num].length; col_num++){
 
-					if(gridArray[y] == undefined){
-						gridArray[y] = Array();
+					if(gridArray[row_num] == undefined){
+						gridArray[row_num] = Array();
 					}
 
-					gridArray[y].push( new GridSquare(levelData.grid[y][x]) );
+					gridArray[row_num][col_num] = new GridSquare(levelData.grid[row_num][col_num]);
 				}
 			}
 			self.grid = gridArray;
 
 			if(!self.hasGenerated){
 				self.generateThisLevel();
+			}
+		}
+
+		this.pickPlayerStartCorner = function(){
+			var minX = self.gridBounds.minX + 1,
+				maxX = self.gridBounds.maxX - 1,
+				minY = self.gridBounds.minY + 1,
+				maxY = self.gridBounds.maxY - 1;
+			var startCorner = Utils.chooseRandomly(["top left", "top right", "bot left", "bot right"]);
+
+			if(startCorner == "top left"){
+				return [minX, minY];
+			}else if(startCorner == "top right"){
+				return [minX, maxY];
+			}else if(startCorner == "bot left"){
+				return [maxX, minY];
+			}else{
+				return [maxX, maxY];
 			}
 		}
 
@@ -126,42 +144,48 @@ define([
 
 			self.playerOrientation = direction;
 
-			var targetX = self.getPlayerPos("x");
-			var targetY = self.getPlayerPos("y");
+			var posX = self.getPlayerPos("x");
+			var posY = self.getPlayerPos("y");
 
 			if(direction == "left" || direction == "right"){
 
 				if(direction == "left"){
-					targetX = self.playerPos[0] - numSquares;
-					targetX = (targetX >= this.gridBounds.minX) ? targetX : this.gridBounds.minX ;
-
+					if( self.getSquare((posX - numSquares), posY).isWall == false ){
+						posX-=numSquares;
+					}
 				}else if(direction == "right"){
-					targetX = self.playerPos[0] + numSquares;
-					targetX = (targetX <= this.gridBounds.maxX) ? targetX : this.gridBounds.maxX ;
+					if( self.getSquare((posX + numSquares), posY).isWall == false ){
+						posX+=numSquares;
+					}
 				}
 
 			}else{
 
 				if(direction == "up"){
-					targetY = self.playerPos[1] - numSquares;
-					targetY = (targetY >= this.gridBounds.minY) ? targetY : this.gridBounds.minY ;
+					if( self.getSquare(posX , (posY - numSquares)).isWall == false ){
+						posY-=numSquares;
+					}
 				}else if(direction == "down"){
-					targetY = self.playerPos[1] + numSquares;
-					targetY = (targetY <= this.gridBounds.maxY) ? targetY : this.gridBounds.maxY ;
+					if( self.getSquare(posX , (posY + numSquares)).isWall == false ){
+						posY+=numSquares;
+					}
 				}
 
 			}
 
-			self.setPlayerPos(targetX, targetY);
+			self.setPlayerPos(posX, posY);
 
 			return this.getPlayerPos();
 		}
 
+		//getSquare is designed to be called with X and Y coordinates
+		//Because of the nature of how the array is stored, a value like 1,4 (x = 1, y = 4) actually correlates to
+		//self.grid[y][x], because with the array the axes are flipped
 		this.getSquare = function(x, y){
 			if(x == undefined || y == undefined){
 				return false;
 			}
-			return self.grid[x][y];
+			return self.grid[y][x];
 		}
 
 		this.getActiveSquare = function(){
@@ -221,19 +245,27 @@ define([
 
 						if(square.isVisible){
 
-							if(odd_row){
+							if(square.isWall && square.isDoor){
+								fillStyle = "#00FF00";
+							}else if(square.isWall){
+								fillStyle = "#152026";
+							}/*else if(square.isDoor){
+								fillStyle = "#FF0000";
+							}*/else{
+								if(odd_row){
 
-								if(col_num % 2){
-									fillStyle = lightFill;
-								}else{
-									fillStyle = darkFill;
-								}
+									if(col_num % 2){
+										fillStyle = lightFill;
+									}else{
+										fillStyle = darkFill;
+									}
 
-							}else{
-								if(col_num % 2){
-									fillStyle = darkFill;
 								}else{
-									fillStyle = lightFill;
+									if(col_num % 2){
+										fillStyle = darkFill;
+									}else{
+										fillStyle = lightFill;
+									}
 								}
 							}
 
@@ -432,24 +464,24 @@ define([
 			}
 		}
 
+		//Set up the array representing our 2D grid
 		this._generateGrid = function(){
-			for(x = self.gridBounds.minX; x <= self.gridBounds.maxX; x++){
-				for(y = self.gridBounds.minY; y <= self.gridBounds.maxY; y++){
-					if(self.grid[x] == undefined){
-						self.grid[x] = Array();
+			for(row_num = self.gridBounds.minY; row_num <= self.gridBounds.maxY; row_num++){
+				for(col_num = self.gridBounds.minX; col_num <= self.gridBounds.maxX; col_num++){
+					if(self.grid[row_num] == undefined){
+						self.grid[row_num] = Array();
 					}
-					self.grid[x][y] = new GridSquare({x : x, y : y});
+					self.grid[row_num][col_num] = new GridSquare({x : col_num, y : row_num});
 				}
 			}
 		}
 
 		this._populateGrid = function(){
 			//Generate things a quad at a time
-			/*
-				//Quad order is:
-				1 , 2
-				3 , 4
-			*/
+			//Quad order is:
+			//	1 , 2
+			//	3 , 4
+			
 			var genOpts = self.genOpts;
 			var playerPos = self.getPlayerPos();
 			var potentialExits = Array(),
@@ -471,12 +503,16 @@ define([
 				var possibleEntranceExitY = playerPos.y;
 
 				if(q == entranceQuadNum || q == exitQuadNum){
-					while( possibleEntranceExitX == playerPos.x && possibleEntranceExitY == playerPos.y ){
+					//Keep picking entrance/exit coords until we've got one in an empty space (that the player isn't standing on)
+					while(
+							(possibleEntranceExitX == playerPos.x && possibleEntranceExitY == playerPos.y)
+							|| (self.getSquare(possibleEntranceExitX, possibleEntranceExitY).isWall == true)
+					){
 						possibleEntranceExitX = Utils.doRand(bounds.minX, bounds.maxX);
 						possibleEntranceExitY = Utils.doRand(bounds.minY, bounds.maxY);
 					}
 
-					var entranceExitSquare = self.grid[ possibleEntranceExitX ][ possibleEntranceExitY ]
+					var entranceExitSquare = self.getSquare(possibleEntranceExitX, possibleEntranceExitY);
 
 					if( q == entranceQuadNum && self.entranceSquare().length == 0 ){
 
@@ -498,7 +534,7 @@ define([
 					for(y = bounds.minY; y <= bounds.maxY; y++){
 
 						//If the current square is not the player position, and it doesn't already have something in it
-						if( !(x == playerPos.x && y == playerPos.y) && !self.grid[x][y].notEmpty){
+						if( !(x == playerPos.x && y == playerPos.y) && !self.getSquare(x,y).notEmpty){
 
 							var type = "empty";
 
@@ -507,12 +543,12 @@ define([
 								//This *should* automatically put the percentages in the correct (ASC) order
 								var type = Utils.doBasedOnPercent(genOpts.genPercents);
 
-								self.grid[x][y].notEmpty = true;
+								self.getSquare(x,y).notEmpty = true;
 
 								numNonEmpty++;
 							}
 
-							self.grid[x][y].setType(type);
+							self.getSquare(x,y).setType(type);
 
 						}
 					}
@@ -535,52 +571,52 @@ define([
 			var medY = Math.floor(this.gridBounds.maxY / 2);
 
 			if( quadNum == 1 ){
-
+				//Top left
 				if(self.quadBounds[1] == undefined){
 
-					bounds.minX = this.gridBounds.minX;
-					bounds.maxX = medX;
-					bounds.minY = this.gridBounds.minY;
-					bounds.maxY = medY;
+					bounds.minX = this.gridBounds.minX + 1; //Take left border into account
+					bounds.maxX = medX + 1; //doRand's top bound is exclusive, so we need to add 1
+					bounds.minY = this.gridBounds.minY + 1; //Take top border into account
+					bounds.maxY = medY + 1; //doRand's top bound is exclusive, so we need to add 1
 
 					self.quadBounds[1] = bounds;
 				}
 				return self.quadBounds[1];
 
 			}else if( quadNum == 2 ){
-
+				//Top right
 				if(self.quadBounds[2] == undefined){
 
 					bounds.minX = medX;
-					bounds.maxX = this.gridBounds.maxX;
-					bounds.minY = this.gridBounds.minY;
-					bounds.maxY = medY;
+					bounds.maxX = this.gridBounds.maxX; //doRand's top bound is exclusive, but we have to take border into account
+					bounds.minY = this.gridBounds.minY + 1; //Take top border into account
+					bounds.maxY = medY + 1; //doRand's top bound is exclusive, so we need to add 1
 
 					self.quadBounds[2] = bounds;
 				}
 				return self.quadBounds[2];
 
 			}else if( quadNum == 3 ){
-
+				//Bottom left
 				if(self.quadBounds[3] == undefined){
 
-					bounds.minX = this.gridBounds.minX;
-					bounds.maxX = medX;
+					bounds.minX = this.gridBounds.minX + 1; //Take left border into account
+					bounds.maxX = medX + 1; //doRand's top bound is exclusive, so we need to add 1
 					bounds.minY = medY;
-					bounds.maxY = this.gridBounds.maxY;
+					bounds.maxY = this.gridBounds.maxY; //doRand's top bound is exclusive, but we have to take border into account
 
 					self.quadBounds[3] = bounds;
 				}
 				return self.quadBounds[3];
 
 			}else if( quadNum == 4 ){
-
+				//Bottom right
 				if(self.quadBounds[4] == undefined){
 
 					bounds.minX = medX;
-					bounds.maxX = this.gridBounds.maxX;
+					bounds.maxX = this.gridBounds.maxX; //doRand's top bound is exclusive, but we have to take border into account
 					bounds.minY = medY;
-					bounds.maxY = this.gridBounds.maxY;
+					bounds.maxY = this.gridBounds.maxY; //doRand's top bound is exclusive, but we have to take border into account
 
 					self.quadBounds[4] = bounds;
 				}
@@ -591,7 +627,8 @@ define([
 
 		}
 
-		this._doForEachGridSquare = function(action){
+		//Commenting out until I have a use for it -- NEEDS TO BE UPDATED TO REFERENCE COLS/ROWS!
+		/*this._doForEachGridSquare = function(action){
 			if( action == undefined || typeof action !== 'function' ){
 				return false;
 			}
@@ -602,9 +639,9 @@ define([
 				}
 			}
 
-		}
+		}*/
 
-		this.generateThisLevel = function(isRegenerate){
+		this.generateThisLevel = function(isRegenerate, doDraw){
 			isRegenerate = ( isRegenerate == undefined ) ? false : isRegenerate ;
 
 			if(isRegenerate){
@@ -613,8 +650,17 @@ define([
 			}
 
 			self._generateGrid();
+			self._fillInGridWalls();
+			if(isRegenerate){
+				self.playerPos = self.pickPlayerStartCorner();
+			}
 			self._populateGrid();
 			self.hasGenerated = 1;
+
+			if(doDraw){
+				self.revealMap();
+				self.dumpVisualRepresentation();
+			}
 		}
 
 		this.generateNextLevelIfNotSet = function(levelData){
@@ -659,6 +705,140 @@ define([
 
 		}
 
+		this._fillInGridWalls = function(){
+			//Set up a grid
+			self._generateGrid();
+
+			//Add borders
+			self._addPerimeterBorders();
+
+			//Recursively add linear dividing walls to the remaining area of the map
+			self.addDivisions((self.gridBounds.minX + 1), (self.gridBounds.maxX - 1), (self.gridBounds.minY + 1), (self.gridBounds.maxY - 1));
+		}
+
+		this.addDivisions = function(minX, maxX, minY, maxY){
+
+			//Randomize "room" size
+			var minSquareForDivision = Utils.doRand(2,6);
+
+			//Set up vars
+			var width 		 = (maxX - minX) + 1,
+				height 		 = (maxY - minY) + 1,
+				divisionAxis = "",
+				minWidth 	 = minSquareForDivision,
+				minHeight 	 = minSquareForDivision;
+
+			if(width == height){
+				//Randomly choose vertical/horizontal direction if dimensions are square
+				divisionAxis = Utils.chooseRandomly(["vertical","horizontal"]);
+			}else{
+				//Otherwise, divide vertically if room is wider than it is tall,
+				//and divide horizontally if room is taller than it is wide
+				divisionAxis = ( (width > height) ? "vertical" : "horizontal" );
+			}
+
+			//If space is greater than the minimum size to make a division
+			if(width >= minWidth && height >= minHeight){
+
+				//Set up vars
+				var minBounds = ( divisionAxis == "vertical" ? minX : minY ),
+					maxBounds = ( divisionAxis == "vertical" ? maxX : maxY ),
+					lengthMinBounds = ( divisionAxis == "vertical" ? minY : minX ),
+					lengthMaxBounds = ( divisionAxis == "vertical" ? maxY : maxX );
+				//Dividing by two, getting the floor, and multiplying the result by two should guarantee us an even number.
+				var wallPosition = Math.floor(Utils.doRand( minBounds, (maxBounds + 1) ) / 2) * 2;
+				//Dividing by two, getting the floor, multiplying the result by two, and adding 1 should guarantee us an odd number.
+				var doorPosition = (Math.floor(Utils.doRand( lengthMinBounds, (lengthMaxBounds + 1) ) / 2) * 2) + 1;
+
+				//Because we're taking the floor, it's possible to end up with a value of 0,
+				//which is a problem, because that's where our border walls are!
+
+				//Let's make sure that we don't try and put a wall over the top or left border walls
+				if( wallPosition < minBounds ){
+					wallPosition+=2;
+				}
+				//Let's also make sure we don't try and put a door in the top or left border walls either
+				if(doorPosition < lengthMinBounds){
+					doorPosition+=1;
+				}
+
+				var i;
+
+				if( divisionAxis == "vertical" ){
+					//For each square in the wall's line, mark the square as a wall (unless it's a door)
+					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
+						if( i != doorPosition ){
+							self.getSquare(wallPosition, i).isWall = true;
+							self.getSquare(wallPosition, i).notEmpty = true;
+
+							if( self.getSquare(wallPosition, i).isDoor == true ){
+								console.log('trying to make a door a wall');
+							}
+						}else{
+							self.getSquare(wallPosition, i).isDoor = true;
+							if( self.getSquare(wallPosition, i).isWall == true ){
+								console.log('trying to make a wall a door');
+							}
+						}
+					}
+					//For the remaining spaces on either side of the wall, divide them as well
+					self.addDivisions((wallPosition + 1), maxX, minY, maxY);
+					self.addDivisions(minX, (wallPosition - 1), minY, maxY);
+				}else{
+					//For each square in the wall's line, mark the square as a wall (unless it's a door)
+					for(i = lengthMinBounds; i <= lengthMaxBounds; i++){
+						if( i != doorPosition ){
+							self.getSquare(i, wallPosition).isWall = true;
+							self.getSquare(i, wallPosition).notEmpty = true;
+							if( self.getSquare(i, wallPosition).isDoor == true ){
+								console.log('trying to make a door a wall');
+							}
+						}else{
+							self.getSquare(i, wallPosition).isDoor = true;
+							if( self.getSquare(i, wallPosition).isWall == true ){
+								console.log('trying to make a wall a door');
+							}
+						}
+					}
+					//For the remaining spaces on either side of the wall, divide them as well
+					self.addDivisions(minX, maxX, (wallPosition + 1), maxY);
+					self.addDivisions(minX, maxX, minY, (wallPosition - 1));
+				}
+
+			}
+
+		}
+
+		this._addPerimeterBorders = function(){
+			var row, col;
+			for(row = self.gridBounds.minY; row <= self.gridBounds.maxY; row++){
+				for(col = self.gridBounds.minX; col <= self.gridBounds.maxX; col++){
+					if(row == self.gridBounds.minX || row == self.gridBounds.maxX || col == self.gridBounds.minY || col == self.gridBounds.maxY ){
+						//Fill in as wall
+						self.getSquare(col, row).isWall = true;
+						self.getSquare(col, row).notEmpty = true;
+					}
+				}
+			}			
+		}
+
+		this.dumpVisualRepresentation = function(){
+			var outputString = "";
+
+			for(row = self.gridBounds.minY; row <= self.gridBounds.maxY; row++){
+				for(col = self.gridBounds.minX; col <= self.gridBounds.maxX; col++){
+					if(self.getSquare(col, row).isWall == false){
+						outputString += " ";
+					}else{
+						outputString += "O";
+					}
+				}
+				outputString += "\n";
+			}
+
+			console.log(outputString);
+		}
+
 		this.getExportData = function(){
 
 			var exportObj = ko.mapping.toJS({
@@ -692,7 +872,8 @@ define([
 		}
 
 		this.revealMap = function(){
-			self.revealSquaresNearPlayer(50);
+			self.scanSquaresNearPlayer(15);
+			self.revealSquaresNearPlayer(15);
 			self.drawMap();
 		}
 

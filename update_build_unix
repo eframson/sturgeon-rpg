@@ -1,0 +1,7 @@
+#!/bin/bash
+#cd /usr/local/var/www/htdocs/sturgeon
+NOW=`date +%s`
+sed -r -i 's/BUILD_VERSION = [^;]+/BUILD_VERSION = '$NOW'/g' js/main.js
+git add js/main.js
+#git commit -m 'Automatically updated build version'
+#git status

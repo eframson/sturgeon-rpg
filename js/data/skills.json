@@ -22,7 +22,7 @@
 			"id" : "scan_squares",
 			"name" : "Scan Squares",
 			"description" : "Focus on your surroundings, revealing the contents of nearby squares.",
-			"skillLevel" : 1,
+			"skillLevel" : 2,
 			"skillProgress" : 0,
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,

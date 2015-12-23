@@ -20,6 +20,8 @@ define([
 		this.isDone = squareData.isDone || false;
 		this.notEmpty = squareData.notEmpty || false;
 		this.isChallengeActive = ko.observable(squareData.isChallengeActive || false);
+		this.isWall = squareData.isWall || false;
+		this.isDoor = squareData.isDoor || false;
 
 		this.setType = function(type){
 			self.type = type;

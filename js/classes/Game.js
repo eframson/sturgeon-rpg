@@ -16,9 +16,10 @@ define([
 	'json!data/monsters.json',
 	'json!data/skills.json',
 	'Utils',
+	'classes/Grid',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils, Grid) {
 
 	//Can these be knockout custom bindings? Some of them, surely...
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
@@ -164,6 +165,9 @@ define([
 		this.init = function(){
 			self.initObservables();
 			self.initGame();
+			//References for debugging
+			self.newGrid = new Grid();
+			self.Utils = Utils;
 		}
 
 		this.initObservables = function(){
@@ -579,7 +583,7 @@ define([
 
 			self.player(player);
 
-			self.level().revealSquaresNearPlayer(0);
+			self.level().revealSquaresNearPlayer(1);
 			self.level().drawMap();
 
 			//Initialize our intro slides if this is a brand new game
@@ -634,8 +638,8 @@ define([
 					//Coming soon...
 					//self.evaluateIntermittentPassives();
 
+					self.level().showSquaresNearPlayer(1);
 					self.level().scanSquaresNearPlayer(0);
-					self.level().revealSquaresNearPlayer(0);
 
 					var square = self.level().getSquare(newPos.x, newPos.y);
 
@@ -1050,30 +1054,17 @@ define([
 			}
 
 			var itemType = Utils.doBasedOnPercent(possibleItemTypes);
+			itemType = "gold";
 
 			if(itemType == "gold"){
 
-				//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 2000
-				var goldSize = Utils.doBasedOnPercent({
-					1 : "hoard",
-					9 : "large",
-					30 : "medium",
-					60 : "small"
-				});
+				var baseGoldPerLevel = 50;
+				var pctGoldVariance = 0.25;
+				var unRandomizedGoldPerLevel = baseGoldPerLevel * self.level().levelNum();
+				var lowerGoldBounds = Math.round(unRandomizedGoldPerLevel - (unRandomizedGoldPerLevel * pctGoldVariance)),
+					upperGoldBounds = Math.round(unRandomizedGoldPerLevel + (unRandomizedGoldPerLevel * pctGoldVariance));
 
-				var goldAmt = 0;
-
-				if( goldSize == "small" ){
-					goldAmt = Utils.doRand(80, 121);
-				}else if( goldSize == "medium" ){
-					goldAmt = Utils.doRand(160, 241);
-				}else if( goldSize == "large" ){
-					goldAmt = Utils.doRand(320, 481);
-				}else if( goldSize == "hoard" ){
-					goldAmt = 2000;
-				}
-
-				goldAmt = Math.ceil(goldAmt * qtyCoefficient);
+				var goldAmt = Utils.doRand(lowerGoldBounds, upperGoldBounds + 1);
 
 				if(lootSet == "monster" || lootSet == "boss"){
 					goldAmt = Math.round(goldAmt * self.currentEnemy().lootCoefficient());
@@ -1580,7 +1571,7 @@ define([
 					nextLevel.isActive(true);
 					currentLevel.isActive(false);
 					nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
-					nextLevel.revealSquaresNearPlayer(0);
+					nextLevel.revealSquaresNearPlayer(1);
 					self.level().scanSquaresNearPlayer(0);
 					nextLevel.drawMap();
 					self.temporarilyDisableActiveSquare(0);
@@ -3201,28 +3192,44 @@ define([
 
 /*
 
+LINKS FOR RESEARCH:
+http://jsfiddle.net/tPm3s/1/ (http://stackoverflow.com/questions/23530756/maze-recursive-division-algorithm-design)
+http://weblog.jamisbuck.org/2011/1/12/maze-generation-recursive-division-algorithm
+http://weblog.jamisbuck.org/2015/1/15/better-recursive-division-algorithm.html
+
+http://weblog.jamisbuck.org/2011/2/7/maze-generation-algorithm-recap
+http://dstromberg.com/2013/07/tutorial-random-maze-generation-algorithm-in-javascript/
+
+https://github.com/felipecsl/random-maze-generator
+http://stackoverflow.com/questions/16150255/javascript-maze-generator
+http://xefer.com//maze-generator
+
 Game Improvements
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 - Make skill trainers cost less, OR improve base skill rather than progress
-- Save user preferences separately, and load automatically
+- Add intermittent passives?
+- Don't allow scanning through walls?
+- Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
 
 UI Improvements
 - Show slot that armor applies to when active item
+- More detail about how much HP food will restore
+- More detail about how much HP food or leveling up restored
 - Dynamic container name
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
 Code Improvements
 - Figure out some way of selectively forcing object reload from *.jsons
-- Show "level" column header in known skills section
 - Prevent enemy HP from going below 0 (maybe)
 - Standardize the way objects are saved (done already?)
 
 Bugs
+- Mystery potion triggering reset stone effect? -OR- Finding food, full inventory, going back, level reset
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
+- After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 Game Ideas
-- Obstacles/mazes/labyrinthine structure in levels
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
 - More consistent gold from monsters?
