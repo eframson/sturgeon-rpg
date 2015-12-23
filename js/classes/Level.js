@@ -63,7 +63,7 @@ define([
 						gridArray[row_num] = Array();
 					}
 
-					gridArray[row_num][col_num] = new GridSquare(levelData[row_num][col_num]);
+					gridArray[row_num][col_num] = new GridSquare(levelData.grid[row_num][col_num]);
 				}
 			}
 			self.grid = gridArray;

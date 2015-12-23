@@ -1054,30 +1054,17 @@ define([
 			}
 
 			var itemType = Utils.doBasedOnPercent(possibleItemTypes);
+			itemType = "gold";
 
 			if(itemType == "gold"){
 
-				//60% of getting 80-120, 30% of getting 160 - 240, 9% of getting 320 - 480, 1% of getting 2000
-				var goldSize = Utils.doBasedOnPercent({
-					1 : "hoard",
-					9 : "large",
-					30 : "medium",
-					60 : "small"
-				});
+				var baseGoldPerLevel = 50;
+				var pctGoldVariance = 0.25;
+				var unRandomizedGoldPerLevel = baseGoldPerLevel * self.level().levelNum();
+				var lowerGoldBounds = Math.round(unRandomizedGoldPerLevel - (unRandomizedGoldPerLevel * pctGoldVariance)),
+					upperGoldBounds = Math.round(unRandomizedGoldPerLevel + (unRandomizedGoldPerLevel * pctGoldVariance));
 
-				var goldAmt = 0;
-
-				if( goldSize == "small" ){
-					goldAmt = Utils.doRand(80, 121);
-				}else if( goldSize == "medium" ){
-					goldAmt = Utils.doRand(160, 241);
-				}else if( goldSize == "large" ){
-					goldAmt = Utils.doRand(320, 481);
-				}else if( goldSize == "hoard" ){
-					goldAmt = 2000;
-				}
-
-				goldAmt = Math.ceil(goldAmt * qtyCoefficient);
+				var goldAmt = Utils.doRand(lowerGoldBounds, upperGoldBounds + 1);
 
 				if(lootSet == "monster" || lootSet == "boss"){
 					goldAmt = Math.round(goldAmt * self.currentEnemy().lootCoefficient());
@@ -3238,11 +3225,8 @@ Code Improvements
 - Standardize the way objects are saved (done already?)
 
 Bugs
-- Advance to next level, spawn in corner instead of on level entrance square
 - Mystery potion triggering reset stone effect? -OR- Finding food, full inventory, going back, level reset
-- After level reset, player spawned on wall
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
-- Went to previous level, did not start on exit square
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 Game Ideas
