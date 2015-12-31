@@ -1279,11 +1279,16 @@ define([
 
 		this.hideMap = function(){
 
+			var playerPos = self.getPlayerPos();
+			var playerX = playerPos.x;
+			var playerY = playerPos.y;
 			for(row_num = self.gridBounds.minY; row_num <= self.gridBounds.maxY; row_num++){
 				for(col_num = self.gridBounds.minX; col_num <= self.gridBounds.maxX; col_num++){
 					var square = self.getSquare(col_num, row_num);
-					square.setVisibility(false);
-					square.setScanned(false);
+					if( !(square.x == playerX && square.y == playerY) ){
+						square.setVisibility(false);
+						square.setScanned(false);
+					}
 				}
 			}
 

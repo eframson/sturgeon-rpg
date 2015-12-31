@@ -1054,7 +1054,6 @@ define([
 			}
 
 			var itemType = Utils.doBasedOnPercent(possibleItemTypes);
-			itemType = "gold";
 
 			if(itemType == "gold"){
 
