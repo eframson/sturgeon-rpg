@@ -259,6 +259,16 @@
 			"chanceOfEffect" : 100,
 			"canPurchase" : 1,
 			"requiredLevel" : 0
+		},
+
+		"improved_scanning" : {
+			"className" : "ImprovedScanning",
+			"id" : "improved_scanning",
+			"name" : "Improved Scanning",
+			"description" : "Allows scan ability to penetrate through walls",
+			"chanceOfEffect" : 100,
+			"canPurchase" : 1,
+			"requiredLevel" : 0
 		}
 
 	}

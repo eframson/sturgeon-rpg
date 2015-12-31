@@ -92,7 +92,12 @@ define([
 				var success = scanSquareSkill.doSkill();
 
 				if(success){ //Just a formality, should always succeed
-					self.level().scanSquaresNearPlayer( scanSquareSkill.skillLevel() );
+					if( self.player().hasPassiveAbility("improved_scanning") ){
+						self.level().scanSquaresNearPlayer( scanSquareSkill.skillLevel() );	
+					}else{
+						self.level().rayCast(scanSquareSkill.skillLevel() * self.level().unitsPerSquare);
+					}
+					
 					self.level().drawMap();
 					self.logMessage("By holding very still and concentrating, you are able to thoroughly survey your surroundings.");
 				}
@@ -3213,6 +3218,8 @@ http://stackoverflow.com/questions/16150255/javascript-maze-generator
 http://xefer.com//maze-generator
 
 Game Improvements
+- Always have exit square visible?
+- Add a dialog option asking if you want to go back to the previous level?
 - Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
 - Make skill trainers cost less, OR improve base skill rather than progress
 - Add intermittent passives?
@@ -3220,6 +3227,7 @@ Game Improvements
 - Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
 
 UI Improvements
+- Show HP in red when it's <25%
 - Show slot that armor applies to when active item
 - More detail about how much HP food will restore
 - More detail about how much HP food or leveling up restored

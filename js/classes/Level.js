@@ -254,6 +254,14 @@ define([
 								fillStyle = "#00FF00";
 							}else if(square.isWall){
 								fillStyle = "#152026";
+							}else if(square.type == "exit"){
+								fillStyle = "#000000";
+								fontStyle = "#FFFFFF";
+								text = "↑";
+							}else if(square.type == "entrance"){
+								fillStyle = "#FFFFFF";
+								fontStyle = "#000000";
+								text = "↓";
 							}/*else if(square.isDoor){
 								fillStyle = "#FF0000";
 							}*/else{
@@ -284,14 +292,6 @@ define([
 								fillStyle = itemColor;
 							}else if(square.type == "event"){
 								fillStyle = eventColor;
-							}else if(square.type == "exit"){
-								fillStyle = "#000000";
-								fontStyle = "#FFFFFF";
-								text = "↑";
-							}else if(square.type == "entrance"){
-								fillStyle = "#FFFFFF";
-								fontStyle = "#000000";
-								text = "↓";
 							}
 
 						}
@@ -862,6 +862,8 @@ define([
 					xDirection = "right";
 					yDirection = "down";
 				}
+				maxX = (radius < maxX) ? radius : maxX;
+				maxY = (radius < maxY) ? radius : maxY;
 				self.castSingleRay(deg, maxX, maxY, xDirection, yDirection, gridSquareVisibilityCounterObject);
 			}
 
