@@ -41,6 +41,8 @@ define([
 				minY: 0,
 				maxY: (self.numSquares - 1),
 			};
+			self.unitsPerSquare = levelData.unitsPerSquare || 2;
+			self.rayTraceDegreeSteps = levelData.rayTraceDegreeSteps || 5;
 			self.quadBounds = levelData.quadBounds || {};
 			self.playerPos = levelData.playerPos || self.pickPlayerStartCorner();
 			self.grid = Array();
@@ -83,9 +85,9 @@ define([
 			if(startCorner == "top left"){
 				return [minX, minY];
 			}else if(startCorner == "top right"){
-				return [minX, maxY];
-			}else if(startCorner == "bot left"){
 				return [maxX, minY];
+			}else if(startCorner == "bot left"){
+				return [minX, maxY];
 			}else{
 				return [maxX, maxY];
 			}
@@ -185,7 +187,10 @@ define([
 			if(x == undefined || y == undefined){
 				return false;
 			}
-			return self.grid[y][x];
+			if(self.grid[y] !== undefined && self.grid[y][x] !== undefined){
+				return self.grid[y][x];
+			}
+			return false;
 		}
 
 		this.getActiveSquare = function(){
@@ -822,6 +827,399 @@ define([
 			}			
 		}
 
+		this.rayCast = function(radius){
+
+			var maxLengths = self._getMaxLengthsForRaysForCurrentPlayerPosition();
+			var gridSquareVisibilityCounterObject = {};
+			var maxX,
+				maxY,
+				xDirection,
+				yDirection;
+
+			for(var deg = 5; deg <= 360; deg+=self.rayTraceDegreeSteps){
+				if(deg <= 90){
+					//Top-right quadrant
+					maxX = maxLengths.top_right.maxX;
+					maxY = maxLengths.top_right.maxY;
+					xDirection = "right";
+					yDirection = "up";
+				}else if(deg <= 180){
+					//Top-left quadrant
+					maxX = maxLengths.top_left.maxX;
+					maxY = maxLengths.top_left.maxY;
+					xDirection = "left";
+					yDirection = "up";
+				}else if(deg <= 270){
+					//Bottom-left quadrant
+					maxX = maxLengths.bottom_left.maxX;
+					maxY = maxLengths.bottom_left.maxY;
+					xDirection = "left";
+					yDirection = "down";
+				}else if(deg <= 360){
+					//Bottom-right quadrant
+					maxX = maxLengths.bottom_right.maxX;
+					maxY = maxLengths.bottom_right.maxY;
+					xDirection = "right";
+					yDirection = "down";
+				}
+				self.castSingleRay(deg, maxX, maxY, xDirection, yDirection, gridSquareVisibilityCounterObject);
+			}
+
+			var square;
+			for(var squareKey in gridSquareVisibilityCounterObject){
+				square = gridSquareVisibilityCounterObject[squareKey];
+				if(square.visible >= square.not_visible){
+					self.getSquare(square.x, square.y).setVisibility(true);
+					self.getSquare(square.x, square.y).setScanned(true);
+				}
+			}
+
+			self.drawMap();
+		}
+
+		//Yes, I know this makes it a line segment and not a ray. Shut up.
+		this.castSingleRay = function(angle, maxXLength, maxYLength, xDirection, yDirection, gridSquareVisibilityCounterObject){
+
+			var verticalWallCheck,
+				verticalWallCheckX,
+				verticalWallCheckY,
+				horizontalWallCheck,
+				horizontalWallCheckX,
+				horizontalWallCheckY,
+				encounteredWall;
+
+			var squareOrderArray = [];
+			var xSquareOrderArray = [];
+			var ySquareOrderArray = [];
+
+			//var playerCoords = self._getUnitCoordNearPlayerForLengthAndDirection(0, "up", 0, "right");
+			var playerPos = self.getPlayerPos();
+			var playerSquare = self.getSquare(playerPos.x, playerPos.y);
+
+			squareOrderArray.push({x : playerSquare.x, y : playerSquare.y});
+
+			for(i = 1; i <= ( maxXLength > maxYLength ? maxXLength : maxYLength ); i++){
+
+				var base, height;
+				if(angle == 90 || angle == 270){
+					base = 0;
+					height = i;
+				}else if(angle == 180 || angle == 360){
+					base = i;
+					height = 0;
+				}else{
+					base = self._findMissingTriangleSide(angle, undefined, i);
+					height = self._findMissingTriangleSide(angle, i, undefined);
+				}
+
+				var xSquare = false;
+				if( height < maxYLength ){
+
+					//Check for collisions with vertically-oriented edges of wall squares
+					var verticalWallCheck = self._getUnitCoordNearPlayerForLengthAndDirection(i, xDirection, height, yDirection);
+					verticalWallCheckX = verticalWallCheck.unitX;
+					verticalWallCheckY = verticalWallCheck.unitY;
+
+					//Get the square to the right or left
+					xSquare = self._getSquareOnEitherSideOfWall(verticalWallCheckX, verticalWallCheckY, xDirection, yDirection);
+
+					if(xSquare && (xSquareOrderArray.length == 0 || xSquareOrderArray[(xSquareOrderArray.length - 1)].x != xSquare.x )){
+						xSquareOrderArray.push(xSquare);
+					}
+
+				}
+
+				var ySquare = false;
+				if( base < maxXLength ){
+
+					//Check for collisions with horizontally-oriented edges of wall squares
+					var horizontalWallCheck = self._getUnitCoordNearPlayerForLengthAndDirection(base, xDirection, i, yDirection);
+					horizontalWallCheckX = horizontalWallCheck.unitX;
+					horizontalWallCheckY = horizontalWallCheck.unitY;
+
+					//Get the square to the top or bottom
+					ySquare = self._getSquareOnEitherSideOfWall(horizontalWallCheckX, horizontalWallCheckY, yDirection, xDirection);
+
+					if(ySquare && (ySquareOrderArray.length == 0 || ySquareOrderArray[(ySquareOrderArray.length - 1)].y != ySquare.y )){
+						ySquareOrderArray.push(ySquare);
+					}
+
+				}
+
+			}//end for loop
+
+			//Iterate through stored squares
+				//If < 45, check X first
+				//If > 45, check Y first
+
+			var firstArray, secondArray, firstAxis, secondAxis;
+			if(angle <= 45 || (angle > 135 && angle <= 225) || angle > 315){
+				firstAxis = "x";
+				secondAxis = "y";
+				firstArray = xSquareOrderArray;
+				secondArray = ySquareOrderArray;
+			}else{
+				firstAxis = "y";
+				secondAxis = "x";
+				firstArray = ySquareOrderArray;
+				secondArray = xSquareOrderArray;
+			}
+			var omitAxis = (angle % 45 == 0) ? true : false ;
+
+			while(firstArray.length > 0 || secondArray.length > 0){
+				//Only choose square if it's adjacent to the previous one
+				var currentSquare = squareOrderArray[(squareOrderArray.length - 1)];
+				var nextSquare = false;
+
+				for(var f = 0; f < firstArray.length; f++){
+					//break on match
+					if (self._squaresAreAdjacent(currentSquare, firstArray[f], (omitAxis ? undefined : firstAxis))){
+						nextSquare = firstArray.shift();
+						break;
+					}
+				}
+
+				if(!nextSquare){
+					for(var s = 0; s < secondArray.length; s++){
+						//break on match
+						if (self._squaresAreAdjacent(currentSquare, secondArray[s], (omitAxis ? undefined : secondAxis))){
+							nextSquare = secondArray.shift();
+							break;
+						}
+					}
+				}
+
+				var key = nextSquare.x.toString() + "," + nextSquare.y.toString();
+
+				squareOrderArray.push({x : nextSquare.x, y : nextSquare.y});
+
+				if( gridSquareVisibilityCounterObject[key] === undefined ){
+					gridSquareVisibilityCounterObject[key] = {
+						visible : 0,
+						not_visible : 0,
+						x : nextSquare.x,
+						y : nextSquare.y
+					};
+				}
+
+				if(encounteredWall){
+					gridSquareVisibilityCounterObject[key].not_visible++;
+				}else{
+					if(nextSquare.isWall){
+						encounteredWall = 1;
+					}
+					gridSquareVisibilityCounterObject[key].visible++;
+				}
+
+				//Maybe add a break if we're at the edge of the map? Although theoretically each array should contain only valid squares, so...
+			}
+
+		}
+
+		this._getSquareOnEitherSideOfWall = function(x, y, direction, perpendicularDirection){
+			var topLeftX, topLeftY, nearestX, nearestY;
+			nearestX = x - (x % self.unitsPerSquare);
+			nearestY = y - (y % self.unitsPerSquare);
+			var posInSquare = self._isUnitCoordEdgeCornerOrCenter(x, y);
+
+			if(posInSquare == "center"){
+				
+				topLeftX = nearestX;
+				topLeftY = nearestY;
+
+			}else if (posInSquare == "edge"){
+
+				if(direction == "up"){ //y = whole number
+					topLeftX = nearestX;
+					topLeftY = y - 2;
+				}else if(direction == "down"){ //y = whole number
+					topLeftX = nearestX;
+					topLeftY = y;
+				}else if(direction == "left"){ //x = whole number
+					topLeftX = x - 2;
+					topLeftY = nearestY;
+				}else if(direction == "right"){ //x = whole number
+					topLeftX = x;
+					topLeftY = nearestY;
+				}
+
+			}else{
+				if( (direction == "right" && perpendicularDirection == "up") || (direction == "up" && perpendicularDirection == "right") ){
+					//Same x, up 2 y
+					topLeftX = x;
+					topLeftY = y - 2;
+				} else if( (direction == "left" && perpendicularDirection == "up") || (direction == "up" && perpendicularDirection == "left") ){
+					//Left 2 x, up 2 y
+					topLeftX = x - 2;
+					topLeftY = y - 2;
+				} else if( (direction == "right" && perpendicularDirection == "down") || (direction == "down" && perpendicularDirection == "right") ){
+					//Same x, same y
+					topLeftX = x;
+					topLeftY = y;
+				} else if( (direction == "left" && perpendicularDirection == "down") || (direction == "down" && perpendicularDirection == "left") ){
+					//Same y, left 2 x
+					topLeftX = x - 2;
+					topLeftY = y;
+				}
+			}
+
+			var square = self.getSquare(topLeftX / 2, topLeftY / 2);
+			return square;
+		}
+
+		this._findMissingTriangleSide = function(degrees, base, height){
+			var degInRads = degrees * Math.PI/180;
+			if(base === undefined){
+				base = height / Math.tan(degInRads);
+				return Math.abs(base);
+			}else{
+				height = base * Math.tan(degInRads);
+				return Math.abs(height);
+			}
+		}
+
+		this._getMaxLengthsForRaysForCurrentPlayerPosition = function(){
+
+			var playerUnitCoords = self._getUnitCoordsForPlayerPos();
+			var playerX = playerUnitCoords.unitX;
+			var playerY = playerUnitCoords.unitY;
+			var minXGridBoundsInUnits = self.gridBounds.minX * self.unitsPerSquare;
+			var maxXGridBoundsInUnits = (self.gridBounds.maxX + 1) * self.unitsPerSquare;
+			var minYGridBoundsInUnits = self.gridBounds.minY * self.unitsPerSquare;
+			var maxYGridBoundsInUnits = (self.gridBounds.maxY + 1) * self.unitsPerSquare;
+
+			var maxLengths = {};
+			//Top-right
+			//Distance from player X coord to grid max X bounds (in units)
+			maxX = maxXGridBoundsInUnits - playerX;
+			//Distance from player Y coord to grid min Y bounds (in units)
+			maxY = playerY - minYGridBoundsInUnits;
+			maxLengths.top_right = {};
+			maxLengths.top_right.maxX = maxX;
+			maxLengths.top_right.maxY = maxY;
+
+			//Top-left
+			//Distance from player X coord to grid min X bounds (in units)
+			maxX = playerX - minXGridBoundsInUnits;
+			//Distance from player Y coord to grid min Y bounds (in units)
+			maxY = playerY - minYGridBoundsInUnits;
+			maxLengths.top_left = {};
+			maxLengths.top_left.maxX = maxX;
+			maxLengths.top_left.maxY = maxY;
+
+			//Bottom-left
+			//Distance from player X coord to grid min X bounds (in units)
+			maxX = playerX - minXGridBoundsInUnits;
+			//Distance from player Y coord to grid max Y bounds (in units)
+			maxY = maxYGridBoundsInUnits - playerY;
+			maxLengths.bottom_left = {};
+			maxLengths.bottom_left.maxX = maxX;
+			maxLengths.bottom_left.maxY = maxY;
+
+			//Bottom-right
+			//Distance from player X coord to grid max X bounds (in units)
+			maxX = maxXGridBoundsInUnits - playerX;
+			//Distance from player Y coord to grid max Y bounds (in units)
+			maxY = maxYGridBoundsInUnits - playerY;
+			maxLengths.bottom_right = {};
+			maxLengths.bottom_right.maxX = maxX;
+			maxLengths.bottom_right.maxY = maxY;
+
+			return maxLengths;
+		}
+
+		this._getUnitCoordNearPlayerForLengthAndDirection = function(xLength, xDirection, yLength, yDirection){
+			var playerUnitCoords = self._getUnitCoordsForPlayerPos();
+			var playerX = playerUnitCoords.unitX;
+			var playerY = playerUnitCoords.unitY;
+			var newX = playerX,
+				newY = playerY;
+
+			if(xDirection == "left"){
+				newX = playerX - xLength;
+			}
+			if(xDirection == "right"){
+				newX = playerX + xLength;
+			}
+			if(yDirection == "up"){
+				newY = playerY - yLength;
+			}
+			if(yDirection == "down"){
+				newY = playerY + yLength;
+			}
+
+			return {
+				unitX : newX,
+				unitY : newY,
+			};
+		}
+
+		this._getUnitCoordsForPlayerPos = function(){
+			var unitX = (this.getPlayerPos("x") * 2) + 1;
+			var unitY = (this.getPlayerPos("y") * 2) + 1;
+
+			return {
+				unitX : unitX,
+				unitY : unitY,
+			};
+		}
+
+		this._squaresAreAdjacent = function(squareOne, squareTwo, axis){
+
+			var xDiff = Math.abs(squareOne.x - squareTwo.x);
+			var yDiff = Math.abs(squareOne.y - squareTwo.y);
+
+			if(axis !== undefined){
+
+				if(axis == "x" && yDiff == 0 && xDiff == 1){
+					return true;
+				}else if(axis == "x" && yDiff > 1){
+					return false;
+				}else if(axis == "y" && xDiff == 0 && yDiff == 1){
+					return true;
+				}else if(axis == "y" && xDiff > 1){
+					return false;
+				}
+
+			}else{
+
+				if(xDiff <= 1 || yDiff <= 1){
+					return true;
+				}else{
+					return false;
+				}
+
+			}
+
+		}
+
+		this._getUnitBoundsForSquare = function(squareX, squareY){
+
+			var minUnitX = squareX * 2;
+			var minUnitY = squareY * 2;
+			var maxUnitX = minUnitX + 2;
+			var maxUnitY = minUnitY + 2;
+
+			return {
+				minUnitX : minUnitX,
+				maxUnitX : maxUnitX,
+				minUnitY : minUnitY,
+				maxUnitY : maxUnitY,
+			};
+		}
+
+		this._isUnitCoordEdgeCornerOrCenter = function(x, y){
+			if(x % self.unitsPerSquare == 0 && y % self.unitsPerSquare == 0){
+				return "corner";
+			}else if( x % self.unitsPerSquare > 0 && y % self.unitsPerSquare > 0 ){
+				//If we ever add more than 2 units^2 per square, this will only mean "inside", not necessarily "center"
+				//So code would have to be adjusted if we still wanted to find a true "center" (and units/square would have to be an even #)
+				return "center";
+			}else{
+				return "edge";
+			}
+		}
+
 		this.dumpVisualRepresentation = function(){
 			var outputString = "";
 
@@ -846,6 +1244,8 @@ define([
 				levelNum : self.levelNum,
 				gridBounds : self.gridBounds,
 				quadBounds : self.quadBounds,
+				unitsPerSquare : self.unitsPerSquare,
+				rayTraceDegreeSteps : self.rayTraceDegreeSteps,
 				nextLevelID : self.nextLevelID,
 				prevLevelID : self.prevLevelID,
 				isActive : self.isActive,
@@ -874,6 +1274,19 @@ define([
 		this.revealMap = function(){
 			self.scanSquaresNearPlayer(15);
 			self.revealSquaresNearPlayer(15);
+			self.drawMap();
+		}
+
+		this.hideMap = function(){
+
+			for(row_num = self.gridBounds.minY; row_num <= self.gridBounds.maxY; row_num++){
+				for(col_num = self.gridBounds.minX; col_num <= self.gridBounds.maxX; col_num++){
+					var square = self.getSquare(col_num, row_num);
+					square.setVisibility(false);
+					square.setScanned(false);
+				}
+			}
+
 			self.drawMap();
 		}
 

@@ -3022,8 +3022,13 @@ define([
 		}
 
 		this.testVisionRange = function(){
-			self.level().scanSquaresNearPlayer( 10 );
+			self.level().scanSquaresNearPlayer( 20 );
 			self.level().drawMap();
+		}
+
+		this.testRaycast = function(radius){
+			radius = radius || self.level().numSquares;
+			self.level().rayCast(radius);
 		}
 
 		this.testAverages = function(targetI){
@@ -3163,6 +3168,10 @@ define([
 			self.testVisionRange();
 		}
 
+		this.testHideMap = function(){
+			self.level().hideMap();
+		}
+
 		self.init();
 
 	};
@@ -3225,6 +3234,8 @@ Code Improvements
 - Standardize the way objects are saved (done already?)
 
 Bugs
+- Merchants only have gold for sale, lol
+- Raycasting sometimes reveals weird squares?
 - Mystery potion triggering reset stone effect? -OR- Finding food, full inventory, going back, level reset
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
