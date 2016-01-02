@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 		<meta name="description" content="A Free (Work In Progress) Tongue-in-Cheek Aquatic-Themed Web-Based RPG">
 		<meta name="author" content="Emmett Framson">
 		<META NAME="ROBOTS" CONTENT="INDEX, NOFOLLOW">
@@ -406,6 +406,13 @@
 										<option value="2">Half</option>
 										<option value="3">Most</option>
 										<option value="4">ALL (no traders, trainers, OR item squares)</option>
+									</select>
+								</div>
+								<div class="lines form-group">
+									<label for="enableZoom">Allow zoom (enables/disables double-tap zoom on Safari Mobile)</label>
+									<select class="form-control" data-bind="value: enableZoom" id="enableZoom">
+										<option value="1">Yes</option>
+										<option value="0">No</option>
 									</select>
 								</div>
 								<!--<div class="lines">

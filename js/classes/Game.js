@@ -214,8 +214,9 @@ define([
 			self.autoSaveBeforeBosses = ko.observable(1);
 			self.pctEmptySquares = ko.observable(2);
 			self.monsterSquareRates = ko.observable(2);
-			self.temporarilyDisableActiveSquare = ko.observable(0);
+			self.enableZoom = ko.observable(0);
 			self.resetPreferences = ko.observable(1);
+			self.temporarilyDisableActiveSquare = ko.observable(0);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -525,6 +526,9 @@ define([
 				if( prefData.pctEmptySquares !== undefined ){
 					self.pctEmptySquares(prefData.pctEmptySquares);
 				}
+				if( prefData.enableZoom !== undefined ){
+					self.enableZoom(prefData.enableZoom);
+				}
 			}
 		}
 
@@ -590,6 +594,8 @@ define([
 
 			self.level().revealSquaresNearPlayer(1);
 			self.level().drawMap();
+
+			self._updateZoomSettings();
 
 			//Initialize our intro slides if this is a brand new game
 			if(self.fullScreenContent() == undefined && self.isNew()){
@@ -2384,6 +2390,15 @@ define([
 			return false;
 		}
 
+		this._updateZoomSettings = function(){
+			$('meta[name=viewport]').remove();
+			if(self.enableZoom() == 1){
+	    		$('head').prepend('<meta name="viewport" content="width=device-width, initial-scale=1">');
+			}else{
+				$('head').prepend('<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">');
+			}
+		}
+
 		this.loadGame = function(){
 			self.loadGameFromData(JSON.parse(localStorage.getItem("saveData"), function(k, v){
 				if(v.constructor == String && v.match(/^function \(/)){
@@ -2415,6 +2430,9 @@ define([
 
 			$SAVED_PREF_NOTICE.finish().show();
 			$SAVED_PREF_NOTICE.delay(800).fadeOut(600);
+
+			//Update zoom controls
+			self._updateZoomSettings();
 		}
 
 		this.getPrefData = function(){
@@ -2424,6 +2442,7 @@ define([
 				autoSaveBeforeBosses : self.autoSaveBeforeBosses(),
 				monsterSquareRates : self.monsterSquareRates(),
 				pctEmptySquares : self.pctEmptySquares(),
+				enableZoom : self.enableZoom(),
 			};
 			return exportObj;
 		}
@@ -3257,6 +3276,7 @@ Game Ideas
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI Ideas
+- Make EXP/XP wording consistent
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Play sound on level up?
 - Minor sound FX on square events
