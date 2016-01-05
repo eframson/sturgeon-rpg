@@ -155,6 +155,54 @@ define([
 					}
 					
 				}
+			},
+			reset_level : function(){
+
+				self.freezeMovement(true);
+
+				self.fullScreenContent({
+					text: "Would you like to reset the current dungeon level? Costs 25% of your current GP.",
+					buttons: [
+						{
+							title : "No",
+							action : function(){
+								self.manageTransitionToView("fullscreen","mainscreen",function() {
+									self.freezeMovement(false);
+								});
+							}
+						},
+						{
+							title : "Yes",
+							action : function(){
+
+								var gold = self.player().inventory.getItemByID("gold");
+								var cost = 0;
+								if(gold){
+									cost = Math.round(gold.qty() * .25);
+									gold.qty( gold.qty() - cost );
+								}
+
+								self.manageTransitionToView(
+									"fullscreen",
+									"mainscreen",
+									function() {
+										self.freezeMovement(false);
+									}, function(){
+										self.level().generateThisLevel(true);
+										self.level().revealSquaresNearPlayer(1);
+										self.level().drawMap();
+
+										self.logMessage("Level has been reset.", "player");
+									}
+								);
+
+							}
+						}
+					]
+				});
+
+				self.manageTransitionToView("mainscreen","fullscreen");
+
 			}
 		};
 
@@ -970,9 +1018,7 @@ define([
 		}
 
 		this.useActiveAbility = function(ability, event){
-
 			self.playerActions[ability.id]();
-
 		}
 
 		this.showContainerWithContents = function(itemArray){
@@ -1068,7 +1114,7 @@ define([
 
 			if(itemType == "gold"){
 
-				var baseGoldPerLevel = 50;
+				var baseGoldPerLevel = 60;
 				var pctGoldVariance = 0.25;
 				var unRandomizedGoldPerLevel = baseGoldPerLevel * self.level().levelNum();
 				var lowerGoldBounds = Math.round(unRandomizedGoldPerLevel - (unRandomizedGoldPerLevel * pctGoldVariance)),
@@ -1090,7 +1136,7 @@ define([
 
 				var miscLootTypePossibilities = Array(
 					"potion",
-					"stone",
+					//"stone",
 					"scrap"
 				);
 
@@ -3236,16 +3282,25 @@ https://github.com/felipecsl/random-maze-generator
 http://stackoverflow.com/questions/16150255/javascript-maze-generator
 http://xefer.com//maze-generator
 
-Game Improvements
-- Always have exit square visible?
-- Add a dialog option asking if you want to go back to the previous level?
-- Make level resets a built-in ability that costs 25% of GP instead of random-dropped item
-- Make skill trainers cost less, OR improve base skill rather than progress
+PROBLEMS NEEDING SOLUTIONS:
+- When player moves into a level entrance square, they are automatically dumped back
+	into the prev. level, but with the new maze structure sometimes it's not possible
+	to avoid those squares so they basically have to do a little tango into the prev.
+	level and back to get to the other side of the square. Some ideas are: only activate
+	level transitions when the player hits "Enter" while standing on the entrance/exit squares
+	(but that won't work for mobile devices -- maybe a double-click/tap?); Or have a dialog pop
+	up each time the player enters a transition square asking if they want to enter/exit or keep
+	going (but this still adds an extra step/disruption in player movement, although not as much
+	of one as if they have to go to the previous level, hop off, hop on, back to the current level,
+	so that would still be a slight improvement)
+
+GAME CHANGES:
+- Make skill trainers cost less, OR improve base skill rather than progress (already done, I think)
 - Add intermittent passives?
-- Don't allow scanning through walls?
 - Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
 
-UI Improvements
+UI CHANGES:
+- Make sure skills that cannot be leveled up are properly represented in list
 - Show HP in red when it's <25%
 - Show slot that armor applies to when active item
 - More detail about how much HP food will restore
@@ -3254,19 +3309,19 @@ UI Improvements
 - Show that a weapon will take up x number of backpack slots
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 
-Code Improvements
-- Figure out some way of selectively forcing object reload from *.jsons
+CODE CHANGES:
+- Remove or comment-out now-deprecated reset stone references
+- Save game version in localstorage; When loading, if version is different from current version, reload JSON files + classes from src
 - Prevent enemy HP from going below 0 (maybe)
-- Standardize the way objects are saved (done already?)
+- Standardize the way objects are saved (done already?) - one idea: either save props as "save these" list or "save all but these" list; check for <prop>SaveHandler method or something
 
-Bugs
-- Merchants only have gold for sale, lol
-- Raycasting sometimes reveals weird squares?
-- Mystery potion triggering reset stone effect? -OR- Finding food, full inventory, going back, level reset
+BUGS:
+- Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
-Game Ideas
+GAME IDEAS:
+- Should combat abilities level up + improve on use, same as active abilities?
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
 - More consistent gold from monsters?
@@ -3275,7 +3330,7 @@ Game Ideas
 - Gradually scale overall difficulty over first X levels (5?)
 - Gradually scale up boss difficulty over first X levels (5?)
 
-UI Ideas
+UI IDEAS:
 - Make EXP/XP wording consistent
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Play sound on level up?
@@ -3289,13 +3344,18 @@ UI Ideas
 - Add help/feedback interface
 - Keyboard shortcuts for "continue" buttons
 
-Code Ideas
+CODE IDEAS:
 - Make Gold a "stat" rather than an inventory item?
-- Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius
+- Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius - write test to see if it's actually faster
 - Write combat simulator for testing balancing stuff
 
-Misc. Thoughts
-- Either remove "scan" or make it more useful (discuss current implementation with Matt)
+GOOD IDEAS WITHOUT KNOWN IMPLEMENTATIONS:
+- Making the turn-based nature of combat more visually apparent (i.e. - you go, then they go, etc.),
+	but it might be a good idea to make this toggle-able via setting, because it might prevent the
+	player from just attacking as fast as they like (i.e. - attack button spam if they're in a hurry)
+
+POSSIBLE IDEAS:
+- Always have exit square visible? (to always give player a general guide as to direction)
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever) (discuss with Matt)
 - Balance item value + dmg/armor + num salvage (discuss with Matt)
 

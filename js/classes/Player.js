@@ -50,7 +50,8 @@ define([
 			if(Utils.isEmptyObject(data.activeAbilities)){
 				data.activeAbilities = {
 					find_food: {},
-					scan_squares: {}
+					scan_squares: {},
+					reset_level: {}
 				};
 			}
 

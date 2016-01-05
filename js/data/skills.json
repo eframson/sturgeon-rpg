@@ -31,6 +31,22 @@
 			"baseCooldown" : 10,
 			"cooldown" : 0,
 			"sortOrder" : 20
+		},
+
+		"reset_level" : {
+			"className" : "ResetLevel",
+			"id" : "reset_level",
+			"name" : "Reset Level",
+			"description" : "Reset the current level at a cost of 25% of your current GP",
+			"skillLevel" : 0,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 0,
+			"resetProgressOnSkillLevelUp" : 0,
+			"buttonLabel" : "Reset Level (25% GP)",
+			"chanceOfEffect" : 100,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"sortOrder" : 30
 		}
 
 	},

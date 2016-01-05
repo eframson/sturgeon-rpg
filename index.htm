@@ -232,7 +232,7 @@
 									<!-- ko foreach: $root.player().getActiveAbilities() -->
 									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
 										<span class="item" data-bind="html: $data.name"></span>
-										<span class="level" data-bind="text: $data.skillLevel()"></span>
+										<span class="level" data-bind="text: (($data.skillLevel() == 0) ? 'N/A' : $data.skillLevel())"></span>
 									</div>
 									<!-- /ko -->
 
