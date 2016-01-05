@@ -243,12 +243,12 @@
 
 		},
 
-		"currency" : {
+		"misc" : {
 
 			"gold" : {
 				"id" : "gold",
 				"name" : "Gold Pieces (GP)",
-				"type" : "currency",
+				"type" : "misc",
 				"desc" : "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.",
 				"slotsRequired" : 0,
 				"stackable" : 1
@@ -256,7 +256,7 @@
 			"junk" : {
 				"id" : "junk",
 				"name" : "Miscellaneous Junk",
-				"type" : "currency",
+				"type" : "misc",
 				"desc" : "Discarded items that are of no discernible use to anyone.",
 				"slotsRequired" : 0,
 				"stackable" : 1,
@@ -264,6 +264,221 @@
 				"sellValue" : 25
 			}
 
+		},
+
+		"gems" : {
+			"ruby" : {
+				"id" : "ruby",
+				"name" : "Ruby",
+				"type" : "gems",
+				"desc" : "A shiny red gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 100,
+				"minLevelRange" : 1,
+				"maxLevelRange" : 10
+			},
+			"emerald" : {
+				"id" : "emerald",
+				"name" : "Emerald",
+				"type" : "gems",
+				"desc" : "A shiny green gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 200,
+				"minLevelRange" : 1,
+				"maxLevelRange" : 10
+			},
+			"sapphire" : {
+				"id" : "sapphire",
+				"name" : "Sapphire",
+				"type" : "gems",
+				"desc" : "A shiny blue gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 300,
+				"minLevelRange" : 5,
+				"maxLevelRange" : 15
+			},
+			"tanzanite" : {
+				"id" : "tanzanite",
+				"name" : "Tanzanite",
+				"type" : "gems",
+				"desc" : "A shiny purple gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 400,
+				"minLevelRange" : 5,
+				"maxLevelRange" : 15
+			},
+			"garnet" : {
+				"id" : "garnet",
+				"name" : "Garnet",
+				"type" : "gems",
+				"desc" : "A dark red gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 500,
+				"minLevelRange" : 10,
+				"maxLevelRange" : 20
+			},
+			"amethyst" : {
+				"id" : "amethyst",
+				"name" : "Amethyst",
+				"type" : "gems",
+				"desc" : "A violet gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 600,
+				"minLevelRange" : 10,
+				"maxLevelRange" : 20
+			},
+			"aquamarine" : {
+				"id" : "aquamarine",
+				"name" : "Aquamarine",
+				"type" : "gems",
+				"desc" : "A light blue gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 700,
+				"minLevelRange" : 15,
+				"maxLevelRange" : 25
+			},
+			"alexandrite" : {
+				"id" : "alexandrite",
+				"name" : "Alexandrite",
+				"type" : "gems",
+				"desc" : "A yellow-green gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 800,
+				"minLevelRange" : 15,
+				"maxLevelRange" : 25
+			},
+			"peridot" : {
+				"id" : "peridot",
+				"name" : "Peridot",
+				"type" : "gems",
+				"desc" : "An olive-green gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 900,
+				"minLevelRange" : 20,
+				"maxLevelRange" : 30
+			},
+			"opal" : {
+				"id" : "opal",
+				"name" : "Opal",
+				"type" : "gems",
+				"desc" : "A white pearlescent gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1000,
+				"minLevelRange" : 20,
+				"maxLevelRange" : 30
+			},
+			"topaz" : {
+				"id" : "topaz",
+				"name" : "Topaz",
+				"type" : "gems",
+				"desc" : "A pink-orange gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1100,
+				"minLevelRange" : 25,
+				"maxLevelRange" : 35
+			},
+			"zircon" : {
+				"id" : "zircon",
+				"name" : "Zircon",
+				"type" : "gems",
+				"desc" : "A brown gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1200,
+				"minLevelRange" : 25,
+				"maxLevelRange" : 35
+			},
+			"diamond" : {
+				"id" : "diamond",
+				"name" : "Diamond",
+				"type" : "gems",
+				"desc" : "A transparent sparkling gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1300,
+				"minLevelRange" : 30,
+				"maxLevelRange" : 40
+			},
+			"red_beryl" : {
+				"id" : "red_beryl",
+				"name" : "Red Beryl",
+				"type" : "gems",
+				"desc" : "A scarlet gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1400,
+				"minLevelRange" : 30,
+				"maxLevelRange" : 40
+			},
+			"musgravite" : {
+				"id" : "musgravite",
+				"name" : "Musgravite",
+				"type" : "gems",
+				"desc" : "A green-gray gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1500,
+				"minLevelRange" : 35
+			},
+			"benitoite" : {
+				"id" : "benitoite",
+				"name" : "Benitoite",
+				"type" : "gems",
+				"desc" : "A blue-white gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1600,
+				"minLevelRange" : 35
+			},
+			"jadeite" : {
+				"id" : "jadeite",
+				"name" : "Jadeite",
+				"type" : "gems",
+				"desc" : "A deep green gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1700,
+				"minLevelRange" : 40
+			},
+			"black_opal" : {
+				"id" : "black_opal",
+				"name" : "Black Opal",
+				"type" : "gems",
+				"desc" : "A black pearlescent gem",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 1800,
+				"minLevelRange" : 40
+			}
 		},
 
 		"crafting" : {

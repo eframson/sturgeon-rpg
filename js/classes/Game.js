@@ -239,7 +239,7 @@ define([
 					var junkQty = findTreasure.junkQtyForLevel(self.level().levelNum());
 
 					//Add the generic "junk" item to inventory or increment its qty appropriately
-					var genericJunkItem = new Item(self.getAvailableItemById("junk", "currency", junkQty));
+					var genericJunkItem = new Item(self.getAvailableItemById("junk", "misc", junkQty));
 					self.player().addItemToInventory( genericJunkItem );
 
 					//Log the junk item name
@@ -1190,7 +1190,7 @@ define([
 					}
 				}
 
-				itemToAdd = self.getAvailableItemById("gold", "currency", goldAmt);
+				itemToAdd = self.getAvailableItemById("gold", "misc", goldAmt);
 
 			}else if(itemType == "misc"){
 
@@ -1822,7 +1822,7 @@ define([
 				self.activeItem().canDrop(0);
 			}else if( opts.moveDirection == "left" && self.rightColContent() == "container" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
-			}else if( type != "currency" || (opts.canDrop && opts.canDrop == 1) ){
+			}else if( type != "misc" || (opts.canDrop && opts.canDrop == 1) ){
 				self.activeItem().canDrop(1);
 			}
 
@@ -2060,7 +2060,7 @@ define([
 			var moveFrom = self.player().inventory;
 			var moveTo = self.currentContainer;
 
-			var gold = self.getAvailableItemById("gold", "currency", (qty * item.sellValue()) );
+			var gold = self.getAvailableItemById("gold", "misc", (qty * item.sellValue()) );
 			goldItem = new Item(gold);
 
 			var newItem = Utils.cloneObject(item);
@@ -2926,7 +2926,7 @@ define([
 
 		this.testGold = function(){
 
-			itemToAdd = self.getAvailableItemById("gold", "currency", 2000);
+			itemToAdd = self.getAvailableItemById("gold", "misc", 2000);
 			self.player().addItemToInventory( new Item(itemToAdd) );
 		}
 
@@ -3370,6 +3370,7 @@ PROBLEMS NEEDING SOLUTIONS:
 	so that would still be a slight improvement)
 
 GAME CHANGES:
+- Add gems for sale to merchants
 - Make skill trainers cost less, OR improve base skill rather than progress (already done, I think)
 - Add intermittent passives?
 - Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
