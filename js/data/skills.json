@@ -17,6 +17,24 @@
 			"sortOrder" : 10
 		},
 
+		"find_treasure" : {
+			"className" : "FindTreasure",
+			"id" : "find_treasure",
+			"name" : "Find Treasure",
+			"description" : "Get out your shovel, spade, toothbrush, and metal detector, and peruse the murky riverbed for shiny things.",
+			"skillLevel" : "poor",
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"buttonLabel" : "Dig for Treasure",
+			"chanceOfEffect" : 100,
+			"baseCooldown" : 10,
+			"cooldown" : 0,
+			"sortOrder" : 20,
+			"canPurchase" : 1,
+			"requiredLevel" : 0
+		},
+
 		"scan_squares" : {
 			"className" : "ScanSquares",
 			"id" : "scan_squares",
@@ -30,7 +48,7 @@
 			"chanceOfEffect" : 100,
 			"baseCooldown" : 10,
 			"cooldown" : 0,
-			"sortOrder" : 20
+			"sortOrder" : 30
 		},
 
 		"reset_level" : {
@@ -46,7 +64,7 @@
 			"chanceOfEffect" : 100,
 			"baseCooldown" : 0,
 			"cooldown" : 0,
-			"sortOrder" : 30
+			"sortOrder" : 40
 		}
 
 	},

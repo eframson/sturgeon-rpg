@@ -27,7 +27,7 @@ define([
 			delayLevelUp = (delayLevelUp != undefined) ? delayLevelUp : 1 ;
 
 			//Trigger cooldown
-			self.cooldown(self.baseCooldown);
+			self.triggerCooldown();
 
 			//See if skill "hit"
 			var didHit = self.makeSkillAttempt();
@@ -83,6 +83,10 @@ define([
 		this.doOnLevelUp = function(){
 			//Should be overridden by child
 			return true;
+		}
+
+		this.triggerCooldown = function(){
+			self.cooldown(self.baseCooldown);
 		}
 
 		this.init(data);

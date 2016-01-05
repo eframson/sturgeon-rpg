@@ -155,6 +155,12 @@ define([
 					}
 					
 				}
+
+				//Trigger cooldown on findTreasure as well! (if applicable)
+				var findTreasure = self.player().activeAbilities()["find_treasure"];
+				if(findTreasure){
+					findTreasure.triggerCooldown();
+				}
 			},
 			reset_level : function(){
 
@@ -203,7 +209,57 @@ define([
 
 				self.manageTransitionToView("mainscreen","fullscreen");
 
-			}
+			},
+			find_treasure : function(){
+
+				var findTreasure = self.player().activeAbilities()["find_treasure"];
+				var foundItem = findTreasure.doSkill();
+
+				if(foundItem){
+					//Get item quality
+					var itemQuality = findTreasure.getItemQuality();
+					//Randomly pick a level-appropriate piece of gear with the given quality
+					newLootItem = self.generateRandomLootItem(undefined, itemQuality, { 100 : "gear" });
+					//Attempt to add the item to inventory
+					var qtyAdded = self.player().addItemToInventory( newLootItem );
+
+					if(qty != false && qty > 0){
+						//Log success
+						self.logMessage("After long hours of tiring excavation, you uncover a " + newLootItem.name + "!", "item");
+					}else{
+						//If inventory is full, bring up the "container" screen
+						self.showContainerWithContents([newLootItem]);
+						//Log discovery
+						self.logMessage("After long hours of tiring excavation, you uncover a " + newLootItem.name + ", but your inventory is full!", "item");
+					}
+
+				}else{
+					//Junk! Pick a junk item
+					var junkItem = self.getRandomVendorTrash();
+					var junkQty = findTreasure.junkQtyForLevel(self.level().levelNum());
+
+					//Add the generic "junk" item to inventory or increment its qty appropriately
+					var genericJunkItem = new Item(self.getAvailableItemById("junk", "currency", junkQty));
+					self.player().addItemToInventory( genericJunkItem );
+
+					//Log the junk item name
+					self.logMessage("After long hours of tiring excavation, unfortunately all you find is " + junkQty + "x " + junkItem.name + ". You dejectedly add it/them to your inventory.", "item");
+				}
+
+				if( findTreasure.canLevelUp){
+					findTreasure.levelUp();
+
+					if(findTreasure.didLevelUp){ //Did we actually improve our skill (i.e. - we're not maxed out)
+						findTreasure.didLevelUp = 0; //Clear this out
+						self.logMessage("Your skill in finding treasure has increased! You are now more likely to find better items!");
+					}
+					
+				}
+
+				//Trigger cooldown on findFood as well!
+				var findFoodSkill = self.player().activeAbilities()["find_food"];
+				findFoodSkill.triggerCooldown();
+			},
 		};
 
 		this.temporaryPreferenceStorage = {};
@@ -902,7 +958,7 @@ define([
 				}
 
 				self.player().addExp(self.currentEnemy().expValue());
-				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " XP!", "combat");
+				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP!", "combat");
 
 				if( self.player().hasLeveledUp() ){
 					self.player().hasLeveledUp(false);
@@ -1071,7 +1127,7 @@ define([
 			}
 		}
 
-		this.generateRandomLootItem = function(lootSet){
+		this.generateRandomLootItem = function(lootSet, overrideQuality, lootSetOverride){
 
 			lootSet = lootSet || "standard";
 			var itemClass = "item";
@@ -1108,6 +1164,10 @@ define([
 					],
 					20 : "gear",
 				};
+			}
+
+			if(lootSetOverride !== undefined){
+				possibleItemTypes = lootSetOverride;
 			}
 
 			var itemType = Utils.doBasedOnPercent(possibleItemTypes);
@@ -1199,6 +1259,10 @@ define([
 
 				if(lootSet == "boss"){
 					quality = "great";
+				}
+
+				if(overrideQuality !== undefined){
+					quality = overrideQuality;
 				}
 
 				if( gearType == "armor" ){
@@ -2548,6 +2612,17 @@ define([
 			});
 		}
 
+		this.getRandomVendorTrash = function(){
+
+			var possibleTrash = self.itemDataCollection.getNode(["items", "trash"], 1);
+
+			var trashKey = Utils.chooseRandomly(possibleTrash);
+
+			var trashObj = self.itemDataCollection.getNode(["items", "trash", trashKey]);
+
+			return trashObj;
+		}
+
 		this.getRandomScroungable = function(qualityCategory, justData){
 
 			if(!qualityCategory){
@@ -3321,6 +3396,7 @@ BUGS:
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 GAME IDEAS:
+- Find treasure ability, like find food, and with shared cooldown
 - Should combat abilities level up + improve on use, same as active abilities?
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Allow certain weapons to be wielded 1H or 2H (for more dmg)
@@ -3331,7 +3407,6 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
-- Make EXP/XP wording consistent
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Play sound on level up?
 - Minor sound FX on square events
@@ -3340,7 +3415,6 @@ UI IDEAS:
 - Add loot acquisition to log
 - More obvious turn-based combat (visual delay between parts of a round?)
 - Allow for a variable number of items to be purchased from merchant
-- Show dmg taken next to player/monster HP counter
 - Add help/feedback interface
 - Keyboard shortcuts for "continue" buttons
 

@@ -252,6 +252,16 @@
 				"desc" : "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.",
 				"slotsRequired" : 0,
 				"stackable" : 1
+			},
+			"junk" : {
+				"id" : "junk",
+				"name" : "Miscellaneous Junk",
+				"type" : "currency",
+				"desc" : "Discarded items that are of no discernible use to anyone.",
+				"slotsRequired" : 0,
+				"stackable" : 1,
+				"buyValue" : 0,
+				"sellValue" : 25
 			}
 
 		},
@@ -523,6 +533,49 @@
 				"pctOfAvgArmor" : 0.4
 			}
 
+		},
+
+		"trash" : {
+			"trash_01" : {
+				"id" : "trash_01",
+				"name" : "Tangled Fishing Line"
+			},
+			"trash_02" : {
+				"id" : "trash_02",
+				"name" : "Shoelaces"
+			},
+			"trash_03" : {
+				"id" : "trash_03",
+				"name" : "Chewed-Up Fishing Net"
+			},
+			"trash_04" : {
+				"id" : "trash_04",
+				"name" : "Partially Digested Boots"
+			},
+			"trash_05" : {
+				"id" : "trash_05",
+				"name" : "Expired Bait"
+			},
+			"trash_06" : {
+				"id" : "trash_06",
+				"name" : "Soggy Newspaper"
+			},
+			"trash_07" : {
+				"id" : "trash_07",
+				"name" : "Empty Gasoline Can"
+			},
+			"trash_08" : {
+				"id" : "trash_08",
+				"name" : "Deflated Buoy"
+			},
+			"trash_09" : {
+				"id" : "trash_09",
+				"name" : "Hopelessly Bent Fishing Hook"
+			},
+			"trash_10" : {
+				"id" : "trash_10",
+				"name" : "Star Wars Christmas Special on VHS"
+			}
 		},
 
 		"exceptional_weapon_names" : {
