@@ -151,7 +151,8 @@ define([
 
 					if(findFoodSkill.didLevelUp){ //Did we actually improve our skill (i.e. - we're not maxed out)
 						findFoodSkill.didLevelUp = 0; //Clear this out
-						self.logMessage("Your skill in scrounging food has increased! You can now find " + findFoodSkill.skillLevel() + " quality food.");
+						self.logMessage("Your skill in scrounging food has increased! You can now find <span class='"
+							+ findFoodSkill.skillLevel() + "'>" + findFoodSkill.skillLevel() + "</span> quality food.");
 					}
 					
 				}
@@ -225,12 +226,14 @@ define([
 
 					if(qtyAdded != false && qtyAdded > 0){
 						//Log success
-						self.logMessage("After long hours of tiring excavation, you uncover a " + newLootItem.name + "!", "item");
+						self.logMessage("After long hours of tiring excavation, you uncover 1x <span class='"
+							+ newLootItem.quality() + "'>" + newLootItem.name + "</span>!", "item");
 					}else{
 						//If inventory is full, bring up the "container" screen
 						self.showContainerWithContents([newLootItem]);
 						//Log discovery
-						self.logMessage("After long hours of tiring excavation, you uncover a " + newLootItem.name + ", but your inventory is full!", "item");
+						self.logMessage("After long hours of tiring excavation, you uncover 1x <span class='"
+							+ newLootItem.quality() + "'>" + newLootItem.name + "</span>, but your inventory is full!", "item");
 					}
 
 				}else{
@@ -3320,6 +3323,19 @@ define([
 			self.level().hideMap();
 		}
 
+		this.testLevelUp = function(numLevels){
+			numLevels = numLevels || 10;
+			for(var i = 0; i < 10; i++){
+				self.player().level( self.player().level() + 1 );
+				self.player().levelUp();
+			}
+		}
+
+		this.testPerkPoints = function(numPoints){
+			numPoints = numPoints || 1;
+			self.player().availablePerkPoints(numPoints);
+		}
+
 		self.init();
 
 	};
@@ -3349,18 +3365,6 @@ define([
 
 /*
 
-LINKS FOR RESEARCH:
-http://jsfiddle.net/tPm3s/1/ (http://stackoverflow.com/questions/23530756/maze-recursive-division-algorithm-design)
-http://weblog.jamisbuck.org/2011/1/12/maze-generation-recursive-division-algorithm
-http://weblog.jamisbuck.org/2015/1/15/better-recursive-division-algorithm.html
-
-http://weblog.jamisbuck.org/2011/2/7/maze-generation-algorithm-recap
-http://dstromberg.com/2013/07/tutorial-random-maze-generation-algorithm-in-javascript/
-
-https://github.com/felipecsl/random-maze-generator
-http://stackoverflow.com/questions/16150255/javascript-maze-generator
-http://xefer.com//maze-generator
-
 PROBLEMS NEEDING SOLUTIONS:
 - When player moves into a level entrance square, they are automatically dumped back
 	into the prev. level, but with the new maze structure sometimes it's not possible
@@ -3373,57 +3377,57 @@ PROBLEMS NEEDING SOLUTIONS:
 	of one as if they have to go to the previous level, hop off, hop on, back to the current level,
 	so that would still be a slight improvement)
 
-GAME CHANGES:
-- Add gems for sale to merchants
-- Make skill trainers cost less, OR improve base skill rather than progress (already done, I think)
-- Add intermittent passives?
-- Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
-
-UI CHANGES:
-- Make sure skills that cannot be leveled up are properly represented in list
-- Show HP in red when it's <25%
-- Show slot that armor applies to when active item
-- More detail about how much HP food will restore
-- More detail about how much HP food or leveling up restored
-- Dynamic container name
-- Show that a weapon will take up x number of backpack slots
-- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
-
-CODE CHANGES:
-- Remove or comment-out now-deprecated reset stone references
-- Save game version in localstorage; When loading, if version is different from current version, reload JSON files + classes from src
-- Prevent enemy HP from going below 0 (maybe)
-- Standardize the way objects are saved (done already?) - one idea: either save props as "save these" list or "save all but these" list; check for <prop>SaveHandler method or something
 
 BUGS:
 - Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
+GAME CHANGES:
+
+
+UI CHANGES:
+
+
+CODE CHANGES:
+
+
 GAME IDEAS:
-- Find treasure ability, like find food, and with shared cooldown
+- Make skill trainers cost less, OR improve base skill rather than progress (already done, I think)
+- Add intermittent passives?
+- Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
+- Add accessory armor slot, allow equipping items with +SPD or whatever
 - Should combat abilities level up + improve on use, same as active abilities?
 - Gambling squares! X gold for Y nice thing, Z chance of success
-- Allow certain weapons to be wielded 1H or 2H (for more dmg)
-- More consistent gold from monsters?
 - Battle arena event?
 - Bosses every x levels + minibosses in between
 - Gradually scale overall difficulty over first X levels (5?)
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
-- Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
-- Play sound on level up?
-- Minor sound FX on square events
+- Show slot that armor applies to when active item
+- Show number of slots an item will take up
+- More detail about how much HP food will restore (Support %%s in item descriptions)
+- More detail about how much HP food or leveling up restored
 - Make log filterable
 - Color code log
 - Add loot acquisition to log
-- More obvious turn-based combat (visual delay between parts of a round?)
+- Color-code items to show quality (in log and in lists)
+- Make sure skills that cannot be leveled up are properly represented in list
+- Dynamic container name
+- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
+- Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Allow for a variable number of items to be purchased from merchant
+- Play sound on level up?
+- Minor sound FX on square events
 - Add help/feedback interface
 - Keyboard shortcuts for "continue" buttons
 
 CODE IDEAS:
+- Remove or comment-out now-deprecated reset stone references
+- Save game version in localstorage; When loading, if version is different from current version, reload JSON files + classes from src
+- Prevent enemy HP from going below 0 (maybe)
+- Standardize the way objects are saved (done already?) - one idea: either save props as "save these" list or "save all but these" list; check for <prop>SaveHandler method or something
 - Make Gold a "stat" rather than an inventory item?
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius - write test to see if it's actually faster
 - Write combat simulator for testing balancing stuff
@@ -3439,8 +3443,10 @@ POSSIBLE IDEAS:
 - Balance item value + dmg/armor + num salvage (discuss with Matt)
 
 Perk Ideas
-- No/reduced cooldown on scan
-- No/reduced cooldown on find food
+- Allow 1H weapons to be wielded 2H (costs 2)
+- Dual-wielding 1H weapons (costs 2)
+- Reduced cooldown on scan
+- Reduced cooldown on find food + treasure
 - Better odds of winning gambling squares
 - Passive HP regen
 - More contribution from armor
@@ -3449,6 +3455,18 @@ Perk Ideas
 
 Feedback
 - Think about floor as a whole instead of just fight-to-fight
+
+LINKS FOR RESEARCH:
+http://jsfiddle.net/tPm3s/1/ (http://stackoverflow.com/questions/23530756/maze-recursive-division-algorithm-design)
+http://weblog.jamisbuck.org/2011/1/12/maze-generation-recursive-division-algorithm
+http://weblog.jamisbuck.org/2015/1/15/better-recursive-division-algorithm.html
+
+http://weblog.jamisbuck.org/2011/2/7/maze-generation-algorithm-recap
+http://dstromberg.com/2013/07/tutorial-random-maze-generation-algorithm-in-javascript/
+
+https://github.com/felipecsl/random-maze-generator
+http://stackoverflow.com/questions/16150255/javascript-maze-generator
+http://xefer.com//maze-generator
 
 */
 

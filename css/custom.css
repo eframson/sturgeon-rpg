@@ -169,6 +169,15 @@ button:focus {
 	margin-left: 5px;
 }
 
+.player-stats .stat-value.hp-stat.max-hp {
+	margin-left: 0px;
+}
+
+.player-stats .stat-value.hp-stat.low-hp {
+	font-weight: bold;
+	color: #ff0000;
+}
+
 .player-stats .col-md-1 {
 	padding: 0;
 	text-align: left;
@@ -416,7 +425,10 @@ button:focus {
 
 .inventory .lines .line,
 .container-ui .container-ui-inner-container,
-.merchant .container-ui-inner-container,
+.merchant .container-ui-inner-container {
+	background-color: #c9c9c9; /*Lightest gray*/
+}
+
 .known-skills .lines,
 .available-skills .lines {
 	background-color: #F0ECE6;
@@ -467,7 +479,10 @@ button:focus {
 .container-ui .line:not(.empty):hover,
 .container-ui .line:not(.empty).selected,
 .merchant .line:not(.empty):hover,
-.merchant .line:not(.empty).selected,
+.merchant .line:not(.empty).selected {
+	background-color: #d6d6d6; /*Lighter gray*/
+}
+
 .known-skills .line:not(.empty):hover,
 .known-skills .line:not(.empty).selected,
 .available-skills .line:not(.empty):hover,
@@ -483,7 +498,10 @@ button:focus {
 
 .inventory .line:not(.empty):active,
 .container-ui .line:not(.empty):active,
-.merchant .line:not(.empty):active,
+.merchant .line:not(.empty):active {
+	background-color: #bfbfbf; /*Dark gray*/
+}
+
 .known-skills .line:not(.empty):active,
 .available-skills .line:not(.empty):active {
 	background-color: #F6D8AC;
@@ -714,6 +732,24 @@ button:focus {
 .x-wide-center {
 	width: 500px;
 	margin-left: -75px;
+}
+
+.poor {
+	color: #333333;
+}
+
+.good {
+	/*color: #1eff00;*/
+	/*color: #1cd800;*/
+	color: #48d332;
+}
+
+.great {
+	color: #0070dd;
+}
+
+.exceptional {
+	color: #a335ee;
 }
 
 /*

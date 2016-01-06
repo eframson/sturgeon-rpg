@@ -73,8 +73,12 @@
 
 				<!-- start stat row header row -->
 				<div class="row player-stat-row player-stats hidden">
-					<div class="col-md-1 with-left-padding"><span class="stat-label">Level</span><span class="stat-value" data-bind="text: player().level()"></span></div>
-					<div class="col-md-1"><span class="stat-label">HP</span><span class="stat-value" data-bind="text: player().hp() + '/' + player().maxHp()"></span></div>
+					<div class="col-md-1 with-left-padding"><span class="stat-label">Level</span><span class="stat-value " data-bind="text: player().level()"></span></div>
+					<div class="col-md-1">
+						<span class="stat-label">HP</span>
+						<span class="stat-value hp-stat current-hp" data-bind="text: player().hp(), css: { 'low-hp' : player().isHpLow() }"></span>
+						<span class="stat-value hp-stat max-hp" data-bind="text: '/ ' + player().maxHp()"></span>
+					</div>
 					<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
 					<div class="col-md-2"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg() + ( player().bonusDmg() > 0 ? ' (+' + player().bonusDmg() + ')' : '' )"></span></div>
 					<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().str()"></span></div>
@@ -203,7 +207,7 @@
 									<!-- /ko -->
 									<!-- ko foreach: $root.player().inventory.items() -->
 									<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
-										<span class="item" data-bind="html: ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name)"></span>
+										<span class="item" data-bind="html: '<span class=\'' + $data.quality() + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
 									</div>
 									<!-- /ko -->

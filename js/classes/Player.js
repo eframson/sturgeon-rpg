@@ -262,6 +262,12 @@ define([
 				return baseChance + self.dex();
 			});
 
+			this.isHpLow = ko.computed(function(){
+				var maxHp = self.maxHp();
+				var hp = self.hp();
+				return ( ( hp <= Math.round(maxHp * 0.25) ) ? 1 : 0 );
+			});
+
 			this.getAvailableActiveAbilities = ko.computed(function(){
 				var abilityData = self.skillDataCollection.getNode(["active_abilities"]);
 				var availableAbilities = [];
@@ -309,8 +315,6 @@ define([
 
 				return availableAbilities;
 			});
-
-			
 
 			self.activeAbilitiesIterable = ko.computed(function(){
 				return Utils.getObjectAsArrayIndexedByNumericalSortOrder(self.activeAbilities());
