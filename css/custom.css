@@ -741,7 +741,14 @@ button:focus {
 .good {
 	/*color: #1eff00;*/
 	/*color: #1cd800;*/
-	color: #48d332;
+	/* color: #48d332; */
+	/* color: #2DAD1A; */ /*Bit lighter green*/
+	/* color: #356F2C; */ /*Darker green*/
+	color: #128C00; /*Medium dark?*/
+}
+
+.good-dark-contrast {
+	color: #128C00; /*Medium dark?*/
 }
 
 .great {
