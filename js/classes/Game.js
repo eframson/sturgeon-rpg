@@ -1174,7 +1174,7 @@ define([
 
 			if(itemType == "gold"){
 
-				var baseGoldPerLevel = 60;
+				var baseGoldPerLevel = 50;
 				var pctGoldVariance = 0.25;
 				var unRandomizedGoldPerLevel = baseGoldPerLevel * self.level().levelNum();
 				var lowerGoldBounds = Math.round(unRandomizedGoldPerLevel - (unRandomizedGoldPerLevel * pctGoldVariance)),
@@ -1196,7 +1196,7 @@ define([
 
 				var miscLootTypePossibilities = Array(
 					"potion",
-					//"stone",
+					"stone",
 					"scrap"
 				);
 
@@ -1205,7 +1205,6 @@ define([
 				}
 
 				var miscType = Utils.chooseRandomly(miscLootTypePossibilities);
-
 
 				if( miscType == "potion" ){
 
@@ -1233,9 +1232,14 @@ define([
 
 				}else if( miscType == "stone" ){
 
-					itemClass = "consumable";
-
-					itemToAdd = self.getAvailableItemById("reset_stone", "consumables", 1);
+					var availableGems = self.getAvailableItemIdsByTypeForLevel("gems", self.level().levelNum());
+					var gemId = Utils.chooseRandomly( availableGems );
+					itemToAdd = self.getAvailableItemById(gemId, "gems", 1);
+					if(self.level().levelNum() <= 50){
+						itemToAdd.qty = Utils.doRand(1,4);
+					}else{
+						itemToAdd.qty = Utils.doRand(1,4) + (self.level().levelNum() - 50);
+					}
 
 				}else if( miscType == "food" ){
 
