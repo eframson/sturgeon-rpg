@@ -21,10 +21,10 @@ define([
 			];
 
 			self.chancesOfSuccess = {
-				"poor" : 10,
-				"good" : 20,
-				"great" : 30,
-				"exceptional" : 40
+				"poor" : 20,
+				"good" : 40,
+				"great" : 60,
+				"exceptional" : 80
 			};
 
 			self.lootQualities = {
@@ -91,7 +91,7 @@ define([
 			//See if skill "hit"
 			var chanceOfSuccess = self.chancesOfSuccess[self.skillLevel()];
 			var hitRoll = Utils.doRand(1, 101);
-			var didHit = (hitRoll <= self.chanceOfSuccess) ? true : false ;
+			var didHit = (hitRoll <= chanceOfSuccess) ? true : false ;
 
 			//Make skill progress
 			self.makeProgress(delayLevelUp);

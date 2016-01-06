@@ -51,7 +51,8 @@ define([
 				data.activeAbilities = {
 					find_food: {},
 					scan_squares: {},
-					reset_level: {}
+					reset_level: {},
+					//find_treasure : {},
 				};
 			}
 

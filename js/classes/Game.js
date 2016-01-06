@@ -223,7 +223,7 @@ define([
 					//Attempt to add the item to inventory
 					var qtyAdded = self.player().addItemToInventory( newLootItem );
 
-					if(qty != false && qty > 0){
+					if(qtyAdded != false && qtyAdded > 0){
 						//Log success
 						self.logMessage("After long hours of tiring excavation, you uncover a " + newLootItem.name + "!", "item");
 					}else{
