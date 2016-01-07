@@ -712,42 +712,42 @@
 									<!-- ko with: $root.player().equipment().armor().head() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Head Armor:</span>
-											<span class="item" data-bind="text: $data.name || 'None'"></span>
+											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().armor().fin() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Fin Armor:</span>
-											<span class="item" data-bind="text: $data.name || 'None'"></span>
+											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().armor().body() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Body Armor:</span>
-											<span class="item" data-bind="text: $data.name || 'None'"></span>
+											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().armor().tail() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Tail Armor:</span>
-											<span class="item" data-bind="text: $data.name || 'None'"></span>
+											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().weapon() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Weapon:</span>
-											<span class="item" data-bind="text: $data.name || 'None'"></span>
+											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().shield() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Shield:</span>
-											<span class="item" data-bind="text: $data.name || 'None'"></span>
+											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
 										</div>
 									<!-- /ko -->
 

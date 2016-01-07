@@ -426,7 +426,7 @@ button:focus {
 .inventory .lines .line,
 .container-ui .container-ui-inner-container,
 .merchant .container-ui-inner-container {
-	background-color: #c9c9c9; /*Lightest gray*/
+	background-color: #D0D0D0; /*Lightest gray*/
 }
 
 .known-skills .lines,
@@ -480,7 +480,7 @@ button:focus {
 .container-ui .line:not(.empty).selected,
 .merchant .line:not(.empty):hover,
 .merchant .line:not(.empty).selected {
-	background-color: #d6d6d6; /*Lighter gray*/
+	background-color: #E4E4E4; /*Lighter gray*/
 }
 
 .known-skills .line:not(.empty):hover,

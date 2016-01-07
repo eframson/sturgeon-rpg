@@ -224,16 +224,17 @@ define([
 					//Attempt to add the item to inventory
 					var qtyAdded = self.player().addItemToInventory( newLootItem );
 
+					var messageString = "After long hours of tiring excavation, you uncover 1x <span class='"
+							+ (newLootItem.hasQuality ? newLootItem.quality() : '') + "'>" + newLootItem.name + "</span>";
+
 					if(qtyAdded != false && qtyAdded > 0){
 						//Log success
-						self.logMessage("After long hours of tiring excavation, you uncover 1x <span class='"
-							+ newLootItem.quality() + "'>" + newLootItem.name + "</span>!", "item");
+						self.logMessage(messageString + "!", "item");
 					}else{
 						//If inventory is full, bring up the "container" screen
 						self.showContainerWithContents([newLootItem]);
 						//Log discovery
-						self.logMessage("After long hours of tiring excavation, you uncover 1x <span class='"
-							+ newLootItem.quality() + "'>" + newLootItem.name + "</span>, but your inventory is full!", "item");
+						self.logMessage(messageString + ", but your inventory is full!", "item");
 					}
 
 				}else{
@@ -246,7 +247,8 @@ define([
 					self.player().addItemToInventory( genericJunkItem );
 
 					//Log the junk item name
-					self.logMessage("After long hours of tiring excavation, unfortunately all you find is " + junkQty + "x " + junkItem.name + ". You dejectedly add it/them to your inventory.", "item");
+					self.logMessage("After long hours of tiring excavation, unfortunately all you find is "
+						+ junkQty + "x " + junkItem.name + ". You dejectedly add " + (junkQty == 1 ? "it" : "them") + " to your inventory.", "item");
 				}
 
 				if( findTreasure.canLevelUp){
@@ -985,7 +987,7 @@ define([
 			}else{
 				msg = "The enemy is ";
 			}
-			self.logMessage(msg + 'now affected by: ' + combatEffectToApply.name,'combat');
+			self.logMessage(msg + 'now affected by: <span class=\'combat-effect\'>' + combatEffectToApply.name + '</span>','combat');
 		}
 
 		this.registerAttack = function(attacker, defender, attackResults){
@@ -1120,12 +1122,15 @@ define([
 
 			var numJustAdded = self.player().addItemToInventory(newItem);
 
+			var messageString = "Inside " + container + " you find " + newItem.qty() + "x <span class='"
+				+ ((newItem.hasQuality) ? newItem.quality() : "") + "'>" + newItem.name + "</span>";
+
 			if(numJustAdded != false && numJustAdded > 0){
 			//if(self.player().inventorySlotsAvailable() > -1){
-				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name, "item");
+				self.logMessage(messageString, "item");
 				self.freezeMovement(false);
 			}else{
-				self.logMessage("Inside " + container + " you find " + newItem.qty() + " " + newItem.name + ", but your inventory is currently full", "item");
+				self.logMessage(messageString + ", but your inventory is currently full", "item");
 				self.showContainerWithContents([newItem]);
 			}
 		}
@@ -1993,7 +1998,7 @@ define([
 			self._resetActiveItem();
 
 			self.player().inventory.addItem(new Item(itemToAdd) );
-			self.logMessage("You gain " + scrapQty + " scraps from salvaging the item.","crafting");
+			self.logMessage("You gain " + scrapQty + "x " + itemToAdd.name + " from salvaging the item.","crafting");
 
 		}
 
