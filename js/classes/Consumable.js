@@ -15,6 +15,7 @@ define([
 
 		this.init = function(data){
 			self.isFood = data.isFood || 0;
+			self.hasQuality = 1;
 		}
 
 		this.init(data);

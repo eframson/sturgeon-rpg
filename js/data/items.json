@@ -172,7 +172,8 @@
 					"slotsRequired" : 1,
 					"stackable" : 1,
 					"buyValue" : 250,
-					"subtype" : "event_square_override"
+					"subtype" : "event_square_override",
+					"hasQuality" : 0
 				},
 
 				"trainer" : {
@@ -182,7 +183,8 @@
 					"slotsRequired" : 1,
 					"stackable" : 1,
 					"buyValue" : 250,
-					"subtype" : "event_square_override"
+					"subtype" : "event_square_override",
+					"hasQuality" : 0
 				},
 
 				"health_potion" : {
@@ -191,7 +193,8 @@
 					"desc" : "A flask filled with a refreshing draught that can re-invigorate and rejuvenate even the most badly wounded fish. Restores half your max HP. May be used during combat.",
 					"slotsRequired" : 1,
 					"stackable" : 1,
-					"buyValue" : 250
+					"buyValue" : 250,
+					"hasQuality" : 0
 				},
 
 				"cooldown_potion" : {
@@ -200,7 +203,8 @@
 					"desc" : "This vial contains a fizzy, light-blue liquid. Drinking it will instantly refresh you, resetting your ability cooldowns.",
 					"slotsRequired" : 1,
 					"stackable" : 1,
-					"buyValue" : 250
+					"buyValue" : 250,
+					"hasQuality" : 0
 				},
 
 				"stat_potion" : {
@@ -209,7 +213,8 @@
 					"desc" : "A vial filled with a pearlescent, silver liquid. Drinking it will improve one of your stats at random.",
 					"slotsRequired" : 1,
 					"stackable" : 1,
-					"buyValue" : 1000
+					"buyValue" : 1000,
+					"hasQuality" : 0
 				}
 
 			},
@@ -277,7 +282,8 @@
 				"buyValue" : 0,
 				"sellValue" : 100,
 				"minLevelRange" : 1,
-				"maxLevelRange" : 10
+				"maxLevelRange" : 10,
+				"hasQuality" : 0
 			},
 			"emerald" : {
 				"id" : "emerald",
@@ -289,7 +295,8 @@
 				"buyValue" : 0,
 				"sellValue" : 200,
 				"minLevelRange" : 1,
-				"maxLevelRange" : 10
+				"maxLevelRange" : 10,
+				"hasQuality" : 0
 			},
 			"sapphire" : {
 				"id" : "sapphire",
@@ -301,7 +308,8 @@
 				"buyValue" : 0,
 				"sellValue" : 300,
 				"minLevelRange" : 5,
-				"maxLevelRange" : 15
+				"maxLevelRange" : 15,
+				"hasQuality" : 0
 			},
 			"tanzanite" : {
 				"id" : "tanzanite",
@@ -313,7 +321,8 @@
 				"buyValue" : 0,
 				"sellValue" : 400,
 				"minLevelRange" : 5,
-				"maxLevelRange" : 15
+				"maxLevelRange" : 15,
+				"hasQuality" : 0
 			},
 			"garnet" : {
 				"id" : "garnet",
@@ -325,7 +334,8 @@
 				"buyValue" : 0,
 				"sellValue" : 500,
 				"minLevelRange" : 10,
-				"maxLevelRange" : 20
+				"maxLevelRange" : 20,
+				"hasQuality" : 0
 			},
 			"amethyst" : {
 				"id" : "amethyst",
@@ -337,7 +347,8 @@
 				"buyValue" : 0,
 				"sellValue" : 600,
 				"minLevelRange" : 10,
-				"maxLevelRange" : 20
+				"maxLevelRange" : 20,
+				"hasQuality" : 0
 			},
 			"aquamarine" : {
 				"id" : "aquamarine",
@@ -349,7 +360,8 @@
 				"buyValue" : 0,
 				"sellValue" : 700,
 				"minLevelRange" : 15,
-				"maxLevelRange" : 25
+				"maxLevelRange" : 25,
+				"hasQuality" : 0
 			},
 			"alexandrite" : {
 				"id" : "alexandrite",
@@ -361,7 +373,8 @@
 				"buyValue" : 0,
 				"sellValue" : 800,
 				"minLevelRange" : 15,
-				"maxLevelRange" : 25
+				"maxLevelRange" : 25,
+				"hasQuality" : 0
 			},
 			"peridot" : {
 				"id" : "peridot",
@@ -373,7 +386,8 @@
 				"buyValue" : 0,
 				"sellValue" : 900,
 				"minLevelRange" : 20,
-				"maxLevelRange" : 30
+				"maxLevelRange" : 30,
+				"hasQuality" : 0
 			},
 			"opal" : {
 				"id" : "opal",
@@ -385,7 +399,8 @@
 				"buyValue" : 0,
 				"sellValue" : 1000,
 				"minLevelRange" : 20,
-				"maxLevelRange" : 30
+				"maxLevelRange" : 30,
+				"hasQuality" : 0
 			},
 			"topaz" : {
 				"id" : "topaz",
@@ -397,7 +412,8 @@
 				"buyValue" : 0,
 				"sellValue" : 1100,
 				"minLevelRange" : 25,
-				"maxLevelRange" : 35
+				"maxLevelRange" : 35,
+				"hasQuality" : 0
 			},
 			"zircon" : {
 				"id" : "zircon",
@@ -409,7 +425,8 @@
 				"buyValue" : 0,
 				"sellValue" : 1200,
 				"minLevelRange" : 25,
-				"maxLevelRange" : 35
+				"maxLevelRange" : 35,
+				"hasQuality" : 0
 			},
 			"diamond" : {
 				"id" : "diamond",
@@ -421,7 +438,8 @@
 				"buyValue" : 0,
 				"sellValue" : 1300,
 				"minLevelRange" : 30,
-				"maxLevelRange" : 40
+				"maxLevelRange" : 40,
+				"hasQuality" : 0
 			},
 			"red_beryl" : {
 				"id" : "red_beryl",
@@ -433,7 +451,8 @@
 				"buyValue" : 0,
 				"sellValue" : 1400,
 				"minLevelRange" : 30,
-				"maxLevelRange" : 40
+				"maxLevelRange" : 40,
+				"hasQuality" : 0
 			},
 			"musgravite" : {
 				"id" : "musgravite",
@@ -444,7 +463,8 @@
 				"stackable" : 1,
 				"buyValue" : 0,
 				"sellValue" : 1500,
-				"minLevelRange" : 35
+				"minLevelRange" : 35,
+				"hasQuality" : 0
 			},
 			"benitoite" : {
 				"id" : "benitoite",
@@ -455,7 +475,8 @@
 				"stackable" : 1,
 				"buyValue" : 0,
 				"sellValue" : 1600,
-				"minLevelRange" : 35
+				"minLevelRange" : 35,
+				"hasQuality" : 0
 			},
 			"jadeite" : {
 				"id" : "jadeite",
@@ -466,7 +487,8 @@
 				"stackable" : 1,
 				"buyValue" : 0,
 				"sellValue" : 1700,
-				"minLevelRange" : 40
+				"minLevelRange" : 40,
+				"hasQuality" : 0
 			},
 			"black_opal" : {
 				"id" : "black_opal",
@@ -477,7 +499,8 @@
 				"stackable" : 1,
 				"buyValue" : 0,
 				"sellValue" : 1800,
-				"minLevelRange" : 40
+				"minLevelRange" : 40,
+				"hasQuality" : 0
 			}
 		},
 

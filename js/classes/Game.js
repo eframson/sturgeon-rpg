@@ -1199,12 +1199,12 @@ define([
 
 				var miscLootTypePossibilities = Array(
 					"potion",
-					"stone",
 					"scrap"
 				);
 
 				if( lootSet != "trader" ){
 					miscLootTypePossibilities.push("food");
+					miscLootTypePossibilities.push("stone");
 				}
 
 				var miscType = Utils.chooseRandomly(miscLootTypePossibilities);

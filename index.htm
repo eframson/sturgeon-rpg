@@ -207,7 +207,7 @@
 									<!-- /ko -->
 									<!-- ko foreach: $root.player().inventory.items() -->
 									<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
-										<span class="item" data-bind="html: '<span class=\'' + $data.quality() + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
+										<span class="item" data-bind="html: '<span class=\'' + ($data.hasQuality ? $data.quality() : '') + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
 									</div>
 									<!-- /ko -->
