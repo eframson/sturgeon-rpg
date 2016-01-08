@@ -132,11 +132,13 @@ define([
 
 				if(newFoodItem){ //Again, just a formality
 					var qty = self.addFoodToPlayerInventory(newFoodItem);
+					message = "You gracefully float to the bottom of the river and successfully scrounge up "
+						+ qty + "x <span class='" + newFoodItem.quality() + "'>" + newFoodItem.name
+						+ "</span> using your kick-ass mouth feelers";
 					if(qty != false && qty > 0){
-						message = "You gracefully float to the bottom of the river and successfully scrounge up " + qty + " food using your kick-ass mouth feelers.";
+						message += "!";
 					}else{
-						message = "You gracefully float to the bottom of the river and successfully scrounge up "
-								  + newFoodItem.qty() + " food using your kick-ass mouth feelers, but your inventory is full!";
+						message += ", but your inventory is full!";
 						self.freezeMovement(true);
 						self.showContainerWithContents([newFoodItem]);
 					}
@@ -616,6 +618,23 @@ define([
 					}
 				}
 			});
+
+			self.poorHpRestore = ko.computed(function(){
+				return self.player() ? Math.round(self.player().maxHp() * 0.25) : 0;
+			}, self);
+
+			self.goodHpRestore = ko.computed(function(){
+				return self.player() ? Math.round(self.player().maxHp() * 0.50) : 0;
+			}, self);
+
+			self.greatHpRestore = ko.computed(function(){
+				return self.player() ? Math.round(self.player().maxHp() * 0.75) : 0;
+			}, self);
+
+			self.exceptionalHpRestore = ko.computed(function(){
+				return self.player() ? self.player().maxHp() : 0;
+			}, self);
+
 		}
 
 		this.initPrefs = function(prefData){
@@ -2224,16 +2243,9 @@ define([
 
 		this._playerEatFood = function(quality){
 
-			var qualityPercentages = {
-				poor : 0.25,
-				good : 0.50,
-				great : 0.75,
-				exceptional : 1
-			}
+			var hpRestored = self.player().restoreHealth( self[quality + 'HpRestore']() );
 
-			self.player().restoreHealth( qualityPercentages[quality], 1);
-
-			self.logMessage("Eating some food restored some of your HP!", "player");
+			self.logMessage("Eating some food restored " + hpRestored + " HP!", "player");
 
 		}
 
@@ -2512,6 +2524,22 @@ define([
 			return false;
 		}
 
+		this._makeMagicReplacements = function(string){
+
+			var magicDesc = string;
+			var matches = string.match(/%[^%]+%/g);
+
+			if(matches != undefined){
+				for(var i = 0; i < matches.length; i++){
+					var trimmedMatch = matches[i].replace(/%/g, "");
+					magicDesc = magicDesc.replace("%" + trimmedMatch + "%", self[trimmedMatch]());
+				}
+			}
+
+			return magicDesc;
+
+		}
+
 		this._updateZoomSettings = function(){
 			$('meta[name=viewport]').remove();
 			if(self.enableZoom() == 1){
@@ -2649,15 +2677,7 @@ define([
 
 			var qty = 2;
 
-			var descriptionsForQuality = {
-				poor : "a small amount",
-				good : "a decent amount",
-				great : "a large amount",
-				exceptional : "all",
-			};
-
-			var descString = descriptionsForQuality[qualityCategory];
-			descString = "Restores " + descString +" of your health when consumed";
+			var descString = "Restores %" + qualityCategory + "HpRestore% HP when consumed";
 			var itemData = $.extend(
 				foodObj,
 				{ qty : qty, type : "consumables", desc : descString }
@@ -3392,10 +3412,10 @@ GAME CHANGES:
 
 
 UI CHANGES:
-
+- Rely on player().levelUpChanges to show actual changes on level up
 
 CODE CHANGES:
-
+- Track skill increases cause by level ups (extend self.levelUpChanges)
 
 GAME IDEAS:
 - Make skill trainers cost less, OR improve base skill rather than progress (already done, I think)
@@ -3410,10 +3430,8 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
-- Show slot that armor applies to when active item
-- Show number of slots an item will take up
-- More detail about how much HP food will restore (Support %%s in item descriptions)
-- More detail about how much HP food or leveling up restored
+- Show how much HP will be restored by quick-eating
+- More detail about how much HP was restored by leveling up
 - Make log filterable
 - Color code log
 - Add loot acquisition to log

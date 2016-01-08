@@ -747,16 +747,19 @@ button:focus {
 	color: #128C00; /*Medium dark?*/
 }
 
-.good-dark-contrast {
-	color: #128C00; /*Medium dark?*/
-}
-
 .great {
 	color: #0070dd;
 }
 
 .exceptional {
 	color: #a335ee;
+}
+
+.log-area .poor,
+.log-area .good,
+.log-area .great,
+.log-area .exceptional {
+	font-weight: bold;
 }
 
 /*

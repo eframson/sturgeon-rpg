@@ -466,7 +466,7 @@
 
 								<div class="inner" data-bind="css: { hidden: activeItem().desc() == '', equipped: activeItem().actualItem() && activeItem().actualItem().isEquipped() == true }">
 
-									<div class="desc" data-bind="html: activeItem().desc()"></div>
+									<div class="desc" data-bind="html: _makeMagicReplacements(activeItem().desc())"></div>
 
 									<!-- ko if: activeItem().actualItem() -->
 
@@ -535,6 +535,20 @@
 										<div class="line">
 											<span class="stat">Item Level: </span>
 											<span class="value" data-bind="text: activeItem().actualItem().level()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: activeItem().actualItem().type && activeItem().actualItem().type == 'armor'-->
+										<div class="line">
+											<span class="stat">Armor Slot: </span>
+											<span class="value" data-bind="text: activeItem().actualItem().armorSlot.toProperCase()"></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: activeItem().actualItem().slotsRequired !== undefined -->
+										<div class="line">
+											<span class="stat">Inventory Slots Occupied: </span>
+											<span class="value" data-bind="text: activeItem().actualItem().slotsRequired"></span>
 										</div>
 										<!-- /ko -->
 

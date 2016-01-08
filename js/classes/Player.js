@@ -87,6 +87,13 @@ define([
 
 			});
 
+			self.levelUpChanges = {}
+			if( data.levelUpChanges ){
+				for (var prop in data.levelUpChanges){
+					self.levelUpChanges[prop] = data.levelUpChanges[prop];
+				}
+			}
+
 			self.speed = ko.observable(data.speed || 2);
 			self.str = ko.observable(data.str || Utils.doRand(1,6));
 			self.dex = ko.observable(data.dex || Utils.doRand(1,6));
@@ -495,11 +502,15 @@ define([
 
 		this.progressActiveAbilities = function(){
 
+			var trackChanges = {};
+
 			$.each(self.activeAbilities(), function(idx, ability){
 
 				ability.makeProgress();
 
 			});
+
+			return trackChanges;
 
 		}
 
@@ -538,11 +549,15 @@ define([
 			//Add stats
 			self.hasLeveledUp(true);
 
+			var trackChanges = {};
+
 			var hpGainPerLevel = 5;
 			var restoreHpTo;
+			trackChanges.baseHp = hpGainPerLevel;
 
 			if( self.hasPassiveAbility("improved_hp_leveling") ){
 				hpGainPerLevel = hpGainPerLevel * 2;
+				trackChanges.baseHp * 2;
 			}
 
 			self.baseHp( self.baseHp() + hpGainPerLevel );
@@ -554,22 +569,39 @@ define([
 
 			restoreHpTo = ( self.hp() < restoreHpTo ? restoreHpTo : self.hp() );
 
+			trackChanges.hpRestored = (self.hp() - restoreHpTo);
+
 			self.hp(restoreHpTo);
 
-			self.progressActiveAbilities();
+			var abilityGains = self.progressActiveAbilities();
+			trackChanges = $.extend(trackChanges, abilityGains);
+
+			var endGain = 1,
+				strGain = 1,
+				dexGain = 1,
+				spdGain = 1,
+				inventorySlotGain = 1,
+				perkPointGain = 1;
 
 			self.end( self.end() + 1 );
 
 			if( self.level() % 3 == 0){
 				self.str( self.str() + 1 );
 				self.dex( self.dex() + 1 );
+				trackChanges.strGain = strGain;
+				trackChanges.dexGain = dexGain;
 			}
 			if( self.level() % 4 == 0){
 				self.speed( self.speed() + 1 );
 				self.inventoryMaxSlots( self.inventoryMaxSlots() + 1 );
 				self.availablePerkPoints( self.availablePerkPoints() + 1 );
+				trackChanges.spdGain = spdGain;
+				trackChanges.inventorySlotGain = inventorySlotGain;
+				trackChanges.perkPointGain = perkPointGain;
 			}
 			//Reset cooldowns on level up?
+
+			self.levelUpChanges = trackChanges;
 		}
 
 		this.restoreHealth = function(amt, isPct){
@@ -585,6 +617,8 @@ define([
 			toRestoreAmt = (toRestoreAmt <= (maxHp - hp)) ? toRestoreAmt : (maxHp - hp) ;
 
 			self.hp( hp + toRestoreAmt );
+
+			return toRestoreAmt;
 		}
 
 		this.getExportData = function(){
@@ -626,6 +660,11 @@ define([
 				exportObj.passiveAbilities[idx] = ability.getExportData();
 
 			});
+
+			exportObj.levelUpChanges = {};
+			for (var prop in self.levelUpChanges){
+				exportObj.levelUpChanges[prop] = self.levelUpChanges[prop];
+			}
 
 			return ko.mapping.toJS( exportObj );
 
