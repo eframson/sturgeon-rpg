@@ -3436,7 +3436,7 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
-- Multiple items selected simultaneously in merchant
+- Multiple items selected simultaneously in merchant (cannot reproduce)
 - Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?

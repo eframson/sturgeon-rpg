@@ -585,7 +585,7 @@ define([
 
 			restoreHpTo = ( self.hp() < restoreHpTo ? restoreHpTo : self.hp() );
 
-			trackChanges.hpRestored = (self.hp() - restoreHpTo);
+			trackChanges.hpRestored = (restoreHpTo - self.hp());
 
 			self.hp(restoreHpTo);
 
