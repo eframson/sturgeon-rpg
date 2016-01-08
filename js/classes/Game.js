@@ -1057,18 +1057,24 @@ define([
 
 			var numLoots = 1 + Math.floor(self.level().levelNum() / 4);
 			var newLootItem;
+			var foundItemString = 'You find: ';
 			self.currentContainer.removeAll(); //Make sure it's empty
 
 			for(var i=0; i < numLoots; i++){
 				newLootItem = self.generateRandomLootItem(lootTable);
 				self.currentContainer.addItem(newLootItem);
+				if(i > 0){
+					foundItemString+=', ';
+				}
+				foundItemString+= newLootItem.qty() + "x <span class='"
+				+ ((newLootItem.hasQuality) ? newLootItem.quality() : "") + "'>" + newLootItem.name + "</span>"
 			}
 
 			if(self.level().getActiveSquare().type == 'exit'){
 				self.backButtonLabel("Onwards!");
 			}
 
-			self.manageTransitionToView("combat","container");
+			self.manageTransitionToView("combat","container", function(){ self.logMessage(foundItemString, "item"); });
 
 			self.level().drawMap();
 		}
@@ -3451,7 +3457,7 @@ CODE CHANGES:
 
 
 GAME IDEAS:
-- Make skill trainers cost less, OR improve base skill rather than progress (already done, I think)
+- Make skill trainers cost less, OR improve base skill rather than progress
 - Add intermittent passives?
 - Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
 - Add accessory armor slot, allow equipping items with +SPD or whatever

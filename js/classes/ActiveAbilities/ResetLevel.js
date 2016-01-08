@@ -12,7 +12,7 @@ define([
 		ActiveAbility.call(this, data);
 
 		this.init = function(data){
-
+			self.canTrainNextLevel(0);
 		}
 
 		this.makeProgress = function(){
