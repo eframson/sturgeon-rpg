@@ -308,7 +308,7 @@ define([
 				actualItem : ko.observable(undefined),
 			});
 			self.activeSkill = ko.observable(undefined);
-			self.arrowKeysControlPlayerPos = ko.observable(true);
+			self.wasdKeysControlPlayerPos = ko.observable(true);
 			self.rightColContent = ko.observable("equipment");
 			self.freezeMovement = ko.observable(false);
 			self.currentContainer = new ItemCollection(Array());
@@ -639,8 +639,8 @@ define([
 
 		this.initPrefs = function(prefData){
 			if(prefData != undefined){
-				if( prefData.arrowKeysControlPlayerPos !== undefined ){
-					self.arrowKeysControlPlayerPos(prefData.arrowKeysControlPlayerPos);
+				if( prefData.wasdKeysControlPlayerPos !== undefined ){
+					self.wasdKeysControlPlayerPos(prefData.wasdKeysControlPlayerPos);
 				}
 				if( prefData.quickEatPriority !== undefined ){
 					self.quickEatPriority(prefData.quickEatPriority);
@@ -683,7 +683,7 @@ define([
 				self.rightColContent(gameData.rightColContent);
 				self.isNew(gameData.isNew);
 				self.logMessages(gameData.logMessages);
-				self.arrowKeysControlPlayerPos(gameData.arrowKeysControlPlayerPos);
+				self.wasdKeysControlPlayerPos(gameData.wasdKeysControlPlayerPos);
 				self.freezeMovement(gameData.freezeMovement);
 				self.backButtonLabel(gameData.backButtonLabel);
 				self.playerHpBarWidth(gameData.playerHpBarWidth);
@@ -2587,7 +2587,7 @@ define([
 
 		this.getPrefData = function(){
 			var exportObj = {
-				arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
+				wasdKeysControlPlayerPos : self.wasdKeysControlPlayerPos(),
 				quickEatPriority : self.quickEatPriority(),
 				autoSaveBeforeBosses : self.autoSaveBeforeBosses(),
 				monsterSquareRates : self.monsterSquareRates(),
@@ -2615,7 +2615,7 @@ define([
 						fullScreenContent 	: self.fullScreenContent(),
 						isNew				: self.isNew(),
 						logMessages			: self.logMessages(),
-						arrowKeysControlPlayerPos : self.arrowKeysControlPlayerPos(),
+						wasdKeysControlPlayerPos : self.wasdKeysControlPlayerPos(),
 						freezeMovement		: self.freezeMovement(),
 						backButtonLabel : self.backButtonLabel(),
 						currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
@@ -3445,8 +3445,7 @@ GAME CHANGES:
 
 
 UI CHANGES:
-- If WASD is set to "no", arrow keys instead (change wording to make this apparent)
-- Make item names colored based on quality in merchant view
+
 
 CODE CHANGES:
 

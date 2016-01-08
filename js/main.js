@@ -63,7 +63,7 @@ require([
 		ko.applyBindings(game);
 		
 		$(document).keydown(function(e){
-			if( game.arrowKeysControlPlayerPos() == true ){
+			if( game.wasdKeysControlPlayerPos() == true ){
 
 				if(e.keyCode == 65){
 					game.aAction();
@@ -78,6 +78,16 @@ require([
 				}
 				
 				//Put shortcut for i = inventory, c = view stats
+			}else{
+				if(e.keyCode == 37){
+					game.aAction();
+				}else if(e.keyCode == 38){
+					game.wAction();
+				}else if(e.keyCode == 39){
+					game.dAction();
+				} else if(e.keyCode == 40){
+					game.sAction();
+				}
 			}
 		});
 

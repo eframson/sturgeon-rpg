@@ -370,10 +370,10 @@
 							<!-- start settings area -->
 							<div class="settings" data-bind="css: { hidden: leftColContent() != 'settings' }">
 								<div class="lines form-group">
-									<label for="arrowKeysControlPlayerPos">WASD keys control player movement:</label>
-									<select class="form-control" data-bind="value: arrowKeysControlPlayerPos" id="arrowKeysControlPlayerPos">
+									<label for="wasdKeysControlPlayerPos">WASD keys control player movement:</label>
+									<select class="form-control" data-bind="value: wasdKeysControlPlayerPos" id="wasdKeysControlPlayerPos">
 										<option value="1">Yes</option>
-										<option value="0">No</option>
+										<option value="0">No (Use arrow keys instead)</option>
 									</select>
 									<!--<input type="" id=""/>-->
 								</div>
@@ -449,7 +449,7 @@
 									</div>
 									<button type="button" class="btn btn-default down" data-bind="click: $root.movePlayerDown">Downstream</button>
 									<!--<div class="arrow-keys-checkbox">
-										<input type="checkbox" data-bind="checked: arrowKeysControlPlayerPos" />WASD keys control player movement
+										<input type="checkbox" data-bind="checked: wasdKeysControlPlayerPos" />WASD keys control player movement
 									</div>-->
 								</div>
 							</div>
@@ -790,7 +790,7 @@
 
 								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
-										<span class="item" data-bind="text: $data.name"></span>
+										<span class="item" data-bind="html: '<span class=\'' + ($data.hasQuality ? $data.quality() : '') + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
 									</div>
 								</div>
@@ -818,7 +818,7 @@
 
 								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
-										<span class="item" data-bind="text: $data.name"></span>
+										<span class="item" data-bind="html: '<span class=\'' + ($data.hasQuality ? $data.quality() : '') + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
 										<span class="qty" data-bind="text: ( $root.player().hasPassiveAbility('improved_barter') ? Math.floor($data.buyValue() / 2) : $data.buyValue() ) + ' GP'"></span>
 									</div>
 								</div>
