@@ -15,6 +15,10 @@ define([
 
 		}
 
+		this.makeProgress = function(){
+			return false;
+		}
+
 		this.doOnLevelUp = function(){
 			return false;
 		}

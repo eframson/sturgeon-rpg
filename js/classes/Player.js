@@ -506,7 +506,23 @@ define([
 
 			$.each(self.activeAbilities(), function(idx, ability){
 
-				ability.makeProgress();
+				trackChanges[ability.id] = {};
+
+				trackChanges[ability.id].resetProgressOnSkillLevelUp = ability.resetProgressOnSkillLevelUp;
+				trackChanges[ability.id].name = ability.name;
+
+				trackChanges[ability.id].oldSkillLevel = ability.skillLevel();
+				trackChanges[ability.id].oldProgress = ability.skillProgress();
+
+				ability.makeProgress(0);
+
+				if(ability.didLevelUp){ //Did we actually improve our skill (i.e. - we're not maxed out)
+					ability.didLevelUp = 0; //Clear this out
+					trackChanges[ability.id].newSkillLevel = ability.skillLevel();	
+				}
+				if(ability.skillProgress() != trackChanges[ability.id].oldSkillLevel){
+					trackChanges[ability.id].newProgress = ability.skillProgress();
+				}
 
 			});
 
@@ -574,7 +590,7 @@ define([
 			self.hp(restoreHpTo);
 
 			var abilityGains = self.progressActiveAbilities();
-			trackChanges = $.extend(trackChanges, abilityGains);
+			trackChanges.abilityGains = abilityGains;
 
 			var endGain = 1,
 				strGain = 1,
@@ -584,6 +600,7 @@ define([
 				perkPointGain = 1;
 
 			self.end( self.end() + 1 );
+			trackChanges.endGain = endGain;
 
 			if( self.level() % 3 == 0){
 				self.str( self.str() + 1 );

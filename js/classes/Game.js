@@ -2789,34 +2789,60 @@ define([
 				keyboard: false
 			}
 
+			var trackChanges = self.player().levelUpChanges;
+
 			//Prepare our stat notification
 			var statChanges = '';
 
-			statChanges += ( self.player().hasPassiveAbility("improved_hp_leveling") ? 'Your HP has been fully restored' : 'Up to half of your max HP has been restored' );
-			statChanges += '<br/>Your max HP has increased by ' + ( self.player().hasPassiveAbility("improved_hp_leveling") ? 10 : 5 );
-			statChanges += '<br/>Your Endurance (END) has increased by 1';
+			if(trackChanges.hpRestored !== undefined && trackChanges.hpRestored > 0){
+				if(self.player().hasPassiveAbility("improved_hp_leveling")){
+					statChanges += 'Your HP has been fully restored';
+				}else{
+					statChanges += 'You have healed up to half of your total HP (gained +' + trackChanges.hpRestored + ' points)';
+				}
+			}
+
+			if(trackChanges.baseHp !== undefined && trackChanges.baseHp > 0){
+				statChanges += '<br/>Your base HP has increased by ' + trackChanges.baseHp;
+			}
+
+			if(trackChanges.endGain !== undefined && trackChanges.endGain > 0){
+				statChanges += '<br/>Your Endurance (END) has increased by ' + trackChanges.endGain;
+			}
 
 			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
 			self.playerHpBarWidth(playerHpBarWidth);
 
-			if( self.player().level() % 3 == 0){
-				statChanges += '<br/>Your Strength (STR) has increased by 1';
-				statChanges += '<br/>Your Dexterity (DEX) has increased by 1';
-			}
-			if( self.player().level() % 4 == 0){
-				statChanges += '<br/>Your Speed (SPD) has increased by 1';
-				statChanges += '<br/>Your Inventory capacity has increased by 1';
-				statChanges += '<br/>You have 1 new perk point to spend';
+			if(trackChanges.strGain !== undefined && trackChanges.strGain > 0){
+				statChanges += '<br/>Your Strength (STR) has increased by ' + trackChanges.strGain;
 			}
 
-			$.each(self.player().activeAbilities(), function(idx, ability){
+			if(trackChanges.dexGain !== undefined && trackChanges.dexGain > 0){
+				statChanges += '<br/>Your Dexterity (DEX) has increased by ' + trackChanges.dexGain;
+			}
 
-				if(ability.canLevelUp){
-					ability.levelUp();
-					statChanges += '<br/>Your ' + ability.name + ' ability has leveled up!';
+			if(trackChanges.spdGain !== undefined && trackChanges.spdGain > 0){
+				statChanges += '<br/>Your Speed (SPD) has increased by ' + trackChanges.spdGain;
+			}
+
+			if(trackChanges.inventorySlotGain !== undefined && trackChanges.inventorySlotGain > 0){
+				statChanges += '<br/>Your Inventory capacity has increased by ' + trackChanges.inventorySlotGain;
+			}
+
+			if(trackChanges.perkPointGain !== undefined && trackChanges.perkPointGain > 0){
+				statChanges += '<br/>You have gained ' + trackChanges.perkPointGain + ' new Perk Point to spend!';
+			}
+
+			if(trackChanges.abilityGains !== undefined){
+				for (var ability_id in trackChanges.abilityGains) {
+					if(trackChanges.abilityGains[ability_id].newSkillLevel !== undefined){
+						//We leveled up
+						statChanges += '<br/>Your ' + trackChanges.abilityGains[ability_id].name + ' ability has leveled up!';
+					}else if(trackChanges.abilityGains[ability_id].newProgress !== undefined){
+						statChanges += '<br/>Progress in your ' + trackChanges.abilityGains[ability_id].name + ' ability has increased to ' + trackChanges.abilityGains[ability_id].newProgress;
+					}
 				}
-
-			});
+			}
 
 			//self.showModalClose(false);
 
@@ -3348,7 +3374,13 @@ define([
 			self.level().hideMap();
 		}
 
-		this.testLevelUp = function(numLevels){
+		this.testLevelUp = function(){
+			self.player().level( self.player().level() + 1 );
+			self.player().levelUp();
+			self.showLevelUpModal();
+		}
+
+		this.testAddLevels = function(numLevels){
 			numLevels = numLevels || 10;
 			for(var i = 0; i < 10; i++){
 				self.player().level( self.player().level() + 1 );
@@ -3404,6 +3436,7 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
+- Multiple items selected simultaneously in merchant
 - Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
@@ -3412,10 +3445,11 @@ GAME CHANGES:
 
 
 UI CHANGES:
-- Rely on player().levelUpChanges to show actual changes on level up
+- If WASD is set to "no", arrow keys instead (change wording to make this apparent)
+- Make item names colored based on quality in merchant view
 
 CODE CHANGES:
-- Track skill increases cause by level ups (extend self.levelUpChanges)
+
 
 GAME IDEAS:
 - Make skill trainers cost less, OR improve base skill rather than progress (already done, I think)
@@ -3447,6 +3481,9 @@ UI IDEAS:
 - Keyboard shortcuts for "continue" buttons
 
 CODE IDEAS:
+- Fix testAddLevel function so it properly increases skill progress
+- Put a cap on leveling
+- Conditionally force CSS clearing
 - Remove or comment-out now-deprecated reset stone references
 - Save game version in localstorage; When loading, if version is different from current version, reload JSON files + classes from src
 - Prevent enemy HP from going below 0 (maybe)
