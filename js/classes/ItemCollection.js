@@ -92,7 +92,7 @@ define([
 			var newQty = 0;
 
 			//If it's a new item or it's not stackable, we'll want to push it onto the array as a new item. Let's make sure we can do that
-			if(!existingItem || !itemToAdd.stackable){
+			if(!existingItem || (!itemToAdd.stackable && !self.opts.ignoreStackable)){
 
 				if(extraCanAddCheck && typeof extraCanAddCheck === 'function'){
 					canAdd = extraCanAddCheck();

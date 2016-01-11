@@ -312,8 +312,8 @@ define([
 			self.rightColContent = ko.observable("equipment");
 			self.freezeMovement = ko.observable(false);
 			self.currentContainer = new ItemCollection(Array());
-			self.acquiredItems = new ItemCollection(Array());
-			self.soldItems = new ItemCollection(Array());
+			self.acquiredItems = new ItemCollection(Array(), { ignoreStackable : 1 });
+			self.soldItems = new ItemCollection(Array(), { ignoreStackable : 1 });
 			self.goldGained = ko.observable(0);
 			self.currentEnemy = ko.observable(undefined);
 			self.backButtonLabel = ko.observable("Back");
@@ -1439,7 +1439,6 @@ define([
 				10 : "stat",
 				5 : "inventory",
 			});
-			eventType = "trader";
 
 			if( self.eventSquareTypeOverride() !== undefined ){
 				eventType = self.eventSquareTypeOverride();
@@ -3040,10 +3039,6 @@ define([
 					30 : "event",
 				};
 			}
-
-			opts.genPercents = {
-				100 : "event"
-			};
 
 			$.extend(
 				opts,
