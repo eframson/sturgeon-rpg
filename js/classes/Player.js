@@ -108,14 +108,18 @@ define([
 			});
 
 			var itemArray = Array();
-			for(i = 0; i < data.inventory.length; i++){
-				if(data.inventory[i]._classNameForLoad){
-					itemArray.push(  eval("new " + data.inventory[i]._classNameForLoad +"(data.inventory[i])")  );
+			data.inventory = data.inventory || {};
+			data.inventory.items = data.inventory.items || [];
+			data.inventory.opts = data.inventory.opts || {};
+			for(i = 0; i < data.inventory.items.length; i++){
+				if(data.inventory.items[i]._classNameForLoad){
+					itemArray.push(  eval("new " + data.inventory.items[i]._classNameForLoad +"(data.inventory.items[i])")  );
 				}else{
-					itemArray.push( new Item(data.inventory[i]) );
+					itemArray.push( new Item(data.inventory.items[i]) );
 				}
 			}
 			self.inventory.items(itemArray);
+			self.inventory.opts = data.inventory.opts;
 
 			this.inventorySlotsOccupied = ko.computed(function(){
 				var slotsOccupied = 0;

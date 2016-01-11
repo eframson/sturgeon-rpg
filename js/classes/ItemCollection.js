@@ -4,13 +4,17 @@ define([
 	'classes/Item'
 ], function($, ko, Item){
 
-	function ItemCollection(items){
+	function ItemCollection(items, opts){
 		
 		var self = this;
 
 		items = items || Array();
 
+		opts = opts || {};
+
 		this.items = ko.observableArray(items);
+		this.opts = opts;
+		this.opts.ignoreStackable = this.opts.ignoreStackable || 0;
 
 		//It would be nice if we could add this function just to the instance of ko
 		//returned by this class rather than the global ko obj, but we'll see...
@@ -25,6 +29,15 @@ define([
 				if( itemID == items[i].id ){
 					return items[i];
 				}
+			}
+			return false;
+
+		}
+
+		this.getItemByIdx = function(idx){
+
+			if( self.items()[idx] !== undefined ){
+				return self.items()[idx];
 			}
 			return false;
 
@@ -161,13 +174,24 @@ define([
 			return filteredArray;
 		}
 
+		this.length = function(){
+			return self.items().length;
+		}
+
+		this.getItems = function(){
+			return self.items();
+		}
+
 		this.getExportData = function(){
 
-			var exportObj = [];
+			var exportObj = {};
+			exportObj.items = [];
 			
 			$.each( self.items(), function(idx, elem){
-				exportObj.push( elem.getExportData() );
+				exportObj.items.push( elem.getExportData() );
 			});
+
+			exportObj.opts = self.opts;
 
 			/*var exportObj = {};
 

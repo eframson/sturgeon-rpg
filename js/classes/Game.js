@@ -312,6 +312,9 @@ define([
 			self.rightColContent = ko.observable("equipment");
 			self.freezeMovement = ko.observable(false);
 			self.currentContainer = new ItemCollection(Array());
+			self.acquiredItems = new ItemCollection(Array());
+			self.soldItems = new ItemCollection(Array());
+			self.goldGained = ko.observable(0);
 			self.currentEnemy = ko.observable(undefined);
 			self.backButtonLabel = ko.observable("Back");
 			self.isNew = ko.observable(true);
@@ -490,21 +493,21 @@ define([
 										buttons.push({
 											css: defaultCss,
 											text: "<< Take 1x",
-											click: self.dropActiveItem
+											click: self.moveActiveItem
 										});
 									}
 
 									buttons.push({
 										css: defaultCss,
 										text: "<< Take All",
-										click: self.dropAllActiveItem
+										click: self.moveAllActiveItem
 									});
 
 								}else if(actualItem.qty() == 1){
 									buttons.push({
 										css: defaultCss,
 										text: "<< Take",
-										click: self.dropActiveItem
+										click: self.moveActiveItem
 									});
 								}
 
@@ -517,13 +520,13 @@ define([
 										buttons.push({
 											css: defaultCss,
 											text: "Put 1x >>",
-											click: self.dropActiveItem
+											click: self.moveActiveItem
 										});
 
 										buttons.push({
 											css: defaultCss,
 											text: "Put All >>",
-											click: self.dropAllActiveItem
+											click: self.moveAllActiveItem
 										});
 
 									}else if( actualItem.qty() == 1 ){
@@ -531,7 +534,7 @@ define([
 										buttons.push({
 											css: defaultCss,
 											text: "Put >>",
-											click: self.dropActiveItem
+											click: self.moveActiveItem
 										});
 
 									}
@@ -547,20 +550,20 @@ define([
 								buttons.push({
 									css: defaultCss,
 									text: "Drop 1x",
-									click: self.dropActiveItem
+									click: self.moveActiveItem
 								});
 
 								buttons.push({
 									css: defaultCss,
 									text: "Drop All",
-									click: self.dropAllActiveItem
+									click: self.moveAllActiveItem
 								});
 
 							}else if(actualItem.qty() == 1){
 								buttons.push({
 									css: defaultCss,
 									text: "Drop",
-									click: self.dropActiveItem
+									click: self.moveActiveItem
 								});
 							}
 
@@ -688,20 +691,44 @@ define([
 				self.backButtonLabel(gameData.backButtonLabel);
 				self.playerHpBarWidth(gameData.playerHpBarWidth);
 				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
+				self.goldGained(gameData.goldGained);
 
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
 				}
 
 				var itemArray = Array();
-				for(i = 0; i < gameData.currentContainer.length; i++){
-					if(gameData.currentContainer[i]._classNameForLoad){
-						itemArray.push(  eval("new " + gameData.currentContainer[i]._classNameForLoad +"(gameData.currentContainer[i])")  );
+				for(i = 0; i < gameData.currentContainer.items.length; i++){
+					if(gameData.currentContainer.items[i]._classNameForLoad){
+						itemArray.push(  eval("new " + gameData.currentContainer.items[i]._classNameForLoad +"(gameData.currentContainer.items[i])")  );
 					}else{
-						itemArray.push( new Item(gameData.currentContainer[i]) );
+						itemArray.push( new Item(gameData.currentContainer.items[i]) );
 					}
 				}
 				self.currentContainer.items(itemArray);
+				self.currentContainer.opts = gameData.currentContainer.opts;
+
+				var acquiredItemArray = Array();
+				for(i = 0; i < gameData.acquiredItems.items.length; i++){
+					if(gameData.acquiredItems.items[i]._classNameForLoad){
+						acquiredItemArray.push(  eval("new " + gameData.acquiredItems.items[i]._classNameForLoad +"(gameData.acquiredItems.items[i])")  );
+					}else{
+						acquiredItemArray.push( new Item(gameData.acquiredItems.items[i]) );
+					}
+				}
+				self.acquiredItems.items(acquiredItemArray);
+				self.acquiredItems.opts = gameData.acquiredItems.opts;
+
+				var soldItemArray = Array();
+				for(i = 0; i < gameData.soldItems.items.length; i++){
+					if(gameData.soldItems.items[i]._classNameForLoad){
+						soldItemArray.push(  eval("new " + gameData.soldItems.items[i]._classNameForLoad +"(gameData.acquiredItems.items[i])")  );
+					}else{
+						soldItemArray.push( new Item(gameData.soldItems.items[i]) );
+					}
+				}
+				self.soldItems.items(soldItemArray);
+				self.soldItems.opts = gameData.soldItems.opts;
 
 			}else{
 
@@ -831,6 +858,8 @@ define([
 					self.freezeMovement(false);
 				});
 			}
+
+			self.logAnyAcquiredOrSoldItems();
 
 			self.activeSkill(undefined);
 
@@ -1410,6 +1439,7 @@ define([
 				10 : "stat",
 				5 : "inventory",
 			});
+			eventType = "trader";
 
 			if( self.eventSquareTypeOverride() !== undefined ){
 				eventType = self.eventSquareTypeOverride();
@@ -2055,6 +2085,9 @@ define([
 				//Add to inventory
 				moveTo.addItem(newItem);
 
+				//Keep track of it in our "acuired items" collection
+				self.acquiredItems.addItem(newItem);
+
 			}
 
 		}
@@ -2086,6 +2119,9 @@ define([
 				//Add to inventory
 				moveTo.addItem(newItem);
 
+				//Keep track of it in our "acuired items" collection
+				self.acquiredItems.addItem(newItem);
+
 			}
 
 		}
@@ -2099,6 +2135,7 @@ define([
 
 			var gold = self.getAvailableItemById("gold", "misc", (qty * item.sellValue()) );
 			goldItem = new Item(gold);
+			self.goldGained( self.goldGained() + goldItem.qty() );
 
 			var newItem = Utils.cloneObject(item);
 			newItem.qty(qty);
@@ -2112,6 +2149,7 @@ define([
 			//Add to inventory
 			moveTo.addItem(newItem);
 			moveFrom.addItem(goldItem);
+			self.soldItems.addItem(newItem);
 		}
 
 		this.sellAllActiveItem = function(game, event){
@@ -2332,6 +2370,9 @@ define([
 				//Add to inventory
 				tarCollection.addItem(newItem);
 
+				//Keep track of it in our "acuired items" collection
+				self.acquiredItems.addItem(newItem);
+
 			}else if ( moveFrom == "inventory" ){
 
 				if(srcNumLeft == 0){
@@ -2346,13 +2387,13 @@ define([
 
 		}
 
-		this.dropActiveItem = function(game, event){
+		this.moveActiveItem = function(game, event){
 
 			self._dropActiveItem(game, event, 1);
 
 		}
 
-		this.dropAllActiveItem = function(game, event){
+		this.moveAllActiveItem = function(game, event){
 
 			self._dropActiveItem(game, event, "all");
 
@@ -2521,6 +2562,57 @@ define([
 			$(".message-log").stop(false, true).effect("highlight", { color: "#BEBEBE" }, 400);
 		}
 
+		this.logAnyAcquiredOrSoldItems = function(){
+
+			var acquiredItemsLength = self.acquiredItems.length();
+			var soldItemsLength = self.soldItems.length();
+			var foundItemString = '';
+
+			if(acquiredItemsLength > 0){
+
+				foundItemString = 'You obtain: ';
+				
+				foundItemString += self._assembleLogMessageStringFromItemCollection(self.acquiredItems);
+
+				self.logMessage(foundItemString);
+
+			}
+			if(soldItemsLength > 0){
+				self.goldGained();
+				foundItemString = 'You gain ' + self.goldGained() + ' gold from the sale of: ';
+				
+				foundItemString += self._assembleLogMessageStringFromItemCollection(self.soldItems);
+
+				self.logMessage(foundItemString);
+			}
+
+			//Clear everything out
+			self.acquiredItems.removeAll();
+			self.soldItems.removeAll();
+			self.goldGained(0);
+		}
+
+		this._assembleLogMessageStringFromItemCollection = function(itemArray){
+			var itemArrayLength = itemArray.length();
+			
+			var foundItemString = '';
+			var foundItem;
+
+			for(var i=0; i < itemArrayLength; i++){
+				foundItem = itemArray.getItemByIdx(i);
+				
+				if( i == (itemArrayLength - 1) && itemArrayLength > 1){
+					foundItemString+=', and ';
+				}else if(i > 0 && itemArrayLength > 1){
+					foundItemString+=', ';
+				}
+				foundItemString+= foundItem.qty() + "x <span class='"
+				+ ((foundItem.hasQuality) ? foundItem.quality() : "") + "'>" + foundItem.name + "</span>"
+			}
+
+			return foundItemString;
+		}
+
 		this.getLevelById = function(id){
 			for(i = 0; i < self.levels().length; i++){
 				if( id == self.levels()[i].levelID() ){
@@ -2626,8 +2718,11 @@ define([
 						backButtonLabel : self.backButtonLabel(),
 						currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
 						currentContainer : self.currentContainer.getExportData(),
+						acquiredItems : self.acquiredItems.getExportData(),
+						soldItems : self.soldItems.getExportData(),
 						playerHpBarWidth : self.playerHpBarWidth(),
 						enemyHpBarWidth : self.enemyHpBarWidth(),
+						goldGained : self.goldGained(),
 					}
 				);
 
@@ -2945,6 +3040,10 @@ define([
 					30 : "event",
 				};
 			}
+
+			opts.genPercents = {
+				100 : "event"
+			};
 
 			$.extend(
 				opts,
