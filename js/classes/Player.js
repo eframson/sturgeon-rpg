@@ -109,6 +109,14 @@ define([
 
 			var itemArray = Array();
 			data.inventory = data.inventory || {};
+
+			var items;
+			if(data.inventory.items == undefined && data.inventory.length > 0){
+				items = data.inventory;
+				data.inventory = {};
+				data.inventory.items = items;
+			}
+
 			data.inventory.items = data.inventory.items || [];
 			data.inventory.opts = data.inventory.opts || {};
 			for(i = 0; i < data.inventory.items.length; i++){

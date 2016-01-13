@@ -697,6 +697,13 @@ define([
 					self.currentEnemy(new Monster(gameData.currentEnemy));
 				}
 
+				var items;
+				if(gameData.currentContainer.items == undefined && gameData.currentContainer.length > 0){
+					items = gameData.currentContainer;
+					gameData.currentContainer = {};
+					gameData.currentContainer.items = items;
+				}
+
 				var itemArray = Array();
 				for(i = 0; i < gameData.currentContainer.items.length; i++){
 					if(gameData.currentContainer.items[i]._classNameForLoad){
@@ -705,8 +712,15 @@ define([
 						itemArray.push( new Item(gameData.currentContainer.items[i]) );
 					}
 				}
+
 				self.currentContainer.items(itemArray);
 				self.currentContainer.opts = gameData.currentContainer.opts;
+
+				if(gameData.acquiredItems.items == undefined && gameData.acquiredItems.length > 0){
+					items = gameData.acquiredItems;
+					gameData.acquiredItems = {};
+					gameData.acquiredItems.items = items;
+				}
 
 				var acquiredItemArray = Array();
 				for(i = 0; i < gameData.acquiredItems.items.length; i++){
@@ -718,6 +732,12 @@ define([
 				}
 				self.acquiredItems.items(acquiredItemArray);
 				self.acquiredItems.opts = gameData.acquiredItems.opts;
+
+				if(gameData.soldItems.items == undefined && gameData.soldItems.length > 0){
+					items = gameData.soldItems;
+					gameData.soldItems = {};
+					gameData.soldItems.items = items;
+				}
 
 				var soldItemArray = Array();
 				for(i = 0; i < gameData.soldItems.items.length; i++){
@@ -3548,6 +3568,7 @@ UI CHANGES:
 
 
 CODE CHANGES:
+- Don't store data collections on object instances when saving
 
 
 GAME IDEAS:
