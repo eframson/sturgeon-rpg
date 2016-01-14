@@ -2,10 +2,11 @@ define([
 	'jquery',
 	'knockout',
 	'classes/DataCollection',
+	'classes/SaveableObject',
 
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, DataCollection, skillDataFile, Utils){
+], function($, ko, DataCollection, SaveableObject, skillDataFile, Utils){
 
 	function Entity(data){
 
@@ -15,6 +16,8 @@ define([
 		data.cooldowns = data.cooldowns || {};
 
 		var skillDataCollection = new DataCollection(skillDataFile);
+
+		SaveableObject.call(this);
 
 		this.init = function(data){
 
@@ -183,6 +186,7 @@ define([
 		self.init(data);
 	}
 
+	Entity.prototype = Object.create(SaveableObject.prototype);
 	Entity.prototype.constructor = Entity;
 
 	return Entity;

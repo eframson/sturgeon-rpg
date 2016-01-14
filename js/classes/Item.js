@@ -1,10 +1,13 @@
 define([
 	'jquery',
 	'knockout',
+	'classes/SaveableObject',
 	'Utils'
-], function($, ko, Utils){
+], function($, ko, SaveableObject, Utils){
 
 	function Item(data){
+
+		SaveableObject.call(this);
 
 		if(data == undefined || data.type == undefined || data.name == undefined || data.id == undefined){
 			return false;
@@ -79,23 +82,6 @@ define([
 			return false;
 		});
 
-		this.getExportData = function(){
-
-			var exportObj = {};
-
-			exportObj._classNameForLoad = self.constructor.name;
-
-			for(prop in self){
-				if ( typeof self[prop] !== 'function' ){
-					exportObj[prop] = self[prop];
-				}else if (ko.isObservable(self[prop])) {
-					exportObj[prop] = self[prop]();
-				}
-			}
-
-			return exportObj;
-		}
-
 		this.applyUpgrade = function(){
 			//This should be overridden in a child class
 			self._applyUpgrade();
@@ -118,6 +104,7 @@ define([
 		console.log("I'm not being evaluated, am I?");
 	}*/
 
+	Item.prototype = Object.create(SaveableObject.prototype);
 	Item.prototype.constructor = Item;
 
 	return Item;

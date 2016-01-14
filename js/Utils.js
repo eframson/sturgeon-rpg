@@ -203,16 +203,40 @@ define([
 
 		getExportDataFromObject : function(obj){
 
-			var exportObj = {};
-			
-			for(prop in obj){
-				if ( typeof obj[prop] !== 'function' ){
-					exportObj[prop] = obj[prop];
-				}else if (ko.isObservable(obj[prop])) {
-					exportObj[prop] = obj[prop]();
+			var exportObj;
+
+			if(typeof obj == "string" || typeof obj == "number"){
+				exportObj = obj;
+			}else if(typeof obj == "object"){
+				if(Array.isArray(obj)){
+					exportObj = [];
+					for (i = 0; i < obj.length; i++){
+						exportObj.push(this.getExportDataFromObject(obj[i]));
+					}
+				}else{
+					exportObj = {};
+					if( obj.hasOwnProperty("getExportData") && typeof obj.getExportData == "function" ){
+						exportObj = this.getExportDataFromObject(obj.getExportData());
+					}else{
+						exportObj= {};
+						for(prop in obj){
+							exportObj[prop] = this.getExportDataFromObject(obj[prop]);
+						}
+					}
+					
+				}
+			}else if(typeof obj == "function"){
+				if(ko.isObservable(obj)){
+					exportObj = this.getExportDataFromObject(obj())
+				}else if(ko.isComputed(obj)){
+					//Do nothing if it's a computed function
+					exportObj = undefined;
+				}else{
+					//Do nothing if it's a regular function
+					exportObj = undefined;
 				}
 			}
-			
+
 			return exportObj;
 
 		},

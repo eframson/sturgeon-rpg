@@ -1,11 +1,14 @@
 define([
 	'jquery',
 	'knockout',
-], function($, ko){
+	'classes/SaveableObject',
+], function($, ko, SaveableObject){
 
 	function Ability(data){
 
 		var self = this;
+
+		SaveableObject.call(this);
 
 		this.init = function(data){
 			
@@ -22,7 +25,7 @@ define([
 
 		this.init(data);
 		
-		this.getExportData = function(){
+		/*this.getExportData = function(){
 			
 			var exportObj = {};
 			
@@ -35,9 +38,10 @@ define([
 			}
 			
 			return exportObj;
-		}
+		}*/
 	}
 
+	Ability.prototype = Object.create(SaveableObject.prototype);
 	Ability.prototype.constructor = Ability;
 
 	return Ability;

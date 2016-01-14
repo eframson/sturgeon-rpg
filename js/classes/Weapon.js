@@ -17,6 +17,10 @@ define([
 
 		GearItem.call(this, data);
 
+		this.noExportProps = [
+			"itemDataCollection"
+		];
+
 		this.init = function(data){
 			
 			self.level = ko.observable(data.level || 1);

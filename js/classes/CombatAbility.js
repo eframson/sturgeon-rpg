@@ -15,6 +15,8 @@ define([
 
 		LevelableAbility.call(this, data);
 
+		this.noExportProps.push("skillDataCollection");
+
 		this.init = function(data){
 
 			self.skillDataCollection = new DataCollection(skillDataFile);

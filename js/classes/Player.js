@@ -22,6 +22,8 @@ define([
 
 		Entity.call(this, data);
 
+		this.noExportProps.push("skillDataCollection");
+
 		this.init = function(data){
 
 			self.skillDataCollection = new DataCollection(skillDataFile);
@@ -650,64 +652,42 @@ define([
 			return toRestoreAmt;
 		}
 
-		this.getExportData = function(){
+		this.customSaveHandlers = {
+			"activeAbilities" : function(){
+				return self._exportAbilities("activeAbilities");
+			},
+			"combatAbilities" : function(){
+				return self._exportAbilities("combatAbilities");
+			},
+			"passiveAbilities" : function(){
+				return self._exportAbilities("passiveAbilities");
+			},
+			"combatEffects" : function(){
+				return self._exportAbilities("combatEffects");
+			},
+			"equipment" : function(){
 
+				var exportObj = Utils.getExportDataFromObject(self.equipment);
 
-			var exportObj = {};
-
-			exportObj._classNameForLoad = self.constructor.name;
-
-			for(prop in self){
-				if(prop != "inventory" && prop != "activeAbilities" && prop != "combatAbilities" && prop != "passiveAbilities" && prop != "combatEffects"){
-					if ( typeof self[prop] !== 'function' ){
-						exportObj[prop] = self[prop];
-					}else if (ko.isObservable(self[prop])) {
-						exportObj[prop] = self[prop]();
+				/*var exportObj = {};
+				for (prop in self.equipment){
+					if( !Utils.isEmptyObject(self.equipment[prop]) ){
+						exportObj[prop] = self.equipment[prop].getExportData();
+					}else{
+						exportObj[prop] = {};
 					}
-				}
+					
+				}*/
+				return exportObj;
 			}
+		}
 
-			exportObj.inventory = self.inventory.getExportData();
-
-			exportObj.activeAbilities = {};
-			$.each(self.activeAbilities(), function(idx, ability){
-
-				exportObj.activeAbilities[idx] = ability.getExportData();
-
+		this._exportAbilities = function(abilityKey){
+			var exportObj = {};
+			$.each(self[abilityKey](), function(idx, ability){
+				exportObj[idx] = ability.getExportData();
 			});
-
-			exportObj.combatAbilities = {};
-			$.each(self.combatAbilities(), function(idx, ability){
-
-				exportObj.combatAbilities[idx] = ability.getExportData();
-
-			});
-
-			exportObj.passiveAbilities = {};
-			$.each(self.passiveAbilities(), function(idx, ability){
-
-				exportObj.passiveAbilities[idx] = ability.getExportData();
-
-			});
-
-			exportObj.levelUpChanges = {};
-			for (var prop in self.levelUpChanges){
-				exportObj.levelUpChanges[prop] = self.levelUpChanges[prop];
-			}
-
-			return ko.mapping.toJS( exportObj );
-
-			/*var exportObj = {};
-
-			for (prop in self){
-				if(prop != "inventory"){
-					exportObj[prop] = self[prop];
-				}
-			}
-
-			exportObj.inventory = self.inventory.getExportData();
-
-			return ko.mapping.toJS( exportObj );*/
+			return exportObj;
 		}
 
 		this._instantiateObservableIfSet = function(obj, className){
