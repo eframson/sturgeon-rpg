@@ -258,10 +258,6 @@ define([
 			return Utils.chooseRandomly(availableArchetypeIds);
 		}
 
-		this.getExportData = function(){
-			return Utils.getExportDataFromObject(self);
-		}
-
 		self.init(monsterData);
 	}
 

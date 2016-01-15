@@ -1,10 +1,13 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/Item'
-], function($, ko, Item){
+	'classes/Item',
+	'classes/SaveableObject',
+], function($, ko, Item, SaveableObject){
 
 	function ItemCollection(items, opts){
+
+		SaveableObject.call(this);
 		
 		var self = this;
 
@@ -182,7 +185,7 @@ define([
 			return self.items();
 		}
 
-		this.getExportData = function(){
+		/*this.getExportData = function(){
 
 			var exportObj = {};
 			exportObj.items = [];
@@ -193,23 +196,12 @@ define([
 
 			exportObj.opts = self.opts;
 
-			/*var exportObj = {};
-
-			exportObj._classNameForLoad = self.constructor.name;
-
-			for(prop in self){
-				if ( typeof self[prop] !== 'function' ){
-					exportObj[prop] = self[prop];
-				}else if (ko.isObservable(self[prop])) {
-					exportObj[prop] = self[prop]();
-				}
-			}*/
-
 			return exportObj;
-		}
+		}*/
 
 	}
 
+	ItemCollection.prototype = Object.create(SaveableObject.prototype);
 	ItemCollection.prototype.constructor = ItemCollection;
 
 	return ItemCollection;

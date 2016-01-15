@@ -1,15 +1,16 @@
 define([
 	'jquery',
 	'knockout',
-
-	'Utils',
-], function($, ko){
+	'classes/SaveableObject',
+], function($, ko, SaveableObject){
 
 	var GridSquare = function(squareData){
 		
 		if(squareData == undefined || squareData.x == undefined || squareData.y == undefined){
 			return false;
 		}
+
+		SaveableObject.call(this);
 
 		var self = this;
 		this.x = squareData.x;
@@ -55,6 +56,9 @@ define([
 		}
 		
 	}
+
+	GridSquare.prototype = Object.create(SaveableObject.prototype);
+	GridSquare.prototype.constructor = GridSquare;
 
 	return GridSquare;
 

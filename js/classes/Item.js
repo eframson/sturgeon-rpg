@@ -7,11 +7,11 @@ define([
 
 	function Item(data){
 
-		SaveableObject.call(this);
-
 		if(data == undefined || data.type == undefined || data.name == undefined || data.id == undefined){
 			return false;
 		}
+
+		SaveableObject.call(this);
 
 		var self = this;
 
