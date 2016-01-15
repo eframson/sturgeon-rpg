@@ -585,6 +585,27 @@ define([
 				return 0;
 			});
 
+			self._quickEatFoodItem = ko.computed(function(){
+				var sortOrder = (self.quickEatPriority() == 'asc') ? 'ASC' : 'DESC' ;
+				var sortedFilteredItems = self.player().inventory.getSortedFilteredItems("isFood", 1, "qualityModifier", sortOrder);
+				var foodItem = 0;
+				if(sortedFilteredItems.length > 0){
+					foodItem = sortedFilteredItems[0];
+				}
+				return foodItem;
+			});
+
+			self.hpRestoredByQuickEat = ko.computed(function(){
+				var foodItem = self._quickEatFoodItem();
+				var hpToRestore = undefined;
+
+				if(foodItem){
+					hpToRestore = self[foodItem.quality() + 'HpRestore']();
+				}
+
+				return hpToRestore;
+			});
+			
 			self.unEquipNotice = ko.computed(function(){
 				if( self.activeItem().actualItem() && self.activeItem().actualItem().isEquippable ){
 					var actualItem = self.activeItem().actualItem();
@@ -2920,6 +2941,12 @@ define([
 				}else{
 					statChanges += 'You have healed up to half of your total HP (gained +' + trackChanges.hpRestored + ' points)';
 				}
+			}else if( trackChanges.hpRestored == undefined || trackChanges.hpRestored < 0 ){
+				if(self.player().hasPassiveAbility("improved_hp_leveling")){
+					statChanges += 'No HP was restored, as you are already at full health.';
+				}else{
+					statChanges += 'No HP was restored, as you are already at or above half health.';
+				}
 			}
 
 			if(trackChanges.baseHp !== undefined && trackChanges.baseHp > 0){
@@ -3568,7 +3595,6 @@ UI CHANGES:
 
 
 CODE CHANGES:
-- Don't store data collections on object instances when saving
 
 
 GAME IDEAS:
@@ -3585,7 +3611,6 @@ GAME IDEAS:
 
 UI IDEAS:
 - Show how much HP will be restored by quick-eating
-- More detail about how much HP was restored by leveling up
 - Make log filterable
 - Color code log
 - Add loot acquisition to log
@@ -3607,7 +3632,6 @@ CODE IDEAS:
 - Remove or comment-out now-deprecated reset stone references
 - Save game version in localstorage; When loading, if version is different from current version, reload JSON files + classes from src
 - Prevent enemy HP from going below 0 (maybe)
-- Standardize the way objects are saved (done already?) - one idea: either save props as "save these" list or "save all but these" list; check for <prop>SaveHandler method or something
 - Make Gold a "stat" rather than an inventory item?
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius - write test to see if it's actually faster
 - Write combat simulator for testing balancing stuff

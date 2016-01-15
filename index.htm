@@ -149,7 +149,7 @@
 												<button type="button" class="btn btn-default" data-bind="
 													css: { disabled: foodAvailableForQuickEat() == 0 || player().maxHp() == player().hp() },
 													click: quickEatFood,
-													text: 'Eat Food (' + (quickEatPriority() == 'asc' ? 'poorest' : 'best') + ' first)'">
+													text: 'Eat Food' + ( (hpRestoredByQuickEat() !== undefined) ? ' (+' + hpRestoredByQuickEat() + ' HP)' : '' )">
 												</button>
 											</div>
 										</div>
