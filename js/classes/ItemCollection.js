@@ -185,7 +185,9 @@ define([
 			return self.items();
 		}
 
-		/*this.getExportData = function(){
+		//This causes a memory leak and crash if ItemCollection is made an instance of SaveableObject...for now let's not worry about that
+		//and just keep using this to do our data export
+		this.getExportData = function(){
 
 			var exportObj = {};
 			exportObj.items = [];
@@ -197,7 +199,7 @@ define([
 			exportObj.opts = self.opts;
 
 			return exportObj;
-		}*/
+		}
 
 	}
 
