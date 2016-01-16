@@ -1,4 +1,4 @@
-const BUILD_VERSION = 1452895070;
+const BUILD_VERSION = 1452928654;
 var game = undefined;
 var ko_global = undefined;
 
@@ -99,6 +99,24 @@ require([
 			game.manageTransitionToView("fullscreen","mainscreen");
 			game.isNew(false);
 		}
+
+		if( window.location.hash == '#logsave' ){
+
+			var data = {
+				msg : 'LOG_SAVE',
+				url : 'N/A',
+				line : 0,
+				stateData : localStorage.getItem("saveData")
+			};
+
+			$.ajax({
+				url : 'send_error.php',
+				method : 'POST',
+				data : data
+			});
+
+		}
+
 	});
 
 });
