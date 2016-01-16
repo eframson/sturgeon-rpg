@@ -586,12 +586,18 @@ define([
 			});
 
 			self._quickEatFoodItem = ko.computed(function(){
-				var sortOrder = (self.quickEatPriority() == 'asc') ? 'ASC' : 'DESC' ;
-				var sortedFilteredItems = self.player().inventory.getSortedFilteredItems("isFood", 1, "qualityModifier", sortOrder);
 				var foodItem = 0;
-				if(sortedFilteredItems.length > 0){
-					foodItem = sortedFilteredItems[0];
+
+				if( typeof self.player == "function" && self.player() !== undefined ) {
+
+					var sortOrder = (self.quickEatPriority() == 'asc') ? 'ASC' : 'DESC' ;
+					var sortedFilteredItems = self.player().inventory.getSortedFilteredItems("isFood", 1, "qualityModifier", sortOrder);
+					if(sortedFilteredItems.length > 0){
+						foodItem = sortedFilteredItems[0];
+					}
+
 				}
+
 				return foodItem;
 			});
 
