@@ -1,4 +1,4 @@
-const BUILD_VERSION = 1452965247;
+const BUILD_VERSION = 1453066461;
 var game = undefined;
 var ko_global = undefined;
 
@@ -102,11 +102,13 @@ require([
 
 		if( window.location.hash == '#logsave' ){
 
+			var saveData = JSON.parse(localStorage.getItem("saveData"));
+
 			var data = {
 				msg : 'LOG_SAVE',
 				url : 'N/A',
 				line : 0,
-				stateData : localStorage.getItem("saveData")
+				stateData : JSON.stringify(saveData)
 			};
 
 			$.ajax({
