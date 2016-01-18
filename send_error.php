@@ -4,6 +4,10 @@ require 'PHPMailerAutoload.php';
 
 require 'vendor/autoload.php';
 
+$credFile = "../smtp.json";
+$credFileContents = file_get_contents($credFile);
+$jsonCreds = json_decode($credFileContents, true);
+
 if (isset($_POST['msg']) && isset($_POST['url']) && isset($_POST['line']))  {
 
 	//Email information
@@ -48,13 +52,13 @@ if (isset($_POST['msg']) && isset($_POST['url']) && isset($_POST['line']))  {
 		);
 
 		$mail->AuthType = 'XOAUTH2';
-		$mail->oauthUserEmail = "framsone@gmail.com";
-		$mail->oauthClientId = "169487615237-pr52dod2uq7q6c155o1ld0c5evfhaeu8.apps.googleusercontent.com";
-		$mail->oauthClientSecret = "k4bi3pBjtoB08okW71vX8eJA";
-		$mail->oauthRefreshToken = "1/PyzW4jS4ZfPeVhOw1JhKxqF922gstbDQXrM34Lt-GeY";
+		$mail->oauthUserEmail = $jsonCreds["smtpThree"];
+		$mail->oauthClientId = $jsonCreds["smtpFour"];
+		$mail->oauthClientSecret = $jsonCreds["smtpFive"];
+		$mail->oauthRefreshToken = $jsonCreds["smtpSix"];
 
-		$mail->Username = "framsone@gmail.com";
-		$mail->Password = "ECHOlima2387";
+		$mail->Username = $jsonCreds["smtpOne"];
+		$mail->Password = $jsonCreds["smtpTwo"];
 
 		$mail->setFrom('framsone@gmail.com');
 		$mail->addAddress('framsone@gmail.com');
