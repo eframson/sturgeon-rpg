@@ -301,6 +301,7 @@ define([
 				canUnEquip : ko.observable(0),
 				canBreakdown : ko.observable(0),
 				canUse : ko.observable(0),
+				canUseBtnDisabled : ko.observable(0),
 				canDrop : ko.observable(0),
 				canSell : ko.observable(0),
 				canBuy : ko.observable(0),
@@ -414,7 +415,10 @@ define([
 					//It's not actually dependent on the equipment screen, it just can't be used while trading with a merchant
 					if( self.activeItem().canUse() && self.rightColContent() != "merchant" ){
 						buttons.push({
-							css: defaultCss,
+							css: defaultCss + (
+								(self.activeItem().actualItem().isFood || self.activeItem().actualItem().id == "health_potion")
+									&& (self.player().hp() == self.player().maxHp()) ? ' disabled' : ''
+							),
 							text: "Use",
 							click: self.useActiveItem
 						});
@@ -3652,10 +3656,7 @@ GAME IDEAS:
 UI IDEAS:
 - Make log filterable
 - Color code log
-- Add loot acquisition to log
-- Color-code items to show quality (in log and in lists)
 - Make sure skills that cannot be leveled up are properly represented in list
-- Don't allow consumables to be eaten when HP is full (in inventory or combat screen)
 - Dynamic container name
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
