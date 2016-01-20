@@ -39,6 +39,14 @@ define([
 			//This should be overridden in a child class
 		}
 
+		this.doOnEquip = function(player){
+
+		}
+
+		this.doOnUnEquip = function(player){
+
+		}
+
 		this.init(data);
 	}
 

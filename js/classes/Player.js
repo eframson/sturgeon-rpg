@@ -8,11 +8,12 @@ define([
 	'classes/Armor',
 	'classes/Shield',
 	'classes/Weapon',
+	'classes/Accessory',
 	'classes/DataCollection',
 
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, DataCollection, skillDataFile, Utils){
+], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, Accessory, DataCollection, skillDataFile, Utils){
 
 	function Player(data){
 
@@ -41,12 +42,13 @@ define([
 					head : self._instantiateObservableIfSet(data.equipment.armor.head, Armor),
 					fin : self._instantiateObservableIfSet(data.equipment.armor.fin, Armor),
 					body : self._instantiateObservableIfSet(data.equipment.armor.body, Armor),
-					tail : self._instantiateObservableIfSet(data.equipment.armor.tail, Armor)
+					tail : self._instantiateObservableIfSet(data.equipment.armor.tail, Armor),
 
 				}),
 
 				weapon : self._instantiateObservableIfSet(data.equipment.weapon, Weapon),
 				shield : self._instantiateObservableIfSet(data.equipment.shield, Shield),
+				accessory : self._instantiateObservableIfSet(data.equipment.accessory, Accessory),
 			});
 
 			if(Utils.isEmptyObject(data.activeAbilities)){
@@ -103,6 +105,7 @@ define([
 			self.baseChanceToCrit = ko.observable(data.baseChanceToCrit || 5);
 			self.hasLeveledUp = ko.observable(data.hasLeveledUp || false);
 			self.availablePerkPoints = ko.observable(data.availablePerkPoints || 0);
+			self.baseArmor = ko.observable(data.baseArmor || 0);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
@@ -209,6 +212,8 @@ define([
 				if(self.hasPassiveAbility("armor_master")){
 					itemArmorValue = itemArmorValue * 2;
 				}
+
+				baseArmorValue += self.baseArmor();
 
 				return (baseArmorValue + itemArmorValue);
 			});
@@ -453,6 +458,10 @@ define([
 			return self._getShieldSlot()();
 		}
 
+		this.getEquippedAccessory = function(){
+			return self._getAccSlot()();
+		}
+
 		this.equipWeapon = function(item){
 			var existingItem = self._getWeaponSlot()();
 			self._getWeaponSlot()(item);
@@ -475,6 +484,13 @@ define([
 			self._getArmorSlot(slot)(item);
 		}
 
+		this.equipAccessory = function(item){
+			var existingItem = self.unEquipAccessory();
+			self._getAccSlot()(item);
+			item.doOnEquip(self);
+			return existingItem;
+		}
+
 		this.unEquipWeapon = function(item){
 			self._getWeaponSlot()({});
 		}
@@ -491,6 +507,16 @@ define([
 			self._getArmorSlot(slot)({});
 		}
 
+		this.unEquipAccessory = function(item){
+			var existingItem = self._getAccSlot()();
+			self._getAccSlot()({});
+			if( !Utils.isEmptyObject(existingItem) ){
+				existingItem.doOnUnEquip(self);
+				return existingItem;
+			}
+			return undefined;
+		}
+
 		this._getArmorSlot = function(slot){
 			return self.equipment().armor()[slot];
 		}
@@ -501,6 +527,10 @@ define([
 
 		this._getShieldSlot = function(){
 			return self.equipment().shield;
+		}
+
+		this._getAccSlot = function(slot){
+			return self.equipment().accessory;
 		}
 
 		this.addExp = function(xp){

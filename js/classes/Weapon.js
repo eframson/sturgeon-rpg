@@ -23,7 +23,6 @@ define([
 
 		this.init = function(data){
 			
-			self.level = ko.observable(data.level || 1);
 			self.dmgMin = ko.observable(data.dmgMin || 0);
 			self.dmgMax = ko.observable(data.dmgMax || 1);
 			self.handsRequired = data.handsRequired || 1;

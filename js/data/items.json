@@ -616,6 +616,20 @@
 
 		},
 
+		"accessory" : {
+
+			"acc_01" : {
+				"id" : "acc_01",
+				"name" : "Necklace of %accessoryStat%",
+				"type" : "accessory",
+				"desc" : "A fetching necklace that improves your %accessoryStat% by %accessoryStatAmt% when equipped.",
+				"slotsRequired" : 0,
+				"stackable" : 0,
+				"fullyDynamicStats" : 1
+			}
+
+		},
+
 		"armor" : {
 
 			"tail_armor_01" : {

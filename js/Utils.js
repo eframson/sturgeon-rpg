@@ -274,6 +274,42 @@ define([
 			return md5(this.microtime());
 		},
 
+		makeMagicReplacements : function(string, objectsToCheck) {
+
+			if(string == undefined || objectsToCheck == undefined || (Array.isArray(objectsToCheck) && objectsToCheck.length == 0) ){
+				return false;
+			}
+
+			if( !Array.isArray(objectsToCheck) ){
+				objectsToCheck = [objectsToCheck];
+			}
+
+			var magicDesc = string;
+			var matches = string.match(/%[^%]+%/g);
+
+			if(matches != undefined){
+				for(var i = 0; i < matches.length; i++){
+					var trimmedMatch = matches[i].replace(/%/g, "");
+
+					for(j = 0; j < objectsToCheck.length; j++){
+						var object = objectsToCheck[j];
+
+						if(object == undefined || object[trimmedMatch] == undefined){
+							continue;
+						}
+
+						if( typeof object[trimmedMatch] == "function" ){
+							magicDesc = magicDesc.replace("%" + trimmedMatch + "%", object[trimmedMatch]());
+						}else{
+							magicDesc = magicDesc.replace("%" + trimmedMatch + "%", object[trimmedMatch]);
+						}
+					}
+				}
+			}
+
+			return magicDesc;
+		},
+
 	}
 
 	String.prototype.toProperCase = function () {

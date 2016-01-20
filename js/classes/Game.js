@@ -8,6 +8,7 @@ define([
 	'classes/Weapon',
 	'classes/Armor',
 	'classes/Shield',
+	'classes/Accessory',
 	'classes/ItemCollection',
 	'classes/DataCollection',
 	'classes/Monster',
@@ -19,7 +20,7 @@ define([
 	'classes/Grid',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils, Grid) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, Accessory, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils, Grid) {
 
 	//Can these be knockout custom bindings? Some of them, surely...
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
@@ -1133,17 +1134,23 @@ define([
 
 			var numLoots = 1 + Math.floor(self.level().levelNum() / 4);
 			var newLootItem;
+			var thisItemString;
 			var foundItemString = 'You find: ';
 			self.currentContainer.removeAll(); //Make sure it's empty
 
 			for(var i=0; i < numLoots; i++){
+				thisItemString = '';
 				newLootItem = self.generateRandomLootItem(lootTable);
 				self.currentContainer.addItem(newLootItem);
 				if(i > 0){
-					foundItemString+=', ';
+					thisItemString = ', ';
 				}
-				foundItemString+= newLootItem.qty() + "x <span class='"
+				thisItemString = newLootItem.qty() + "x <span class='"
 				+ ((newLootItem.hasQuality) ? newLootItem.quality() : "") + "'>" + newLootItem.name + "</span>"
+
+				thisItemString = self._makeMagicReplacementsForItem(thisItemString, newLootItem);
+
+				foundItemString += thisItemString;
 			}
 
 			if(self.level().getActiveSquare().type == 'exit'){
@@ -1225,6 +1232,8 @@ define([
 
 			var messageString = "Inside " + container + " you find " + newItem.qty() + "x <span class='"
 				+ ((newItem.hasQuality) ? newItem.quality() : "") + "'>" + newItem.name + "</span>";
+
+			messageString = self._makeMagicReplacementsForItem(messageString, newItem);
 
 			if(numJustAdded != false && numJustAdded > 0){
 			//if(self.player().inventorySlotsAvailable() > -1){
@@ -1361,10 +1370,13 @@ define([
 			}else if(itemType == "gear"){
 
 				var gearType = Utils.doBasedOnPercent({
-					50 : [
+					40 : [
 						"armor",
 						"weapon",
 					],
+					20 : [
+						"accessory"
+					]
 
 				});
 
@@ -1387,7 +1399,7 @@ define([
 					var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
 					availableArmor = availableArmor.concat( self.getAvailableItemIdsByTypeForLevel("shield", self.level().levelNum()) );
 					armorId = Utils.chooseRandomly( availableArmor );
-					if(armorId == "shield_01" || armorId == "shield_02"){
+					if( armorId.indexOf("shield_") === 0 ){
 						itemClass = "shield";
 						itemToAdd = self.getAvailableItemById(armorId, "shield", 1);
 					}else{
@@ -1404,6 +1416,17 @@ define([
 					weaponId = Utils.chooseRandomly( availableWeapons );
 
 					itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
+
+				}else if( gearType == "accessory" ){
+
+					itemClass = "accessory";
+
+					var accId;
+
+					var availableAccessories = self.getAvailableItemIdsByTypeForLevel("accessory", self.level().levelNum());
+					accId = Utils.chooseRandomly( availableAccessories );
+
+					itemToAdd = self.getAvailableItemById(accId, "accessory", 1);
 
 				}
 
@@ -1427,6 +1450,8 @@ define([
 				newItem = new Shield(itemToAdd);
 			}else if(itemClass == "consumable"){
 				newItem = new Consumable(itemToAdd);
+			}else if(itemClass == "accessory"){
+				newItem = new Accessory(itemToAdd);
 			}else{
 				newItem = itemToAdd;
 			}
@@ -1920,9 +1945,9 @@ define([
 			var type = item.type;
 			if( type == "consumables" || (opts.canUse && opts.canUse == 1) ){
 				self.activeItem().canUse(1);
-			}else if ( (opts.moveDirection == "right" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canEquip && opts.canEquip == 1) ){
+			}else if ( (opts.moveDirection == "right" && item.canEquip) || (opts.canEquip && opts.canEquip == 1) ){
 				self.activeItem().canEquip(1);
-			}else if ( (self.rightColContent() == "equipment" && opts.moveDirection == "left" && (type == "armor" || type == "weapon" || type == "shield")) || (opts.canUnEquip && opts.canUnEquip == 1) ){
+			}else if ( (self.rightColContent() == "equipment" && opts.moveDirection == "left" && item.canEquip) || (opts.canUnEquip && opts.canUnEquip == 1) ){
 				self.activeItem().canUnEquip(1);
 			}
 
@@ -1969,6 +1994,8 @@ define([
 				alreadyEquippedItem = self.player().equipShield(item);
 			}else if(type == "armor"){
 				alreadyEquippedItem = self.player().equipArmor(item);
+			}else if(type == "accessory"){
+				alreadyEquippedItem = self.player().equipAccessory(item);
 			}
 
 			self.player().inventory.removeItem(item);
@@ -1977,7 +2004,6 @@ define([
 				//Skip the normal slot-checking logic to account for 2H weaps or 1H + shield combos
 				self.player().inventory.addItem(alreadyEquippedItem);
 				alreadyEquippedItem.isEquipped(false);
-				var equippedWeapon = self.player().getEquippedWeapon();
 			}
 
 			if( type == "weapon" && item.handsRequired == 2){ //We just equipped a 2H weapon, so unequip whatever shield we have equipped
@@ -2005,6 +2031,8 @@ define([
 				self.player().unEquipShield(item);
 			}else if(item.type == "armor"){
 				self.player().unEquipArmor(item);
+			}else if(item.type == "accessory"){
+				self.player().unEquipAccessory(item);
 			}
 
 			item.isEquipped(false);
@@ -2653,7 +2681,7 @@ define([
 					foundItemString+=', ';
 				}
 				foundItemString+= foundItem.qty() + "x <span class='"
-				+ ((foundItem.hasQuality) ? foundItem.quality() : "") + "'>" + foundItem.name + "</span>"
+				+ ((foundItem.hasQuality) ? foundItem.quality() : "") + "'>" +  Utils.makeMagicReplacements(foundItem.name, foundItem) + "</span>"
 			}
 
 			return foundItemString;
@@ -2668,20 +2696,28 @@ define([
 			return false;
 		}
 
-		this._makeMagicReplacements = function(string){
+		this._makeMagicReplacementsForItem = function(string, item){
+			return Utils.makeMagicReplacements(string, [self, item]);
+		}
 
-			var magicDesc = string;
-			var matches = string.match(/%[^%]+%/g);
-
-			if(matches != undefined){
-				for(var i = 0; i < matches.length; i++){
-					var trimmedMatch = matches[i].replace(/%/g, "");
-					magicDesc = magicDesc.replace("%" + trimmedMatch + "%", self[trimmedMatch]());
+		this._getHtmlDisplayStringForItem = function(item, context){
+			var displayString;
+			if(context == "equipment"){
+				if(item.name == undefined){
+					displayString = "None";
+				}else{
+					displayString = self._makeMagicReplacementsForItem('<span class=\'' + item.quality() + '\'>' + item.name + '</span>', item);
 				}
+			}else if(context == "inventory" || context == "merchant" || context == "container") {
+				displayString = self._makeMagicReplacementsForItem('<span class=\'' + (item.hasQuality ? item.quality() : '') + '\'>'
+					+ (item.namedItem && typeof item.namedItem === 'function' && item.namedItem() == 1
+						? '<em>' + item.name + '</em>'
+						: item.name
+					) + '</span>', item);
+			}else{
+
 			}
-
-			return magicDesc;
-
+			return displayString;
 		}
 
 		this._updateZoomSettings = function(){
@@ -3606,8 +3642,6 @@ CODE CHANGES:
 GAME IDEAS:
 - Make skill trainers cost less, OR improve base skill rather than progress
 - Add intermittent passives?
-- Log all items acquired (get inventory status when displaying merchant or loot screen, get status when leaving, log diffs?)
-- Add accessory armor slot, allow equipping items with +SPD or whatever
 - Should combat abilities level up + improve on use, same as active abilities?
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Battle arena event?
@@ -3616,12 +3650,12 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
-- Show how much HP will be restored by quick-eating
 - Make log filterable
 - Color code log
 - Add loot acquisition to log
 - Color-code items to show quality (in log and in lists)
 - Make sure skills that cannot be leveled up are properly represented in list
+- Don't allow consumables to be eaten when HP is full (in inventory or combat screen)
 - Dynamic container name
 - Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)

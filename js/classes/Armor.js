@@ -14,14 +14,11 @@ define([
 		GearItem.call(this, data);
 
 		this.init = function(data){
-			self.level = ko.observable(data.level || 1);
 			self.armorValue = ko.observable(data.armorValue || 0);
 			self.armorSlot = data.armorSlot || "body";
 			self.isArmor = true;
 			self.isEquippable = true;
 			self.pctOfAvgArmor = data.pctOfAvgArmor;
-
-			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 

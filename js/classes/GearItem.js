@@ -12,9 +12,12 @@ define([
 		data.canEquip = (data.canEquip !== undefined) ? data.canEquip : 1;
 		data.canBreakdown = (data.canBreakdown !== undefined) ? data.canBreakdown : 1;
 		data.canUpgrade = (data.canUpgrade !== undefined) ? data.canUpgrade : 1;
-		data.hasQuality = 1;
+		data.hasQuality = 1;		
 
 		Item.call(this, data);
+
+		self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
+		self.level = ko.observable(data.level || 1);
 
 		this.init = function(data){
 			self.upgradedWithScrapType = data.upgradedWithScrapType;
@@ -22,6 +25,14 @@ define([
 				return Math.round(self.buyValue() / 10);
 			});
 			self.namedItem = ko.observable(data.namedItem || 0);
+		}
+
+		this.doOnEquip = function(player){
+
+		}
+
+		this.doOnUnEquip = function(player){
+
 		}
 
 		this.init(data);

@@ -28,7 +28,7 @@
 		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
-		<link href="css/custom.css?cssBust=1453066461" rel="stylesheet">
+		<link href="css/custom.css?cssBust=1453328600" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -207,7 +207,7 @@
 									<!-- /ko -->
 									<!-- ko foreach: $root.player().inventory.items() -->
 									<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
-										<span class="item" data-bind="html: '<span class=\'' + ($data.hasQuality ? $data.quality() : '') + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
+										<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'inventory')"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
 									</div>
 									<!-- /ko -->
@@ -466,7 +466,7 @@
 
 								<div class="inner" data-bind="css: { hidden: activeItem().desc() == '', equipped: activeItem().actualItem() && activeItem().actualItem().isEquipped() == true }">
 
-									<div class="desc" data-bind="html: _makeMagicReplacements(activeItem().desc())"></div>
+									<div class="desc" data-bind="html: _makeMagicReplacementsForItem(activeItem().desc(), activeItem().actualItem() )"></div>
 
 									<!-- ko if: activeItem().actualItem() -->
 
@@ -726,44 +726,52 @@
 									<!-- ko with: $root.player().equipment().armor().head() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Head Armor:</span>
-											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().armor().fin() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Fin Armor:</span>
-											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().armor().body() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Body Armor:</span>
-											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().armor().tail() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Tail Armor:</span>
-											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().weapon() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Weapon:</span>
-											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
 										</div>
 									<!-- /ko -->
 
 									<!-- ko with: $root.player().equipment().shield() -->
 										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
 											<span class="slot">Shield:</span>
-											<span class="item" data-bind="html: (($data.name !== undefined) ? '<span class=\'' + $data.quality() + '\'>' + $data.name + '</span>' : 'None')"></span>
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
 										</div>
 									<!-- /ko -->
+
+									<!-- ko with: $root.player().equipment().accessory() -->
+										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+											<span class="slot">Accessory:</span>
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+										</div>
+									<!-- /ko -->
+
 
 								</div>
 
@@ -790,7 +798,7 @@
 
 								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
-										<span class="item" data-bind="html: '<span class=\'' + ($data.hasQuality ? $data.quality() : '') + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
+										<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'container')"></span>
 										<span class="qty" data-bind="text: $data.qty()"></span>
 									</div>
 								</div>
@@ -818,7 +826,7 @@
 
 								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
 									<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
-										<span class="item" data-bind="html: '<span class=\'' + ($data.hasQuality ? $data.quality() : '') + '\'>' + ($data.namedItem && typeof $data.namedItem === 'function' && $data.namedItem() == 1 ? '<em>' + $data.name + '</em>' : $data.name) + '</span>'"></span>
+										<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'merchant')"></span>
 										<span class="qty" data-bind="text: ( $root.player().hasPassiveAbility('improved_barter') ? Math.floor($data.buyValue() / 2) : $data.buyValue() ) + ' GP'"></span>
 									</div>
 								</div>
