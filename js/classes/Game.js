@@ -3629,6 +3629,8 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
+- Log displays extra, inaccurate messages when player loots item square + inventory is full
+- Log records incorrect number of items when they have been xferred back and forth
 - Multiple items selected simultaneously in merchant (cannot reproduce)
 - Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
@@ -3654,7 +3656,9 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
+- Automatically sort inventory
 - Make log filterable
+- Make inventory sortable
 - Color code log
 - Make sure skills that cannot be leveled up are properly represented in list
 - Dynamic container name

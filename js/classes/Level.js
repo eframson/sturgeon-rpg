@@ -221,8 +221,8 @@ define([
 			// Restore the transform
 			context.restore();
 
-			var lightFill = '#658DA6';
-			var darkFill = '#436073';
+			var lightFill = '#CAD2E4';
+			var darkFill = '#9AA8C7';
 			var playerColor = '#D36600';
 			var combatColor = '#FF8585';
 			var itemColor = '#FFE240';
@@ -238,7 +238,7 @@ define([
 
 				$.each(row, function(col_num, cell){
 
-					var fillStyle = "#EDEEF7";
+					var fillStyle = "#ECEFF6";
 					var fontStyle = false;
 					var square = self.getSquare(col_num, row_num);
 

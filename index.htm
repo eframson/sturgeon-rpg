@@ -28,7 +28,7 @@
 		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
-		<link href="css/custom.css?cssBust=1453330980" rel="stylesheet">
+		<link href="css/custom.css?cssBust=1453507289" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -194,22 +194,28 @@
 								<h3>Inventory (<span data-bind="css: { danger: player().inventorySlotsOccupied() > player().inventoryMaxSlots() }, text: player().inventorySlotsOccupied()"></span>/<span data-bind="text: player().inventoryMaxSlots()"></span> slots occupied)</h3>
 
 								<div class="lines">
+
+									<div class="container-ui-section-header-container">
+										<div class="line empty section-header">
+											<span class="item">Item</span>
+											<span class="qty">Qty</span>
+										</div>
+									</div>
+
 									<!-- ko if: $root.player().inventory.items().length == 0 || ($root.player().inventory.items().length == 1 && $root.player().gp() > 0) -->
 									<div class="line empty">
 										<span class="item">Your inventory is empty</span>
 									</div>
 									<!-- /ko -->
 									<!-- ko if: $root.player().inventory.items().length > 1 || ($root.player().inventory.items().length == 1 && $root.player().gp() == 0) -->
-									<div class="line empty section-header">
-										<span class="item">Item</span>
-										<span class="qty">Qty</span>
-									</div>
-									<!-- /ko -->
-									<!-- ko foreach: $root.player().inventory.items() -->
-									<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
-										<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'inventory')"></span>
-										<span class="qty" data-bind="text: $data.qty()"></span>
-									</div>
+										<div class="inventory-inner">
+											<!-- ko foreach: $root.player().inventory.items() -->
+											<div class="line" data-bind="click: $root.setInventoryItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data), hidden : $data.id == 'gold' }">
+												<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'inventory')"></span>
+												<span class="qty" data-bind="text: $data.qty()"></span>
+											</div>
+											<!-- /ko -->
+										</div>
 									<!-- /ko -->
 								</div>
 							</div>
@@ -783,25 +789,27 @@
 
 								<h3>Container</h3>
 
+									<div class="container-ui-section-header-container">
+										<div class="line empty section-header">
+											<span class="item">Item</span>
+											<span class="qty">Qty</span>
+										</div>
+									</div>
+
 								<!-- ko if: $root.currentContainer.items().length == 0 -->
-								<div class="line empty">
-									<span class="item">The container is empty</span>
-								</div>
+									<div class="line empty">
+										<span class="item">The container is empty</span>
+									</div>
 								<!-- /ko -->
 
 								<!-- ko if: $root.currentContainer.items().length > 0 -->
-								<div class="line empty section-header">
-									<span class="item">Item</span>
-									<span class="qty">Qty</span>
-								</div>
-								<!-- /ko -->
-
-								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
-									<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
-										<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'container')"></span>
-										<span class="qty" data-bind="text: $data.qty()"></span>
+									<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
+										<div class="line" data-bind="click: $root.setContainerItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'container')"></span>
+											<span class="qty" data-bind="text: $data.qty()"></span>
+										</div>
 									</div>
-								</div>
+								<!-- /ko -->
 
 							</div>
 							<!-- end loot container area -->
@@ -811,6 +819,13 @@
 
 								<h3>Merchant</h3>
 
+								<div class="container-ui-section-header-container">
+									<div class="line empty section-header">
+										<span class="item">Item</span>
+										<span class="qty">Cost</span>
+									</div>
+								</div>
+
 								<!-- ko if: $root.currentContainer.items().length == 0 -->
 								<div class="line empty">
 									<span class="item">The merchant has no goods for sale</span>
@@ -818,18 +833,13 @@
 								<!-- /ko -->
 
 								<!-- ko if: $root.currentContainer.items().length > 0 -->
-								<div class="line empty section-header">
-									<span class="item">Item</span>
-									<span class="qty">Cost</span>
-								</div>
-								<!-- /ko -->
-
-								<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
-									<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
-										<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'merchant')"></span>
-										<span class="qty" data-bind="text: ( $root.player().hasPassiveAbility('improved_barter') ? Math.floor($data.buyValue() / 2) : $data.buyValue() ) + ' GP'"></span>
+									<div class="container-ui-inner-container" data-bind="foreach: $root.currentContainer.items()">
+										<div class="line" data-bind="click: $root.setMerchantItemAsActiveItem, css: { selected: $root._shouldItemBeSelected($data) }">
+											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'merchant')"></span>
+											<span class="qty" data-bind="text: ( $root.player().hasPassiveAbility('improved_barter') ? Math.floor($data.buyValue() / 2) : $data.buyValue() ) + ' GP'"></span>
+										</div>
 									</div>
-								</div>
+								<!-- /ko -->
 
 							</div>
 							<!-- end merchant area -->
