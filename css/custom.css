@@ -684,15 +684,24 @@ button:focus {
 	overflow: hidden;
 }
 
-.combat.enemy .enemy-info {
-	/* background-color: #FFF5F5; */
-	/* background-color: #9D0A0E; */
-	background-color: #e07678;
-}
 .combat.player .player-info {
 	/* background-color: #DDEDDD; */
 	/* background-color: #748C4F; */
-	background-color: #c5dd9b;
+	/* background-color: #c5dd9b; */
+	background-color: #CAD2E4;
+	border-radius: 5px;
+	border: #9AA8C7 1px solid;
+	box-shadow: 1px 1px 7px #CAD2E4;
+}
+
+.combat.enemy .enemy-info {
+	/* background-color: #FFF5F5; */
+	/* background-color: #9D0A0E; */
+	/* background-color: #e07678; */
+	background-color: #C2DEDE;
+	border-radius: 5px;
+	border: #8CBBBB 1px solid;
+	box-shadow: 1px 1px 7px #C2DEDE;
 }
 
 .combat .lines, .combat .desc {
@@ -706,6 +715,22 @@ button:focus {
 
 .combat .lines.active-effects .line:not(.empty) {
 	cursor: pointer;
+}
+
+.combat .active-effects-section {
+	margin-top: 10px;
+	background-color: #FFF4DE;
+	border-radius: 5px;
+	border: #FFEABF 1px solid;
+	box-shadow: 1px 1px 7px #FFF4DE;
+}
+
+.combat .temporary-immunity-section {
+	margin-top: 10px;
+	background-color: #FDFFFF;
+	border-radius: 5px;
+	border: #E9F5F5 1px solid;
+	box-shadow: 1px 1px 7px #FDFFFF;
 }
 
 .combat .lines .hpbar {
@@ -722,6 +747,15 @@ button:focus {
 	text-align: center;
 	line-height: 22px; /* same as #progressBar height if we want text middle aligned */
 	width: 368px;
+	background-color: #ff3d3d;
+	text-shadow:
+		-1px -1px 0 #e8c2c2,
+		 1px -1px 0 #e8c2c2,
+		 -1px 1px 0 #e8c2c2,
+		  1px 1px 0 #e8c2c2;
+}
+
+.combat.player .lines .hpbar div {
 	background-color: #ff3d3d;
 	text-shadow:
 		-1px -1px 0 #e8c2c2,
