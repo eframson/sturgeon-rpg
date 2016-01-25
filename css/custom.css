@@ -442,21 +442,39 @@ button:focus {
 
 .inventory .lines .line:last-child,
 .container-ui .container-ui-inner-container:last-child,
-.merchant .container-ui-inner-container:last-child {
+.merchant .container-ui-inner-container:last-child,
+.known-skills .line:last-child,
+.available-skills .line:last-child {
 	border-bottom-right-radius: 5px;
 	border-bottom-left-radius: 5px;
 }
 
 .inventory .lines .line:first-child,
 .container-ui .container-ui-inner-container:first-child,
-.merchant .container-ui-inner-container:first-child {
+.merchant .container-ui-inner-container:first-child,
+.known-skills .line:first-child,
+.available-skills .line:first-child {
 	border-top-right-radius: 5px;
 	border-top-left-radius: 5px;
 }
 
+.known-skills .lines {
+	background-color: #CAD2E4;
+	border-radius: 5px;
+	border: #9AA8C7 1px solid;
+	box-shadow: 1px 1px 7px #CAD2E4;
+}
+
+.available-skills .lines {
+	background-color: #C2DEDE;
+	border-radius: 5px;
+	border: #8CBBBB 1px solid;
+	box-shadow: 1px 1px 7px #C2DEDE;
+}
+
 .known-skills .lines,
 .available-skills .lines {
-	background-color: #F0ECE6;
+	
 }
 
 .equipment .equipment-inner-container {
@@ -507,27 +525,24 @@ button:focus {
 .container-ui .line:not(.empty):hover,
 .container-ui .line:not(.empty).selected,
 .merchant .line:not(.empty):hover,
-.merchant .line:not(.empty).selected {
+.merchant .line:not(.empty).selected,
+.known-skills .line:not(.empty):hover,
+.known-skills .line:not(.empty).selected,
+.available-skills .line:not(.empty):hover,
+.available-skills .line:not(.empty).selected {
 	background-color: #9AA8C7;
 }
 
 .inventory .line:not(.empty):active,
 .container-ui .line:not(.empty):active,
-.merchant .line:not(.empty):active {
+.merchant .line:not(.empty):active,
+.known-skills .line:not(.empty):active,
+.available-skills .line:not(.empty):active {
 	background-color: #A89DCA;
 }
 
-.known-skills .line:not(.empty):hover,
-.known-skills .line:not(.empty).selected,
-.available-skills .line:not(.empty):hover,
-.available-skills .line:not(.empty).selected,
 .active-effects .line:not(.empty):hover {
 	background-color: #EDC78E;
-}
-
-.known-skills .line:not(.empty):active,
-.available-skills .line:not(.empty):active {
-	background-color: #F6D8AC;
 }
 
 .equipment .line:not(.empty):hover,
