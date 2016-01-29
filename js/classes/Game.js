@@ -3629,6 +3629,8 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
+- Rubies can be sold to merchants and re-bought for 0, then re-sold
+- Scraps can be equipped
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
 - Log records incorrect number of items when they have been xferred back and forth
 - Multiple items selected simultaneously in merchant (cannot reproduce)
@@ -3687,6 +3689,7 @@ GOOD IDEAS WITHOUT KNOWN IMPLEMENTATIONS:
 	player from just attacking as fast as they like (i.e. - attack button spam if they're in a hurry)
 
 POSSIBLE IDEAS:
+- Some sort of "penalty" to prevent players from just running down the clock by going back and forth between squares
 - Always have exit square visible? (to always give player a general guide as to direction)
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever) (discuss with Matt)
 - Balance item value + dmg/armor + num salvage (discuss with Matt)
