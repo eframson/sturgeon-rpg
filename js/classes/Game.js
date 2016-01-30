@@ -3631,6 +3631,8 @@ PROBLEMS NEEDING SOLUTIONS:
 BUGS:
 - Rubies can be sold to merchants and re-bought for 0, then re-sold
 - Scraps can be equipped
+- logsave gives error
+- Trainer offers to train for 0 gp
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
 - Log records incorrect number of items when they have been xferred back and forth
 - Multiple items selected simultaneously in merchant (cannot reproduce)
@@ -3639,10 +3641,11 @@ BUGS:
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 GAME CHANGES:
-
+- Add potion that reveals the exit square
 
 UI CHANGES:
-
+- Fix colors on combat UI
+- Fix colors on skill screen
 
 CODE CHANGES:
 
