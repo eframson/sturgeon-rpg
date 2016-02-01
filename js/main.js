@@ -1,4 +1,4 @@
-const BUILD_VERSION = 1453740295;
+const BUILD_VERSION = 1454354657;
 var game = undefined;
 var ko_global = undefined;
 

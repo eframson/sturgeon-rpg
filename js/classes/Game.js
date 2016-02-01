@@ -748,12 +748,6 @@ define([
 				self.currentContainer.items(itemArray);
 				self.currentContainer.opts = gameData.currentContainer.opts;
 
-				if(gameData.acquiredItems.items == undefined && gameData.acquiredItems.length > 0){
-					items = gameData.acquiredItems;
-					gameData.acquiredItems = {};
-					gameData.acquiredItems.items = items;
-				}
-
 				var acquiredItemArray = Array();
 				for(i = 0; i < gameData.acquiredItems.items.length; i++){
 					if(gameData.acquiredItems.items[i]._classNameForLoad){
@@ -764,12 +758,6 @@ define([
 				}
 				self.acquiredItems.items(acquiredItemArray);
 				self.acquiredItems.opts = gameData.acquiredItems.opts;
-
-				if(gameData.soldItems.items == undefined && gameData.soldItems.length > 0){
-					items = gameData.soldItems;
-					gameData.soldItems = {};
-					gameData.soldItems.items = items;
-				}
 
 				var soldItemArray = Array();
 				for(i = 0; i < gameData.soldItems.items.length; i++){

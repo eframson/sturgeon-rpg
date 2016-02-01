@@ -45,6 +45,7 @@ define([
 				self.accessoryStatAmt(Math.round(self.level() * self.qualityModifier));
 
 				self._buyValue = self.accessoryStatAmt() * 100;
+				self._forceRecalculate.valueHasMutated();
 
 				self.isScaled(1);
 			}else if(!self.fullyDynamicStats && (self.accessoryStat() == undefined || self.accessoryStatAmt() == undefined)){

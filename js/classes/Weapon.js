@@ -54,6 +54,7 @@ define([
 				self.dmgMax( (self.dmgMax() < self.dmgMin()) ? self.dmgMin() : self.dmgMax() );
 				
 				self._buyValue = Math.round( (avgDmgPerHit * 100) + (self.qualityModifier * 10) );
+				self._forceRecalculate.valueHasMutated();
 
 				var magicDesc = self.desc;
 				var matches = self.desc.match(/%[^%]+%/g);
