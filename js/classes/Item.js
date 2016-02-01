@@ -23,8 +23,8 @@ define([
 		this.stackable = ( data.stackable != undefined ) ? data.stackable : true;
 		this.qty = ko.observable(data.qty || 1);
 		this.desc = data.desc || data.name;
-		this.buyValue = ko.observable(data.buyValue || 0);
-		this._sellValue = data.sellValue;
+		this._buyValue = data.buyValue || data._buyValue;
+		this._sellValue = data.sellValue || data._sellValue;
 		this.minLevelRange = data.minLevelRange || 1;
 		this.maxLevelRange = data.maxLevelRange;
 		this.numUpgradesApplied = ko.observable(data.numUpgradesApplied || 0);
@@ -59,12 +59,20 @@ define([
 			self.qualityModifier = 1;
 		}
 
+		//How much GP the PLAYER GETS from SELLING an item
 		this.sellValue = ko.computed(function(){
-			if(self._sellValue){
+			if(self._sellValue !== undefined){
 				return self._sellValue;
 			}
-			var buyValue = self.buyValue();
-			return Math.ceil(buyValue / 2);
+			return Math.ceil(self._buyValue / 2);
+		});
+
+		//How much GP it COSTS the player to BUY an item
+		this.buyValue = ko.computed(function(){
+			if(self._buyValue !== undefined){
+				return self._buyValue;
+			}
+			return self._sellValue * 2;
 		});
 
 		this.canSell = ko.computed(function(){
@@ -85,7 +93,7 @@ define([
 		this.applyUpgrade = function(){
 			//This should be overridden in a child class
 			self._applyUpgrade();
-			self.buyValue( self.buyValue() + self.costForNextUpgradeLevel() );
+			self._buyValue = self.buyValue() + self.costForNextUpgradeLevel();
 			self.numUpgradesApplied( self.numUpgradesApplied() + 1 );
 		}
 

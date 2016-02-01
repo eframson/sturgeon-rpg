@@ -33,7 +33,7 @@ define([
 				baseArmorValue = (baseArmorValue > 0) ? baseArmorValue : 1;
 				self.armorValue(baseArmorValue);
 				
-				self.buyValue( self.armorValue() * 100 );
+				self._buyValue = self.armorValue() * 100;
 
 				var magicDesc = self.desc;
 				var matches = self.desc.match(/%[^%]+%/g);
