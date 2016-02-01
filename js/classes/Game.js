@@ -3629,8 +3629,9 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
-- Rubies can be sold to merchants and re-bought for 0, then re-sold
+- Gems can be equipped
 - Scraps can be equipped
+- Gems can be sold to merchants and re-bought for 0, then re-sol
 - logsave gives error
 - Trainer offers to train for 0 gp
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
@@ -3651,6 +3652,7 @@ CODE CHANGES:
 
 
 GAME IDEAS:
+- Add in gem merchants that accept gems as currency (ask Matt)
 - Make skill trainers cost less, OR improve base skill rather than progress
 - Add intermittent passives?
 - Should combat abilities level up + improve on use, same as active abilities?
@@ -3661,6 +3663,7 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
+- Hold down shift/hover over something to see currently equpped item rather than just "if equipped: X" in merchant screen
 - Automatically sort inventory
 - Make log filterable
 - Make inventory sortable
@@ -3691,11 +3694,12 @@ GOOD IDEAS WITHOUT KNOWN IMPLEMENTATIONS:
 	but it might be a good idea to make this toggle-able via setting, because it might prevent the
 	player from just attacking as fast as they like (i.e. - attack button spam if they're in a hurry)
 
-POSSIBLE IDEAS:
+POSSIBLE IDEAS/FEEDBACK:
 - Some sort of "penalty" to prevent players from just running down the clock by going back and forth between squares
 - Always have exit square visible? (to always give player a general guide as to direction)
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever) (discuss with Matt)
 - Balance item value + dmg/armor + num salvage (discuss with Matt)
+- Think about floor as a whole instead of just fight-to-fight
 
 Perk Ideas
 - Allow 1H weapons to be wielded 2H (costs 2)
@@ -3709,7 +3713,7 @@ Perk Ideas
 - Sword 'n' Board (don't know what it does yet, but we need to have one called this!)
 
 Feedback
-- Think about floor as a whole instead of just fight-to-fight
+
 
 LINKS FOR RESEARCH:
 http://jsfiddle.net/tPm3s/1/ (http://stackoverflow.com/questions/23530756/maze-recursive-division-algorithm-design)
