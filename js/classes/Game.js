@@ -1937,9 +1937,9 @@ define([
 			var type = item.type;
 			if( type == "consumables" || (opts.canUse && opts.canUse == 1) ){
 				self.activeItem().canUse(1);
-			}else if ( (opts.moveDirection == "right" && item.canEquip) || (opts.canEquip && opts.canEquip == 1) ){
+			}else if ( (opts.moveDirection == "right" && item.canEquip() == 1) || (opts.canEquip && opts.canEquip == 1) ){
 				self.activeItem().canEquip(1);
-			}else if ( (self.rightColContent() == "equipment" && opts.moveDirection == "left" && item.canEquip) || (opts.canUnEquip && opts.canUnEquip == 1) ){
+			}else if ( (self.rightColContent() == "equipment" && opts.moveDirection == "left" && item.canEquip() == 1) || (opts.canUnEquip && opts.canUnEquip == 1) ){
 				self.activeItem().canUnEquip(1);
 			}
 
@@ -3617,9 +3617,6 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
-- Gems can be equipped
-- Scraps can be equipped
-- Gems can be sold to merchants and re-bought for 0, then re-sol
 - logsave gives error
 - Trainer offers to train for 0 gp
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
