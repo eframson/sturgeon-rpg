@@ -333,6 +333,7 @@ define([
 			self.enableZoom = ko.observable(0);
 			self.resetPreferences = ko.observable(1);
 			self.temporarilyDisableActiveSquare = ko.observable(0);
+			self._forceRecalculate = ko.observable(0);
 
 			//Keep track of what is displayed where
 			self.fullScreenContent = ko.observable(undefined);
@@ -655,6 +656,7 @@ define([
 			});
 
 			self.inventoryTemplateOptions = ko.computed(function(){
+				var forceRecalculate = self._forceRecalculate();
 				var opts = {
 					optKey : 'inventory',
 					emptyString : "Your inventory is empty",
@@ -667,7 +669,7 @@ define([
 
 				opts.header = "Inventory";
 				if( self.player() ){
-					var itemCollection = self.player().inventory.items();
+					var itemCollection = self.player().inventory.getItemsSortedByMultipleCriteria(["type","qualityModifier","name"],["ASC", "ASC", "ASC"]);
 					opts.itemCollection = itemCollection;
 
 					var headerString = opts.header;
@@ -1650,6 +1652,12 @@ define([
 					trainCost = self.player().activeAbilities()["scan_squares"].getTrainCost();
 					trainSkill = "scan_squares";
 					trainSkillSuccessDesc = "scan range";
+					skillOrStat = "skill";
+				}else if(trainSkillString == "find_treasure"){
+					text += "get better at surveying your surroundings";
+					trainCost = self.player().activeAbilities()["find_treasure"].getTrainCost();
+					trainSkill = "find_treasure";
+					trainSkillSuccessDesc = "skill in finding shiny treasure";
 					skillOrStat = "skill";
 				}else if( trainSkillString == "str" ){
 					text += "become stronger";
@@ -3686,7 +3694,6 @@ PROBLEMS NEEDING SOLUTIONS:
 
 BUGS:
 - logsave gives error
-- Trainer offers to train for 0 gp
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
 - Log records incorrect number of items when they have been xferred back and forth
 - Multiple items selected simultaneously in merchant (cannot reproduce)
@@ -3698,8 +3705,7 @@ GAME CHANGES:
 - Add potion that reveals the exit square
 
 UI CHANGES:
-- Fix colors on combat UI
-- Fix colors on skill screen
+
 
 CODE CHANGES:
 
@@ -3732,6 +3738,7 @@ UI IDEAS:
 - Keyboard shortcuts for "continue" buttons
 
 CODE IDEAS:
+- Improve the skill training stuff somehow so it doesn't always break whenever a new skill is added
 - Fix testAddLevel function so it properly increases skill progress
 - Put a cap on leveling
 - Conditionally force CSS clearing

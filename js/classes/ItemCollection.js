@@ -177,6 +177,63 @@ define([
 			return filteredArray;
 		}
 
+		this.getItemsSortedByMultipleCriteria = function(sortFieldArray, sortDirectionArray){
+
+			if(sortFieldArray == undefined || sortDirectionArray == undefined || !Array.isArray(sortFieldArray) || !Array.isArray(sortDirectionArray)){
+				throw 'Sort fields and directions must be specified';
+			}
+
+			if(sortFieldArray.length != sortDirectionArray.length){
+				throw 'Every entry in sort fields must have a corresponding entry in sort directions';
+			}
+
+			var filteredArray = self.items();
+			filteredArray.sort(self._dynamicSortMultiple(sortFieldArray, sortDirectionArray));
+			return filteredArray;
+
+		}
+
+		self._dynamicSortMultiple = function(sortFieldArray, sortDirectionArray) {
+
+			return function (left, right) {
+				var i = 0, result = 0, numberOfProperties = sortFieldArray.length;
+				//try getting a different result from 0 (equal)
+				//as long as we have extra sorts to compare
+				while(result === 0 && i < numberOfProperties) {
+					result = self._dynamicSort(sortFieldArray[i])(left, right, sortDirectionArray[i]);
+					i++;
+				}
+				return result;
+			}
+		}
+
+		//http://stackoverflow.com/questions/11379361/how-to-sort-an-array-of-objects-with-multiple-field-values-in-javascript
+		this._dynamicSort = function(property){
+			return function (left, right, sortDirection) {
+				var leftCompare, rightCompare;
+				if(typeof left[property] == 'function'){
+					leftCompare = left[property]();
+				}else{
+					leftCompare = left[property];
+				}
+
+				if(typeof right[property] == 'function'){
+					rightCompare = right[property]();
+				}else{
+					rightCompare = right[property];
+				}
+
+				if(sortDirection == "ASC"){
+					return leftCompare > rightCompare ? 1
+						: leftCompare < rightCompare ? -1 : 0;
+				}else{
+					return leftCompare > rightCompare ? -1
+						: leftCompare < rightCompare ? 1 : 0;
+				}
+
+			}
+		}
+
 		this.length = function(){
 			return self.items().length;
 		}
