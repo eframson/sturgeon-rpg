@@ -654,6 +654,67 @@ define([
 				}
 			});
 
+			self.inventoryTemplateOptions = ko.computed(function(){
+				var opts = {
+					optKey : 'inventory',
+					emptyString : "Your inventory is empty",
+					onClickFn : self.setInventoryItemAsActiveItem,
+					noLinesCond : 1,
+					showLinesCond : 0,
+					cssClass : 'inventory',
+					showCostInsteadOfQty : 0,
+				};
+
+				opts.header = "Inventory";
+				if( self.player() ){
+					var itemCollection = self.player().inventory.items();
+					opts.itemCollection = itemCollection;
+
+					var headerString = opts.header;
+					headerString += " (<span class='" + (self.player().inventorySlotsOccupied() > self.player().inventoryMaxSlots() ? 'danger' : '') + "'>" + self.player().inventorySlotsOccupied() + "</span>/<span>" + self.player().inventoryMaxSlots() + "</span> slots occupied)";
+					opts.header = headerString;
+
+					opts.noLinesCond = ( itemCollection.length == 0 || (itemCollection.length == 1 && self.player().gp() > 0) );
+					opts.showLinesCond = (itemCollection.length > 1 || (itemCollection.length == 1 && self.player().gp() == 0) );
+				}
+				return opts;
+
+			}, self);
+
+			self.containerTemplateOptions = ko.computed(function(){
+				var itemCollection = self.currentContainer.items();
+				var opts = {
+					optKey : 'container',
+					header : 'Container',
+					emptyString : "The container is empty",
+					onClickFn : self.setContainerItemAsActiveItem,
+					noLinesCond : (itemCollection.length == 0),
+					showLinesCond : (itemCollection.length > 0),
+					cssClass : 'container',
+					itemCollection: itemCollection,
+					showCostInsteadOfQty : 0,
+				};
+				return opts;
+
+			}, self);
+
+			self.merchantTemplateOptions = ko.computed(function(){
+				var itemCollection = self.currentContainer.items();
+				var opts = {
+					optKey : 'merchant',
+					header : 'Merchant',
+					emptyString : "The merchant has no goods for sale",
+					onClickFn : self.setMerchantItemAsActiveItem,
+					noLinesCond : (itemCollection.length == 0),
+					showLinesCond : (itemCollection.length > 0),
+					cssClass : 'merchant',
+					itemCollection: itemCollection,
+					showCostInsteadOfQty : 1,
+				};
+				return opts;
+
+			}, self);
+
 			self.poorHpRestore = ko.computed(function(){
 				return self.player() ? Math.round(self.player().maxHp() * 0.25) : 0;
 			}, self);
@@ -2492,6 +2553,13 @@ define([
 				}
 				return false;
 
+			}
+			return false;
+		}
+
+		this.shouldLineItemBeHidden = function(item, sectionKey){
+			if(item.id == "gold" && sectionKey != "container"){
+				return true;
 			}
 			return false;
 		}

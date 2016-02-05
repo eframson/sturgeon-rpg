@@ -432,8 +432,8 @@ button:focus {
 	box-shadow: 1px 1px 7px #CAD2E4;
 }
 
-.container-ui .container-ui-inner-container,
-.merchant .container-ui-inner-container {
+.container-ui .container-inner,
+.merchant .merchant-inner {
 	background-color: #C2DEDE;
 	border-radius: 5px;
 	border: #8CBBBB 1px solid;
@@ -441,8 +441,8 @@ button:focus {
 }
 
 .inventory .lines .line:last-child,
-.container-ui .container-ui-inner-container:last-child,
-.merchant .container-ui-inner-container:last-child,
+.container-ui .container-inner:last-child,
+.merchant .merchant-inner:last-child,
 .known-skills .line:last-child,
 .available-skills .line:last-child {
 	border-bottom-right-radius: 5px;
@@ -450,8 +450,8 @@ button:focus {
 }
 
 .inventory .lines .line:first-child,
-.container-ui .container-ui-inner-container:first-child,
-.merchant .container-ui-inner-container:first-child,
+.container-ui .container-inner:first-child,
+.merchant .merchant-inner:first-child,
 .known-skills .line:first-child,
 .available-skills .line:first-child {
 	border-top-right-radius: 5px;
