@@ -158,13 +158,23 @@ button:focus {
 	box-shadow: 1px 1px 7px #FDFFFF;
 }
 
-.container-ui-section-header-container {
+.container-ui-section-header-container,
+.container-ui-section-footer-container {
 	margin-bottom: 5px;
 	background-color: #FDFFFF;
 	border-radius: 5px;
 	border: #E9F5F5 1px solid;
 	box-shadow: 1px 1px 7px #FDFFFF;
 }
+
+.container-ui-section-header-container {
+	margin-bottom: 5px;
+}
+
+.container-ui-section-footer-container {
+	margin-top: 5px;
+}
+
 
 .player-stats .stat-label,
 .player-stats .stat-value {

@@ -271,6 +271,22 @@ define([
 		};
 
 		this.temporaryPreferenceStorage = {};
+
+		this.sortByPresets = {
+			"Type" : ["type", "qualityModifier", "name"],
+			"Quality" : ["qualityModifier", "type", "name"],
+			"Name": ["name","qualityModifier"]
+		};
+		this.sortByPresetsSortDirs = {
+			"Type" : ["ASC", "ASC", "ASC"],
+			"Quality" : ["ASC", "ASC", "ASC"],
+			"Name": ["ASC","ASC"]
+		};
+		this.sortByPresetsList = [
+			"Type",
+			"Quality",
+			"Name"
+		];
 		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
@@ -344,6 +360,10 @@ define([
 			self.hpBarBaseWidth = 368;
 			self.playerHpBarWidth = ko.observable(self.hpBarBaseWidth);
 			self.enemyHpBarWidth = ko.observable(self.hpBarBaseWidth);
+
+			self.inventorySortOrder = ko.observable("Type");
+			self.containerSortOrder = ko.observable("Type");
+			self.merchantSortOrder = ko.observable("Type");
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -669,7 +689,7 @@ define([
 
 				opts.header = "Inventory";
 				if( self.player() ){
-					var itemCollection = self.player().inventory.getItemsSortedByMultipleCriteria(["type","qualityModifier","name"],["ASC", "ASC", "ASC"]);
+					var itemCollection = self.player().inventory.getItemsSortedByMultipleCriteria(self.sortByPresets[self.inventorySortOrder() || "Type"],self.sortByPresetsSortDirs[self.inventorySortOrder() || "Type"]);
 					opts.itemCollection = itemCollection;
 
 					var headerString = opts.header;
@@ -787,6 +807,10 @@ define([
 				self.playerHpBarWidth(gameData.playerHpBarWidth);
 				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
 				self.goldGained(gameData.goldGained);
+
+				self.inventorySortOrder(gameData.inventorySortOrder);
+				self.containerSortOrder(gameData.containerSortOrder);
+				self.merchantSortOrder(gameData.merchantSortOrder);
 
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
@@ -2420,6 +2444,21 @@ define([
 			self.showContentArea();
 		}
 
+		this.switchNextSortOrder = function(data, event){
+			var currentSort = self[data.optKey + "SortOrder"];
+			var currentSortIdx = self.sortByPresetsList.indexOf(currentSort());
+			var newSortIdx;
+
+			if(currentSortIdx == (self.sortByPresetsList.length - 1)){
+				newSortIdx = 0;
+			}else{
+				newSortIdx = currentSortIdx + 1;
+			}
+
+			currentSort( self.sortByPresetsList[newSortIdx] );
+			//self._forceRecalculate.valueHasMutated();
+		}
+
 		this._playerEatFood = function(quality){
 
 			var hpRestored = self.player().restoreHealth( self[quality + 'HpRestore']() );
@@ -2873,6 +2912,9 @@ define([
 						playerHpBarWidth : self.playerHpBarWidth(),
 						enemyHpBarWidth : self.enemyHpBarWidth(),
 						goldGained : self.goldGained(),
+						inventorySortOrder : self.inventorySortOrder(),
+						containerSortOrder : self.containerSortOrder(),
+						merchantSortOrder : self.merchantSortOrder(),
 					}
 				);
 
