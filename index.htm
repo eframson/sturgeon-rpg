@@ -28,7 +28,7 @@
 		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
-		<link href="css/custom.css?cssBust=1454959618" rel="stylesheet">
+		<link href="css/custom.css?cssBust=1455917599" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -95,7 +95,6 @@
 					<div class="col-md-1 with-right-padding"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 				</div>
 				<!-- end stat row header row -->
-
 			</div>
 			<!-- end main header area -->
 
@@ -110,6 +109,7 @@
 					<!-- start leftcol -->
 					<div class="col-md-4 leftcol">
 
+						<!-- start leftcol-inner -->
 						<div class="leftcol-inner">
 
 							<!-- start player control area -->
@@ -189,7 +189,12 @@
 							<!-- end player control area -->
 
 							<!-- start inventory area -->
-							<div class="inventory" data-bind="template:{ name: 'item-list-template', data: $root.inventoryTemplateOptions() }, css: { hidden: leftColContent() != 'inventory' }"></div>
+							<div class="inventory" data-bind="template:{ name: 'item-list-template', data: $root.inventoryTemplateOptions() }, css: { hidden: leftColContent() != 'inventory' || ( leftColContent() == 'inventory' && inventoryEquipmentToggle() != 'Inventory' ) }"></div>
+
+							<!-- start inventory/equipment area -->
+							<div class="equipment" data-bind="template:{ name: 'equipment-template', data: { showInventoryEquipmentToggle : 1 } }, css: { hidden: leftColContent() != 'inventory' || ( leftColContent() == 'inventory' && inventoryEquipmentToggle() == 'Inventory' ) }" ></div>
+							<!-- end inventory/equipment area -->
+
 							<!-- end inventory area -->
 
 							<!-- start known skills area -->
@@ -403,6 +408,7 @@
 							<!-- end settings area -->
 
 						</div>
+						<!-- end leftcol-inner -->
 
 					</div>
 					<!-- end leftcol -->
@@ -694,65 +700,7 @@
 							<!-- end map area -->
 
 							<!-- start equipment area -->
-							<div class="equipment" data-bind="css: { hidden: rightColContent() != 'equipment' }" >
-
-								<h3>Equipment</h3>
-
-								<div class="equipment-inner-container">
-
-									<!-- ko with: $root.player().equipment().armor().head() -->
-										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
-											<span class="slot">Head Armor:</span>
-											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
-										</div>
-									<!-- /ko -->
-
-									<!-- ko with: $root.player().equipment().armor().fin() -->
-										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
-											<span class="slot">Fin Armor:</span>
-											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
-										</div>
-									<!-- /ko -->
-
-									<!-- ko with: $root.player().equipment().armor().body() -->
-										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
-											<span class="slot">Body Armor:</span>
-											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
-										</div>
-									<!-- /ko -->
-
-									<!-- ko with: $root.player().equipment().armor().tail() -->
-										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
-											<span class="slot">Tail Armor:</span>
-											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
-										</div>
-									<!-- /ko -->
-
-									<!-- ko with: $root.player().equipment().weapon() -->
-										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
-											<span class="slot">Weapon:</span>
-											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
-										</div>
-									<!-- /ko -->
-
-									<!-- ko with: $root.player().equipment().shield() -->
-										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
-											<span class="slot">Shield:</span>
-											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
-										</div>
-									<!-- /ko -->
-
-									<!-- ko with: $root.player().equipment().accessory() -->
-										<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
-											<span class="slot">Accessory:</span>
-											<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
-										</div>
-									<!-- /ko -->
-
-
-								</div>
-
-							</div>
+							<div class="equipment" data-bind="template:{ name: 'equipment-template', data: {} }, css: { hidden: rightColContent() != 'equipment' }" ></div>
 							<!-- end equipment area -->
 
 							<!-- start loot container area -->
@@ -760,7 +708,7 @@
 							<!-- end loot container area -->
 
 							<!-- start merchant area -->
-							<div class="merchant" data-bind="template: {name: 'item-list-template', data: $root.merchantTemplateOptions() }, css: { hidden: rightColContent() != 'merchant' }" ></div></div>
+							<div class="merchant" data-bind="template: {name: 'item-list-template', data: $root.merchantTemplateOptions() }, css: { hidden: rightColContent() != 'merchant' }" ></div>
 							<!-- end merchant area -->
 
 							<!-- start available skills area -->
@@ -953,14 +901,88 @@
 							</div>
 
 							<div class="container-ui-section-footer-container">
-							<div class="line empty section-header">
-								<span class="item">Sorted By: <button type="button" class="btn btn-default" data-bind="text: $root[$data.optKey + 'SortOrder'](), click: $root.switchNextSortOrder"></button></span>
+								<div class="line empty section-header">
+									<span class="item">Sorted By: <button type="button" class="btn btn-default" data-bind="text: $root[$data.optKey + 'SortOrder'](), click: $root.switchNextSortOrder"></button></span>
+									<!-- ko if: $data.showInventoryEquipmentToggle -->
+										<span class="item showInventoryEquipmentToggle">Showing: <button type="button" class="btn btn-default" data-bind="text: $root.inventoryEquipmentToggle(), click: $root.switchInventoryEquipmentToggle"></button></span>
+										<div class="clear"></div>
+									<!-- /ko -->
+								</div>
 							</div>
-						</div>
 						<!-- /ko -->
 					</div>
 			</script>
 			<!-- end item list template -->
+
+			<!-- start equipment template -->
+			<script type="text/html" id="equipment-template">
+
+				<h3>Equipment</h3>
+
+				<div class="equipment-inner-container">
+
+					<!-- ko with: $root.player().equipment().armor().head() -->
+						<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+							<span class="slot">Head Armor:</span>
+							<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+						</div>
+					<!-- /ko -->
+
+					<!-- ko with: $root.player().equipment().armor().fin() -->
+						<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+							<span class="slot">Fin Armor:</span>
+							<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+						</div>
+					<!-- /ko -->
+
+					<!-- ko with: $root.player().equipment().armor().body() -->
+						<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+							<span class="slot">Body Armor:</span>
+							<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+						</div>
+					<!-- /ko -->
+
+					<!-- ko with: $root.player().equipment().armor().tail() -->
+						<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+							<span class="slot">Tail Armor:</span>
+							<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+						</div>
+					<!-- /ko -->
+
+					<!-- ko with: $root.player().equipment().weapon() -->
+						<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+							<span class="slot">Weapon:</span>
+							<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+						</div>
+					<!-- /ko -->
+
+					<!-- ko with: $root.player().equipment().shield() -->
+						<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+							<span class="slot">Shield:</span>
+							<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+						</div>
+					<!-- /ko -->
+
+					<!-- ko with: $root.player().equipment().accessory() -->
+						<div class="line" data-bind="click: function(){ $root.setEquipmentItemAsActiveItem( $data ) }, css: { selected: $root._shouldItemBeSelected($data), empty : $data.name == undefined }">
+							<span class="slot">Accessory:</span>
+							<span class="item" data-bind="html: $root._getHtmlDisplayStringForItem($data, 'equipment')"></span>
+						</div>
+					<!-- /ko -->
+				</div>
+
+				<!-- ko if: $data.showInventoryEquipmentToggle -->
+					<div class="container-ui-section-footer-container">
+						<div class="line empty section-header">
+							
+								<span class="item showInventoryEquipmentToggle">Showing: <button type="button" class="btn btn-default" data-bind="text: $root.inventoryEquipmentToggle(), click: $root.switchInventoryEquipmentToggle"></button></span>
+								<div class="clear"></div>
+						</div>
+					</div>
+				<!-- /ko -->
+
+			</script>
+			<!-- end equipment template -->
 
 			<!-- start message log area -->
 			<div class="log-area hidden">
@@ -973,7 +995,17 @@
 				</div>
 			</div>
 			<!-- end message log area -->
-		</div><!-- /.container -->
+
+			<!-- start footer row -->
+			<div class="row footer">
+				<div class="col-md-4">
+					<span class="copyright">Copyright 2016 Emmett Framson under <a href="http://www.perlfoundation.org/artistic_license_2_0" target="_blank">The Artistic License 2.0</a></span>
+				</div>
+				<div class="col-md-4"></div>
+				<div class="col-md-4"><span class="feedback">Bugs/feedback welcomed at framsone at gmail dot com</span></div>
+			</div>
+			<!-- end footer row -->
+		</div> <!-- end container -->
 
 		<!-- Bootstrap core JavaScript
 		================================================== -->

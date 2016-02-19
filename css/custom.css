@@ -503,6 +503,7 @@ button:focus {
 	padding: 5px 10px 5px 10px;
 }
 
+.equipment .line.section-header,
 .inventory .line.section-header,
 .container-ui .line.section-header,
 .merchant .line.section-header,
@@ -584,6 +585,10 @@ button:focus {
 	display: inline-block;
 }
 
+.showInventoryEquipmentToggle {
+	float: right;
+}
+
 .item-desc .inner,
 .skill-desc .inner {
 	padding: 5px 10px 5px 10px;
@@ -605,7 +610,6 @@ button:focus {
 .item-desc button.inventory-control,
 .skill-desc button.skill-control {
 	margin-top: 10px;
-	font-size: 12px;
 }
 
 .item-desc button.inventory-control {
@@ -852,6 +856,11 @@ button:focus {
 .log-area .great,
 .log-area .exceptional {
 	font-weight: bold;
+}
+
+.footer {
+	font-size: 10px;
+	font-style: italic;
 }
 
 /*

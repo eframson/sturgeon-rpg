@@ -287,6 +287,13 @@ define([
 			"Quality",
 			"Name"
 		];
+
+		this.showInventoryEquipmentPresetsList = [
+			"Inventory",
+			"Equipment",
+		];
+
+		this.savedBuildVersion = undefined;
 		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
@@ -364,6 +371,7 @@ define([
 			self.inventorySortOrder = ko.observable("Type");
 			self.containerSortOrder = ko.observable("Type");
 			self.merchantSortOrder = ko.observable("Type");
+			self.inventoryEquipmentToggle = ko.observable("Inventory");
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -689,7 +697,10 @@ define([
 
 				opts.header = "Inventory";
 				if( self.player() ){
-					var itemCollection = self.player().inventory.getItemsSortedByMultipleCriteria(self.sortByPresets[self.inventorySortOrder() || "Type"],self.sortByPresetsSortDirs[self.inventorySortOrder() || "Type"]);
+					var itemCollection = self.player().inventory.getItemsSortedByMultipleCriteria(
+							self.sortByPresets[self.inventorySortOrder() || "Type"],
+							self.sortByPresetsSortDirs[self.inventorySortOrder() || "Type"])
+					;
 					opts.itemCollection = itemCollection;
 
 					var headerString = opts.header;
@@ -699,12 +710,19 @@ define([
 					opts.noLinesCond = ( itemCollection.length == 0 || (itemCollection.length == 1 && self.player().gp() > 0) );
 					opts.showLinesCond = (itemCollection.length > 1 || (itemCollection.length == 1 && self.player().gp() == 0) );
 				}
+
+				if(self.rightColContent() == "container" || self.rightColContent() == "merchant"){
+					opts.showInventoryEquipmentToggle = 1;
+				}
 				return opts;
 
 			}, self);
 
 			self.containerTemplateOptions = ko.computed(function(){
-				var itemCollection = self.currentContainer.items();
+				var itemCollection = self.currentContainer.getItemsSortedByMultipleCriteria(
+					self.sortByPresets[self.containerSortOrder() || "Type"],
+					self.sortByPresetsSortDirs[self.containerSortOrder() || "Type"]
+				);
 				var opts = {
 					optKey : 'container',
 					header : 'Container',
@@ -721,7 +739,10 @@ define([
 			}, self);
 
 			self.merchantTemplateOptions = ko.computed(function(){
-				var itemCollection = self.currentContainer.items();
+				var itemCollection = self.currentContainer.getItemsSortedByMultipleCriteria(
+					self.sortByPresets[self.merchantSortOrder() || "Type"],
+					self.sortByPresetsSortDirs[self.merchantSortOrder() || "Type"]
+				);
 				var opts = {
 					optKey : 'merchant',
 					header : 'Merchant',
@@ -808,9 +829,24 @@ define([
 				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
 				self.goldGained(gameData.goldGained);
 
-				self.inventorySortOrder(gameData.inventorySortOrder);
-				self.containerSortOrder(gameData.containerSortOrder);
-				self.merchantSortOrder(gameData.merchantSortOrder);
+				// These "if" statements are really only necessary to accomodate beta testers (i.e. - anyone loading a game from a previous "version")
+				if(gameData.inventorySortOrder){
+					self.inventorySortOrder(gameData.inventorySortOrder);
+				}
+				if(gameData.containerSortOrder){
+					self.containerSortOrder(gameData.containerSortOrder);
+				}
+				if(gameData.merchantSortOrder){
+					self.merchantSortOrder(gameData.merchantSortOrder);
+				}
+				if(gameData.inventoryEquipmentToggle){
+					self.inventoryEquipmentToggle(gameData.inventoryEquipmentToggle);
+				}
+
+				// Maybe this will help debug issues?
+				if(gameData.savedBuildVersion){
+					self.savedBuildVersion = gameData.savedBuildVersion;
+				}
 
 				if(gameData.currentEnemy){
 					self.currentEnemy(new Monster(gameData.currentEnemy));
@@ -2459,6 +2495,21 @@ define([
 			//self._forceRecalculate.valueHasMutated();
 		}
 
+		this.switchInventoryEquipmentToggle = function(data, event){
+			var currentSort = self.inventoryEquipmentToggle;
+			var currentSortIdx = self.showInventoryEquipmentPresetsList.indexOf(currentSort());
+			var newSortIdx;
+
+			if(currentSortIdx == (self.showInventoryEquipmentPresetsList.length - 1)){
+				newSortIdx = 0;
+			}else{
+				newSortIdx = currentSortIdx + 1;
+			}
+
+			currentSort( self.showInventoryEquipmentPresetsList[newSortIdx] );
+			//self._forceRecalculate.valueHasMutated();
+		}
+
 		this._playerEatFood = function(quality){
 
 			var hpRestored = self.player().restoreHealth( self[quality + 'HpRestore']() );
@@ -2915,6 +2966,8 @@ define([
 						inventorySortOrder : self.inventorySortOrder(),
 						containerSortOrder : self.containerSortOrder(),
 						merchantSortOrder : self.merchantSortOrder(),
+						inventoryEquipmentToggle : self.inventoryEquipmentToggle(),
+						savedBuildVersion : BUILD_VERSION,
 					}
 				);
 
