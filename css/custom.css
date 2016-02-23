@@ -140,6 +140,10 @@ button:focus {
 	margin-top: 15px;
 }
 
+.title-row .faq-notice {
+	margin-top: 30px;
+}
+
 .header {
 	margin-right: 0px;
 	margin-left: 0px;
