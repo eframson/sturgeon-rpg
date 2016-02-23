@@ -14,7 +14,7 @@
 		<link href="css/bootstrap.min.css" rel="stylesheet">
 
 		<!-- Bootstrap theme -->
-		<link href="css/bootstrap-theme.min.css" rel="stylesheet">
+		<!--<link href="css/bootstrap-theme.min.css" rel="stylesheet">-->
 
 		<!-- jQuery UI -->
 		<link href="css/jquery-ui.min.css" rel="stylesheet">
@@ -28,7 +28,7 @@
 		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
-		<link href="css/custom.css?cssBust=1455917599" rel="stylesheet">
+		<link href="css/custom.css?cssBust=1456186468" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -45,7 +45,7 @@
 		    <div class="modal-content massupdate">
 			    <div class="modal-header">
 			        <button type="button" class="close" data-bind="click: hideModal, visible: showModalClose"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-			        <h4 class="modal-title" data-bind="text: modalWindowTitle">Error</h4>
+			        <h4 class="modal-title" data-bind="text: modalWindowTitle"></h4>
 			    </div>
 				<div class="modal-body" data-bind="html: modalWindowText">
 				</div>
@@ -996,13 +996,72 @@
 			</div>
 			<!-- end message log area -->
 
+			<!-- start FAQ area -->
+			<div class="hidden">
+				<div id="faq-content">
+					<div class="q-section">
+						<h4 class="q">So...wtf is this?</h4>
+						<div class="a"><p><em>Sturgeon Simulator</em> is a browser-based video game. In early 2015 I played the (excellent) iOS game <em><a href="https://itunes.apple.com/us/app/a-dark-room/id736683061?mt=8" target="_blank">A Dark Room</a>.</em> Certain parts of that game reminded me of another game I'd played a long time ago: <em>Moraff's World</em> (1991). Don't worry, apparently nobody else has heard of it either. At any rate, I tried to find a game that centered around the mechanics of <em>ADR</em> that I'd really liked, and was more modern than <em>MW</em>&mdash;you know, something that I didn't need a DOS emulator for. I could not find such a game in existence, so...it turns out I had to make one. And, as I'm most familiar with web languages, here we are.</p>
+						</div>
+						<h4 class="q">You totally didn't answer my question. Seriously, wtf is this?</h4>
+						<div class="a"><p>Okay, okay. Sorry, got side-tracked there. So, <em>Sturgeon Simulator</em> is a turn-based RPG (Role-Playing Game, but you probably knew that already) where you move around a dungeon, collect loot, sometimes fight bosses, level-up your character, and whatever other features I end up adding in. But everything is aquatic. It's like a regular RPG, but everything is coated in a layer of algae. As a bonus, it's also a completely accurate representation of what it's really like to be a juvenille sturgeon!*</p>
+						<p class="small"><em>*This is a completely inaccurate representation of what it's like to be a juvenille sturgeon. Or a mature sturgeon, or really a fish of any kind.</em></p>
+						</div>
+						<h4 class="q">Ummm...okay. So it's a game?</h4>
+						<div class="a"><p>Yes! It's the RPG that didn't exist so I made it so now it exists so now I can play it and it's on the Internet so you can play it too.</p>
+						</div>
+						<h4 class="q">Alright then. So how do I play?</h4>
+						<div class="a"><p>It's pretty straightforward. I'm obviously biased, because I made the damn thing and therefore know it upside-down, backwards, and inside-out, but if I've done my job right, it <em>should</em> be pretty straightforward and self-explanatory. Please please email me (see page footer) if you think something is weird or doesn't make sense, and I'll either add an entry to this FAQ explaining it, or alter the UI so it's more clear. Or both.</p>
+						</div>
+						<h4 class="q">Well you're wrong, I have no idea where to start. How do I move?</h4>
+						<div class="a"><p>You move your character around the grid (i.e. - the "dungeon") using the provided on-screen controls or the WASD keys.</p>
+						</div>
+						<h4 class="q">Can I use arrow keys instead of WASD?</h4>
+						<div class="a"><p>Yes. By default only the WASD keys work, but if you click the settings button (the little gear icon) you can toggle between WASD and arrow keys. Just be aware that because it's a browser, arrow keys will probably also move the page up and down. I can try and fix this if there turns out to be a huge preference for arrow keys over WASD keys, but if you're a PC gamer you're probably already used to using WASD for things.</p>
+						</div>
+						<h4 class="q">I moved and a thing happened!</h4>
+						<div class="a"><p>Yes, although technically that's a statement, not a question. Things will probably happen after you move your character. Every time you move into a new square, there's a chance of encountering something. It might be a monster you have to fight, a merchant you can trade with, an item you can pick up, or something else.</p>
+						</div>
+						<h4 class="q">Wait, there are monsters in this game? Surely you can't be serious.</h4>
+						<div class="a"><p>Yes, and don't call me Shirley. When you move into a new square (i.e. - one you haven't been in before), there is a chance you will encounter a monster. When this happens, you'll be notified with a little message beforehand, and then the screen will change to the "fight" interface. Fights take place in a little pocket dimension of the dungeon, so basically cooldowns for abilities like Find Food and Scan Surroundings won't count down while you're fighting.</p>
+						</div>
+						<h4 class="q">Find what? Scan what?</h4>
+						<div class="a"><p>Oh right, those. So at the start of the game, you have two abilities unlocked: Find Food and Scan Surroundings. You can use both of those abilities while you're in the main dungeon screen, but not while you're in combat. Find Food will let you scrounge around in your current square for consumables. The quality of the found item varies by skill, but one way or another you'll always find some item you can eat to restore your health.</p>
+						<p>Scan Surroundings will reveal, up to a certain point, any squares you have line-of-sight to currently, as well as their contents (if any). The distance of the scan will increase as your skill improves, and you can acquire another skill that will let the ability penetrate through walls (i.e. - it reveals all squares in a certain radius around you)</p>
+						</div>
+						<h4 class="q">Okay, so go back to that fighting thing.</h4>
+						<div class="a"><p>Yeah, so, combat is a series of turn-based rounds. A round consists of both combatants using a single combat ability. The order that you fight in for each round depends on your SPD (Speed) stat, and the monster's. If its number is higher, it goes first. If your number is higher, you go first. If it's a tie, who goes first is randomly chosen each round. Combat abilities range from the basics ("Attack", which makes a single attack) to the more complex ("Flurry" makes a series of attacks which do less damage than normal, but which each have a chance of doing bonus damage; "Stun" will prevent the target from acting for a number of rounds). You only start out knowing how to make basic attacks, but as your character levels up you can learn more moves.</p>
+						</div>
+						<h4 class="q">Eeeek! I don't want to fight right now!</h4>
+						<div class="a"><p>That's okay. At any point during a fight, you can flee (provided you are not stunned, dead, or otherwise incapacitated). There are no penalties for fleeing combat, although the monster will continue occupying that same square until it is defeated, and it will regenerate back up to full health whenever you next encounter it.</p>
+						</div>
+						<h4 class="q">Aww man, I died! Laaaaame.</h4>
+						<div class="a"><p>It happens. Unfortunately you'll have to start over by reloading the page, or by reloading a previous save (if you have one).</p>
+						</div>
+						<h4 class="q">Wait, I can save?</h4>
+						<div class="a"><p>YES! Do it, and do it often.</p>
+						</div>
+						<h4 class="q">Pffft, I don't know what that guy's problem is. I TOTALLY just defeated a monster.</h4>
+						<div class="a"><p>Congrats! You may now loot its corpse. You'll likely find gold, gems, or items you can equip to make your character stronger. It's also worth noting that you CAN temporarily overload your inventory, you just have to resolve the issue of being over-full before leaving the loot screen.</p>
+						</div>
+						<h4 class="q">Hey, what gives? You didn't answer my question?</h4>
+						<div class="a"><p>Please email it to me and I will answer it and/or add it here, as appropriate. This FAQ is also not done yet, so please be patient :)</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- end FAQ area -->
+
 			<!-- start footer row -->
 			<div class="row footer">
 				<div class="col-md-4">
 					<span class="copyright">Copyright 2016 Emmett Framson under <a href="http://www.perlfoundation.org/artistic_license_2_0" target="_blank">The Artistic License 2.0</a></span>
 				</div>
-				<div class="col-md-4"></div>
-				<div class="col-md-4"><span class="feedback">Bugs/feedback welcomed at framsone at gmail dot com</span></div>
+				<div class="col-md-2"><a class="footer-link" role="button" data-bind="click: showFaq">Help/FAQ</a></div>
+				<div class="col-md-2"></div>
+				<div class="col-md-4">
+					<span class="feedback">Bugs/feedback welcomed at framsone at gmail dot com</span>
+				</div>
 			</div>
 			<!-- end footer row -->
 		</div> <!-- end container -->

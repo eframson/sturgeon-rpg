@@ -27,6 +27,7 @@ define([
 	var $MAIN_CONTENT_DIV = $(".main-content-row");
 	var $PLAYER_STAT_HEADER = $(".player-stat-row");
 	var $MESSAGE_LOG = $(".log-area");
+	var $FAQ = $("#faq-content");
 	var $SAVED_NOTICE = $(".saved-notice");
 	var $SAVED_PREF_NOTICE = $(".saved-pref-notice");
 	var BASE_FADEOUT_SPEED = 600;
@@ -344,7 +345,7 @@ define([
 			self.backButtonLabel = ko.observable("Back");
 			self.isNew = ko.observable(true);
 			self.eventSquareTypeOverride = ko.observable(undefined);
-			self.modalWindowTitle = ko.observable("A Header");
+			self.modalWindowTitle = ko.observable("");
 			self.modalWindowText = ko.observable("");
 			self.showModalClose = ko.observable(true);
 			self.showModalWindowFooter = ko.observable(true);
@@ -1579,14 +1580,15 @@ define([
 			self.freezeMovement(true);
 
 			//Generate "enemy appears" message
-			var enemyMsg = Utils.doBasedOnPercent({
+			/*var enemyMsg = Utils.doBasedOnPercent({
 				25 : [
 					"Suddenly, swimming out of the murky depths, a foe appears!",
 					"A shadow looms over you. You turn around swiftly; it's an enemy!",
 					"An enemy swims up to you, and attacks!",
 					"You charge headfirst into an enemy!",
 				]
-			});
+			});*/
+			var enemyMsg = "You've encountered an enemy! Time to fight!";
 
 			//self.logMessage(enemyMsg, "combat");
 
@@ -3211,6 +3213,18 @@ define([
 			self.showModalWindowFooter(true);
 			self.modalWindow.data('bs.modal').options.backdrop = true;
 			self.modalWindow.data('bs.modal').options.keyboard = true;
+		}
+
+		this.showFaq = function(){
+			var options = {
+				backdrop: 'static',
+				keyboard: false
+			}
+
+			self.modalWindowTitle("Help/FAQ");
+			self.showModalWindowFooter(false);
+			self.modalWindowText($FAQ.html());
+			self.showModal(options);
 		}
 
 		this._getSrcCollectionForActiveItem = function(){

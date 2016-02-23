@@ -863,6 +863,22 @@ button:focus {
 	font-style: italic;
 }
 
+.footer .footer-link {
+	cursor: pointer;
+}
+
+.q-section .q {
+	margin-bottom: 5px;
+}
+
+.q-section .a {
+	margin-bottom: 20px;
+}
+
+.q-section .a p {
+	margin-bottom: 5px;
+}
+
 /*
 http://paletton.com/#uid=63L0u0k1wXK00++09+R46QO7+F-
 */
