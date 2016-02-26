@@ -19,17 +19,40 @@ define([
 		this.opts = opts;
 		this.opts.ignoreStackable = this.opts.ignoreStackable || 0;
 
-		//It would be nice if we could add this function just to the instance of ko
-		//returned by this class rather than the global ko obj, but we'll see...
-		//Maybe cloning?
-		//http://stackoverflow.com/questions/122102/what-is-the-most-efficient-way-to-clone-an-object
-		//var newObject = jQuery.extend(true, {}, oldObject);
+		//THIS FUNCTION DOES NOT HANDLE THE CASE OF THERE BEING MORE THAN ONE ITEM WITH THE SAME ID, USE getItemsByID FOR THAT!
 		this.getItemByID = function(itemID){
 
 			var items = self.items();
 
 			for(i = 0; i < items.length; i++){
 				if( itemID == items[i].id ){
+					return items[i];
+				}
+			}
+			return false;
+
+		}
+
+		this.getItemsByID = function(itemID){
+
+			var items = self.items();
+			var matchingItems = [];
+
+			for(i = 0; i < items.length; i++){
+				if( itemID == items[i].id ){
+					matchingItems.push(items[i]);
+				}
+			}
+			return matchingItems;
+
+		}
+
+		this.getItemByUniqueID = function(uniqueID){
+
+			var items = self.items();
+
+			for(i = 0; i < items.length; i++){
+				if( uniqueID == items[i].uniqueID ){
 					return items[i];
 				}
 			}
@@ -61,6 +84,7 @@ define([
 
 		}
 
+		//@TODO: This really should use unique item ID instead of just itemID
 		this.removeItem = function(itemOrItemID, qty){
 
 			//If it's not an Item instance, treat it as an item ID

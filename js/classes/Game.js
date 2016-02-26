@@ -1361,7 +1361,7 @@ define([
 			}
 		}
 
-		this.generateRandomLootItem = function(lootSet, overrideQuality, lootSetOverride){
+		this.generateRandomLootItem = function(lootSet, overrideQuality, lootSetOverride, levelNum){
 
 			lootSet = lootSet || "standard";
 			var itemClass = "item";
@@ -1369,6 +1369,7 @@ define([
 			var qtyCoefficient = Math.ceil( self.level().levelNum() / 3 );
 			var possibleItemTypes = {};
 			var canAdd = true;
+			levelNum = levelNum || self.level().levelNum();
 
 			if( lootSet == "monster" ){
 				qtyCoefficient = qtyCoefficient * 1.5;
@@ -1410,7 +1411,7 @@ define([
 
 				var baseGoldPerLevel = 50;
 				var pctGoldVariance = 0.25;
-				var unRandomizedGoldPerLevel = baseGoldPerLevel * self.level().levelNum();
+				var unRandomizedGoldPerLevel = baseGoldPerLevel * levelNum;
 				var lowerGoldBounds = Math.round(unRandomizedGoldPerLevel - (unRandomizedGoldPerLevel * pctGoldVariance)),
 					upperGoldBounds = Math.round(unRandomizedGoldPerLevel + (unRandomizedGoldPerLevel * pctGoldVariance));
 
@@ -1466,13 +1467,13 @@ define([
 
 				}else if( miscType == "stone" ){
 
-					var availableGems = self.getAvailableItemIdsByTypeForLevel("gems", self.level().levelNum());
+					var availableGems = self.getAvailableItemIdsByTypeForLevel("gems", levelNum);
 					var gemId = Utils.chooseRandomly( availableGems );
 					itemToAdd = self.getAvailableItemById(gemId, "gems", 1);
-					if(self.level().levelNum() <= 50){
+					if(levelNum <= 50){
 						itemToAdd.qty = Utils.doRand(1,4);
 					}else{
-						itemToAdd.qty = Utils.doRand(1,4) + (self.level().levelNum() - 50);
+						itemToAdd.qty = Utils.doRand(1,4) + (levelNum - 50);
 					}
 
 				}else if( miscType == "food" ){
@@ -1512,8 +1513,8 @@ define([
 
 					var armorId;
 
-					var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", self.level().levelNum());
-					availableArmor = availableArmor.concat( self.getAvailableItemIdsByTypeForLevel("shield", self.level().levelNum()) );
+					var availableArmor = self.getAvailableItemIdsByTypeForLevel("armor", levelNum);
+					availableArmor = availableArmor.concat( self.getAvailableItemIdsByTypeForLevel("shield", levelNum) );
 					armorId = Utils.chooseRandomly( availableArmor );
 					if( armorId.indexOf("shield_") === 0 ){
 						itemClass = "shield";
@@ -1528,7 +1529,7 @@ define([
 
 					var weaponId;
 
-					var availableWeapons = self.getAvailableItemIdsByTypeForLevel("weapon", self.level().levelNum());
+					var availableWeapons = self.getAvailableItemIdsByTypeForLevel("weapon", levelNum);
 					weaponId = Utils.chooseRandomly( availableWeapons );
 
 					itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
@@ -1539,7 +1540,7 @@ define([
 
 					var accId;
 
-					var availableAccessories = self.getAvailableItemIdsByTypeForLevel("accessory", self.level().levelNum());
+					var availableAccessories = self.getAvailableItemIdsByTypeForLevel("accessory", levelNum);
 					accId = Utils.chooseRandomly( availableAccessories );
 
 					itemToAdd = self.getAvailableItemById(accId, "accessory", 1);
@@ -1547,7 +1548,7 @@ define([
 				}
 
 				itemToAdd.fullyDynamicStats = 1;
-				itemToAdd.level = (lootSet == "boss" ? (self.level().levelNum() + 1) : self.level().levelNum() );
+				itemToAdd.level = (lootSet == "boss" ? (levelNum + 1) : levelNum );
 				itemToAdd.quality = quality;
 				if(lootSet == "monster"){
 					itemToAdd.monsterLootCoefficient = self.currentEnemy().lootCoefficient();
@@ -2544,6 +2545,7 @@ define([
 		this._dropActiveItem = function(game, event, qty){
 
 			var itemToMoveId = self.activeItem().actualItem().id,
+				itemToMoveUniqueId = self.activeItem().actualItem().uniqueID,
 				existingItem = undefined,
 				newItem = undefined,
 				moveFrom = "inventory",
@@ -2572,7 +2574,7 @@ define([
 			}
 
 			//Get the existing item we want to "move"
-			existingItem = srcCollection.getItemByID(itemToMoveId);
+			existingItem = srcCollection.getItemByUniqueID(itemToMoveUniqueId);
 			//Clone it so we're not writing to the same object from two different places
 			if(moveTo){
 				newItem = Utils.cloneObject(existingItem);
@@ -2600,6 +2602,11 @@ define([
 				//Keep track of it in our "acuired items" collection
 				self.acquiredItems.addItem(newItem);
 
+				//Log acquisition
+				var foundItemString = 'You obtain: ';
+				foundItemString += self._assembleLogMessageStringFromItem(newItem);
+				self.logMessage(foundItemString);
+
 			}else if ( moveFrom == "inventory" ){
 
 				if(srcNumLeft == 0){
@@ -2610,6 +2617,8 @@ define([
 					//Add to container
 					tarCollection.addItem(newItem);
 				}
+
+				//Log dropping
 			}
 
 		}
@@ -2802,7 +2811,7 @@ define([
 			var soldItemsLength = self.soldItems.length();
 			var foundItemString = '';
 
-			if(acquiredItemsLength > 0){
+			/*if(acquiredItemsLength > 0){
 
 				foundItemString = 'You obtain: ';
 				
@@ -2810,7 +2819,7 @@ define([
 
 				self.logMessage(foundItemString);
 
-			}
+			}*/
 			if(soldItemsLength > 0){
 				self.goldGained();
 				foundItemString = 'You gain ' + self.goldGained() + ' gold from the sale of: ';
@@ -2840,11 +2849,16 @@ define([
 				}else if(i > 0 && itemArrayLength > 1){
 					foundItemString+=', ';
 				}
-				foundItemString+= foundItem.qty() + "x <span class='"
-				+ ((foundItem.hasQuality) ? foundItem.quality() : "") + "'>" +  Utils.makeMagicReplacements(foundItem.name, foundItem) + "</span>"
+				foundItemString+= self._assembleLogMessageStringFromItem(foundItem);
 			}
 
 			return foundItemString;
+		}
+
+		this._assembleLogMessageStringFromItem = function(item){
+			var itemString = item.qty() + "x <span class='"
+				+ ((item.hasQuality) ? item.quality() : "") + "'>" +  Utils.makeMagicReplacements(item.name, item) + "</span>";
+			return itemString;
 		}
 
 		this.getLevelById = function(id){
@@ -3759,6 +3773,20 @@ define([
 			self.player().availablePerkPoints(numPoints);
 		}
 
+		this.testMerchantSquare = function(levelNum, numItems){
+			self.currentContainer.removeAll();
+
+			var itemArray = Array();
+
+			var numItems = numItems || Utils.doRand(3,8);
+
+			for(var i = 0; i < numItems; i++){
+				self.currentContainer.addItem(self.generateRandomLootItem("trader", undefined, undefined, levelNum));
+			}
+
+			self.manageTransitionToView("fullscreen","merchant");
+		}
+
 		self.init();
 
 	};
@@ -3831,7 +3859,6 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
-- Hold down shift/hover over something to see currently equpped item rather than just "if equipped: X" in merchant screen
 - Automatically sort inventory
 - Make log filterable
 - Make inventory sortable

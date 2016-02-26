@@ -249,7 +249,7 @@ define([
 			return Object.keys(obj).length === 0;
 		},
 		
-		cloneObject : function(obj){
+		cloneObject : function(obj, genNewUniqueID){
 			
 			var newItemData = ko.mapping.toJS(obj);
 			
@@ -257,8 +257,15 @@ define([
 			
 			var newObj = new className.constructor(newItemData);
 
+			var newUniqueID;
+			if(genNewUniqueID){
+				newUniqueID = this.uniqueID();
+			}else{
+				newUniqueID = obj.uniqueID || this.uniqueID();
+			}
+
 			if(newObj.hasOwnProperty("uniqueID")){
-				newObj.uniqueID = this.uniqueID();
+				newObj.uniqueID = newUniqueID;
 			}
 			
 			return newObj;
