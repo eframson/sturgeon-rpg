@@ -518,7 +518,7 @@ define([
 
 						if( self.rightColContent() == 'container' ){ //We're moving something
 
-							if( self.activeItem().moveDirection() == "left" ){ //We're moving from the container to the inventory
+							if( self.activeItem().moveDirection() == "left" && self.inventoryEquipmentToggle() == "Inventory"){ //We're moving from the container to the inventory
 
 								if(actualItem.qty() > 1){
 
@@ -2022,6 +2022,12 @@ define([
 		this.setEquipmentItemAsActiveItem = function(item){
 			if( !Utils.isEmptyObject(item) ){
 				item.isEquipped(true);
+				//This is not quite working yet...
+				/*if( self.rightColContent() == "container" || self.rightColContent() == "merchant" ){
+					self._setAsActiveItem({ moveDirection : "right", canEquip : 0, canUnEquip : 1 }, item);
+				}else{
+					self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
+				}*/
 				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
 			}
 		}
@@ -2485,6 +2491,7 @@ define([
 			}
 
 			currentSort( self.showInventoryEquipmentPresetsList[newSortIdx] );
+			self._resetActiveItem();
 			//self._forceRecalculate.valueHasMutated();
 		}
 
