@@ -865,6 +865,8 @@ button:focus {
 .footer {
 	font-size: 10px;
 	font-style: italic;
+	margin-top: 15px;
+	margin-bottom: 15px;
 }
 
 .footer .footer-link {

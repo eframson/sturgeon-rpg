@@ -338,8 +338,6 @@ define([
 			self.rightColContent = ko.observable("equipment");
 			self.freezeMovement = ko.observable(false);
 			self.currentContainer = new ItemCollection(Array());
-			self.acquiredItems = new ItemCollection(Array(), { ignoreStackable : 1 });
-			self.soldItems = new ItemCollection(Array(), { ignoreStackable : 1 });
 			self.goldGained = ko.observable(0);
 			self.currentEnemy = ko.observable(undefined);
 			self.backButtonLabel = ko.observable("Back");
@@ -872,28 +870,6 @@ define([
 				self.currentContainer.items(itemArray);
 				self.currentContainer.opts = gameData.currentContainer.opts;
 
-				var acquiredItemArray = Array();
-				for(i = 0; i < gameData.acquiredItems.items.length; i++){
-					if(gameData.acquiredItems.items[i]._classNameForLoad){
-						acquiredItemArray.push(  eval("new " + gameData.acquiredItems.items[i]._classNameForLoad +"(gameData.acquiredItems.items[i])")  );
-					}else{
-						acquiredItemArray.push( new Item(gameData.acquiredItems.items[i]) );
-					}
-				}
-				self.acquiredItems.items(acquiredItemArray);
-				self.acquiredItems.opts = gameData.acquiredItems.opts;
-
-				var soldItemArray = Array();
-				for(i = 0; i < gameData.soldItems.items.length; i++){
-					if(gameData.soldItems.items[i]._classNameForLoad){
-						soldItemArray.push(  eval("new " + gameData.soldItems.items[i]._classNameForLoad +"(gameData.acquiredItems.items[i])")  );
-					}else{
-						soldItemArray.push( new Item(gameData.soldItems.items[i]) );
-					}
-				}
-				self.soldItems.items(soldItemArray);
-				self.soldItems.opts = gameData.soldItems.opts;
-
 			}else{
 
 				player = new Player( {str: 3, dex: 2, end: 2} );
@@ -1022,8 +998,6 @@ define([
 					self.freezeMovement(false);
 				});
 			}
-
-			self.logAnyAcquiredOrSoldItems();
 
 			self.activeSkill(undefined);
 
@@ -1324,6 +1298,7 @@ define([
 			for( var i=0; i < self.currentContainer.items().length; i++ ){
 				//Skip the normal cap-checking rules
 				self.player().inventory.addItem( self.currentContainer.items()[i] );
+				self.displayAcquiredItemMessageForItem(self.currentContainer.items()[i]);
 			}
 			self.currentContainer.removeAll();
 			self._resetActiveItem();
@@ -2251,7 +2226,8 @@ define([
 			self._resetActiveItem();
 
 			self.player().inventory.addItem(new Item(itemToAdd) );
-			self.logMessage("You gain " + scrapQty + "x " + itemToAdd.name + " from salvaging the item.","crafting");
+			var itemLogString = self._assembleLogMessageStringFromItem(item);
+			self.logMessage("You gain " + scrapQty + "x " + itemToAdd.name + " from salvaging " + itemLogString + ".","crafting");
 
 		}
 
@@ -2282,9 +2258,6 @@ define([
 
 				//Add to inventory
 				moveTo.addItem(newItem);
-
-				//Keep track of it in our "acuired items" collection
-				self.acquiredItems.addItem(newItem);
 
 			}
 
@@ -2317,23 +2290,23 @@ define([
 				//Add to inventory
 				moveTo.addItem(newItem);
 
-				//Keep track of it in our "acuired items" collection
-				self.acquiredItems.addItem(newItem);
-
 			}
 
 		}
 
 		this.sellActiveItem = function(game, event, qty){
 
-			var qty = qty || 1;
+			qty = qty || 1;
 			var item = self.activeItem().actualItem();
 			var moveFrom = self.player().inventory;
 			var moveTo = self.currentContainer;
+			var goldItem = undefined;
 
-			var gold = self.getAvailableItemById("gold", "misc", (qty * item.sellValue()) );
-			goldItem = new Item(gold);
-			self.goldGained( self.goldGained() + goldItem.qty() );
+			if(item.sellValue() > 0){
+				var gold = self.getAvailableItemById("gold", "misc", (qty * item.sellValue()) );
+				goldItem = new Item(gold);
+				self.goldGained( self.goldGained() + goldItem.qty() );
+			}
 
 			var newItem = Utils.cloneObject(item);
 			newItem.qty(qty);
@@ -2346,8 +2319,10 @@ define([
 
 			//Add to inventory
 			moveTo.addItem(newItem);
-			moveFrom.addItem(goldItem);
-			self.soldItems.addItem(newItem);
+			if(goldItem !== undefined){
+				moveFrom.addItem(goldItem);
+			}
+			self.displaySoldItemMessageForItem(newItem, qty, ( goldItem !== undefined ? goldItem.qty() : 0 ) );
 		}
 
 		this.sellAllActiveItem = function(game, event){
@@ -2599,13 +2574,8 @@ define([
 				//Add to inventory
 				tarCollection.addItem(newItem);
 
-				//Keep track of it in our "acuired items" collection
-				self.acquiredItems.addItem(newItem);
-
 				//Log acquisition
-				var foundItemString = 'You obtain: ';
-				foundItemString += self._assembleLogMessageStringFromItem(newItem);
-				self.logMessage(foundItemString);
+				self.displayAcquiredItemMessageForItem(newItem);
 
 			}else if ( moveFrom == "inventory" ){
 
@@ -2619,6 +2589,7 @@ define([
 				}
 
 				//Log dropping
+				self.displayDroppedItemMessageForItem(existingItem, qty);
 			}
 
 		}
@@ -2671,6 +2642,24 @@ define([
 				return true;
 			}
 			return false;
+		}
+
+		this.displayAcquiredItemMessageForItem = function(item){
+			var itemString = 'You obtain: ';
+			itemString += self._assembleLogMessageStringFromItem(item);
+			self.logMessage(itemString);
+		}
+
+		this.displayDroppedItemMessageForItem = function(item, qty){
+			var itemString = 'You drop: ';
+			itemString += self._assembleLogMessageStringFromItem(item, qty);
+			self.logMessage(itemString);
+		}
+
+		this.displaySoldItemMessageForItem = function(item, qty, goldGained){
+			var itemString = 'You gain ' + goldGained + ' GP from the sale of: ';
+			itemString += self._assembleLogMessageStringFromItem(item, qty);
+			self.logMessage(itemString);
 		}
 
 		this._shouldSkillBeSelected = function(skill){
@@ -2805,36 +2794,6 @@ define([
 			$(".message-log").stop(false, true).effect("highlight", { color: "#BEBEBE" }, 400);
 		}
 
-		this.logAnyAcquiredOrSoldItems = function(){
-
-			var acquiredItemsLength = self.acquiredItems.length();
-			var soldItemsLength = self.soldItems.length();
-			var foundItemString = '';
-
-			/*if(acquiredItemsLength > 0){
-
-				foundItemString = 'You obtain: ';
-				
-				foundItemString += self._assembleLogMessageStringFromItemCollection(self.acquiredItems);
-
-				self.logMessage(foundItemString);
-
-			}*/
-			if(soldItemsLength > 0){
-				self.goldGained();
-				foundItemString = 'You gain ' + self.goldGained() + ' gold from the sale of: ';
-				
-				foundItemString += self._assembleLogMessageStringFromItemCollection(self.soldItems);
-
-				self.logMessage(foundItemString);
-			}
-
-			//Clear everything out
-			self.acquiredItems.removeAll();
-			self.soldItems.removeAll();
-			self.goldGained(0);
-		}
-
 		this._assembleLogMessageStringFromItemCollection = function(itemArray){
 			var itemArrayLength = itemArray.length();
 			
@@ -2855,8 +2814,13 @@ define([
 			return foundItemString;
 		}
 
-		this._assembleLogMessageStringFromItem = function(item){
-			var itemString = item.qty() + "x <span class='"
+		this._assembleLogMessageStringFromItem = function(item, qty, showQty){
+			showQty = (showQty !== undefined) ? showQty : 1 ;
+			if(qty && qty == "all"){
+				qty = item.qty();
+			}
+			qty = qty || item.qty();
+			var itemString = (showQty ? qty + "x " : "") + "<span class='"
 				+ ((item.hasQuality) ? item.quality() : "") + "'>" +  Utils.makeMagicReplacements(item.name, item) + "</span>";
 			return itemString;
 		}
@@ -2974,8 +2938,6 @@ define([
 						backButtonLabel : self.backButtonLabel(),
 						currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
 						currentContainer : self.currentContainer.getExportData(),
-						acquiredItems : self.acquiredItems.getExportData(),
-						soldItems : self.soldItems.getExportData(),
 						playerHpBarWidth : self.playerHpBarWidth(),
 						enemyHpBarWidth : self.enemyHpBarWidth(),
 						goldGained : self.goldGained(),
