@@ -1785,7 +1785,17 @@ define([
 					self.logMessage(text);
 				};
 
-				text = "You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. All your cooldowns are instantly finished.";
+				var cooldownTextOptions = [
+					"You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. All your cooldowns are instantly finished.",
+					"You're thirsty, so you stop at a nearby Fishbucks and get a double-chocolate pumpkin spiced quadruple shot of espresso. (With whipped cream). You sip it quietly, and relax. All your cooldowns are instantly finished.",
+					"You need to take a break and look up directions on your iFin. You spend 30 minutes just trying to get a good signal. Reception is terrible down here! It takes so much time that by the time you regain your bearings, all your cooldowns have finished.",
+					"You take a quick power-nap. Your cooldowns are finished, AND you are totally ready to work on that homework assignment that's due tomorrow. You were planning on doing that, right?",
+					"You just remembered a really funny thing you wanted to watch on FishTube. It's the one where a sea cucumber...no, wait, was it a salmon? The one where it's chasing a ball and then...no, it wasn't a ball, it was a frisbee. Wasn't it? Your cooldowns finish in the time it takes you to remember.",
+					"You just remembered...you left the gas on! You quickly run home and turn it off. But wait, how can you run? You don't have legs! You wake up, short of breath. It was all a dream! Apparently you dozed off. Also, your stove is electric, not gas. Your cooldowns finished while you were asleep.",
+				];
+
+				text = Utils.chooseRandomly(cooldownTextOptions);
+
 				buttons = new Array(
 					{
 						title : "Continue",
@@ -1808,10 +1818,21 @@ define([
 
 				var statIncreaseAmt = 1;
 
+				var strTextOptions = [
+					"You find your path blocked by a large rock. Instead of simply swimming around or over it, you decide to try and move it. After an hour of laborious work, you manage to move it out of the way. The experience empowers you, permanently giving you +1 STR.",
+					"You encounter a pair of young fish who went into a crab pot on a dare, and now they can't get out. It takes every ounce of strength you have, but you manage to break open the trap, freeing them. They are eternally grateful for your efforts, and reward you with high-fins and an icepack. You permanently gain +1 STR.",
+					"You decide you should finally make use of that year-long subscription you won to Eel A. Fitness. After an hour, you've never felt more sore, but you've never looked better! Permanently gain +1 STR.",
+				];
+
+				var dexTextOptions = [
+					"While swimming along, you suddenly realize that you are about to crash right into a sharp metal hook just floating in the water in front of you. With quick thinking and maneuvering, you manage to barrel-roll to the side and avoid it. As you cruise past, you also snag a tasty-looking worm that someone apparently left just hanging on the hook. As you munch the delicious worm, you think you can probably figure out how to better avoid such water hazards in the future. Permanently gain +1 DEX.",
+					"You take a 30-minute break and do some Yoga. You are particularly talented at the Leaping Fish position. You permently gain +1 DEX. The look of smug self-satisfaction is optional."
+				];
+
 				if( stat == "str" ){
-					text = "You find your path blocked by a large rock. Instead of simply swimming around or over it, you decide to try and move it. After an hour of laborious work, you manage to move it out of the way. The experience empowers you, permanently giving you +1 STR.";
+					text = Utils.chooseRandomly(strTextOptions);
 				}else if( stat == "dex" ){
-					text = "While swimming along, you suddenly realize that you are about to crash right into a sharp metal hook just floating in the water in front of you. With quick thinking and maneuvering, you manage to barrel-roll to the side and avoid it.  As you cruise past, you also snag a tasty-looking worm that someone apparently left just hanging on the hook. As you munch the delicious worm, you think you can probably figure out how to better avoid such water hazards in the future. Gain +1 DEX."
+					text = Utils.chooseRandomly(dexTextOptions);
 				}else if( stat == "end" ){
 					text = "A passing trout challenges you to an impromptu fin-wrestling contest. The ensuing match takes a full hour before your strength finally gives out and you are forced to concede victory to the other fish. Panting and visibly just as exhausted as you and thoroughly impressed with your determination, the trout tells you one of his fin-wrestling secrets. You gain +1 END.";
 				}else if( stat == "exp" ){
@@ -3755,6 +3776,15 @@ define([
 
 			self.manageTransitionToView("fullscreen","merchant");
 		}
+
+		this.testCooldownSquare = function(levelNum, numItems){
+			
+			var currentOverride = self.eventSquareTypeOverride();
+			self.eventSquareTypeOverride("cooldown");
+			self.squareEventAction();
+			self.eventSquareTypeOverride(currentOverride);
+		}
+
 
 		self.init();
 
