@@ -42,6 +42,8 @@ define([
 
 			self.availableAttacks = monsterData.availableAttacks || {};
 
+			var archetypeData;
+
 			if(self.fullyDynamicStats && !self.isScaled()){
 				
 				//Idea 1
@@ -53,7 +55,7 @@ define([
 
 				var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
 				self.archetypeId = newMonsterArchetypeId;
-				var archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
+				archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 
 				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient);
 				self.xpCoefficient = ko.observable(archetypeData.xpCoefficient);
@@ -109,6 +111,26 @@ define([
 				abilityDataToLoad = $.map(self.combatAbilities(), function(elem, idx){
 					return elem;
 				});
+			}
+
+			//Theoretically this shouldn't happen, but at least one error email says it is, so we're implementing this fix
+			if(self.archetypeId){
+				archetypeData = archetypeData || self.getMonsterArchetypeById(self.archetypeId, self.archetypeClass);
+				var availableCombatAbilities = archetypeData.availableCombatAbilities;
+
+				var abilityDataToLoadIds = $.map(abilityDataToLoad, function(elem, idx){
+					return elem.id;
+				});
+
+				$.each((availableCombatAbilities || []), function(idx, elem){
+					var abilityData;
+					
+					if( abilityDataToLoadIds.indexOf(elem) == -1 ){
+						abilityData = skillDataCollection.getNode(["combat_abilities", elem]);
+						abilityDataToLoad.push(abilityData);
+					}
+				});
+
 			}
 
 			$.each(abilityDataToLoad, function(idx, elem){
