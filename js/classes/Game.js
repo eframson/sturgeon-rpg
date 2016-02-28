@@ -1597,15 +1597,40 @@ define([
 
 			self.freezeMovement(true);
 
-			var eventType = Utils.doBasedOnPercent({
-				30 : "trainer",
-				40 : "trader",
-				15 : "cooldown",
-				10 : "stat",
-				5 : "inventory",
-			});
+			var eventSquarePercents = {
+				"normal" : {
+					30 : "trainer",
+					40 : "trader",
+					15 : "cooldown",
+					10 : "stat",
+					5 : "inventory",
+				},
+				"no_trainer" : {
+					50 : "trader",
+					25 : "cooldown",
+					15 : "stat",
+					10 : "inventory",
+				}
+			};
+			var eventSquarePercentKey;
+			var eventSquarePercentObject;
 
-			if( self.eventSquareTypeOverride() !== undefined ){
+			//Don't let trainer squares show up if there's nothing to train in!
+			$.each(self.player().activeAbilities(), function(idx, skill){
+				if(skill.canTrainNextLevel()){
+					eventSquarePercentKey = "normal";
+					return false;
+				}
+			});
+			if(eventSquarePercentObject == undefined){
+				eventSquarePercentKey = "no_trainer";
+			}
+
+			var eventType = Utils.doBasedOnPercent(eventSquarePercents[eventSquarePercentKey]);
+
+			if (self.eventSquareTypeOverride() !== undefined && self.eventSquareTypeOverride() == "trainer" && eventSquarePercentKey == "no_trainer" ) {
+				self.eventSquareTypeOverride(undefined);
+			} else if( self.eventSquareTypeOverride() !== undefined ){
 				eventType = self.eventSquareTypeOverride();
 				self.eventSquareTypeOverride(undefined);
 			}
@@ -1723,6 +1748,9 @@ define([
 					trainCost = 800;
 					trainSkillAmt = 10;
 					trainSkillSuccessDesc = "max HP bonus";
+				}else {
+					console.log(improvableStats);
+					window.onerror.call(window, "Unknown train string: " + trainSkillString, document.location.toString(), 0);
 				}
 
 				text += " for " + trainCost + " GP";
@@ -3781,6 +3809,13 @@ define([
 			
 			var currentOverride = self.eventSquareTypeOverride();
 			self.eventSquareTypeOverride("cooldown");
+			self.squareEventAction();
+			self.eventSquareTypeOverride(currentOverride);
+		}
+
+		this.testTrainSkillSquare = function(levelNum, numItems){
+			var currentOverride = self.eventSquareTypeOverride();
+			self.eventSquareTypeOverride("trainer");
 			self.squareEventAction();
 			self.eventSquareTypeOverride(currentOverride);
 		}
