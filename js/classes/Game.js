@@ -372,6 +372,9 @@ define([
 			self.merchantSortOrder = ko.observable("Type");
 			self.inventoryEquipmentToggle = ko.observable("Inventory");
 
+			self.numBattlesWon = ko.observable(0);
+			self.numItemSquaresLooted = ko.observable(0);
+
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
 
@@ -870,6 +873,9 @@ define([
 				self.currentContainer.items(itemArray);
 				self.currentContainer.opts = gameData.currentContainer.opts;
 
+				self.numBattlesWon( gameData.numBattlesWon || 0 );
+				self.numItemSquaresLooted( gameData.numItemSquaresLooted || 0 );
+
 			}else{
 
 				player = new Player( {str: 3, dex: 2, end: 2} );
@@ -1150,6 +1156,7 @@ define([
 
 				self.player().addExp(self.currentEnemy().expValue());
 				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP!", "combat");
+				self.numBattlesWon( self.numBattlesWon() + 1 );
 
 				if( self.player().hasLeveledUp() ){
 					self.player().hasLeveledUp(false);
@@ -1227,20 +1234,27 @@ define([
 			var thisItemString;
 			var foundItemString = 'You find: ';
 			self.currentContainer.removeAll(); //Make sure it's empty
+			var numLootsFound = self.numBattlesWon() + self.numItemSquaresLooted();
 
-			for(var i=0; i < numLoots; i++){
-				thisItemString = '';
-				newLootItem = self.generateRandomLootItem(lootTable);
-				self.currentContainer.addItem(newLootItem);
-				if(i > 0){
-					thisItemString = ', ';
+			if( numLootsFound < 5){
+				self.generateScheduledLootItem();
+			}else{
+
+				for(var i=0; i < numLoots; i++){
+					thisItemString = '';
+					newLootItem = self.generateRandomLootItem(lootTable);
+					self.currentContainer.addItem(newLootItem);
+					if(i > 0){
+						thisItemString = ', ';
+					}
+					thisItemString = newLootItem.qty() + "x <span class='"
+					+ ((newLootItem.hasQuality) ? newLootItem.quality() : "") + "'>" + newLootItem.name + "</span>"
+
+					thisItemString = self._makeMagicReplacementsForItem(thisItemString, newLootItem);
+
+					foundItemString += thisItemString;
 				}
-				thisItemString = newLootItem.qty() + "x <span class='"
-				+ ((newLootItem.hasQuality) ? newLootItem.quality() : "") + "'>" + newLootItem.name + "</span>"
 
-				thisItemString = self._makeMagicReplacementsForItem(thisItemString, newLootItem);
-
-				foundItemString += thisItemString;
 			}
 
 			if(self.level().getActiveSquare().type == 'exit'){
@@ -1308,7 +1322,16 @@ define([
 
 			self.freezeMovement(true);
 
-			var newItem = self.generateRandomLootItem();
+			self.numItemSquaresLooted( self.numItemSquaresLooted() + 1 );
+
+			var newItem;
+			var numLootsFound = self.numBattlesWon() + self.numItemSquaresLooted();
+
+			if( numLootsFound < 5){
+				newItem = self.generateScheduledLootItem(1)[0];
+			}else {
+				newItem = self.generateRandomLootItem();
+			}
 
 			var container = Utils.doBasedOnPercent({
 				25 : [
@@ -1334,6 +1357,62 @@ define([
 				self.logMessage(messageString + ", but your inventory is currently full", "item");
 				self.showContainerWithContents([newItem]);
 			}
+		}
+
+		this.generateScheduledLootItem = function(returnItems){
+			returnItems = returnItems || 0;
+			var returnItemsArray = [];
+			var numLootsFound = self.numBattlesWon() + self.numItemSquaresLooted();
+			var scheduledLootIdx = numLootsFound - 1;
+			var initialLootSchedule = [
+				"melee_weapon_01",
+				"tail_armor_01",
+				"head_armor_01",
+				"body_armor_01",
+			];
+			var initialLootTypes = [
+				"weapon",
+				"armor",
+				"armor",
+				"armor",
+			];
+			var scheduledFoodItem = "qual_30_1";
+
+			var itemToAdd, newLootItem, itemId;
+
+			itemId = initialLootSchedule[scheduledLootIdx];
+
+			itemToAdd = self.getAvailableItemById(itemId, initialLootTypes[scheduledLootIdx], 1);
+
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = 1;
+			itemToAdd.quality = "good";
+			if( initialLootTypes[scheduledLootIdx] == "weapon" ){
+				newLootItem = new Weapon(itemToAdd);
+			}else if( initialLootTypes[scheduledLootIdx] == "armor" ){
+				newLootItem = new Armor(itemToAdd);
+			}
+
+			if(!returnItems){
+				self.currentContainer.addItem(newLootItem);
+			}else{
+				returnItemsArray.push(newLootItem);
+			}
+
+			itemToAdd = self.itemDataCollection.getNode(["items", "consumables", "scroungables", "poor", scheduledFoodItem]);
+			itemToAdd.qty = 2;
+			itemToAdd.type = "consumables";
+			itemToAdd.desc = "Restores %poorHpRestore% HP when consumed";
+			newLootItem = new Consumable(itemToAdd);
+
+			if(!returnItems){
+				self.currentContainer.addItem(newLootItem);
+			}else{
+				returnItemsArray.push(newLootItem);
+			}
+
+			return returnItemsArray;
+
 		}
 
 		this.generateRandomLootItem = function(lootSet, overrideQuality, lootSetOverride, levelNum){
@@ -2869,17 +2948,6 @@ define([
 			return foundItemString;
 		}
 
-		this._assembleLogMessageStringFromItem = function(item, qty, showQty){
-			showQty = (showQty !== undefined) ? showQty : 1 ;
-			if(qty && qty == "all"){
-				qty = item.qty();
-			}
-			qty = qty || item.qty();
-			var itemString = (showQty ? qty + "x " : "") + "<span class='"
-				+ ((item.hasQuality) ? item.quality() : "") + "'>" +  Utils.makeMagicReplacements(item.name, item) + "</span>";
-			return itemString;
-		}
-
 		this.getLevelById = function(id){
 			for(i = 0; i < self.levels().length; i++){
 				if( id == self.levels()[i].levelID() ){
@@ -2893,20 +2961,32 @@ define([
 			return Utils.makeMagicReplacements(string, [self, item]);
 		}
 
+		this._assembleLogMessageStringFromItem = function(item, qty){
+			var showQty = (qty == 0) ? 0 : 1;
+
+			if(qty && qty == "all"){
+				qty = item.qty();
+			}
+			qty = qty || item.qty();
+			var itemName = self._makeMagicReplacementsForItem(item.name, item);
+			if( item.namedItem && typeof item.namedItem === "function" && item.namedItem() == 1 ){
+				itemName = "<em>" + item.name + "</em>";
+			}
+			var itemString = (showQty ? qty + "x " : "") + "<span class='"
+				+ ((item.hasQuality) ? item.quality() : "") + "'>" +  itemName + "</span>";
+			return itemString;
+		}
+
 		this._getHtmlDisplayStringForItem = function(item, context){
 			var displayString;
 			if(context == "equipment"){
 				if(item.name == undefined){
 					displayString = "None";
 				}else{
-					displayString = self._makeMagicReplacementsForItem('<span class=\'' + item.quality() + '\'>' + item.name + '</span>', item);
+					displayString = self._assembleLogMessageStringFromItem(item, 0);
 				}
 			}else if(context == "inventory" || context == "merchant" || context == "container") {
-				displayString = self._makeMagicReplacementsForItem('<span class=\'' + (item.hasQuality ? item.quality() : '') + '\'>'
-					+ (item.namedItem && typeof item.namedItem === 'function' && item.namedItem() == 1
-						? '<em>' + item.name + '</em>'
-						: item.name
-					) + '</span>', item);
+				displayString = self._assembleLogMessageStringFromItem(item, 0);
 			}else{
 
 			}
@@ -3000,6 +3080,8 @@ define([
 						containerSortOrder : self.containerSortOrder(),
 						merchantSortOrder : self.merchantSortOrder(),
 						inventoryEquipmentToggle : self.inventoryEquipmentToggle(),
+						numBattlesWon : self.numBattlesWon(),
+						numItemSquaresLooted : self.numItemSquaresLooted(),
 						savedBuildVersion : BUILD_VERSION,
 					}
 				);
@@ -3743,6 +3825,76 @@ define([
 
 		}
 
+		this.testEquipmentSetForLevel = function(level, quality){
+			level = level || 1;
+			quality = quality || "good";
+
+			var	itemToAdd;
+			var newItem;
+
+			// --- Add weaps ---
+			var weaponId;
+
+			//1H
+			weaponId = "melee_weapon_03";
+			itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
+
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = level;
+			itemToAdd.quality = quality;
+			newItem = new Weapon(itemToAdd);
+
+			self.player().addItemToInventory( newItem, 1 );
+
+			//2H
+			weaponId = "melee_weapon_04";
+			itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
+
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = level;
+			itemToAdd.quality = quality;
+			newItem = new Weapon(itemToAdd);
+
+			self.player().addItemToInventory( newItem, 1 );
+			
+			// --- Add shield ---
+			var shieldId = "shield_01";
+			itemToAdd = self.getAvailableItemById(shieldId, "shield", 1);
+
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = level;
+			itemToAdd.quality = quality;
+			newItem = new Shield(itemToAdd);
+
+			self.player().addItemToInventory( newItem, 1 );
+
+			// --- Add armor ---
+			var armorIds = [
+				"tail_armor_01",
+				"body_armor_01",
+				"head_armor_01",
+			];
+			if(level >= 5){
+				armorIds.push("fin_armor_01");
+			}
+
+			var armorId;
+			var i;
+			for(i = 0; i < armorIds.length; i++){
+				armorId = armorIds[i];
+
+				itemToAdd = self.getAvailableItemById(armorId, "armor", 1);
+
+				itemToAdd.fullyDynamicStats = 1;
+				itemToAdd.level = level;
+				itemToAdd.quality = quality;
+
+				newItem = new Armor(itemToAdd);
+
+				self.player().addItemToInventory( newItem, 1 );
+			}
+		}
+
 		this.testApplyEffectToPlayer = function(combat_effect_id){
 			combat_effect_id = combat_effect_id || 'stun';
 			combatEffectToApply = new CombatEffect(self.skillDataCollection.getNode(["combat_effects", combat_effect_id]));
@@ -3771,17 +3923,27 @@ define([
 			self.level().hideMap();
 		}
 
-		this.testLevelUp = function(){
+		this.testLevelUp = function(logStats){
 			self.player().level( self.player().level() + 1 );
 			self.player().levelUp();
 			self.showLevelUpModal();
+			if(logStats){
+				console.log('Level: ' + self.player().level());
+				console.log('Max HP: ' + self.player().maxHp());
+			}
 		}
 
-		this.testAddLevels = function(numLevels){
+		this.testAddLevels = function(numLevels, logStats){
+			console.log('Level: ' + self.player().level());
+			console.log('Max HP: ' + self.player().maxHp());
 			numLevels = numLevels || 10;
-			for(var i = 0; i < 10; i++){
+			for(var i = 0; i < numLevels; i++){
 				self.player().level( self.player().level() + 1 );
 				self.player().levelUp();
+				if(logStats){
+					console.log('Level: ' + self.player().level());
+					console.log('Max HP: ' + self.player().maxHp());
+				}
 			}
 		}
 
@@ -3865,22 +4027,25 @@ PROBLEMS NEEDING SOLUTIONS:
 BUGS:
 - logsave gives error
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
-- Log records incorrect number of items when they have been xferred back and forth
-- Multiple items selected simultaneously in merchant (cannot reproduce)
 - Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 GAME CHANGES:
-- Add potion that reveals the exit square
+- Auto-equip gear if slot is empty
+- "Schedule" first few monster loots
+- Balance monster dmg so it accounts for (some) player armor
 
 UI CHANGES:
 
 
 CODE CHANGES:
+- Make item logging code go through _assembleLogMessageStringFromItem
 
 
 GAME IDEAS:
+- Add potion that reveals the exit square
+
 - Add in gem merchants that accept gems as currency (ask Matt)
 - Make skill trainers cost less, OR improve base skill rather than progress
 - Add intermittent passives?
@@ -3892,7 +4057,6 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
-- Automatically sort inventory
 - Make log filterable
 - Make inventory sortable
 - Color code log
@@ -3907,6 +4071,7 @@ UI IDEAS:
 - Keyboard shortcuts for "continue" buttons
 
 CODE IDEAS:
+- Don't save and rehydrate functions
 - Improve the skill training stuff somehow so it doesn't always break whenever a new skill is added
 - Fix testAddLevel function so it properly increases skill progress
 - Put a cap on leveling
@@ -3943,6 +4108,15 @@ Perk Ideas
 
 Feedback
 
+Too easy. Contributing factors:
+- Monster strength is calculated based on an unarmored/unequipped player (I think)
+- Monster strength goes by dungeon level, regardless of what level the player is
+- Players get a lot of HP on level-up -- too much?
+- Monsters might reward too much XP?
+- Players spend too much time on level (always show exit square?)
+- Definitely add a difficulty selector
+- Control first set of loot drops so player gets a set of gear
+More text variance
 
 LINKS FOR RESEARCH:
 http://jsfiddle.net/tPm3s/1/ (http://stackoverflow.com/questions/23530756/maze-recursive-division-algorithm-design)

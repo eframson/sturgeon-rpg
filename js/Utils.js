@@ -102,10 +102,10 @@ define([
 
 		calculateAveragesForLevel : function(levelNum) {
 
-			var avgPlayerHp = 20 + ((levelNum - 1) * 2);
+			var avgPlayerHp = 20 + ((levelNum - 1) * 7);
 			var avgMonsterHp;
 			if(levelNum == 1){
-				avgMonsterHp = avgPlayerHp / 3;
+				avgMonsterHp = avgPlayerHp / 2;
 			}else if(levelNum == 2) {
 				avgMonsterHp = avgPlayerHp;
 			}else {
@@ -118,9 +118,9 @@ define([
 
 			var avgPlayerArmorValue;
 			
-			if(levelNum < 5){
+			if(levelNum < 2){
 				avgPlayerArmorValue = Math.round(levelNum * 5);
-			}else if(levelNum < 10){
+			}else if(levelNum < 3){
 				avgPlayerArmorValue = Math.round(levelNum * 4);
 			}else {
 				avgPlayerArmorValue = Math.round(levelNum * 3);
@@ -133,7 +133,8 @@ define([
 				avgPlayerDmg : avgPlayerDmgPerHit,
 				avgMonsterHp : avgMonsterHp,
 				avgMonsterDmg : avgMonsterDmgPerHit,
-				avgPlayerArmorValue : avgPlayerArmorValue
+				avgPlayerArmorValue : avgPlayerArmorValue,
+				actualAvgPlayerArmorValue : Math.round(avgPlayerArmorValue * 1.25)
 			};
 
 			return averages;

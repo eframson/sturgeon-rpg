@@ -629,7 +629,7 @@
 				"id" : "tail_armor_02",
 				"name" : "Molted Mermaid Tail",
 				"type" : "armor",
-				"desc" : "The freshly molted tail of a mermaid. I bet you didn't even know they did that. Yeah, there's a lot of facts most people don't know about mermaids. +%armorValue% Armor when equipped",
+				"desc" : "The freshly molted tail of a mermaid. I bet you didn't even know they did that. Yeah, there's a lot of facts most people don't know about mermaids. Did you know that they're all named \"Steve\"? +%armorValue% Armor when equipped",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"armorSlot" : "tail",
