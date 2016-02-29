@@ -1622,9 +1622,8 @@ define([
 					return false;
 				}
 			});
-			if(eventSquarePercentObject == undefined){
-				eventSquarePercentKey = "no_trainer";
-			}
+			
+			eventSquarePercentKey = eventSquarePercentKey || "no_trainer";
 
 			var eventType = Utils.doBasedOnPercent(eventSquarePercents[eventSquarePercentKey]);
 
