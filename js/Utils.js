@@ -134,7 +134,8 @@ define([
 				avgMonsterHp : avgMonsterHp,
 				avgMonsterDmg : avgMonsterDmgPerHit,
 				avgPlayerArmorValue : avgPlayerArmorValue,
-				actualAvgPlayerArmorValue : Math.round(avgPlayerArmorValue * 1.25)
+				adjustedPlayerArmorValue : Math.round(avgPlayerArmorValue * 1.35),
+				adjustedPlayerDmgValue : Math.round(avgPlayerDmgPerHit * 1.35)
 			};
 
 			return averages;
@@ -142,17 +143,19 @@ define([
 
 		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum){
 			var actualDmg;
+			var absorption;
 
-			if(levelNum < 5){
-				actualDmg = dmg * Math.pow(0.95, armor);
-			}else if(levelNum < 10){
-				actualDmg = dmg * Math.pow(0.97, armor);
-			}else if(levelNum < 20){
-				actualDmg = dmg * Math.pow(0.98, armor);
-			}else{
-				actualDmg = dmg * Math.pow(0.99, armor);
+			absorption = Math.pow(0.99, armor);
+			actualDmg = Math.round(dmg * absorption);
+
+			/*var i;
+			actualDmg = dmg;
+			for (i = 0; i < armor; i++) {
+				actualDmg = actualDmg * 0.99;
 			}
-			actualDmg = Math.round(actualDmg);
+			Math.round(actualDmg);*/
+
+			//actualDmg = dmg - (armor - Math.pow(armor, 0.95));
 
 			return actualDmg;
 		},

@@ -3897,7 +3897,8 @@ define([
 			itemToAdd.quality = quality;
 			newItem = new Weapon(itemToAdd);
 
-			self.player().addItemToInventory( newItem, 1 );
+			//self.player().addItemToInventory( newItem, 1 );
+			self._equipItem(newItem);
 
 			//2H
 			weaponId = "melee_weapon_04";
@@ -3919,7 +3920,8 @@ define([
 			itemToAdd.quality = quality;
 			newItem = new Shield(itemToAdd);
 
-			self.player().addItemToInventory( newItem, 1 );
+			//self.player().addItemToInventory( newItem, 1 );
+			self._equipItem(newItem);
 
 			// --- Add armor ---
 			var armorIds = [
@@ -3944,7 +3946,8 @@ define([
 
 				newItem = new Armor(itemToAdd);
 
-				self.player().addItemToInventory( newItem, 1 );
+				//self.player().addItemToInventory( newItem, 1 );
+				self._equipItem(newItem);
 			}
 		}
 
@@ -3987,8 +3990,10 @@ define([
 		}
 
 		this.testAddLevels = function(numLevels, logStats){
-			console.log('Level: ' + self.player().level());
-			console.log('Max HP: ' + self.player().maxHp());
+			if(logStats){
+				console.log('Level: ' + self.player().level());
+				console.log('Max HP: ' + self.player().maxHp());
+			}
 			numLevels = numLevels || 10;
 			for(var i = 0; i < numLevels; i++){
 				self.player().level( self.player().level() + 1 );
@@ -3997,6 +4002,35 @@ define([
 					console.log('Level: ' + self.player().level());
 					console.log('Max HP: ' + self.player().maxHp());
 				}
+			}
+		}
+
+		this.testPlayerStatsWithGearForLevel = function(level, gearQuality, showAverages) {
+			gearQuality = gearQuality || "good";
+			showAverages = showAverages || 0 ;
+			var levelsToAdd = level - self.player().level();
+			if(levelsToAdd > 0){
+				self.testAddLevels(levelsToAdd);
+			}
+			self.testEquipmentSetForLevel(level, gearQuality);
+
+			var armorWithShield = self.player().totalArmor();
+			self.player().unEquipShield();
+			var armorWithoutShield = self.player().totalArmor();
+			console.log("HP: " + self.player().maxHp());
+			console.log("AC: " + armorWithoutShield + " - " + armorWithShield);
+			console.log("DMG: " + self.player().minDmg() + ' - ' + self.player().maxDmg() + ( self.player().bonusDmg() > 0 ? ' (+' + self.player().bonusDmg() + ')' : '' ));
+			var avgArmor = Math.round((armorWithoutShield + armorWithShield) / 2);
+
+			var averages = Utils.calculateAveragesForLevel(level);
+
+			var actualDmgPerMonsterHit = Utils.calculateDmgForArmorAndLevel(Math.round(averages.avgMonsterDmg * 1), avgArmor, level);
+
+			averages.estPlayerArmor = avgArmor;
+			averages.actualDmgPerMonsterHit = actualDmgPerMonsterHit;
+
+			if(showAverages){
+				console.log( averages );
 			}
 		}
 
