@@ -247,6 +247,10 @@ define([
 		},
 
 		isEmptyObject : function(obj){
+			if(obj == undefined || obj == null || typeof obj !== 'object'){
+				//Not sure why we were encountering this error...
+				return true;
+			}
 			return Object.keys(obj).length === 0;
 		},
 		

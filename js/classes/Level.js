@@ -227,8 +227,8 @@ define([
 			var combatColor = '#FF8585';
 			var itemColor = '#FFE240';
 			var eventColor = '#B92EFF';
-			var exitColor = '#FFD095';
-			var entranceColor = '#FF0000';
+			var exitColor = '#FFEABF';
+			var entranceColor = '#8CBBBB';
 			var text = "";
 			var playerPos = self.getPlayerPos();
 
@@ -248,18 +248,18 @@ define([
 
 					}else{
 
-						if(square.isVisible){
+						if (square.type == "exit") {
+							fillStyle = exitColor;
+							fontStyle = "#000000";
+							text = "↑";
+						} else if(square.isVisible){
 
 							if(square.isWall && square.isDoor){
 								fillStyle = "#00FF00";
 							}else if(square.isWall){
 								fillStyle = "#152026";
-							}else if(square.type == "exit"){
-								fillStyle = "#000000";
-								fontStyle = "#FFFFFF";
-								text = "↑";
 							}else if(square.type == "entrance"){
-								fillStyle = "#FFFFFF";
+								fillStyle = entranceColor;
 								fontStyle = "#000000";
 								text = "↓";
 							}/*else if(square.isDoor){
@@ -302,7 +302,7 @@ define([
 					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
 					if( square.type == "entrance" || square.type == "exit"){
 						context.fillStyle = fontStyle;
-						context.font = "26px serif";
+						context.font = "22px serif";
 						context.fillText(text, col_num * squareWidth + (squareWidth / 4), (row_num * squareHeight) + (squareHeight / 2) + (squareHeight / 4));
 					}
 

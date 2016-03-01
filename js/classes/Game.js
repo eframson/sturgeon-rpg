@@ -134,9 +134,7 @@ define([
 
 				if(newFoodItem){ //Again, just a formality
 					var qty = self.addFoodToPlayerInventory(newFoodItem);
-					message = "You gracefully float to the bottom of the river and successfully scrounge up "
-						+ qty + "x <span class='" + newFoodItem.quality() + "'>" + newFoodItem.name
-						+ "</span> using your kick-ass mouth feelers";
+					message = "You gracefully float to the bottom of the river and successfully scrounge up " + self._assembleLogMessageStringFromItem(newFoodItem) + " using your kick-ass mouth feelers";
 					if(qty != false && qty > 0){
 						message += "!";
 					}else{
@@ -228,8 +226,7 @@ define([
 					//Attempt to add the item to inventory
 					var qtyAdded = self.player().addItemToInventory( newLootItem );
 
-					var messageString = "After long hours of tiring excavation, you uncover 1x <span class='"
-							+ (newLootItem.hasQuality ? newLootItem.quality() : '') + "'>" + newLootItem.name + "</span>";
+					var messageString = "After long hours of tiring excavation, you uncover " + self._assembleLogMessageStringFromItem(newLootItem);
 
 					if(qtyAdded != false && qtyAdded > 0){
 						//Log success
@@ -295,6 +292,7 @@ define([
 		];
 
 		this.savedBuildVersion = undefined;
+		this.ignoreSquareActions = 0;
 		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
@@ -957,11 +955,14 @@ define([
 
 					if(square.notEmpty && square.isDone == false){
 
-						self.handleSquareAction(square);
+						if( self.ignoreSquareActions == 0 ){
+							self.handleSquareAction(square);
 
-						if(square.type != "exit" && square.type != "entrance" && square.type != "combat"){
-							square.setDone(true);
+							if(square.type != "exit" && square.type != "entrance" && square.type != "combat"){
+								square.setDone(true);
+							}
 						}
+						
 					}
 
 					self.level().drawMap();
@@ -1237,7 +1238,20 @@ define([
 			var numLootsFound = self.numBattlesWon() + self.numItemSquaresLooted();
 
 			if( numLootsFound < 5){
-				self.generateScheduledLootItem();
+				var lootFound = self.generateScheduledLootItem(1);
+
+				for(var i = 0; i < lootFound.length; i++){
+					thisItemString = '';
+					newLootItem = lootFound[i];
+					self.currentContainer.addItem(newLootItem);
+					if(i > 0){
+						thisItemString = ', ';
+					}
+					thisItemString += self._assembleLogMessageStringFromItem(newLootItem);
+
+					foundItemString += thisItemString;
+				}
+
 			}else{
 
 				for(var i=0; i < numLoots; i++){
@@ -1247,10 +1261,7 @@ define([
 					if(i > 0){
 						thisItemString = ', ';
 					}
-					thisItemString = newLootItem.qty() + "x <span class='"
-					+ ((newLootItem.hasQuality) ? newLootItem.quality() : "") + "'>" + newLootItem.name + "</span>"
-
-					thisItemString = self._makeMagicReplacementsForItem(thisItemString, newLootItem);
+					thisItemString = self._assembleLogMessageStringFromItem(newLootItem);
 
 					foundItemString += thisItemString;
 				}
@@ -1311,8 +1322,15 @@ define([
 		this.takeAllFromContainer = function(){
 			for( var i=0; i < self.currentContainer.items().length; i++ ){
 				//Skip the normal cap-checking rules
-				self.player().inventory.addItem( self.currentContainer.items()[i] );
-				self.displayAcquiredItemMessageForItem(self.currentContainer.items()[i]);
+				if(self.currentContainer.items()[i].canEquip() && self.player().shouldAutoEquip(self.currentContainer.items()[i])){
+					//Equip it
+					self._equipItem(self.currentContainer.items()[i]);
+					self.displayAcquiredAndEquippedItemMessageForItem(self.currentContainer.items()[i]);
+				}else{
+					self.player().inventory.addItem( self.currentContainer.items()[i] );
+					self.displayAcquiredItemMessageForItem(self.currentContainer.items()[i]);
+				}
+				
 			}
 			self.currentContainer.removeAll();
 			self._resetActiveItem();
@@ -1333,21 +1351,32 @@ define([
 				newItem = self.generateRandomLootItem();
 			}
 
-			var container = Utils.doBasedOnPercent({
-				25 : [
-					"a crate sealed tightly with tar",
-					"an upturned canoe concealing a pocket of air",
-					"a waterproof oilskin bag",
-					"a crevice between two large rocks",
-				]
-			});
+			var container = Utils.chooseRandomly([
+				"a crate sealed tightly with tar",
+				"an upturned canoe concealing a pocket of air",
+				"a waterproof oilskin bag",
+				"a crevice between two large rocks",
+				"an old boot",
+				"a pile of fish bones",
+				"an abandoned hermit crab shell",
+				"a mound of broken coral",
+				"a freshly dug nest",
+			]);
 
-			var numJustAdded = self.player().addItemToInventory(newItem);
+			var numJustAdded;
+			var messageString;
 
-			var messageString = "Inside " + container + " you find " + newItem.qty() + "x <span class='"
-				+ ((newItem.hasQuality) ? newItem.quality() : "") + "'>" + newItem.name + "</span>";
-
-			messageString = self._makeMagicReplacementsForItem(messageString, newItem);
+			if(newItem.canEquip() && self.player().shouldAutoEquip(newItem)){
+				//Equip it
+				self._equipItem(newItem);
+				//Log acquisition
+				messageString = "Inside " + container + " you find " + self._assembleLogMessageStringFromItem(newItem) + ". It was automatically equipped.";
+				//Make sure the game knows it was properly picked up
+				numJustAdded = 1;
+			}else{
+				numJustAdded = self.player().addItemToInventory(newItem);
+				messageString = "Inside " + container + " you find " + self._assembleLogMessageStringFromItem(newItem);
+			}
 
 			if(numJustAdded != false && numJustAdded > 0){
 			//if(self.player().inventorySlotsAvailable() > -1){
@@ -2220,15 +2249,7 @@ define([
 
 			var alreadyEquippedItem;
 
-			if(type == "weapon"){
-				alreadyEquippedItem = self.player().equipWeapon(item);
-			}else if(type == "shield"){
-				alreadyEquippedItem = self.player().equipShield(item);
-			}else if(type == "armor"){
-				alreadyEquippedItem = self.player().equipArmor(item);
-			}else if(type == "accessory"){
-				alreadyEquippedItem = self.player().equipAccessory(item);
-			}
+			alreadyEquippedItem = self._equipItem(item);
 
 			self.player().inventory.removeItem(item);
 
@@ -2271,6 +2292,23 @@ define([
 			self.player().inventory.addItem(item);
 			self._resetActiveItem();
 
+		}
+
+		this._equipItem = function(item) {
+			var type = item.type;
+			var equippedItem;
+
+			if(type == "weapon"){
+				equippedItem = self.player().equipWeapon(item);
+			}else if(type == "shield"){
+				equippedItem = self.player().equipShield(item);
+			}else if(type == "armor"){
+				equippedItem = self.player().equipArmor(item);
+			}else if(type == "accessory"){
+				equippedItem = self.player().equipAccessory(item);
+			}
+
+			return equippedItem;
 		}
 
 		this.getEquipChangeText = function(){
@@ -2705,11 +2743,19 @@ define([
 					self._resetActiveItem();
 				}
 
-				//Add to inventory
-				tarCollection.addItem(newItem);
+				if(newItem.canEquip() && self.player().shouldAutoEquip(newItem)){
+					//Equip it
+					self._equipItem(newItem);
 
-				//Log acquisition
-				self.displayAcquiredItemMessageForItem(newItem);
+					//Log acquisition
+					self.displayAcquiredAndEquippedItemMessageForItem(newItem);
+				}else{
+					//Add to inventory
+					tarCollection.addItem(newItem);
+
+					//Log acquisition
+					self.displayAcquiredItemMessageForItem(newItem);
+				}
 
 			}else if ( moveFrom == "inventory" ){
 
@@ -2781,6 +2827,13 @@ define([
 		this.displayAcquiredItemMessageForItem = function(item){
 			var itemString = 'You obtain: ';
 			itemString += self._assembleLogMessageStringFromItem(item);
+			self.logMessage(itemString);
+		}
+
+		this.displayAcquiredAndEquippedItemMessageForItem = function(item){
+			var itemString = 'You obtain: ';
+			itemString += self._assembleLogMessageStringFromItem(item);
+			itemString += ". It was automatically equipped.";
 			self.logMessage(itemString);
 		}
 
@@ -3981,6 +4034,9 @@ define([
 			self.eventSquareTypeOverride(currentOverride);
 		}
 
+		this.testSquareItemAction = function(){
+			self.squareItemAction();
+		}
 
 		self.init();
 
@@ -4040,12 +4096,10 @@ UI CHANGES:
 
 
 CODE CHANGES:
-- Make item logging code go through _assembleLogMessageStringFromItem
 
 
 GAME IDEAS:
-- Add potion that reveals the exit square
-
+- Add in "skip to exit square" button, maybe costs 25% GP (maybe not), possibly unlocks after player is >1 level higher than current dungeon level
 - Add in gem merchants that accept gems as currency (ask Matt)
 - Make skill trainers cost less, OR improve base skill rather than progress
 - Add intermittent passives?
@@ -4057,6 +4111,7 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
+- Change color of exit squares (and maybe entrance squares, accordingly)
 - Make log filterable
 - Make inventory sortable
 - Color code log

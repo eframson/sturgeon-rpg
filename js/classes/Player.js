@@ -533,6 +533,39 @@ define([
 			return self.equipment().accessory;
 		}
 
+		this.shouldAutoEquip = function(item){
+
+			var alreadyEquippedItem, equippedWeapon, equippedShield;
+			var type = item.type;
+
+			if(type == "weapon"){
+				alreadyEquippedItem = self.getEquippedWeapon();
+				equippedShield = self.getEquippedShield();
+			}else if(type == "shield"){
+				alreadyEquippedItem = self.getEquippedShield();
+				equippedWeapon = self.getEquippedWeapon();
+			}else if(type == "armor"){
+				alreadyEquippedItem = self.getEquippedArmorBySlot(item.armorSlot);
+			}else if(type == "accessory"){
+				alreadyEquippedItem = self.getEquippedAccessory();
+			}
+
+			if( alreadyEquippedItem == undefined || Utils.isEmptyObject(alreadyEquippedItem) ){
+
+				if( type == "weapon" && item.handsRequired == 2 && equippedShield != undefined && !Utils.isEmptyObject(equippedShield) ){
+					//Don't auto-equip if it's a 2H weapon and a shield is already equipped (even if the current weapon spot is blank)
+					return false;
+				}else if( type == "shield" && equippedWeapon != undefined && !Utils.isEmptyObject(equippedShield)  && equippedWeapon.handsRequired == 2 ) {
+					//Don't auto-equip shield if a 2H weapon is already equipped (even if the current shield spot is blank)
+					return false;
+				}
+
+				return true;
+			}
+			return false;
+
+		}
+
 		this.addExp = function(xp){
 			var potentialTotalXp = self.exp() + xp;
 			if(potentialTotalXp >= self.expRequiredForNextLevel()){
