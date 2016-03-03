@@ -4122,6 +4122,11 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
+- Shields are automatically equipped even if 2H is present
+- Necklace of Health not working?
+- If toggle inventory view @ merchant UI, can see "buy" button on own inventory items
+- HP can go over max if necklace of endurance is unequipped
+
 - logsave gives error
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
 - Sometimes scan does not reveal squares that I think should be revealed near the player
@@ -4129,17 +4134,20 @@ BUGS:
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 GAME CHANGES:
-- Auto-equip gear if slot is empty
-- "Schedule" first few monster loots
-- Balance monster dmg so it accounts for (some) player armor
+- Might be a little too intense on lvl 2 still
+- When necklace is equipped, increase current HP by appropriate amount
 
 UI CHANGES:
-
+- Should show "if equipped" message on Necklaces
+- Should show if equipping a shield/2h will unequip existing 2h/shield on "buy" UI
 
 CODE CHANGES:
 
 
 GAME IDEAS:
+- Ask Matt about "bonus" dmg
+- Ask Matt about limiting back-and-forth spamming to run down the clock
+- Add a "reveal unvisited squares" button when most of level visited?
 - Add in "skip to exit square" button, maybe costs 25% GP (maybe not), possibly unlocks after player is >1 level higher than current dungeon level
 - Add in gem merchants that accept gems as currency (ask Matt)
 - Make skill trainers cost less, OR improve base skill rather than progress
@@ -4152,6 +4160,8 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
+- Make unrevealed squares more obvious
+- Make unvisited squares more obvious?
 - Change color of exit squares (and maybe entrance squares, accordingly)
 - Make log filterable
 - Make inventory sortable
