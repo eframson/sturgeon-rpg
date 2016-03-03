@@ -33,6 +33,7 @@ define([
 			self.avgDmgCoefficient = monsterData.avgDmgCoefficient || 1;
 			self.archetypeId = monsterData.archetypeId;
 			self.archetypeClass = monsterData.archetypeClass || "regular";
+			self.doNotSpecializeArchetype = (monsterData.doNotSpecializeArchetype !== undefined) ? monsterData.doNotSpecializeArchetype : 0;
 
 			self.hpCoefficient = ko.observable(monsterData.hpCoefficient || 1);
 			self.xpCoefficient = ko.observable(monsterData.xpCoefficient || 1);
@@ -48,12 +49,15 @@ define([
 				
 				//Idea 1
 				var averages = Utils.calculateAveragesForLevel(self.level());
-				var avgPlayerHp = averages.avgPlayerHp;
 				var avgMonsterHp = averages.avgMonsterHp;
 				var avgMonsterDmg = averages.avgMonsterDmg;
 
-
-				var newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
+				var newMonsterArchetypeId;
+				if(self.doNotSpecializeArchetype){
+					newMonsterArchetypeId = "basic";
+				}else{
+					newMonsterArchetypeId = self.archetypeId || self._getAppropriateArchetypeIdForLevel();
+				}
 				self.archetypeId = newMonsterArchetypeId;
 				archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 

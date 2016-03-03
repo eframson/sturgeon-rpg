@@ -23,9 +23,6 @@ define([
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 
 				var averages = Utils.calculateAveragesForLevel(self.level());
-				var avgPlayerHp = averages.avgPlayerHp;
-				var avgMonsterHp = averages.avgMonsterHp;
-				var avgMonsterDmg = averages.avgMonsterDmg;
 				var baseArmorValue = averages.avgPlayerArmorValue;
 
 				baseArmorValue = baseArmorValue * self.pctOfAvgArmor * self.qualityModifier;

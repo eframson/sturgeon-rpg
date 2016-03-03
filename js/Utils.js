@@ -72,11 +72,12 @@ define([
 			}
 			
 			//lolwut?
-			console.log(rand + " did not match");
+			//Not necessary to keep logging this, it can happen legitimately
+			/*console.log(rand + " did not match");
 			console.log("percentageActions:");
 			console.log(percentageActions);
 			console.log("percents:");
-			console.log(percents);
+			console.log(percents);*/
 			return false;
 		},
 
@@ -102,30 +103,46 @@ define([
 
 		calculateAveragesForLevel : function(levelNum) {
 
+			//Avg. player HP
 			var avgPlayerHp = 20 + ((levelNum - 1) * 7);
-			var avgMonsterHp;
+			
+			//Avg. monster HP (used for determining monster stats)
+			var avgMonsterHp = 7 + ((avgPlayerHp / 2) * Math.pow(1.01, levelNum));
+
+			//Nerf monster HP for lvls 1 & 2
 			if(levelNum == 1){
-				avgMonsterHp = avgPlayerHp / 2;
-			}else if(levelNum == 2) {
-				avgMonsterHp = avgPlayerHp;
-			}else {
-				avgMonsterHp = avgPlayerHp * 2;
-			}
+				avgMonsterHp = avgMonsterHp * 0.8;
+			}/*else if(levelNum == 2) {
+				avgMonsterHp = avgMonsterHp * 0.8;
+			}*/
 			avgMonsterHp = Math.round( avgMonsterHp );
+
+			//Avg player dmg per hit (used for calculating weapon stats)
 			var avgPlayerDmgPerHit = Math.round(avgMonsterHp / 5);
 
-			var avgMonsterDmgPerHit = Math.round( (avgPlayerHp / 10) + (levelNum * 1));
+			//Estimated avg. player AC (about halfway between shieldless / shield equipped)
+			var estPlayerArmor = levelNum * 4.4;
 
+			//Avg monster dmg per hit (used for determining monster stats)
+			var avgMonsterDmgPerHit = (avgPlayerHp / 4) + estPlayerArmor;
+
+			//Nerf monster dmg for lvl 1
+			if( levelNum == 1 ){
+				avgMonsterDmgPerHit = avgMonsterDmgPerHit * 0.4
+			}
+			avgMonsterDmgPerHit = Math.round(avgMonsterDmgPerHit);
+
+			//Avg player armor value (used for calculating armor stats)
 			var avgPlayerArmorValue;
 			
+			//Buff up armor stats for first 2 levels
 			if(levelNum < 2){
-				avgPlayerArmorValue = Math.round(levelNum * 5);
+				avgPlayerArmorValue = levelNum * 5;
 			}else if(levelNum < 3){
-				avgPlayerArmorValue = Math.round(levelNum * 4);
+				avgPlayerArmorValue = levelNum * 4;
 			}else {
-				avgPlayerArmorValue = Math.round(levelNum * 3);
+				avgPlayerArmorValue =levelNum * 3;
 			}
-
 			avgPlayerArmorValue = Math.round(avgPlayerArmorValue);
 
 			var averages = {
@@ -134,8 +151,7 @@ define([
 				avgMonsterHp : avgMonsterHp,
 				avgMonsterDmg : avgMonsterDmgPerHit,
 				avgPlayerArmorValue : avgPlayerArmorValue,
-				adjustedPlayerArmorValue : Math.round(avgPlayerArmorValue * 1.35),
-				adjustedPlayerDmgValue : Math.round(avgPlayerDmgPerHit * 1.35)
+				estPlayerArmor : estPlayerArmor,
 			};
 
 			return averages;
@@ -143,21 +159,13 @@ define([
 
 		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum){
 			var actualDmg;
-			var absorption;
+			//var minDmg = 0.20 * dmg;
 
-			absorption = Math.pow(0.99, armor);
-			actualDmg = Math.round(dmg * absorption);
+			actualDmg = dmg * ( (100 + (levelNum * 0.65) ) / (100 + armor) );
 
-			/*var i;
-			actualDmg = dmg;
-			for (i = 0; i < armor; i++) {
-				actualDmg = actualDmg * 0.99;
-			}
-			Math.round(actualDmg);*/
+			return Math.round(actualDmg);
 
-			//actualDmg = dmg - (armor - Math.pow(armor, 0.95));
-
-			return actualDmg;
+			//return Math.round( (actualDmg >= minDmg) ? actualDmg : minDmg );
 		},
 
 		getObjectAsArrayIndexedByNumericalSortOrder : function(object, sortFieldName){

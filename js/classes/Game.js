@@ -1047,6 +1047,11 @@ define([
 				archetypeClass : (encounterType == "boss" ? "special" : undefined)
 			};
 
+			//Make sure first few encounters are basic monsters while player is starting out
+			if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 5 && encounterType != "boss"){
+				extraParamObj.doNotSpecializeArchetype = 1;
+			}
+
 			//Set up a new object to merge everything else into, otherwise VERY BAD THINGS HAPPEN (because JS passing objects by reference)
 			var newObj = {};
 			$.extend(
@@ -3777,7 +3782,7 @@ define([
 			return results;
 		}
 
-		this.monsterTest = function(){
+		this.testMonster = function(){
 			self.startCombat();
 			var i;
 			for(i=0; i < 100; i++){
@@ -4019,14 +4024,16 @@ define([
 			var armorWithoutShield = self.player().totalArmor();
 			console.log("HP: " + self.player().maxHp());
 			console.log("AC: " + armorWithoutShield + " - " + armorWithShield);
-			console.log("DMG: " + self.player().minDmg() + ' - ' + self.player().maxDmg() + ( self.player().bonusDmg() > 0 ? ' (+' + self.player().bonusDmg() + ')' : '' ));
 			var avgArmor = Math.round((armorWithoutShield + armorWithShield) / 2);
+			console.log("AC (AVG): " + avgArmor);
+			console.log("DMG: " + self.player().minDmg() + ' - ' + self.player().maxDmg() + ( self.player().bonusDmg() > 0 ? ' (+' + self.player().bonusDmg() + ')' : '' ));
+			var avgDmg = Math.round(( (self.player().minDmg() + self.player().maxDmg()) / 2 ) + self.player().bonusDmg());
+			console.log("DMG (AVG): " + avgDmg);
 
 			var averages = Utils.calculateAveragesForLevel(level);
 
 			var actualDmgPerMonsterHit = Utils.calculateDmgForArmorAndLevel(Math.round(averages.avgMonsterDmg * 1), avgArmor, level);
 
-			averages.estPlayerArmor = avgArmor;
 			averages.actualDmgPerMonsterHit = actualDmgPerMonsterHit;
 
 			if(showAverages){

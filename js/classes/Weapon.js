@@ -37,8 +37,6 @@ define([
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 				var averages = Utils.calculateAveragesForLevel(self.level());
-				var avgPlayerHp = averages.avgPlayerHp;
-				var avgMonsterHp = averages.avgMonsterHp;
 				var avgDmgPerHit = averages.avgPlayerDmg;
 
 				//Apply coefficient representing item quality to our average figure
