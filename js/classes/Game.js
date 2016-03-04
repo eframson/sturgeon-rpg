@@ -647,7 +647,7 @@ define([
 			});
 			
 			self.unEquipNotice = ko.computed(function(){
-				if( self.activeItem().actualItem() && self.activeItem().actualItem().isEquippable ){
+				if( self.activeItem().actualItem() && (self.activeItem().actualItem().isEquippable || self.activeItem().canBuy() ) ){
 					var actualItem = self.activeItem().actualItem();
 
 					if( actualItem instanceof Shield ){
@@ -2189,7 +2189,7 @@ define([
 				}else{
 					self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
 				}*/
-				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
+				self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1, canBuy : 0, canSell : 0 }, item);
 			}
 		}
 
@@ -2230,7 +2230,7 @@ define([
 				self.activeItem().canDrop(1);
 			}
 
-			if( ( opts.moveDirection == "left" && self.rightColContent() == "merchant" ) || ( opts.canBuy && opts.canBuy == 1 ) ){
+			if( ( opts.moveDirection == "left" && self.rightColContent() == "merchant" ) && ( opts.canBuy == undefined || opts.canBuy == 1 ) ){
 				self.activeItem().canBuy(1);
 			}else if( ( opts.moveDirection == "right" && self.rightColContent() == "merchant" ) || ( opts.canSell && opts.canSell == 1 ) ){
 				self.activeItem().canSell(1);
@@ -3883,9 +3883,10 @@ define([
 
 		}
 
-		this.testEquipmentSetForLevel = function(level, quality){
+		this.testEquipmentSetForLevel = function(level, quality, equip2H){
 			level = level || 1;
 			quality = quality || "good";
+			equip2H = equip2H || 0;
 
 			var	itemToAdd;
 			var newItem;
@@ -3902,8 +3903,11 @@ define([
 			itemToAdd.quality = quality;
 			newItem = new Weapon(itemToAdd);
 
-			//self.player().addItemToInventory( newItem, 1 );
-			self._equipItem(newItem);
+			if(!equip2H){
+				self._equipItem(newItem);
+			}else{
+				self.player().addItemToInventory( newItem, 1 );
+			}
 
 			//2H
 			weaponId = "melee_weapon_04";
@@ -3914,7 +3918,11 @@ define([
 			itemToAdd.quality = quality;
 			newItem = new Weapon(itemToAdd);
 
-			self.player().addItemToInventory( newItem, 1 );
+			if(equip2H){
+				self._equipItem(newItem);
+			}else{
+				self.player().addItemToInventory( newItem, 1 );
+			}
 			
 			// --- Add shield ---
 			var shieldId = "shield_01";
@@ -3925,8 +3933,11 @@ define([
 			itemToAdd.quality = quality;
 			newItem = new Shield(itemToAdd);
 
-			//self.player().addItemToInventory( newItem, 1 );
-			self._equipItem(newItem);
+			if(!equip2H){
+				self._equipItem(newItem);
+			}else{
+				self.player().addItemToInventory( newItem, 1 );
+			}
 
 			// --- Add armor ---
 			var armorIds = [
@@ -3953,6 +3964,30 @@ define([
 
 				//self.player().addItemToInventory( newItem, 1 );
 				self._equipItem(newItem);
+			}
+		}
+
+		this.testGiveAndEquipShield = function(level, quality){
+			level = level || 1;
+			quality = quality || "good";
+
+			var	itemToAdd;
+			var newItem;
+			
+			// --- Add shield ---
+			var shieldId = "shield_01";
+			itemToAdd = self.getAvailableItemById(shieldId, "shield", 1);
+
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = level;
+			itemToAdd.quality = quality;
+			newItem = new Shield(itemToAdd);
+
+			//This should fail if player already has a 2H weapon equipped
+			if( self.player().shouldAutoEquip(newItem) ){
+				self._equipItem(newItem);
+			}else{
+				self.player().addItemToInventory( newItem, 1 );
 			}
 		}
 
@@ -4041,6 +4076,37 @@ define([
 			}
 		}
 
+		this.testAddAccessory = function(level, quality, accessoryStat, accessoryStatAmt){
+			level = level || 1;
+			quality = quality || "good";
+
+			var	itemToAdd;
+			var newItem;
+
+			var accId;
+
+			/*
+			"Speed",
+			"Armor",
+			"Strength",
+			"Dexterity",
+			"Endurance",
+			"Health"
+			*/
+
+			accId = "acc_01";
+			itemToAdd = self.getAvailableItemById(accId, "accessory", 1);
+
+			itemToAdd.fullyDynamicStats = 1;
+			itemToAdd.level = level;
+			itemToAdd.quality = quality;
+			itemToAdd.accessoryStat = accessoryStat;
+			itemToAdd.accessoryStatAmt = accessoryStatAmt;
+			newItem = new Accessory(itemToAdd);
+
+			self.player().addItemToInventory( newItem, 1 );
+		}
+
 		this.testPerkPoints = function(numPoints){
 			numPoints = numPoints || 1;
 			self.player().availablePerkPoints(numPoints);
@@ -4122,10 +4188,7 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
-- Shields are automatically equipped even if 2H is present
-- Necklace of Health not working?
-- If toggle inventory view @ merchant UI, can see "buy" button on own inventory items
-- HP can go over max if necklace of endurance is unequipped
+- Necklace of Health not working? (CAN NOT REPRODUCE)
 
 - logsave gives error
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
@@ -4134,17 +4197,17 @@ BUGS:
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 GAME CHANGES:
-- Might be a little too intense on lvl 2 still
-- When necklace is equipped, increase current HP by appropriate amount
+- Might be a little too intense on lvl 2 still (adjusted, let's see how it goes...)
 
 UI CHANGES:
+- Show "hands required" on weapon desc section
 - Should show "if equipped" message on Necklaces
-- Should show if equipping a shield/2h will unequip existing 2h/shield on "buy" UI
 
 CODE CHANGES:
 
 
 GAME IDEAS:
+- When necklace is equipped, increase current HP by appropriate amount, MAYBE (ask Matt)
 - Ask Matt about "bonus" dmg
 - Ask Matt about limiting back-and-forth spamming to run down the clock
 - Add a "reveal unvisited squares" button when most of level visited?
@@ -4160,6 +4223,7 @@ GAME IDEAS:
 - Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
+- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 - Make unrevealed squares more obvious
 - Make unvisited squares more obvious?
 - Change color of exit squares (and maybe entrance squares, accordingly)
@@ -4168,7 +4232,6 @@ UI IDEAS:
 - Color code log
 - Make sure skills that cannot be leveled up are properly represented in list
 - Dynamic container name
-- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 - Allow equip from loot container -- maybe (or make it more obvious that inventory can be temporarily overloaded)
 - Allow for a variable number of items to be purchased from merchant
 - Play sound on level up?
@@ -4177,6 +4240,7 @@ UI IDEAS:
 - Keyboard shortcuts for "continue" buttons
 
 CODE IDEAS:
+- Not really happy with the way _setAsActiveItem is structured; the whole moveDirection concept could probably be redone
 - Don't save and rehydrate functions
 - Improve the skill training stuff somehow so it doesn't always break whenever a new skill is added
 - Fix testAddLevel function so it properly increases skill progress

@@ -555,7 +555,7 @@ define([
 				if( type == "weapon" && item.handsRequired == 2 && equippedShield != undefined && !Utils.isEmptyObject(equippedShield) ){
 					//Don't auto-equip if it's a 2H weapon and a shield is already equipped (even if the current weapon spot is blank)
 					return false;
-				}else if( type == "shield" && equippedWeapon != undefined && !Utils.isEmptyObject(equippedShield)  && equippedWeapon.handsRequired == 2 ) {
+				}else if( type == "shield" && equippedWeapon != undefined && !Utils.isEmptyObject(equippedWeapon) && equippedWeapon.handsRequired == 2 ) {
 					//Don't auto-equip shield if a 2H weapon is already equipped (even if the current shield spot is blank)
 					return false;
 				}

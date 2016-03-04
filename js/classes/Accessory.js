@@ -38,11 +38,15 @@ define([
 		this.init = function(data){
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 
-				//Pick a stat
-				self.accessoryStat( Utils.chooseRandomly(self.possibleStats) );
+				//Pick a stat (if not set)
+				if( self.accessoryStat() == undefined ){
+					self.accessoryStat( Utils.chooseRandomly(self.possibleStats) );
+				}
 
-				//Pick an amount
-				self.accessoryStatAmt(Math.round(self.level() * self.qualityModifier));
+				//Pick an amount (if not set)
+				if( self.accessoryStatAmt() == undefined ){
+					self.accessoryStatAmt(Math.round(self.level() * self.qualityModifier));
+				}
 
 				self._buyValue = self.accessoryStatAmt() * 100;
 				self._forceRecalculate.valueHasMutated();
@@ -62,6 +66,10 @@ define([
 		this.doOnUnEquip = function(player){
 			var stat = self.actualStats[ self.accessoryStat() ];
 			player[stat]( player[stat]() - self.accessoryStatAmt() );
+
+			if( self.accessoryStat() == "Health" || self.accessoryStat() == "Endurance" && player.hp() >= player.maxHp()){
+				player.hp(player.maxHp());
+			}
 		}
 
 		this.init(data);

@@ -112,9 +112,9 @@ define([
 			//Nerf monster HP for lvls 1 & 2
 			if(levelNum == 1){
 				avgMonsterHp = avgMonsterHp * 0.8;
-			}/*else if(levelNum == 2) {
-				avgMonsterHp = avgMonsterHp * 0.8;
-			}*/
+			}else if(levelNum == 2) {
+				avgMonsterHp = avgMonsterHp * 0.9;
+			}
 			avgMonsterHp = Math.round( avgMonsterHp );
 
 			//Avg player dmg per hit (used for calculating weapon stats)
@@ -128,20 +128,22 @@ define([
 
 			//Nerf monster dmg for lvl 1
 			if( levelNum == 1 ){
-				avgMonsterDmgPerHit = avgMonsterDmgPerHit * 0.4
+				avgMonsterDmgPerHit = avgMonsterDmgPerHit * 0.4;
+			}else if(levelNum == 2) {
+				avgMonsterDmgPerHit = avgMonsterDmgPerHit * 0.6;
 			}
 			avgMonsterDmgPerHit = Math.round(avgMonsterDmgPerHit);
 
 			//Avg player armor value (used for calculating armor stats)
 			var avgPlayerArmorValue;
 			
-			//Buff up armor stats for first 2 levels
-			if(levelNum < 2){
+			//Buff up armor stats for first 4 levels
+			if(levelNum < 3){
 				avgPlayerArmorValue = levelNum * 5;
-			}else if(levelNum < 3){
+			}else if(levelNum < 5){
 				avgPlayerArmorValue = levelNum * 4;
 			}else {
-				avgPlayerArmorValue =levelNum * 3;
+				avgPlayerArmorValue = levelNum * 3;
 			}
 			avgPlayerArmorValue = Math.round(avgPlayerArmorValue);
 
@@ -161,7 +163,7 @@ define([
 			var actualDmg;
 			//var minDmg = 0.20 * dmg;
 
-			actualDmg = dmg * ( (100 + (levelNum * 0.65) ) / (100 + armor) );
+			actualDmg = dmg * ( (100 + ((levelNum - 5) * 0.65) ) / (100 + armor) );
 
 			return Math.round(actualDmg);
 
