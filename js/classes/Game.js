@@ -2350,6 +2350,15 @@ define([
 
 				changeString = minDmgChange + " - " + maxDmgChange + (existingBonusDmg > 0 || actualItem.extraDamage() > 0 ? bonusDmgChange : '') + " DMG";
 
+				if( actualItem.handsRequired == 2 ){
+
+					var equippedShield = self.player().getEquippedShield();
+					if( equippedShield != undefined && !Utils.isEmptyObject(equippedShield) ) {
+						changeString += " (<span class='negative'>-" + equippedShield.armorValue() + "</span> Armor)";
+					}
+
+				}
+
 			}else if( actualItem instanceof Armor){
 
 				var existingArmorValue = 0;
@@ -4257,13 +4266,9 @@ GAME IDEAS:
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Battle arena event?
 - Bosses every x levels + minibosses in between
-- Gradually scale overall difficulty over first X levels (5?)
-- Gradually scale up boss difficulty over first X levels (5?)
 
 UI IDEAS:
-- Show that if a 2H weapon is equipped, it will also reduce Arm by X if a shield is currently equipped
 - Make unrevealed squares more obvious
-- Make unvisited squares more obvious?
 - Change color of exit squares (and maybe entrance squares, accordingly)
 - Make log filterable
 - Make inventory sortable
