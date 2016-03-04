@@ -23,6 +23,7 @@ define([
 		this.isChallengeActive = ko.observable(squareData.isChallengeActive || false);
 		this.isWall = squareData.isWall || false;
 		this.isDoor = squareData.isDoor || false;
+		this.isVisited = squareData.isVisited || false;
 
 		this.setType = function(type){
 			self.type = type;

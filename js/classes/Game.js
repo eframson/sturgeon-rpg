@@ -953,6 +953,8 @@ define([
 
 					var square = self.level().getSquare(newPos.x, newPos.y);
 
+					square.isVisited = 1;
+
 					if(square.notEmpty && square.isDone == false){
 
 						if( self.ignoreSquareActions == 0 ){
@@ -2368,6 +2370,42 @@ define([
 				armorValueChange = ( armorValueChange < 0 ) ? "<span class='negative'>" + armorValueChange + "</span>" : ( armorValueChange > 0 ? "<span class='positive'>+" + armorValueChange + "</span>" : "+" + armorValueChange ) ; //show 0 change as "+0"
 
 				changeString = armorValueChange + " Armor";
+			}else if( actualItem instanceof Accessory ){
+
+				var currentAccessory = self.player().getEquippedAccessory();
+				var existingStatType, existingStatAmt;
+				var potentialStatType = actualItem.accessoryStat(),
+					potentialStatAmt = actualItem.accessoryStatAmt();
+
+				if( !Utils.isEmptyObject(currentAccessory) ){
+					existingStatType = currentAccessory.accessoryStat();
+					existingStatAmt = currentAccessory.accessoryStatAmt();
+				}
+
+				if(existingStatType){
+					if(existingStatType == potentialStatType){
+						var statDiff = potentialStatAmt - existingStatAmt;
+						var changeType = false;
+
+						if(statDiff > 0){
+							changeType = "positive";
+						}else if(statDiff < 0){
+							changeType = "negative";
+						}
+
+						if(changeType){
+							changeString = "<span class='" + changeType + "'>" + (changeType == "positive" ? "+" : "-") + Math.abs(statDiff) + "</span> " + potentialStatType;
+						}else{
+							changeString = "+0 " + potentialStatType;
+						}
+
+					}else{
+						changeString = "<span class='positive'>+" + potentialStatAmt + "</span> " + potentialStatType + " (<span class='negative'>-" + existingStatAmt + "</span> " + existingStatType + ")";
+					}
+				}else {
+					changeString = "<span class='positive'>+" + potentialStatAmt + "</span> " + potentialStatType;
+				}
+
 			}
 
 			return changeString;
@@ -4200,13 +4238,13 @@ GAME CHANGES:
 - Might be a little too intense on lvl 2 still (adjusted, let's see how it goes...)
 
 UI CHANGES:
-- Show "hands required" on weapon desc section
-- Should show "if equipped" message on Necklaces
+
 
 CODE CHANGES:
 
 
 GAME IDEAS:
+- Allow item usage from merchant screen
 - When necklace is equipped, increase current HP by appropriate amount, MAYBE (ask Matt)
 - Ask Matt about "bonus" dmg
 - Ask Matt about limiting back-and-forth spamming to run down the clock

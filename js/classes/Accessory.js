@@ -17,6 +17,8 @@ define([
 		self.accessoryStat = ko.observable(data.accessoryStat || undefined);
 		self.accessoryStatAmt = ko.observable(data.accessoryStatAmt || undefined);
 
+		self.isEquippable = true;
+
 		self.possibleStats = [
 			"Speed",
 			"Armor",
@@ -52,6 +54,7 @@ define([
 				self._forceRecalculate.valueHasMutated();
 
 				self.isScaled(1);
+
 			}else if(!self.fullyDynamicStats && (self.accessoryStat() == undefined || self.accessoryStatAmt() == undefined)){
 				//Can't create this item, insufficient data
 				return false;

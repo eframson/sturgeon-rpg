@@ -223,6 +223,9 @@ define([
 
 			var lightFill = '#CAD2E4';
 			var darkFill = '#9AA8C7';
+			var visitedLightFill = '#959ba8';
+			//var visitedDarkFill = '#6a7387';
+			var visitedDarkFill = '#959ba8';
 			var playerColor = '#D36600';
 			var combatColor = '#FF8585';
 			var itemColor = '#FFE240';
@@ -242,11 +245,11 @@ define([
 					var fontStyle = false;
 					var square = self.getSquare(col_num, row_num);
 
-					if( square.isDone ){
+					//if( square.isDone ){
 
-						fillStyle = "#7A7A7A";
+						//fillStyle = "#7A7A7A";
 
-					}else{
+					//}else{
 
 						if (square.type == "exit") {
 							fillStyle = exitColor;
@@ -268,23 +271,23 @@ define([
 								if(odd_row){
 
 									if(col_num % 2){
-										fillStyle = lightFill;
+										fillStyle = (square.isVisited) ? visitedLightFill : lightFill;
 									}else{
-										fillStyle = darkFill;
+										fillStyle = (square.isVisited) ? visitedDarkFill : darkFill;
 									}
 
 								}else{
 									if(col_num % 2){
-										fillStyle = darkFill;
+										fillStyle = (square.isVisited) ? visitedDarkFill : darkFill;
 									}else{
-										fillStyle = lightFill;
+										fillStyle = (square.isVisited) ? visitedLightFill : lightFill;
 									}
 								}
 							}
 
 						}
 
-						if(square.isScanned){
+						if(square.isScanned && !square.isDone){
 
 							if(square.type == "combat"){
 								fillStyle = combatColor;
@@ -296,7 +299,7 @@ define([
 
 						}
 
-					}
+					//}
 
 					context.fillStyle = fillStyle;
 					context.fillRect(col_num * squareWidth, row_num * squareHeight, squareWidth, squareHeight);
@@ -555,6 +558,8 @@ define([
 
 							self.getSquare(x,y).setType(type);
 
+						}else if ( x == playerPos.x && y == playerPos.y ){
+							self.getSquare(x,y).isVisited = 1;
 						}
 					}
 				}

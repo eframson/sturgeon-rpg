@@ -28,7 +28,7 @@
 		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
-		<link href="css/custom.css?cssBust=1457050591" rel="stylesheet">
+		<link href="css/custom.css?cssBust=1457130455" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -471,6 +471,13 @@
 										<div class="line">
 											<span class="stat">Armor Value:</span>
 											<span class="value" data-bind="text: activeItem().actualItem().armorValue() + ( activeItem().actualItem().numUpgradesApplied() > 0 ? ' (Improved)' : '') "></span>
+										</div>
+										<!-- /ko -->
+
+										<!-- ko if: activeItem().actualItem().handsRequired -->
+										<div class="line">
+											<span class="stat">Fins required:</span>
+											<span class="value" data-bind="text: activeItem().actualItem().handsRequired"></span>
 										</div>
 										<!-- /ko -->
 
