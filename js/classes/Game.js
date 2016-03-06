@@ -2554,6 +2554,8 @@ define([
 		
 		this.useHealthPotion = function(game, event){
 			self.useActiveItem(game, event, {id : "health_potion"});
+			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
+			self.playerHpBarWidth(playerHpBarWidth);
 		}
 
 		this.useActiveItem = function(game, event, item){
