@@ -163,8 +163,8 @@
 		"boss" : {
 			"id" : "boss",
 			"displayString" : "Boss",
-			"hpCoefficient" : 3,
-			"dmgCoefficient" : 2,
+			"hpCoefficient" : 2.8,
+			"dmgCoefficient" : 1.8,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 10,
 			"xpCoefficient" : 2.0,

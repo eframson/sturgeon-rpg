@@ -4237,8 +4237,8 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
-- Necklace of Health not working? (CAN NOT REPRODUCE)
-
+- Reset skill appears on the list of levelable abilities
+- When a skill's level is improved as a result of player leveling, it says the skill proficiency has improved to 0
 - logsave gives error
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
 - Sometimes scan does not reveal squares that I think should be revealed near the player
@@ -4255,6 +4255,13 @@ CODE CHANGES:
 
 
 GAME IDEAS:
+- Shell cracker doesn't seem that useful when speed is too low
+- Replace overworld cooldown system with a finite resource system
+- Add quests
+- Add some tutorial-type stuff in the intro slides
+- Speed necklaces might be OP
+- Flurry might be OP
+- Bosses still might hit too hard
 - Allow item usage from merchant screen
 - When necklace is equipped, increase current HP by appropriate amount, MAYBE (ask Matt)
 - Ask Matt about "bonus" dmg
