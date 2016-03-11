@@ -9,12 +9,13 @@ define([
 
 		var self = this;
 
-		data.canEquip = (data.canEquip !== undefined) ? data.canEquip : 1;
-		data.canBreakdown = (data.canBreakdown !== undefined) ? data.canBreakdown : 1;
-		data.canUpgrade = (data.canUpgrade !== undefined) ? data.canUpgrade : 1;
-		data.hasQuality = 1;		
+		data.hasQuality = 1;
 
 		Item.call(this, data);
+
+		this.canEquip( (data.canEquip !== undefined) ? data.canEquip : 1 );
+		this.canBreakdown( (data.canBreakdown !== undefined) ? data.canBreakdown : 1 );
+		this.canUpgrade( (data.canUpgrade !== undefined) ? data.canUpgrade : 1 );
 
 		self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 		self.level = ko.observable(data.level || 1);

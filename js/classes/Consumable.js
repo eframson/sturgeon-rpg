@@ -13,6 +13,8 @@ define([
 
 		Item.call(this, data);
 
+		this.canUse((data.canUse !== undefined) ? data.canUse : 1 );
+
 		this.init = function(data){
 			self.isFood = data.isFood || 0;
 			self.hasQuality = 1;

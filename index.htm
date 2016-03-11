@@ -911,7 +911,7 @@
 							<div class="container-ui-section-footer-container">
 								<div class="line empty section-header">
 									<span class="item">Sorted By: <button type="button" class="btn btn-default" data-bind="text: $root[$data.optKey + 'SortOrder'](), click: $root.switchNextSortOrder"></button></span>
-									<!-- ko if: $data.showInventoryEquipmentToggle -->
+									<!-- ko if: $root.showInventoryEquipmentToggle() == 1 -->
 										<span class="item showInventoryEquipmentToggle">Showing: <button type="button" class="btn btn-default" data-bind="text: $root.inventoryEquipmentToggle(), click: $root.switchInventoryEquipmentToggle"></button></span>
 										<div class="clear"></div>
 									<!-- /ko -->

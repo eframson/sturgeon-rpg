@@ -11,42 +11,48 @@
 						"id" : "qual_10_1",
 						"name" : "Grilled Halibut",
 						"quality" : "poor",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 5
 					},
 
 					"qual_10_2" : {
 						"id" : "qual_10_2",
 						"name" : "Bourbon-Glazed Salmon",
 						"quality" : "poor",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 5
 					},
 
 					"qual_20_1" : {
 						"id" : "qual_20_1",
 						"name" : "Shrimp Taco Salad",
 						"quality" : "poor",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 5
 					},
 
 					"qual_20_2" : {
 						"id" : "qual_20_2",
 						"name" : "Salmon Croquettes",
 						"quality" : "poor",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 5
 					},
 
 					"qual_30_1" : {
 						"id" : "qual_30_1",
 						"name" : "Seared Scallops",
 						"quality" : "poor",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 5
 					},
 
 					"qual_30_2" : {
 						"id" : "qual_30_2",
 						"name" : "Tuna Noodle Casserole",
 						"quality" : "poor",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 5
 					}
 
 				},
@@ -57,42 +63,48 @@
 						"id" : "qual_40_1",
 						"name" : "Pan-Seared Halibut",
 						"quality" : "good",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 10
 					},
 
 					"qual_40_2" : {
 						"id" : "qual_40_2",
 						"name" : "Lemon Pepper Shrimp",
 						"quality" : "good",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 10
 					},
 
 					"qual_50_1" : {
 						"id" : "qual_50_1",
 						"name" : "Fish Tacos",
 						"quality" : "good",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 10
 					},
 
 					"qual_50_2" : {
 						"id" : "qual_50_2",
 						"name" : "Crab Cakes",
 						"quality" : "good",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 10
 					},
 
 					"qual_60_1" : {
 						"id" : "qual_60_1",
 						"name" : "Scallop Piccata",
 						"quality" : "good",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 10
 					},
 
 					"qual_60_2" : {
 						"id" : "qual_60_2",
 						"name" : "Sesame-Crusted Tuna",
 						"quality" : "good",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 10
 					}
 					
 				},
@@ -103,42 +115,48 @@
 						"id" : "qual_70_1",
 						"name" : "Mussels in Broth",
 						"quality" : "great",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 15
 					},
 
 					"qual_70_2" : {
 						"id" : "qual_70_2",
 						"name" : "Pan-Fried Trout",
 						"quality" : "great",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 15
 					},
 
 					"qual_80_1" : {
 						"id" : "qual_80_1",
 						"name" : "Jerk-Rubbed Catfish",
 						"quality" : "great",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 15
 					},
 
 					"qual_80_2" : {
 						"id" : "qual_80_2",
 						"name" : "Blackened Tilapia",
 						"quality" : "great",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 15
 					},
 
 					"qual_90_1" : {
 						"id" : "qual_90_1",
 						"name" : "Baked Grouper",
 						"quality" : "great",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 15
 					},
 
 					"qual_90_2" : {
 						"id" : "qual_90_2",
 						"name" : "Sauteed Tilapia",
 						"quality" : "great",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 15
 					}
 					
 				},
@@ -149,14 +167,32 @@
 						"id" : "qual_100_1",
 						"name" : "Shrimp-Stuffed Pasta",
 						"quality" : "exceptional",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 20
 					},
 
 					"qual_100_2" : {
 						"id" : "qual_100_2",
 						"name" : "Lobster Risotto",
 						"quality" : "exceptional",
-						"isFood" : 1
+						"isFood" : 1,
+						"sellValue" : 20
+					},
+
+					"qual_100_3" : {
+						"id" : "qual_100_3",
+						"name" : "Seawater Ice Cream",
+						"quality" : "exceptional",
+						"isFood" : 1,
+						"sellValue" : 20
+					},
+
+					"qual_100_4" : {
+						"id" : "qual_100_4",
+						"name" : "Banana Creme Pie",
+						"quality" : "exceptional",
+						"isFood" : 1,
+						"sellValue" : 20
 					}
 					
 				}
@@ -256,7 +292,9 @@
 				"type" : "misc",
 				"desc" : "Shiny gold pieces, worth a pretty penny. Actually, worth several thousand pretty pennies. Don't spend it all in one place.",
 				"slotsRequired" : 0,
-				"stackable" : 1
+				"stackable" : 1,
+				"canBuy" : 0,
+				"canSell" : 0
 			},
 			"junk" : {
 				"id" : "junk",

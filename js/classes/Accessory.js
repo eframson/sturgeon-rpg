@@ -9,17 +9,16 @@ define([
 
 		var self = this;
 
-		data.canBreakdown = 0;
-		data.canUpgrade = 0;
-
 		GearItem.call(this, data);
 
-		self.accessoryStat = ko.observable(data.accessoryStat || undefined);
-		self.accessoryStatAmt = ko.observable(data.accessoryStatAmt || undefined);
+		this.canBreakdown( (data.canBreakdown !== undefined) ? data.canBreakdown : 0 );
+		this.canUpgrade( (data.canUpgrade !== undefined) ? data.canUpgrade : 0 );
+		this.accessoryStat = ko.observable(data.accessoryStat || undefined);
+		this.accessoryStatAmt = ko.observable(data.accessoryStatAmt || undefined);
 
-		self.isEquippable = true;
+		this.isEquippable = true;
 
-		self.possibleStats = [
+		this.possibleStats = [
 			"Speed",
 			"Armor",
 			"Strength",
@@ -28,7 +27,7 @@ define([
 			"Health"
 		];
 
-		self.actualStats = {
+		this.actualStats = {
 			"Speed" : "speed",
 			"Armor" : "baseArmor",
 			"Strength" : "str",

@@ -41,10 +41,23 @@ define([
 		this.hasQuality = (data.hasQuality !== undefined) ? data.hasQuality : 0;
 		this._forceRecalculate = ko.observable(0);
 
-		this.canEquip = ko.observable( (data.canEquip !== undefined) ? data.canEquip : 0 );
-		this.canBreakdown = ko.observable( (data.canBreakdown !== undefined) ? data.canBreakdown : 0 );
 		this.canUse = ko.observable( (data.canUse !== undefined) ? data.canUse : 0 );
+		this.canEquip = ko.observable( (data.canEquip !== undefined) ? data.canEquip : 0 );
+		//Whether the item can be SOLD TO a MERCHANT
+		this.canSell = ko.observable( (data.canSell !== undefined) ? data.canSell : 1 );
+		//Whether the item can be BOUGHT FROM a MERCHANT
+		this.canBuy = ko.observable( (data.canBuy !== undefined) ? data.canBuy : 1 );
+		this.canBreakdown = ko.observable( (data.canBreakdown !== undefined) ? data.canBreakdown : 0 );
 		this.canUpgrade = ko.observable( (data.canUpgrade !== undefined) ? data.canUpgrade : 0 );
+		this.canDrop = ko.observable(1);
+
+		if (data.canDrop !== undefined){
+			this.canDrop(data.canDrop);
+		}else{
+			if( this.slotsRequired == 0 ){
+				this.canDrop(0);
+			}
+		}
 
 		if(data.qualityModifier){
 			self.qualityModifier = data.qualityModifier;
@@ -76,14 +89,6 @@ define([
 				return self._buyValue;
 			}
 			return (self._sellValue * 2) || 0;
-		});
-
-		this.canSell = ko.computed(function(){
-			return self.sellValue() > 0;
-		});
-
-		this.canBuy = ko.computed(function(){
-			return self.buyValue() > 0;
 		});
 
 		this.costForNextUpgradeLevel = ko.computed(function(){
