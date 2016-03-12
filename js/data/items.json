@@ -294,7 +294,9 @@
 				"slotsRequired" : 0,
 				"stackable" : 1,
 				"canBuy" : 0,
-				"canSell" : 0
+				"canSell" : 0,
+				"canDrop" : 0,
+				"canPut" : 0
 			},
 			"junk" : {
 				"id" : "junk",

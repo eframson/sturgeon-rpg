@@ -294,7 +294,7 @@ define([
 		this.savedBuildVersion = undefined;
 		this.ignoreSquareActions = 0;
 		this.srcCollection = undefined;
-		this.tarCollection = undefined;
+		this.equipItemCallback = undefined;
 		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
@@ -332,9 +332,7 @@ define([
 				canSell : ko.observable(0),
 				canBuy : ko.observable(0),
 				canUpgrade : ko.observable(0),
-				moveDirection : ko.observable("right"),
 				actualItem : ko.observable(undefined),
-				moveDirSymbol : ko.observable(false),
 			});
 			self.activeSkill = ko.observable(undefined);
 			self.wasdKeysControlPlayerPos = ko.observable(true);
@@ -421,7 +419,7 @@ define([
 						});
 					}
 
-					if( self.activeItem().canUnEquip() && self.rightColContent() == "equipment" ){
+					if( self.activeItem().canUnEquip() ){
 						buttons.push({
 							css: defaultCss,
 							text: "Un-Equip",
@@ -447,9 +445,9 @@ define([
 						});
 					}
 
-					//It's not actually dependent on the equipment screen, it just can't be used while trading with a merchant
-					if( self.activeItem().canUse() && self.rightColContent() != "merchant" ){
+					if( self.activeItem().canUse() ){
 						buttons.push({
+							//@TODO: Put this logic in a function somewhere instead of here or check for a "restoresHealth" property or something
 							css: defaultCss + (
 								(self.activeItem().actualItem().isFood || self.activeItem().actualItem().id == "health_potion")
 									&& (self.player().hp() == self.player().maxHp()) ? ' disabled' : ''
@@ -459,32 +457,38 @@ define([
 						});
 					}
 
-					if( self.activeItem().canBuy() && self.rightColContent() == "merchant" ){
+					if( self.activeItem().canBuy() ){
+
+						var actualItemCost = actualItem.buyValue();
+
+						if( self.player().hasPassiveAbility('improved_barter') ){
+							actualItemCost = Math.floor(actualItemCost / 2);
+						}
 
 						if( actualItem.qty() == 1 ){
 
 							buttons.push({
-								css: defaultCss + (( self.player().gp() < actualItem.buyValue() ) ? " disabled" : ""),
-								text: "Buy (" + (self.player().hasPassiveAbility('improved_barter') ? Math.floor(actualItem.buyValue() / 2) : actualItem.buyValue() ) + " GP)",
+								css: defaultCss + (( self.player().gp() < actualItemCost ) ? " disabled" : ""),
+								text: "Buy (" + actualItemCost + " GP)",
 								click: self.buyActiveItem
 							});
 
 						}else if( actualItem.qty() > 1 ){
 
 							buttons.push({
-								css: defaultCss + (( self.player().gp() < actualItem.buyValue() ) ? " disabled" : ""),
-								text: "Buy 1x (" + actualItem.buyValue() + " GP)",
+								css: defaultCss + (( self.player().gp() < actualItemCost ) ? " disabled" : ""),
+								text: "Buy 1x (" + actualItemCost + " GP)",
 								click: self.buyActiveItem
 							});
 
 							var numPurchasable = Math.floor( self.player().gp() / actualItem.buyValue() );
 							var actualPurchasable = (numPurchasable <= actualItem.qty()) ? numPurchasable : actualItem.qty() ;
 
-							if(actualPurchasable > 0 && actualItem.qty() > 0){
+							if(actualPurchasable > 1 && actualItem.qty() > 0){
 
 								buttons.push({
-									css: defaultCss + (( self.player().gp() < (actualPurchasable * actualItem.buyValue()) ) ? " disabled" : ""),
-									text: "Buy " + actualPurchasable + "x (" + (actualPurchasable * actualItem.buyValue()) + " GP)",
+									css: defaultCss + (( self.player().gp() < (actualPurchasable * actualItemCost) ) ? " disabled" : ""),
+									text: "Buy " + actualPurchasable + "x (" + (actualPurchasable * actualItemCost) + " GP)",
 									click: self.buyMaxActiveItem
 								});
 
@@ -493,13 +497,15 @@ define([
 
 					}
 
-					if( self.activeItem().canSell() && self.rightColContent() == "merchant" ){
+					if( self.activeItem().canSell() ){
+
+						var itemSellValue = self.activeItem().actualItem().sellValue();
 
 						if( self.activeItem().actualItem().qty() == 1 ){
 
 							buttons.push({
 								css: defaultCss,
-								text: "Sell (" + self.activeItem().actualItem().sellValue() + " GP)",
+								text: "Sell (" + itemSellValue + " GP)",
 								click: self.sellActiveItem
 							});
 
@@ -507,13 +513,13 @@ define([
 
 							buttons.push({
 								css: defaultCss,
-								text: "Sell 1x (" + actualItem.sellValue() + " GP)",
+								text: "Sell 1x (" + itemSellValue + " GP)",
 								click: self.sellActiveItem
 							});
 
 							buttons.push({
 								css: defaultCss,
-								text: "Sell All (" + (actualItem.qty() * actualItem.sellValue()) + " GP)",
+								text: "Sell All (" + (actualItem.qty() * itemSellValue) + " GP)",
 								click: self.sellAllActiveItem
 							});
 
@@ -521,93 +527,87 @@ define([
 
 					}
 
-					if( self.activeItem().canDrop() && self.rightColContent() != 'merchant'){
+					if( self.activeItem().canDrop() == 1) {
 
-						if( self.rightColContent() == 'container' ){ //We're moving something
+						if(actualItem.qty() > 1){
 
-							if( self.activeItem().moveDirection() == "left" && self.inventoryEquipmentToggle() == "Inventory"){ //We're moving from the container to the inventory
+							buttons.push({
+								css: defaultCss,
+								text: "Drop 1x",
+								click: self.dropActiveItem
+							});
 
-								if(actualItem.qty() > 1){
+							buttons.push({
+								css: defaultCss,
+								text: "Drop All",
+								click: self.dropAllActiveItem
+							});
 
-									if( actualItem.id != "gold" ){
-										buttons.push({
-											css: defaultCss,
-											text: "<< Take 1x",
-											click: self.moveActiveItem
-										});
-									}
+						}else if(actualItem.qty() == 1){
 
-									buttons.push({
-										css: defaultCss,
-										text: "<< Take All",
-										click: self.moveAllActiveItem
-									});
-
-								}else if(actualItem.qty() == 1){
-									buttons.push({
-										css: defaultCss,
-										text: "<< Take",
-										click: self.moveActiveItem
-									});
-								}
-
-							}else if( self.activeItem().moveDirection() == "right" ){ //We're moving from the inventory to the container
-
-								if( actualItem.id != "gold" ){
-
-									if( actualItem.qty() > 1 ){
-
-										buttons.push({
-											css: defaultCss,
-											text: "Put 1x >>",
-											click: self.moveActiveItem
-										});
-
-										buttons.push({
-											css: defaultCss,
-											text: "Put All >>",
-											click: self.moveAllActiveItem
-										});
-
-									}else if( actualItem.qty() == 1 ){
-
-										buttons.push({
-											css: defaultCss,
-											text: "Put >>",
-											click: self.moveActiveItem
-										});
-
-									}
-
-								}
-
-							}
-
-						}else { //We're dropping something
-
-							if(actualItem.qty() > 1){
-
-								buttons.push({
-									css: defaultCss,
-									text: "Drop 1x",
-									click: self.moveActiveItem
-								});
-
-								buttons.push({
-									css: defaultCss,
-									text: "Drop All",
-									click: self.moveAllActiveItem
-								});
-
-							}else if(actualItem.qty() == 1){
-								buttons.push({
-									css: defaultCss,
-									text: "Drop",
-									click: self.moveActiveItem
-								});
-							}
+							buttons.push({
+								css: defaultCss,
+								text: "Drop",
+								click: self.dropActiveItem
+							});
 
 						}
+
+					}else if( self.activeItem().canTake() == 1 ){
+
+						if(actualItem.qty() > 1){
+
+							//Quite frankly there's no reason to ever NOT take all gold...
+							if( actualItem.id != "gold" ){
+								buttons.push({
+									css: defaultCss,
+									text: "<< Take 1x",
+									click: self.takeActiveItem
+								});
+							}
+
+							buttons.push({
+								css: defaultCss,
+								text: "<< Take All",
+								click: self.takeAllActiveItem
+							});
+
+						}else if(actualItem.qty() == 1){
+
+							buttons.push({
+								css: defaultCss,
+								text: "<< Take",
+								click: self.takeActiveItem
+							});
+							
+						}
+
+					}else if( self.activeItem().canPut() == 1 ){
+
+						if(actualItem.qty() > 1){
+
+							buttons.push({
+								css: defaultCss,
+								text: "Put 1x >>",
+								click: self.putActiveItem
+							});
+
+							buttons.push({
+								css: defaultCss,
+								text: "Put All >>",
+								click: self.putAllActiveItem
+							});
+
+						}else if(actualItem.qty() == 1){
+
+							buttons.push({
+								css: defaultCss,
+								text: "Put >>",
+								click: self.putActiveItem
+							});
+							
+						}
+
 					}
 
 				}
@@ -2182,60 +2182,47 @@ define([
 			self.activeItem().canBuy(0);
 			self.activeItem().canUnEquip(0);
 			self.activeItem().canUpgrade(0);
-			self.activeItem().moveDirection("right");
-			self.activeItem().moveDirSymbol(false);
 			self.activeItem().actualItem(undefined);
 
 		}
 
 		this.setContainerItemAsActiveItem = function(item, e){
 
-			self.playerItemCollection = self._getActivePlayerItemCollection();
-			self.nonPlayerItemCollection = self._getActiveNonPlayerItemCollection();
 			var displayOpts = self._getAvailableActionsForActiveItemFromSection("container");
+			self.srcCollection = self.currentContainer;
+			self.equipItemCallback = function(item){
+				self.displayAcquiredAndEquippedItemMessageForItem(item, 1);
+			}
 			
 			self._setAsActiveItem(displayOpts, item, e);
 		}
 
 		this.setInventoryItemAsActiveItem = function(item, e){
 
-			self.srcCollection = self._getActivePlayerItemCollection();
-			self.tarCollection = self._getActiveNonPlayerItemCollection();
 			var displayOpts = self._getAvailableActionsForActiveItemFromSection("inventory");
+			self.srcCollection = self.player().inventory;
+			self.equipItemCallback = undefined;
 
 			self._setAsActiveItem(displayOpts, item, e);
 		}
 
 		this.setEquipmentItemAsActiveItem = function(item){
 
-			self.srcCollection = undefined;
-			self.tarCollection = undefined;
 			var displayOpts = self._getAvailableActionsForActiveItemFromSection("equipment");
+			self.srcCollection = undefined;
+			self.equipItemCallback = undefined;
 
 			if( !Utils.isEmptyObject(item) ){
 				item.isEquipped(true);
-
-				if( self.showInventoryEquipmentToggle() == 1 ){
-					//Inventory/merchant or inventory/container view, but with equipment toggled instead of inventory
-				}else{
-					//Regular inventory/equipment view
-				}
-
-				//This is not quite working yet...
-				/*if( self.rightColContent() == "container" || self.rightColContent() == "merchant" ){
-					self._setAsActiveItem({ moveDirection : "right", canEquip : 0, canUnEquip : 1 }, item);
-				}else{
-					self._setAsActiveItem({ moveDirection : "left", canEquip : 0, canUnEquip : 1 }, item);
-				}*/
 				self._setAsActiveItem(displayOpts, item);
 			}
 		}
 
 		this.setMerchantItemAsActiveItem = function(item, e){
 
-			self.srcCollection = self._getActiveNonPlayerItemCollection();
-			self.tarCollection = self._getActivePlayerItemCollection();
 			var displayOpts = self._getAvailableActionsForActiveItemFromSection("merchant");
+			self.srcCollection = undefined;
+			self.equipItemCallback = undefined;
 
 			self._setAsActiveItem(displayOpts, item, e);
 		}
@@ -2286,9 +2273,6 @@ define([
 				self.activeItem().canUpgrade(1);
 			}
 
-			//Move direction symbol (>>, <<, or false)
-			self.activeItem().moveDirSymbol(opts.moveDirSymbol);
-
 			self.activeItem().actualItem(item);
 
 		}
@@ -2302,7 +2286,7 @@ define([
 
 			alreadyEquippedItem = self._equipItem(item);
 
-			self.player().inventory.removeItem(item);
+			self.srcCollection.removeItem(item);
 
 			if( alreadyEquippedItem != undefined && !Utils.isEmptyObject(alreadyEquippedItem) ){
 				//Skip the normal slot-checking logic to account for 2H weaps or 1H + shield combos
@@ -2322,12 +2306,17 @@ define([
 				self.player().unEquipWeapon();
 			}
 
+			if( typeof self.equipItemCallback === 'function' ){
+				self.equipItemCallback(item);
+			}
+
 			self._resetActiveItem();
 		}
 
-		this.unEquipActiveItem = function(game, event){
+		this.unEquipActiveItem = function(game, event, doNotAddBackToInventory){
 
 			var item = self.activeItem().actualItem();
+			doNotAddBackToInventory = doNotAddBackToInventory || 0;
 
 			if(item.type == "weapon"){
 				self.player().unEquipWeapon(item);
@@ -2340,7 +2329,9 @@ define([
 			}
 
 			item.isEquipped(false);
-			self.player().inventory.addItem(item);
+			if(!doNotAddBackToInventory){
+				self.player().inventory.addItem(item);
+			}
 			self._resetActiveItem();
 
 		}
@@ -2476,16 +2467,8 @@ define([
 				itemToAdd = self.getAvailableItemById("weapon_scraps", "crafting", scrapQty);
 			}
 
-			if(self.rightColContent() == "equipment" && self.activeItem().moveDirection() == "left" ){ //If item is equipped
-
-				if(item.type == "weapon"){
-					self.player().unEquipWeapon(item);
-				}else if(item.type == "shield"){
-					self.player().unEquipShield(item);
-				}else if(item.type == "armor"){
-					self.player().unEquipArmor(item);
-				}
-
+			if( item.isEquipped() == 1 ){
+				self.unEquipActiveItem(game, event, 1);
 			}else{
 				self.player().inventory.removeItem(item);
 			}
@@ -2565,7 +2548,7 @@ define([
 
 			qty = qty || 1;
 			var item = self.activeItem().actualItem();
-			var moveFrom = self._getActivePlayerItemCollection();
+			var moveFrom = self.player().inventory;
 			var moveTo = self._getActiveNonPlayerItemCollection();
 			var goldItem = undefined;
 
@@ -2578,7 +2561,15 @@ define([
 			var newItem = Utils.cloneObject(item);
 			newItem.qty(qty);
 
-			var srcNumLeft = moveFrom.removeItem(item, qty);
+			var srcNumLeft;
+
+			if(item.isEquipped() == 0){
+				srcNumLeft = moveFrom.removeItem(item, qty);
+			}else{
+				//Un equip the item instead of removing it from player inventory
+				self.unEquipActiveItem(game, event, 1);
+				srcNumLeft = 0;
+			}
 
 			if(srcNumLeft == 0){
 				self._resetActiveItem();
@@ -2808,14 +2799,14 @@ define([
 
 		this.takeActiveItem = function(game, event, qty){
 			qty = qty || 1;
-			var playerItemCollection = self._getActivePlayerItemCollection();
+			var playerItemCollection = self.player().inventory;
 			var externalItemCollection = self._getActiveNonPlayerItemCollection();
 			self._moveActiveItem(externalItemCollection, playerItemCollection, qty, function(movedItem){
 				//Log acquisition
 				self.displayAcquiredItemMessageForItem(movedItem);
 			}, 1, function(movedItem){
 				//Log acquisition + auto equip
-				self.displayAcquiredAndEquippedItemMessageForItem(newItem);
+				self.displayAcquiredAndEquippedItemMessageForItem(movedItem);
 			});
 		}
 
@@ -2823,7 +2814,10 @@ define([
 			qty = qty || 1;
 			var playerItemCollection = self._getActivePlayerItemCollection();
 			var externalItemCollection = self._getActiveNonPlayerItemCollection();
-			self._moveActiveItem(playerItemCollection, externalItemCollection, qty, function(movedItem){});
+			self._moveActiveItem(playerItemCollection, externalItemCollection, qty, function(movedItem){
+				//Log dropping
+				self.displayDroppedItemMessageForItem(movedItem, qty);
+			});
 		}
 
 		this.dropActiveItem = function(game, event, qty){
@@ -2837,9 +2831,16 @@ define([
 		}
 
 		this._moveActiveItem = function(from, to, qty, onFinishcallback, tryAutoEquip, onEquipCallback){
+			tryAutoEquip = tryAutoEquip || 0;
 
 			//Get the existing item
-			var existingItem = srcCollection.getItemByUniqueID(self.activeItem().actualItem().uniqueID);
+			var existingItem;
+			if(from){
+				existingItem = from.getItemByUniqueID(self.activeItem().actualItem().uniqueID);
+			}else{
+				//We're going to assume this means that it's an equipped item...hopefully this won't come back to bite us!
+				existingItem = self.activeItem().actualItem();
+			}
 			var newItem = undefined;
 
 			//We do this even if there's no "to" specified, so we can have a record of exactly what we droppped
@@ -2847,12 +2848,19 @@ define([
 			newItem.qty(qty);
 
 			//Remove the object from the source
-			var srcNumLeft = srcCollection.removeItem(existingItem, qty);
+			var srcNumLeft = 0;
+			if(from){
+				srcNumLeft = from.removeItem(existingItem, qty);
+			}else{
+				//Try and unequip it (since we're assume it's an equipped item)
+				self.unEquipActiveItem(undefined, undefined, 1);
+			}
 
 			if(srcNumLeft == 0){
 				self._resetActiveItem();
 			}
 
+			var didEquip = false;
 			if(tryAutoEquip){
 
 				if(newItem.canEquip() && self.player().shouldAutoEquip(newItem)){
@@ -2862,9 +2870,12 @@ define([
 					if(typeof onFinishcallback === 'function'){
 						onEquipCallback(newItem);
 					}
+					didEquip = true;
 				}
 
-			}else{
+			}
+
+			if(!didEquip){
 				if(to){
 					to.addItem(newItem);
 				}
@@ -2973,17 +2984,9 @@ define([
 
 		this.removeActiveItem = function(game, event, qty){
 
-			var actualItem = self.activeItem().actualItem(),
-				srcCollection = undefined;
+			var actualItem = self.activeItem().actualItem();
 
-			srcCollection = self.player().inventory;
-
-			//Do we have an active container?
-			if(self.rightColContent() == 'container' && self.activeItem().moveDirection() == "left"){
-				srcCollection = self.currentContainer;
-			}
-
-			var srcNumLeft = srcCollection.removeItem(actualItem, qty);
+			var srcNumLeft = self.srcCollection.removeItem(actualItem, qty);
 
 			return srcNumLeft;
 
@@ -3015,10 +3018,15 @@ define([
 			self.logMessage(itemString);
 		}
 
-		this.displayAcquiredAndEquippedItemMessageForItem = function(item){
+		this.displayAcquiredAndEquippedItemMessageForItem = function(item, manuallyEquipped){
 			var itemString = 'You obtain: ';
+			manuallyEquipped = manuallyEquipped || 0;
 			itemString += self._assembleLogMessageStringFromItem(item);
-			itemString += ". It was automatically equipped.";
+			if(manuallyEquipped){
+				itemString += ", and equip it.";
+			}else{
+				itemString += ". It was automatically equipped.";
+			}
 			self.logMessage(itemString);
 		}
 
@@ -3193,6 +3201,19 @@ define([
 				}
 			}
 			return false;
+		}
+
+		this._getItemValueString = function(item, buyOrSell){
+			if(buyOrSell == "buy"){
+				return ( self.player().hasPassiveAbility('improved_barter') ? Math.floor(item.buyValue() / 2) : item.buyValue() ) + ' GP';
+			}else if(buyOrSell == "sell"){
+				return item.sellValue() + ' GP' + (item.qty() > 1 ?
+					' ea. (' + (item.qty() * item.sellValue()) + ' GP total)'
+					: ''
+				);
+			}else{
+				return "N/A";
+			}
 		}
 
 		this._makeMagicReplacementsForItem = function(string, item){
@@ -3631,7 +3652,6 @@ define([
 						showDrop 		: 0,
 						showSalvage 	: 0,
 						showUpgrade 	: 0,
-						moveDirSymbol	: "<<",
 					};
 
 				}else{
@@ -3648,7 +3668,6 @@ define([
 						showDrop 		: 0,
 						showSalvage 	: 0,
 						showUpgrade 	: 0,
-						moveDirSymbol	: "<<",
 					};
 
 				}
@@ -3669,7 +3688,6 @@ define([
 						showDrop 		: 0,
 						showSalvage 	: 1,
 						showUpgrade 	: 1,
-						moveDirSymbol	: ">>",
 					};
 
 				}else if( self.rightColContent() == "merchant" ){
@@ -3686,7 +3704,6 @@ define([
 						showDrop 		: 0,
 						showSalvage 	: 1,
 						showUpgrade 	: 1,
-						moveDirSymbol	: ">>",
 					};
 
 				}else if( self.rightColContent() == "equipment" ){
@@ -3703,7 +3720,6 @@ define([
 						showDrop 		: 1,
 						showSalvage 	: 1,
 						showUpgrade 	: 1,
-						moveDirSymbol	: false,
 					};
 
 				}
@@ -3727,7 +3743,6 @@ define([
 							showDrop 		: 0,
 							showSalvage 	: 1,
 							showUpgrade 	: 1,
-							moveDirSymbol	: ">>",
 						};
 
 					}else if( self.rightColContent() == "merchant" ){
@@ -3744,7 +3759,6 @@ define([
 							showDrop 		: 0,
 							showSalvage 	: 1,
 							showUpgrade 	: 1,
-							moveDirSymbol	: ">>",
 						};
 
 					}
@@ -3762,7 +3776,6 @@ define([
 						showDrop 		: 1,
 						showSalvage 	: 1,
 						showUpgrade 	: 1,
-						moveDirSymbol	: false,
 					};
 
 				}
@@ -3783,7 +3796,6 @@ define([
 						showDrop 		: 0,
 						showSalvage 	: 1,
 						showUpgrade 	: 0,
-						moveDirSymbol	: "<<",
 					};
 				}else{
 
@@ -3799,12 +3811,13 @@ define([
 						showDrop 		: 0,
 						showSalvage 	: 1,
 						showUpgrade 	: 0,
-						moveDirSymbol	: "<<",
 					};
 
 				}
 
 			}
+
+			return viewOptions;
 		}
 
 		this._getNewLevelParams = function(overrideWithObj){
@@ -4539,7 +4552,7 @@ define([
 			self.eventSquareTypeOverride(currentOverride);
 		}
 
-		this.testSquareItemAction = function(){
+		this.testItemSquare = function(){
 			self.squareItemAction();
 		}
 
@@ -4586,9 +4599,9 @@ PROBLEMS NEEDING SOLUTIONS:
 
 
 BUGS:
+- When buying/selling scraps from merchant, inventory and merchant items are both highlighted
 - Reset skill appears on the list of levelable abilities
 - When a skill's level is improved as a result of player leveling, it says the skill proficiency has improved to 0
-- logsave gives error
 - Log displays extra, inaccurate messages when player loots item square + inventory is full
 - Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
@@ -4631,6 +4644,8 @@ GAME IDEAS:
 - Bosses every x levels + minibosses in between
 
 UI IDEAS:
+- Allow item sort by.....what was it again????
+- Show GP cost in red in "buy" button if GP is insufficient
 - Add "Buy + Equip" option
 - When item is sold, auto-select next item from inventory for fewer clicks
 - Make unrevealed squares more obvious
@@ -4648,16 +4663,12 @@ UI IDEAS:
 - Keyboard shortcuts for "continue" buttons
 
 CODE IDEAS:
-- Clarify in Item WHICH kind of buying/selling it is (i.e. - selling BY the player vs. selling TO the player)
-- Not really happy with the way _setAsActiveItem is structured; the whole moveDirection concept could probably be redone
 - Don't save and rehydrate functions
 - Improve the skill training stuff somehow so it doesn't always break whenever a new skill is added
 - Fix testAddLevel function so it properly increases skill progress
 - Put a cap on leveling
-- Conditionally force CSS clearing
 - Remove or comment-out now-deprecated reset stone references
 - Save game version in localstorage; When loading, if version is different from current version, reload JSON files + classes from src
-- Prevent enemy HP from going below 0 (maybe)
 - Make Gold a "stat" rather than an inventory item?
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius - write test to see if it's actually faster
 - Write combat simulator for testing balancing stuff

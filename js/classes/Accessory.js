@@ -69,7 +69,7 @@ define([
 			var stat = self.actualStats[ self.accessoryStat() ];
 			player[stat]( player[stat]() - self.accessoryStatAmt() );
 
-			if( self.accessoryStat() == "Health" || self.accessoryStat() == "Endurance" && player.hp() >= player.maxHp()){
+			if( player.hp() >= player.maxHp() ){
 				player.hp(player.maxHp());
 			}
 		}
