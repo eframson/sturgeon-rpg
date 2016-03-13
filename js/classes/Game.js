@@ -2470,7 +2470,7 @@ define([
 			if( item.isEquipped() == 1 ){
 				self.unEquipActiveItem(game, event, 1);
 			}else{
-				self.player().inventory.removeItem(item);
+				self.srcCollection.removeItem(item);
 			}
 
 			self._resetActiveItem();
@@ -4617,6 +4617,15 @@ CODE CHANGES:
 
 
 GAME IDEAS:
+- Make certain weapons do REALLY well in VERY specific circumstances
+- Make epic weapons feel more special but maybe don't just add arbitrary numbers (bonus dmg)
+- Make gem vendor enchant weapons
+- Don't allow exit squares in hallways
+- Ship combat skies of arcadia
+- Queue up a series of actions ahead of time
+- Give limited skill slots, allow for swapping out of combat
+- Award talent points earlier?
+- Add different types of attacks, and make enemies stronger/weaker to those attacks
 - "Summon merchant" ability (costs some gold)
 - "Summon trainer" ability? (costs some more gold)
 - Bonus for wearing items of a certan quality
