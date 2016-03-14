@@ -30,8 +30,7 @@ define([
 				percentEmpty : 50,
 				minNonEmptyPerQuad: 3, //Not currently used
 				maxNonEmptyPerQuad: 0, //0 = unlimited
-				quadsWithPotentialExits: [1, 2],
-				quadsWithPotentialEntrances: [3, 4],
+				generateEntrance : true,
 			}, (levelData.genOpts || {}));
 			self.numSquares = levelData.numSquares || 10;
 			self.levelNum = ko.observable(levelData.levelNum || 1);
@@ -484,6 +483,49 @@ define([
 			}
 		}
 
+		this._gridSquareHasAdjacentWalls = function(squareX, squareY){
+			var minX = squareX - 1,
+				maxX = squareX + 1,
+				minY = squareY - 1,
+				maxY = squareY + 1;
+			var gridSquare;
+			
+			//console.log("For square at " + squareX + "," + squareY);
+			var x, y;
+			for(x = minX; x <= maxX; x++){
+				for(y = minY; y <= maxY; y++){
+					gridSquare = self.getSquare(x,y);
+					if(gridSquare.isWall){
+						//console.log(x + "," + y + " is a wall");
+						return true;
+					}
+				}
+			}
+			//console.log("No walls!");
+			return false;
+		}
+
+		this._getPotentialExitEntranceSquareCoords = function(){
+			var playerPos = self.getPlayerPos();
+			//Level perimeter is walls, and potential exits/entrances require at least a one square buffer
+			var minX = self.gridBounds.minX + 2,
+				maxX = self.gridBounds.maxX - 1, //this is only -1 because doRand's upper bounds is exclusive and not inclusive
+				minY = self.gridBounds.minY + 2,
+				maxY = self.gridBounds.maxY - 1; //this is only -1 because doRand's upper bounds is exclusive and not inclusive
+			var possibleCoordList = [];
+
+			var x, y;
+			for(x = minX; x <= maxX; x++){
+				for(y = minY; y <= maxY; y++){
+					if( !self._gridSquareHasAdjacentWalls(x,y) && !(x == playerPos.x && y == playerPos.y) ){
+						possibleCoordList.push([x,y]);
+					}
+				}
+			}
+
+			return possibleCoordList;
+		}
+
 		this._populateGrid = function(){
 			//Generate things a quad at a time
 			//Quad order is:
@@ -492,51 +534,50 @@ define([
 			
 			var genOpts = self.genOpts;
 			var playerPos = self.getPlayerPos();
-			var potentialExits = Array(),
-				potentialEntrances = Array(),
-				q,
-				entranceQuadNum,
-				exitQuadNum;
+			
+			var entranceSquareIdx,
+				entranceSquareCoords = false,
+				exitSquareCoords = false,
+				potentialCoordsArray = self._getPotentialExitEntranceSquareCoords();
 
-			//Choose one quad or the other off-the-bat, and then randomize its position inside that
-			entranceQuadNum = ( genOpts.quadsWithPotentialEntrances.length > 0 ) ? genOpts.quadsWithPotentialEntrances[Utils.doRand(0, genOpts.quadsWithPotentialEntrances.length)] : 0;
-			exitQuadNum = ( genOpts.quadsWithPotentialExits.length > 0 ) ? genOpts.quadsWithPotentialExits[Utils.doRand(0, genOpts.quadsWithPotentialExits.length)] : 0;
+			entranceSquareIdx = Utils.doRand(0, potentialCoordsArray.length);
 
+			if(genOpts.generateEntrance){
+				entranceSquareCoords = potentialCoordsArray[entranceSquareIdx];
+				potentialCoordsArray.splice(entranceSquareIdx, 1);
+			}else{
+				exitSquareCoords = potentialCoordsArray[entranceSquareIdx];
+			}
+
+			if(!exitSquareCoords){
+				exitSquareCoords = Utils.chooseRandomly(potentialCoordsArray);
+			}
+
+			var exitEntranceSquare;
+			if( entranceSquareCoords ){
+
+				exitEntranceSquare = self.getSquare(entranceSquareCoords[0], entranceSquareCoords[1]);
+				exitEntranceSquare.setType("entrance");
+				exitEntranceSquare.notEmpty = true;
+				self.entranceSquare([ exitEntranceSquare.x, exitEntranceSquare.y ]);
+
+			}
+			if( exitSquareCoords ){
+
+				exitEntranceSquare = self.getSquare(exitSquareCoords[0], exitSquareCoords[1]);
+				exitEntranceSquare.setType("exit");
+				exitEntranceSquare.notEmpty = true;
+				exitEntranceSquare.isChallengeActive(1);
+				self.exitSquare([ exitEntranceSquare.x, exitEntranceSquare.y ]);
+
+			}
+
+			var q;
 			for(q=1; q <= 4; q++){
 
 				var numNonEmpty = 0;
 
 				var bounds = self._getQuadBounds(q);
-				var possibleEntranceExitX = playerPos.x;
-				var possibleEntranceExitY = playerPos.y;
-
-				if(q == entranceQuadNum || q == exitQuadNum){
-					//Keep picking entrance/exit coords until we've got one in an empty space (that the player isn't standing on)
-					while(
-							(possibleEntranceExitX == playerPos.x && possibleEntranceExitY == playerPos.y)
-							|| (self.getSquare(possibleEntranceExitX, possibleEntranceExitY).isWall == true)
-					){
-						possibleEntranceExitX = Utils.doRand(bounds.minX, bounds.maxX);
-						possibleEntranceExitY = Utils.doRand(bounds.minY, bounds.maxY);
-					}
-
-					var entranceExitSquare = self.getSquare(possibleEntranceExitX, possibleEntranceExitY);
-
-					if( q == entranceQuadNum && self.entranceSquare().length == 0 ){
-
-						entranceExitSquare.setType("entrance");
-						entranceExitSquare.notEmpty = true;
-						self.entranceSquare([ entranceExitSquare.x, entranceExitSquare.y ]);
-
-					}else if( q == exitQuadNum && self.exitSquare().length == 0 ){
-
-						entranceExitSquare.setType("exit");
-						entranceExitSquare.notEmpty = true;
-						entranceExitSquare.isChallengeActive(1);
-						self.exitSquare([ entranceExitSquare.x, entranceExitSquare.y ]);
-
-					}
-				}
 
 				for(x = bounds.minX; x <= bounds.maxX; x++){
 					for(y = bounds.minY; y <= bounds.maxY; y++){

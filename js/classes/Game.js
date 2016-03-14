@@ -888,7 +888,7 @@ define([
 			}else{
 
 				player = new Player( {str: 3, dex: 2, end: 2} );
-				level = new Level( self._getNewLevelParams( { genOpts : { quadsWithPotentialEntrances : [] }, isActive : true } ) );
+				level = new Level( self._getNewLevelParams( { genOpts : { generateEntrance : false }, isActive : true } ) );
 				self.levels.push(level);
 
 			}
@@ -4205,7 +4205,7 @@ define([
 
 		this.testGeneration = function(){
 			self.level().generateThisLevel(true);
-			self.level().scanSquaresNearPlayer( 10 );
+			self.level().scanSquaresNearPlayer( 15 );
 			self.level().drawMap();
 		}
 
@@ -4556,6 +4556,33 @@ define([
 			self.squareItemAction();
 		}
 
+		this.testGoToNextLevel = function(){
+
+			var nextLevel = self.getLevelById( self.level().nextLevelID() );
+			var currentLevel = self.level();
+
+			if(self.level().nextLevelID() == undefined){
+
+				var newLevel = self.level().generateNextLevelIfNotSet(self._getNewLevelParams());
+
+				if( newLevel ){
+					self.levels.push(newLevel);
+					nextLevel = newLevel;
+				}
+
+			}
+
+			nextLevel.isActive(true);
+			currentLevel.isActive(false);
+			nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
+			nextLevel.revealSquaresNearPlayer(1);
+			self.level().scanSquaresNearPlayer(0);
+			nextLevel.drawMap();
+			self.temporarilyDisableActiveSquare(0);
+			self.testVisionRange();
+
+		}
+
 		self.init();
 
 	};
@@ -4597,7 +4624,6 @@ PROBLEMS NEEDING SOLUTIONS:
 	of one as if they have to go to the previous level, hop off, hop on, back to the current level,
 	so that would still be a slight improvement)
 
-
 BUGS:
 - When buying/selling scraps from merchant, inventory and merchant items are both highlighted
 - Reset skill appears on the list of levelable abilities
@@ -4620,7 +4646,6 @@ GAME IDEAS:
 - Make certain weapons do REALLY well in VERY specific circumstances
 - Make epic weapons feel more special but maybe don't just add arbitrary numbers (bonus dmg)
 - Make gem vendor enchant weapons
-- Don't allow exit squares in hallways
 - Ship combat skies of arcadia
 - Queue up a series of actions ahead of time
 - Give limited skill slots, allow for swapping out of combat
