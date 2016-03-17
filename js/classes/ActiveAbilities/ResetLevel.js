@@ -1,15 +1,15 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/ActiveAbility',
+	'classes/LevelableActiveAbility',
 	'Utils'
-], function($, ko, ActiveAbility, Utils){
+], function($, ko, LevelableActiveAbility, Utils){
 
 	function ResetLevel(data){
 
 		var self = this;
 
-		ActiveAbility.call(this, data);
+		LevelableActiveAbility.call(this, data);
 
 		this.init = function(data){
 			self.canTrainNextLevel(0);
@@ -30,7 +30,7 @@ define([
 		this.init(data);
 	}
 
-	ResetLevel.prototype = Object.create(ActiveAbility.prototype);
+	ResetLevel.prototype = Object.create(LevelableActiveAbility.prototype);
 	ResetLevel.prototype.constructor = ResetLevel;
 
 	return ResetLevel;

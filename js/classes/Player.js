@@ -106,6 +106,8 @@ define([
 			self.hasLeveledUp = ko.observable(data.hasLeveledUp || false);
 			self.availablePerkPoints = ko.observable(data.availablePerkPoints || 0);
 			self.baseArmor = ko.observable(data.baseArmor || 0);
+			self.ap = ko.observable(data.ap || 2);
+			self.maxAp = ko.observable(data.maxAp || 10);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
@@ -713,6 +715,21 @@ define([
 			self.hp( hp + toRestoreAmt );
 
 			return toRestoreAmt;
+		}
+
+		this.addAp = function(apAmt){
+			var apToAdd;
+			var apToMax = self.maxAp() - self.ap();
+			apToAdd = (apAmt > apToMax) ? apToMax : apAmt;
+			self.ap( self.ap() + apToAdd );
+			return apToAdd;
+		}
+
+		this.spendAp = function(apAmt){
+			var apToSub;
+			apToSub = (apAmt > self.ap()) ? self.ap() : apAmt;
+			self.ap( self.ap() - apToSub );
+			return apToSub;
 		}
 
 		this.customSaveHandlers = {

@@ -28,7 +28,7 @@
 		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
-		<link href="css/custom.css?cssBust=1457986794" rel="stylesheet">
+		<link href="css/custom.css?cssBust=1458255907" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -81,7 +81,7 @@
 						<span class="stat-value hp-stat max-hp" data-bind="text: '/ ' + player().maxHp()"></span>
 					</div>
 					<div class="col-md-1"><span class="stat-label">AC</span><span class="stat-value" data-bind="text: player().totalArmor()"></span></div>
-					<div class="col-md-2"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg() + ( player().bonusDmg() > 0 ? ' (+' + player().bonusDmg() + ')' : '' )"></span></div>
+					<div class="col-md-1"><span class="stat-label">DMG</span><span class="stat-value" data-bind="text: player().minDmg() + ' - ' + player().maxDmg() + ( player().bonusDmg() > 0 ? ' (+' + player().bonusDmg() + ')' : '' )"></span></div>
 					<div class="col-md-1"><span class="stat-label">STR</span><span class="stat-value" data-bind="text: player().str()"></span></div>
 					<div class="col-md-1"><span class="stat-label">DEX</span><span class="stat-value" data-bind="text: player().dex()"></span></div>
 					<div class="col-md-1"><span class="stat-label">END</span><span class="stat-value" data-bind="text: player().end()"></span></div>
@@ -91,7 +91,11 @@
 					<!--<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>-->
 					<!--<div class="col-md-1"><span class="stat-label"></span><span class="stat-value"></span></div>-->
 
-
+					<div class="col-md-1">
+						<span class="stat-label">AP</span>
+						<span class="stat-value hp-stat current-hp" data-bind="text: player().ap(), css: { 'low-hp' : player().ap() == 0 }"></span>
+						<span class="stat-value hp-stat max-hp" data-bind="text: '/ ' + player().maxAp()"></span>
+					</div>
 					<div class="col-md-2"><span class="stat-label">EXP</span><span class="stat-value" data-bind="text: player().exp() + '/' + player().expRequiredForNextLevel()"></span></div>
 					<div class="col-md-1 with-right-padding"><span class="stat-label">GP</span><span class="stat-value" data-bind="text: player().gp()"></span></div>
 				</div>
@@ -126,8 +130,8 @@
 											<div class="state-button">
 												<button type="button" class="btn btn-default" data-bind="
 													click: $root.useActiveAbility,
-													text: buttonLabel + ( cooldown() > 0 ? ' (' + cooldown() + ')' : '' ),
-													css: { disabled : cooldown() > 0 }">
+													text: buttonLabel + ( $data.apCost > 0 ? ' (' + $data.apCost + ' AP)' : '' ),
+													css: { disabled : $data.apCost > 0 && $data.apCost > $root.player().ap() }">
 												</button>
 											</div>
 										</div>
@@ -583,10 +587,10 @@
 											<!-- /ko -->
 
 											<!-- ko if: activeSkill().baseCooldown !== undefined && activeSkill().baseCooldown > 0 -->
-											<div class="line">
+											<!--<div class="line">
 												<span class="stat">Base cooldown:</span>
 												<span class="value" data-bind="html: activeSkill().baseCooldown"></span>
-											</div>
+											</div>-->
 											<!-- /ko -->
 
 										<!-- /ko -->

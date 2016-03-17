@@ -1,15 +1,15 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/ActiveAbility',
+	'classes/LevelableActiveAbility',
 	'Utils'
-], function($, ko, ActiveAbility, Utils){
+], function($, ko, LevelableActiveAbility, Utils){
 
 	function FindTreasure(data){
 
 		var self = this;
 
-		ActiveAbility.call(this, data);
+		LevelableActiveAbility.call(this, data);
 
 		this.init = function(data){
 
@@ -122,7 +122,7 @@ define([
 		this.init(data);
 	}
 
-	FindTreasure.prototype = Object.create(ActiveAbility.prototype);
+	FindTreasure.prototype = Object.create(LevelableActiveAbility.prototype);
 	FindTreasure.prototype.constructor = FindTreasure;
 
 	return FindTreasure;

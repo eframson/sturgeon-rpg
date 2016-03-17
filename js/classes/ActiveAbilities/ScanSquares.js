@@ -1,15 +1,15 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/ActiveAbility',
+	'classes/LevelableActiveAbility',
 	'Utils'
-], function($, ko, ActiveAbility, Utils){
+], function($, ko, LevelableActiveAbility, Utils){
 
 	function ScanSquares(data){
 
 		var self = this;
 
-		ActiveAbility.call(this, data);
+		LevelableActiveAbility.call(this, data);
 
 		this.init = function(data){
 
@@ -33,7 +33,7 @@ define([
 		this.init(data);
 	}
 
-	ScanSquares.prototype = Object.create(ActiveAbility.prototype);
+	ScanSquares.prototype = Object.create(LevelableActiveAbility.prototype);
 	ScanSquares.prototype.constructor = ScanSquares;
 
 	return ScanSquares;

@@ -91,7 +91,7 @@ define([
 		this.playerActions = {
 			scan_squares : function(){
 				var scanSquareSkill = self.player().activeAbilities()["scan_squares"];
-				var success = scanSquareSkill.doSkill();
+				var success = self._doPlayerSkill(scanSquareSkill);
 
 				if(success){ //Just a formality, should always succeed
 					if( self.player().hasPassiveAbility("improved_scanning") ){
@@ -118,7 +118,7 @@ define([
 			find_food : function(){
 
 				var findFoodSkill = self.player().activeAbilities()["find_food"];
-				var success = findFoodSkill.doSkill();
+				var success = self._doPlayerSkill(findFoodSkill);
 
 				var newFoodItem = false;
 
@@ -216,7 +216,7 @@ define([
 			find_treasure : function(){
 
 				var findTreasure = self.player().activeAbilities()["find_treasure"];
-				var foundItem = findTreasure.doSkill();
+				var foundItem = self._doPlayerSkill(findTreasure);
 
 				if(foundItem){
 					//Get item quality
@@ -1174,7 +1174,9 @@ define([
 				}
 
 				self.player().addExp(self.currentEnemy().expValue());
-				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP!", "combat");
+				var apToAdd = ( self.player().ap() == 0 ) ? 2 : 1 ;
+				self.player().addAp(apToAdd);
+				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP and " + apToAdd + " AP!", "combat");
 				self.numBattlesWon( self.numBattlesWon() + 1 );
 
 				if( self.player().hasLeveledUp() ){
@@ -1931,20 +1933,22 @@ define([
 
 				afterLoad = function(){
 
-					$.each(self.player().activeAbilities(), function(idx, skill){
+					/*$.each(self.player().activeAbilities(), function(idx, skill){
 						skill.cooldown(0);
-					});
+					});*/
+
+					self.player().addAp(2);
 
 					self.logMessage(text);
 				};
 
 				var cooldownTextOptions = [
-					"You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. All your cooldowns are instantly finished.",
-					"You're thirsty, so you stop at a nearby Fishbucks and get a double-chocolate pumpkin spiced quadruple shot of espresso. (With whipped cream). You sip it quietly, and relax. All your cooldowns are instantly finished.",
-					"You need to take a break and look up directions on your iFin. You spend 30 minutes just trying to get a good signal. Reception is terrible down here! It takes so much time that by the time you regain your bearings, all your cooldowns have finished.",
-					"You take a quick power-nap. Your cooldowns are finished, AND you are totally ready to work on that homework assignment that's due tomorrow. You were planning on doing that, right?",
-					"You just remembered a really funny thing you wanted to watch on FishTube. It's the one where a sea cucumber...no, wait, was it a salmon? The one where it's chasing a ball and then...no, it wasn't a ball, it was a frisbee. Wasn't it? Your cooldowns finish in the time it takes you to remember.",
-					"You just remembered...you left the gas on! You quickly run home and turn it off. But wait, how can you run? You don't have legs! You wake up, short of breath. It was all a dream! Apparently you dozed off. Also, your stove is electric, not gas. Your cooldowns finished while you were asleep.",
+					"You take a moment to catch your breath and play FishVille on your phone, and become immediately engrossed in the game. When you decide to resume your journey, you realize that several hours have passed. Gain 2 AP.",
+					"You're thirsty, so you stop at a nearby Fishbucks and get a double-chocolate pumpkin spiced quadruple shot of espresso. (With whipped cream). You sip it quietly, and relax. Gain 2 AP.",
+					"You need to take a break and look up directions on your iFin. You spend 30 minutes just trying to get a good signal. Reception is terrible down here! It takes so much time that by the time you regain your bearings, you find that you've gained 2 AP.",
+					"You take a quick power-nap. Gain 2 AP, AND you are totally ready to work on that homework assignment that's due tomorrow. You were planning on doing that, right?",
+					"You just remembered a really funny thing you wanted to watch on FishTube. It's the one where a sea cucumber...no, wait, was it a salmon? The one where it's chasing a ball and then...no, it wasn't a ball, it was a frisbee. Wasn't it? You gain 2 AP in the time it takes you to remember.",
+					"You just remembered...you left the gas on! You quickly run home and turn it off. But wait, how can you run? You don't have legs! You wake up, short of breath. It was all a dream! Apparently you dozed off. Also, your stove is electric, not gas. You gained 2 AP while you were asleep.",
 				];
 
 				text = Utils.chooseRandomly(cooldownTextOptions);
@@ -3167,6 +3171,15 @@ define([
 			self.player().inventory.removeItem(foodItem, 1);
 
 			self._playerEatFood(foodItem.quality());
+		}
+
+		this._doPlayerSkill = function(skill){
+			var apCost = skill.apCost;
+			if(apCost > 0 && self.player().ap() >= apCost){
+				self.player().spendAp(apCost);
+				return skill.doSkill();
+			}
+			return undefined;
 		}
 
 		this.logMessage = function(msgText, cssClass){
@@ -4613,22 +4626,11 @@ define([
 /*
 
 PROBLEMS NEEDING SOLUTIONS:
-- When player moves into a level entrance square, they are automatically dumped back
-	into the prev. level, but with the new maze structure sometimes it's not possible
-	to avoid those squares so they basically have to do a little tango into the prev.
-	level and back to get to the other side of the square. Some ideas are: only activate
-	level transitions when the player hits "Enter" while standing on the entrance/exit squares
-	(but that won't work for mobile devices -- maybe a double-click/tap?); Or have a dialog pop
-	up each time the player enters a transition square asking if they want to enter/exit or keep
-	going (but this still adds an extra step/disruption in player movement, although not as much
-	of one as if they have to go to the previous level, hop off, hop on, back to the current level,
-	so that would still be a slight improvement)
 
 BUGS:
 - When buying/selling scraps from merchant, inventory and merchant items are both highlighted
 - Reset skill appears on the list of levelable abilities
 - When a skill's level is improved as a result of player leveling, it says the skill proficiency has improved to 0
-- Log displays extra, inaccurate messages when player loots item square + inventory is full
 - Sometimes scan does not reveal squares that I think should be revealed near the player
 - Sometimes stun does not apply (cannot reliably recreate! possibly a conditional breakpoint...?)
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
@@ -4637,16 +4639,16 @@ GAME CHANGES:
 - Might be a little too intense on lvl 2 still (adjusted, let's see how it goes...)
 
 UI CHANGES:
-
+- Select "next" item in item list after salvage or sale
 
 CODE CHANGES:
 
 
 GAME IDEAS:
+- Re-tool/re-balance numbers (player HP, player stats, player dmg, monster HP, monster dmg, armor, etc)
 - Make certain weapons do REALLY well in VERY specific circumstances
 - Make epic weapons feel more special but maybe don't just add arbitrary numbers (bonus dmg)
 - Make gem vendor enchant weapons
-- Ship combat skies of arcadia
 - Queue up a series of actions ahead of time
 - Give limited skill slots, allow for swapping out of combat
 - Award talent points earlier?
@@ -4663,11 +4665,8 @@ GAME IDEAS:
 - Speed necklaces might be OP
 - Flurry might be OP
 - Bosses still might hit too hard
-- Allow item usage from merchant screen
 - When necklace is equipped, increase current HP by appropriate amount, MAYBE (ask Matt)
-- Ask Matt about "bonus" dmg
 - Ask Matt about limiting back-and-forth spamming to run down the clock
-- Add a "reveal unvisited squares" button when most of level visited?
 - Add in "skip to exit square" button, maybe costs 25% GP (maybe not), possibly unlocks after player is >1 level higher than current dungeon level
 - Add in gem merchants that accept gems as currency (ask Matt)
 - Make skill trainers cost less, OR improve base skill rather than progress
@@ -4675,10 +4674,10 @@ GAME IDEAS:
 - Should combat abilities level up + improve on use, same as active abilities?
 - Gambling squares! X gold for Y nice thing, Z chance of success
 - Battle arena event?
-- Bosses every x levels + minibosses in between
+- Maybe have miniboss squares guarding some real nice treasure
 
 UI IDEAS:
-- Allow item sort by.....what was it again????
+- Allow items to be filtered by just bought/just sold...or highlight in a given color maybe
 - Show GP cost in red in "buy" button if GP is insufficient
 - Add "Buy + Equip" option
 - When item is sold, auto-select next item from inventory for fewer clicks
@@ -4737,12 +4736,13 @@ Too easy. Contributing factors:
 - Monster strength goes by dungeon level, regardless of what level the player is
 - Players get a lot of HP on level-up -- too much?
 - Monsters might reward too much XP?
-- Players spend too much time on level (always show exit square?)
 - Definitely add a difficulty selector
-- Control first set of loot drops so player gets a set of gear
 More text variance
 
 LINKS FOR RESEARCH:
+http://www.html5rocks.com/en/tutorials/es6/promises/
+http://stackoverflow.com/questions/28511559/sychronous-animations-in-knockout-binding
+
 http://jsfiddle.net/tPm3s/1/ (http://stackoverflow.com/questions/23530756/maze-recursive-division-algorithm-design)
 http://weblog.jamisbuck.org/2011/1/12/maze-generation-recursive-division-algorithm
 http://weblog.jamisbuck.org/2015/1/15/better-recursive-division-algorithm.html

@@ -1,15 +1,15 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/ActiveAbility',
+	'classes/LevelableActiveAbility',
 	'Utils'
-], function($, ko, ActiveAbility, Utils){
+], function($, ko, LevelableActiveAbility, Utils){
 
 	function FindFood(data){
 
 		var self = this;
 
-		ActiveAbility.call(this, data);
+		LevelableActiveAbility.call(this, data);
 
 		this.init = function(data){
 
@@ -43,7 +43,7 @@ define([
 		this.init(data);
 	}
 
-	FindFood.prototype = Object.create(ActiveAbility.prototype);
+	FindFood.prototype = Object.create(LevelableActiveAbility.prototype);
 	FindFood.prototype.constructor = FindFood;
 
 	return FindFood;

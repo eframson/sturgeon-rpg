@@ -44,7 +44,7 @@
 			"skillProgress" : 0,
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,
-			"buttonLabel" : "Scan Surroundings",
+			"buttonLabel" : "Scan Squares",
 			"chanceOfEffect" : 100,
 			"baseCooldown" : 10,
 			"cooldown" : 0,
@@ -64,7 +64,8 @@
 			"chanceOfEffect" : 100,
 			"baseCooldown" : 0,
 			"cooldown" : 0,
-			"sortOrder" : 40
+			"sortOrder" : 40,
+			"apCost" : 0
 		}
 
 	},

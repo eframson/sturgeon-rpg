@@ -1,0 +1,100 @@
+define([
+	'jquery',
+	'knockout',
+	'classes/LevelableAbility',
+	'Utils'
+], function($, ko, LevelableAbility, Utils){
+
+	function LevelableActiveAbility(data){
+
+		var self = this;
+
+		LevelableAbility.call(this, data);
+
+		this.init = function(data){
+
+			self.buttonLabel = data.buttonLabel;
+			self.baseCooldown = data.baseCooldown || 0;
+			self.cooldown = ko.observable(data.cooldown || 0);
+			self.didLevelUp = 0;
+			self.canLevelUp = 0;
+			self.sortOrder = data.sortOrder;
+			self.apCost = (data.apCost !== undefined) ? data.apCost : 1 ;
+
+		}
+
+		this.doSkill = function(delayLevelUp){
+
+			delayLevelUp = (delayLevelUp != undefined) ? delayLevelUp : 1 ;
+
+			//Trigger cooldown
+			self.triggerCooldown();
+
+			//See if skill "hit"
+			var didHit = self.makeSkillAttempt();
+
+			//Make skill progress
+			self.makeProgress(delayLevelUp);
+			
+			//Return true/false on success/fail
+			return didHit;
+		}
+
+		this.makeSkillAttempt = function(){
+			var hitRoll = Utils.doRand(1, 101);
+			return (hitRoll <= self.chanceOfEffect) ? true : false ;
+		}
+
+		this.makeProgress = function(delayLevelUp){
+
+			delayLevelUp = (delayLevelUp != undefined) ? delayLevelUp : 1 ;
+
+			self.skillProgress( self.skillProgress() + 1 );
+
+			//Level skill up if progress is sufficient
+			if( self.isSkillProgressSufficientToLevel() && !delayLevelUp ){
+				self.levelUp();
+			}else if( self.isSkillProgressSufficientToLevel() ){
+				self.canLevelUp = 1;
+			}
+		}
+
+		this.isSkillProgressSufficientToLevel = function(){
+			return self.skillProgress() >= self.nextSkillLevelAtProgress();
+		}
+
+		this.levelUp = function(){
+			self.canLevelUp = 0;
+			self.didLevelUp = 1;
+
+			if(self.resetProgressOnSkillLevelUp){
+				self.skillProgress(0);
+			}
+
+			self.updateNextSkillLevelAtProgress();
+
+			self.doOnLevelUp();
+		}
+
+		this.updateNextSkillLevelAtProgress = function(){
+			//Can be overridden by child
+			return true;
+		}
+
+		this.doOnLevelUp = function(){
+			//Should be overridden by child
+			return true;
+		}
+
+		this.triggerCooldown = function(){
+			self.cooldown(self.baseCooldown);
+		}
+
+		this.init(data);
+	}
+
+	LevelableActiveAbility.prototype = Object.create(LevelableAbility.prototype);
+	LevelableActiveAbility.prototype.constructor = LevelableActiveAbility;
+
+	return LevelableActiveAbility;
+});
