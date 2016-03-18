@@ -4596,6 +4596,30 @@ define([
 
 		}
 
+		this.testRebalanceNumbers = function(level){
+			level = level || 1;
+			
+			var output = Utils.projectedStatAllotmentsForLevel(level);
+
+			output.player.totalArmor = {
+				with_shield : {
+					poor : (output.player.armor.poor * 4) + output.player.shield.poor,
+					good : (output.player.armor.good * 4) + output.player.shield.good,
+					great : (output.player.armor.great * 4) + output.player.shield.great,
+					exceptional : (output.player.armor.exceptional * 4) + output.player.shield.exceptional,
+				},
+				no_shield : {
+					poor : output.player.armor.poor * 4,
+					good : output.player.armor.good * 4,
+					great : output.player.armor.great * 4,
+					exceptional : output.player.armor.exceptional * 4,
+				},
+			}
+
+			console.log(output);
+
+		}
+
 		self.init();
 
 	};
@@ -4636,7 +4660,7 @@ BUGS:
 - After changing level preferences, game.level().generateThisLevel(1,1) doesn't read changes until reload?
 
 GAME CHANGES:
-- Might be a little too intense on lvl 2 still (adjusted, let's see how it goes...)
+- Make improving armor (and weapons?) improve by a percentage instead of a flat amount
 
 UI CHANGES:
 - Select "next" item in item list after salvage or sale
@@ -4645,6 +4669,7 @@ CODE CHANGES:
 
 
 GAME IDEAS:
+- Attack stances? Purchase with talent points, more dmg + less defense etc.
 - Re-tool/re-balance numbers (player HP, player stats, player dmg, monster HP, monster dmg, armor, etc)
 - Make certain weapons do REALLY well in VERY specific circumstances
 - Make epic weapons feel more special but maybe don't just add arbitrary numbers (bonus dmg)

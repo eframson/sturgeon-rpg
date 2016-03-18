@@ -159,11 +159,99 @@ define([
 			return averages;
 		},
 
+		projectedStatAllotmentsForLevel : function(levelNum){
+			levelNum = levelNum || 1;
+
+			var output = {
+				player : {},
+				monster : {},
+			};
+
+			//100 + (30 * levelNum)
+			output.player.hp = 100 + (30 * (levelNum - 1));
+
+			//Base monster DMG = 33% of player HP
+			output.monster.baseDmg = Math.round(output.player.hp * .33);
+
+			//Full poor armor should reduce dmg taken to: 29% player HP
+			//Full good armor should reduce dmg taken to: 25% player HP
+			//Full great armor should reduce dmg taken to: 20% player HP
+			//Full epic armor should reduce dmg taken to: 14% player HP
+
+			//AC of poor quality item: 1% of player HP
+			var armorBaseAC = .01 * output.player.hp;
+			output.player.armor = {
+				poor : Math.round(1.0 * armorBaseAC),
+				//AC of good quality item: 1.9x poor quality item
+				good : Math.round(1.9 * armorBaseAC),
+				//AC of great quality item: 3.2x poor quality item
+				great : Math.round(3.2 * armorBaseAC),
+				//AC of epic quality item: 4.7x poor quality item
+				exceptional : Math.round(4.7 * armorBaseAC),
+			}
+
+			//AC of poor quality shield: .5% of player HP
+			var shieldBaseAC = .005 * output.player.hp;
+			output.player.shield = {
+				poor : Math.round(1.0 * shieldBaseAC),
+				//AC of good quality shield: 1.9x poor quality shield
+				good : Math.round(1.9 * shieldBaseAC),
+				//AC of great quality shield: 3.1x poor quality shield
+				great : Math.round(3.1 * shieldBaseAC),
+				//AC of epic quality shield: 4.5x poor quality shield
+				exceptional : Math.round(4.5 * shieldBaseAC),
+			}
+
+			//Player can't reduce dmg below 5% of total HP
+			output.player.minDmgReceived = Math.round(.05 * output.player.hp)
+
+			//Monster HP is 3x player HP
+			output.monster.hp = output.player.hp * 3;
+
+			//AVG DMG of Epic quality weapon deals 31% monster HP
+			//AVG DMG of Great quality weapon deals 25% monster HP
+			//AVG DMG of Good quality weapon deals 20% monster HP
+			//AVG DMG of Poor quality weapon deals 16% monster HP
+
+			//AVG DMG of poor quality item: 48% of player HP
+			var weaponBaseDMG = .48 * output.player.hp;
+			//1H weapon deals 10% less (avg) than that
+			var oneHandedWeaponBaseDMG = 0.9 * weaponBaseDMG;
+			//2H weapon deals 20% more (avg) dmg than that
+			var twoHandedWeaponBaseDMG = 1.1 * weaponBaseDMG;
+
+			output.player.weapon = {
+				1 : {
+					poor : Math.round(1.0 * oneHandedWeaponBaseDMG),
+					//DMG of good quality weapon: 1.2x poor quality weapon
+					good : Math.round(1.2 * oneHandedWeaponBaseDMG),
+					//DMG of great quality weapon: 1.6x poor quality weapon
+					great : Math.round(1.6 * oneHandedWeaponBaseDMG),
+					//DMG of epic quality weapon: 1.9x poor quality weapon
+					exceptional : Math.round(1.9 * oneHandedWeaponBaseDMG),
+				},
+				2 : {
+					poor : Math.round(1.0 * twoHandedWeaponBaseDMG),
+					//DMG of good quality weapon: 1.2x poor quality weapon
+					good : Math.round(1.2 * twoHandedWeaponBaseDMG),
+					//DMG of great quality weapon: 1.6x poor quality weapon
+					great : Math.round(1.6 * twoHandedWeaponBaseDMG),
+					//DMG of epic quality weapon: 1.9x poor quality weapon
+					exceptional : Math.round(1.9 * twoHandedWeaponBaseDMG),
+				}
+			}
+
+			return output;
+		},
+
 		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum){
 			var actualDmg;
 			//var minDmg = 0.20 * dmg;
 
 			actualDmg = dmg * ( (100 + ((levelNum - 5) * 0.65) ) / (100 + armor) );
+
+			/*var dmgCoefficient = Math.pow(0.99, armor);
+			actualDmg = dmgCoefficient * dmg;*/
 
 			return Math.round(actualDmg);
 
