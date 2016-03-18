@@ -28,7 +28,7 @@
 		<!-- <link href="css/jquery.growl.css" rel="stylesheet"> -->
 
 		<!-- Theme customizations -->
-		<link href="css/custom.css?cssBust=1458255907" rel="stylesheet">
+		<link href="css/custom.css?cssBust=1458324679" rel="stylesheet">
 
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -173,10 +173,12 @@
 											<h3>Skill Proficiencies</h3>
 										</div>
 										<!-- ko foreach: $root.player().activeAbilitiesIterable() -->
-											<div class="state-button-row">
-												<span class="stat" data-bind="text: $data.name + ':'"></span>
-												<span class="value" data-bind="text: $data.skillLevel() + ' (progress: ' + $data.skillProgress() + '/' + $data.nextSkillLevelAtProgress() + ')'"></span>
-											</div>
+											<!-- ko if: $data.isLevelable == 1 -->
+												<div class="state-button-row">
+													<span class="stat" data-bind="text: $data.name + ':'"></span>
+													<span class="value" data-bind="text: $data.skillLevel() + ' (progress: ' + $data.skillProgress() + '/' + $data.nextSkillLevelAtProgress() + ')'"></span>
+												</div>
+											<!-- /ko -->
 										<!-- /ko -->
 									</div>
 									<div class="clear"></div>
@@ -221,10 +223,10 @@
 									<!-- /ko -->
 
 									<!-- ko foreach: $root.player().getActiveAbilities() -->
-									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
-										<span class="item" data-bind="html: $data.name"></span>
-										<span class="level" data-bind="text: (($data.skillLevel() == 0) ? 'N/A' : $data.skillLevel())"></span>
-									</div>
+										<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
+											<span class="item" data-bind="html: $data.name"></span>
+											<span class="level" data-bind="text: (($data.isLevelable == 1) ? $data.skillLevel() : 'N/A')"></span>
+										</div>
 									<!-- /ko -->
 
 									<div class="line empty section-header">
@@ -259,7 +261,7 @@
 									<!-- ko foreach: $root.player().getCombatAbilities() -->
 									<div class="line" data-bind="click: $root.setSkillAsActiveSkill, css: { selected: $root._shouldSkillBeSelected($data) }">
 										<span class="item" data-bind="html: $data.name"></span>
-										<span class="level" data-bind="text: $data.skillLevel()"></span>
+										<span class="level" data-bind="text: 'N/A'"></span>
 									</div>
 									<!-- /ko -->
 
@@ -446,9 +448,11 @@
 							<!-- start inventory/equipment/merchant item description area -->
 							<div class="item-desc" data-bind="css: { hidden: centerColContent() != 'item_desc' }">
 
-								<button class="btn btn-default back" type="button" data-bind="click: showContentArea, css: { disabled: player().inventorySlotsOccupied() > player().inventoryMaxSlots() }"><span data-bind="text: backButtonLabel()"></span></button>
+								<!-- ko if: rightColContent() == "container" -->
+								<button class="btn btn-default take-all" type="button" data-bind="click: takeAllFromContainer, css: { hidden: rightColContent() != 'container', disabled : currentContainer.length() == 0 }"><span>Take All</span></button>
+								<!-- /ko -->
 
-								<button class="btn btn-default take-all" type="button" data-bind="click: takeAllFromContainer, css: { hidden: rightColContent() != 'container' }"><span>Take All</span></button>
+								<button class="btn btn-default back" type="button" data-bind="click: showContentArea, css: { disabled: player().inventorySlotsOccupied() > player().inventoryMaxSlots(), rightfloat : rightColContent() == 'container' }"><span data-bind="text: backButtonLabel()"></span></button>
 
 								<div class="clear"></div>
 

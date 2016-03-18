@@ -954,7 +954,7 @@ define([
 					
 					self.temporarilyDisableActiveSquare(0);
 
-					self.updateCooldowns();
+					//self.updateCooldowns();
 
 					//Coming soon...
 					//self.evaluateIntermittentPassives();
@@ -1745,7 +1745,7 @@ define([
 
 			//Don't let trainer squares show up if there's nothing to train in!
 			$.each(self.player().activeAbilities(), function(idx, skill){
-				if(skill.canTrainNextLevel()){
+				if(skill.isLevelable == 1 && skill.canTrainNextLevel()){
 					eventSquarePercentKey = "normal";
 					return false;
 				}
@@ -1815,7 +1815,7 @@ define([
 				);
 
 				$.each(self.player().activeAbilities(), function(idx, skill){
-					if(skill.canTrainNextLevel()){
+					if(skill.isLevelable == 1 && skill.canTrainNextLevel()){
 						improvableStats.push(skill.id)
 					}
 				});

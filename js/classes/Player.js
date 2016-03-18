@@ -590,8 +590,10 @@ define([
 				trackChanges[ability.id].resetProgressOnSkillLevelUp = ability.resetProgressOnSkillLevelUp;
 				trackChanges[ability.id].name = ability.name;
 
-				trackChanges[ability.id].oldSkillLevel = ability.skillLevel();
-				trackChanges[ability.id].oldProgress = ability.skillProgress();
+				if(ability.isLevelable == 1){
+					trackChanges[ability.id].oldSkillLevel = ability.skillLevel();
+					trackChanges[ability.id].oldProgress = ability.skillProgress();
+				}
 
 				ability.makeProgress(0);
 
@@ -599,7 +601,7 @@ define([
 					ability.didLevelUp = 0; //Clear this out
 					trackChanges[ability.id].newSkillLevel = ability.skillLevel();	
 				}
-				if(ability.skillProgress() != trackChanges[ability.id].oldSkillLevel){
+				if(ability.isLevelable == 1 && (ability.skillProgress() != trackChanges[ability.id].oldSkillLevel)){
 					trackChanges[ability.id].newProgress = ability.skillProgress();
 				}
 

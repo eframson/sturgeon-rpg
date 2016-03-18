@@ -1,19 +1,19 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/LevelableAbility',
+	'classes/UsableAbility',
 	'classes/DataCollection',
 	'classes/CombatEffect',
 
 	'json!data/skills.json',
 	'Utils'
-], function($, ko, LevelableAbility, DataCollection, CombatEffect, skillDataFile, Utils){
+], function($, ko, UsableAbility, DataCollection, CombatEffect, skillDataFile, Utils){
 
 	function CombatAbility(data){
 
 		var self = this;
 
-		LevelableAbility.call(this, data);
+		UsableAbility.call(this, data);
 
 		this.noExportProps.push("skillDataCollection");
 
@@ -143,7 +143,7 @@ define([
 
 	}
 
-	CombatAbility.prototype = Object.create(LevelableAbility.prototype);
+	CombatAbility.prototype = Object.create(UsableAbility.prototype);
 	CombatAbility.prototype.constructor = CombatAbility;
 
 	return CombatAbility;

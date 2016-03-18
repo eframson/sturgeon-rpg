@@ -631,9 +631,14 @@ button:focus {
 	float: left;
 }
 
-.item-desc .take-all {
+.item-desc .back.rightfloat {
 	float: right;
 	clear: right;
+}
+
+.item-desc .take-all {
+	float: left;
+	/*clear: right;*/
 }
 
 .settings-buttons .back {

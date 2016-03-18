@@ -1,25 +1,35 @@
 define([
 	'jquery',
 	'knockout',
-	'classes/LevelableAbility',
+	'classes/ActiveAbility',
 	'Utils'
-], function($, ko, LevelableAbility, Utils){
+], function($, ko, ActiveAbility, Utils){
 
 	function LevelableActiveAbility(data){
 
 		var self = this;
 
-		LevelableAbility.call(this, data);
+		ActiveAbility.call(this, data);
+
+		this.isLevelable = 1;
 
 		this.init = function(data){
 
-			self.buttonLabel = data.buttonLabel;
+
+			self.skillLevel = ko.observable((data.skillLevel !== undefined) ? data.skillLevel : 1 );
+			self.skillLevelString = ko.observable((data.skillLevelString !== undefined) ? data.skillLevelString : "Skill level" );
+			self.skillProgress = ko.observable(data.skillProgress || 0);
+			self.nextSkillLevelAtProgress = ko.observable(data.nextSkillLevelAtProgress || 10);
+			self.resetProgressOnSkillLevelUp = (data.resetProgressOnSkillLevelUp !== undefined) ? data.resetProgressOnSkillLevelUp : 1 ;
+			self.canTrainNextLevel = ko.observable( (data.canTrainNextLevel !== undefined) ? data.canTrainNextLevel : 1 );
+			self.requiredLevel = data.requiredLevel || 0;
+
+
+
 			self.baseCooldown = data.baseCooldown || 0;
 			self.cooldown = ko.observable(data.cooldown || 0);
 			self.didLevelUp = 0;
 			self.canLevelUp = 0;
-			self.sortOrder = data.sortOrder;
-			self.apCost = (data.apCost !== undefined) ? data.apCost : 1 ;
 
 		}
 
@@ -83,7 +93,12 @@ define([
 
 		this.doOnLevelUp = function(){
 			//Should be overridden by child
-			return true;
+			return 1;
+		}
+
+		this.getTrainCost = function(){
+			//Should be overridden by child
+			return 0;
 		}
 
 		this.triggerCooldown = function(){
@@ -93,7 +108,7 @@ define([
 		this.init(data);
 	}
 
-	LevelableActiveAbility.prototype = Object.create(LevelableAbility.prototype);
+	LevelableActiveAbility.prototype = Object.create(ActiveAbility.prototype);
 	LevelableActiveAbility.prototype.constructor = LevelableActiveAbility;
 
 	return LevelableActiveAbility;

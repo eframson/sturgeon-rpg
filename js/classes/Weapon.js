@@ -66,7 +66,7 @@ define([
 					self.desc = magicDesc;
 				}
 
-				if(self.quality() == "exceptional"){
+				/*if(self.quality() == "exceptional"){
 					var bonusDmg = Utils.doRand(1, (self.level() + 1));
 					self.extraDamage(bonusDmg);
 					Utils.doBasedOnPercent({ 25 : function(){
@@ -75,7 +75,7 @@ define([
 					}});
 					self.name = self.name + " +" + self.extraDamage();
 					//TODO: Increase buy/sell value based on extra damage amount (dmg amount * level ?)
-				}
+				}*/
 
 				self.isScaled(1);
 			}
