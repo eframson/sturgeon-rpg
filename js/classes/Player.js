@@ -31,7 +31,7 @@ define([
 
 			self.level = ko.observable(data.level || 1);
 			self.hp = ko.observable(data.hp || 0);
-			self.baseHp = ko.observable(data.baseHp || 20);
+			self.baseHp = ko.observable(data.baseHp || 100);
 			self.exp = ko.observable(data.exp || 0);
 			self.inventory = new ItemCollection(Array());
 			self.inventoryMaxSlots = ko.observable(data.inventoryMaxSlots || 5);
@@ -648,13 +648,13 @@ define([
 
 			var trackChanges = {};
 
-			var hpGainPerLevel = 5;
+			var hpGainPerLevel = 30;
 			var restoreHpTo;
 			trackChanges.baseHp = hpGainPerLevel;
 
 			if( self.hasPassiveAbility("improved_hp_leveling") ){
-				hpGainPerLevel = hpGainPerLevel * 2;
-				trackChanges.baseHp * 2;
+				hpGainPerLevel = hpGainPerLevel * 1.2;
+				trackChanges.baseHp * 1.2;
 			}
 
 			self.baseHp( self.baseHp() + hpGainPerLevel );

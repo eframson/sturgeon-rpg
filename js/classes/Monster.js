@@ -71,11 +71,13 @@ define([
 				self.availableAttacks = archetypeData.attacks;
 
 				//Let's say HP and DMG both have a 30% variance
-				self.maxHp( Math.round((Utils.doRand(Math.ceil(avgMonsterHp * 0.6), Math.ceil(avgMonsterHp * 1.4))) * self.avgHpCoefficient) );
-				self.maxHp( Math.ceil(self.maxHp() * self.hpCoefficient()) );
+				var stats = Utils.projectedStatAllotmentsForLevel( self.level() );
+				self.maxHp(stats.monster.hp);
+				self.maxHp( Math.round((Utils.doRand(Math.ceil(stats.monster.hp * 0.9), Math.ceil(stats.monster.hp * 1.1))) ));
+				//self.maxHp( Math.round(self.maxHp() * self.hpCoefficient()) );
 				self.hp( self.maxHp() );
-				self.minDmg( Math.ceil(avgMonsterDmg * 0.7) * self.avgDmgCoefficient );
-				self.maxDmg( Math.ceil(avgMonsterDmg * 1.3) * self.avgDmgCoefficient );
+				self.minDmg( Math.round(stats.monster.baseDmg * 0.9) );
+				self.maxDmg( Math.round(stats.monster.baseDmg * 1.1) );
 				self.speed( self.level() );
 				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
 				

@@ -86,8 +86,12 @@ define([
 
 		}
 
-		this.calculateActualDmg = function(dmg, levelNum){
+		this.calculateActualDmg = function(dmg, levelNum, minDmg){
 			var baseDmg = Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum);
+
+			if( minDmg !== undefined ){
+				baseDmg = (baseDmg < minDmg) ? minDmg : baseDmg ;
+			}
 
 			return baseDmg;
 		}

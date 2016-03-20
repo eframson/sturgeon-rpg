@@ -80,6 +80,7 @@ define([
 							self.manageTransitionToView("fullscreen","mainscreen");
 
 							self.isNew(false);
+							self.equipInitialLootItems();
 						}
 					},
 				],
@@ -1061,7 +1062,9 @@ define([
 			};
 
 			//Make sure first few encounters are basic monsters while player is starting out
-			if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 5 && encounterType != "boss"){
+			//if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 5 && encounterType != "boss"){
+			//Okay, monster archetypes totally mess up our delicately calibrated system...everything is basic for now!
+			if( encounterType != "boss"){
 				extraParamObj.doNotSpecializeArchetype = 1;
 			}
 
@@ -1094,6 +1097,19 @@ define([
 			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
 			self.playerHpBarWidth(playerHpBarWidth);
 			self.enemyHpBarWidth(self.hpBarBaseWidth);
+
+			//Let's sneak in some selective nerfing here...
+			if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 6){
+				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.5) );
+				self.currentEnemy().hp( self.currentEnemy().maxHp() );
+				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.3) );
+				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.3) );
+			} else if( self.level().levelNum() < 2 ){
+				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
+				self.currentEnemy().hp( self.currentEnemy().maxHp() );
+				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
+				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
+			}
 		}
 
 		this.getGoesFirst = function(){
@@ -1464,6 +1480,50 @@ define([
 
 		}
 
+		this.equipInitialLootItems = function(returnItems){
+			
+			var scheduledLootIdx;
+			var initialLootSchedule = [
+				"melee_weapon_01",
+				"tail_armor_01",
+				"head_armor_01",
+				"body_armor_01",
+				"shield_01",
+			];
+			var initialLootTypes = [
+				"weapon",
+				"armor",
+				"armor",
+				"armor",
+				"shield",
+			];
+			
+			var itemToAdd, newLootItem, itemId;
+
+			var i;
+			for(i = 0; i < initialLootSchedule.length; i++){
+				scheduledLootIdx = i;
+
+				itemId = initialLootSchedule[scheduledLootIdx];
+
+				itemToAdd = self.getAvailableItemById(itemId, initialLootTypes[scheduledLootIdx], 1);
+
+				itemToAdd.fullyDynamicStats = 1;
+				itemToAdd.level = 1;
+				itemToAdd.quality = "poor";
+				if( initialLootTypes[scheduledLootIdx] == "weapon" ){
+					newLootItem = new Weapon(itemToAdd);
+				}else if( initialLootTypes[scheduledLootIdx] == "armor" ){
+					newLootItem = new Armor(itemToAdd);
+				}else if( initialLootTypes[scheduledLootIdx] == "shield" ){
+					newLootItem = new Shield(itemToAdd);
+				}
+
+				self._equipItem(newLootItem);
+			}
+
+		}
+
 		this.generateRandomLootItem = function(lootSet, overrideQuality, lootSetOverride, levelNum){
 
 			lootSet = lootSet || "standard";
@@ -1600,10 +1660,13 @@ define([
 
 				});
 
-				var quality = Utils.chooseRandomly(Utils.getPossibleQualities());
+				var quality = Utils.doBasedOnPercent(Utils.getPossibleQualitiesWithPossibilities());
 
 				if(lootSet == "boss"){
-					quality = "great";
+					quality = Utils.doBasedOnPercent({
+						75 : "great",
+						25 : "exceptional",
+					});
 				}
 
 				if(overrideQuality !== undefined){
@@ -4206,16 +4269,6 @@ define([
 			return results;
 		}
 
-		this.testMonster = function(){
-			self.startCombat();
-			var i;
-			for(i=0; i < 100; i++){
-				self.startCombat();
-				console.log(game.currentEnemy().archetypeId);
-			}
-			//self.lootEnemy();
-		}
-
 		this.testGeneration = function(){
 			self.level().generateThisLevel(true);
 			self.level().scanSquaresNearPlayer( 15 );
@@ -4569,6 +4622,24 @@ define([
 			self.squareItemAction();
 		}
 
+		this.testCombatSquare = function(){
+			self.manageTransitionToView("fullscreen","combat");
+			self.startCombat();
+		}
+
+		this.testMonster = function(numMonsters){
+			numMonsters = numMonsters || 100;
+			var i;
+			for(i=0; i < numMonsters; i++){
+				self.startCombat();
+				console.log(game.currentEnemy().archetypeId);
+				console.log("HP: " + game.currentEnemy().maxHp());
+				console.log("MIN: " + game.currentEnemy().minDmg());
+				console.log("MAX: " + game.currentEnemy().maxDmg());
+			}
+			//self.lootEnemy();
+		}
+
 		this.testGoToNextLevel = function(){
 
 			var nextLevel = self.getLevelById( self.level().nextLevelID() );
@@ -4652,6 +4723,7 @@ define([
 PROBLEMS NEEDING SOLUTIONS:
 
 BUGS:
+- "Loot" button can be clicked multiple times
 - When buying/selling scraps from merchant, inventory and merchant items are both highlighted
 - Reset skill appears on the list of levelable abilities
 - When a skill's level is improved as a result of player leveling, it says the skill proficiency has improved to 0

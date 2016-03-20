@@ -30,8 +30,8 @@ define([
 			self.isEquippable = true;
 			self.fullyDynamicStats = (data.fullyDynamicStats !== undefined) ? data.fullyDynamicStats : 1;
 			self.extraDamage = ko.observable(data.extraDamage || 0);
-			self.minDmgPctOfAvg = data.minDmgPctOfAvg || 0.7;
-			self.maxDmgPctOfAvg = data.maxDmgPctOfAvg || 1.3;
+			self.minDmgPctOfAvg = data.minDmgPctOfAvg || 0.9;
+			self.maxDmgPctOfAvg = data.maxDmgPctOfAvg || 1.1;
 			self.monsterLootCoefficient = data.monsterLootCoefficient || 1;
 			self.subtype = data.subtype;
 			
@@ -39,8 +39,10 @@ define([
 				var averages = Utils.calculateAveragesForLevel(self.level());
 				var avgDmgPerHit = averages.avgPlayerDmg;
 
+				var calculatedStats = Utils.projectedStatAllotmentsForLevel(self.level());
+
 				//Apply coefficient representing item quality to our average figure
-				avgDmgPerHit = avgDmgPerHit * self.qualityModifier;
+				avgDmgPerHit = calculatedStats.player.weapon[self.handsRequired][self.quality()];
 				
 				//Let's say the dmg range is -30% - +30%
 				self.dmgMin( Math.round(avgDmgPerHit * self.minDmgPctOfAvg) );
@@ -51,7 +53,7 @@ define([
 				//Shouldn't ever happen, but just to be on the safe side...
 				self.dmgMax( (self.dmgMax() < self.dmgMin()) ? self.dmgMin() : self.dmgMax() );
 				
-				self._buyValue = Math.round( (avgDmgPerHit * 100) + (self.qualityModifier * 10) );
+				self._buyValue = Math.round( (avgDmgPerHit * 3) + (self.qualityModifier * 10) );
 				self._forceRecalculate.valueHasMutated();
 
 				var magicDesc = self.desc;

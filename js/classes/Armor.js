@@ -22,12 +22,12 @@ define([
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
 
-				var averages = Utils.calculateAveragesForLevel(self.level());
-				var baseArmorValue = averages.avgPlayerArmorValue;
+				var calculatedStats = Utils.projectedStatAllotmentsForLevel(self.level());
+				var armorValues = calculatedStats.player.armor;
 
-				baseArmorValue = baseArmorValue * self.pctOfAvgArmor * self.qualityModifier;
-				baseArmorValue = Math.round(baseArmorValue);
-				baseArmorValue = (baseArmorValue > 0) ? baseArmorValue : 1;
+				armorValues[data.quality];
+				
+				baseArmorValue = armorValues[data.quality];
 				self.armorValue(baseArmorValue);
 				
 				self._buyValue = self.armorValue() * 100;

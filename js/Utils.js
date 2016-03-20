@@ -188,7 +188,7 @@ define([
 				great : Math.round(3.2 * armorBaseAC),
 				//AC of epic quality item: 4.7x poor quality item
 				exceptional : Math.round(4.7 * armorBaseAC),
-			}
+			};
 
 			//AC of poor quality shield: .5% of player HP
 			var shieldBaseAC = .005 * output.player.hp;
@@ -200,10 +200,10 @@ define([
 				great : Math.round(3.1 * shieldBaseAC),
 				//AC of epic quality shield: 4.5x poor quality shield
 				exceptional : Math.round(4.5 * shieldBaseAC),
-			}
+			};
 
 			//Player can't reduce dmg below 5% of total HP
-			output.player.minDmgReceived = Math.round(.05 * output.player.hp)
+			output.player.minDmgReceived = Math.round(.05 * output.player.hp);
 
 			//Monster HP is 3x player HP
 			output.monster.hp = output.player.hp * 3;
@@ -238,23 +238,27 @@ define([
 					great : Math.round(1.6 * twoHandedWeaponBaseDMG),
 					//DMG of epic quality weapon: 1.9x poor quality weapon
 					exceptional : Math.round(1.9 * twoHandedWeaponBaseDMG),
-				}
-			}
+				},
+			};
 
 			return output;
 		},
 
 		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum){
 			var actualDmg;
+			//2
 			//var minDmg = 0.20 * dmg;
 
-			actualDmg = dmg * ( (100 + ((levelNum - 5) * 0.65) ) / (100 + armor) );
+			//1
+			//actualDmg = dmg * ( (100 + ((levelNum - 5) * 0.65) ) / (100 + armor) );
 
-			/*var dmgCoefficient = Math.pow(0.99, armor);
-			actualDmg = dmgCoefficient * dmg;*/
+			//3
+			actualDmg = dmg - armor;
+			return actualDmg;
 
-			return Math.round(actualDmg);
-
+			//1
+			//return Math.round(actualDmg);
+			//2
 			//return Math.round( (actualDmg >= minDmg) ? actualDmg : minDmg );
 		},
 
@@ -300,6 +304,16 @@ define([
 				"great",
 				"exceptional"
 			];
+			return qualities;
+		},
+
+		getPossibleQualitiesWithPossibilities : function(){
+			var qualities = {
+				35 : "poor",
+				45 : "good",
+				15 : "great",
+				5 : "exceptional"
+			};
 			return qualities;
 		},
 
