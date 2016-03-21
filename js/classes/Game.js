@@ -4741,6 +4741,7 @@ CODE CHANGES:
 
 
 GAME IDEAS:
+- Add a bit more variance in armor stats (+/- 10%)
 - Attack stances? Purchase with talent points, more dmg + less defense etc.
 - Re-tool/re-balance numbers (player HP, player stats, player dmg, monster HP, monster dmg, armor, etc)
 - Make certain weapons do REALLY well in VERY specific circumstances
@@ -4774,6 +4775,7 @@ GAME IDEAS:
 - Maybe have miniboss squares guarding some real nice treasure
 
 UI IDEAS:
+- Make loot all + leaving faster
 - Allow items to be filtered by just bought/just sold...or highlight in a given color maybe
 - Show GP cost in red in "buy" button if GP is insufficient
 - Add "Buy + Equip" option
