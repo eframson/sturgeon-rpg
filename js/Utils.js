@@ -317,6 +317,16 @@ define([
 			return qualities;
 		},
 
+		getWeaponQualityDescriptors : function(){
+			var qualities = {
+				"poor" : "Crude",
+				"good" : "Sturdy",
+				"great" : "High-Quality",
+				"exceptional" : "Deadly",
+			};
+			return qualities;
+		},
+
 		getExportDataFromObject : function(obj){
 
 			var exportObj;

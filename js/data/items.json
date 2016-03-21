@@ -553,87 +553,301 @@
 
 		"weapon" : {
 
-			"melee_weapon_01" : {
-				"id" : "melee_weapon_01",
-				"name" : "Crude Shiv (1H)",
+			"shiv" : {
+				"id" : "shiv",
+				"name" : "Shiv (1H)",
 				"type" : "weapon",
 				"subtype" : "thrusting",
-				"desc" : "A sharpened piece of fish bone. Clearly whoever made this was significantly luckier than whomever it came from. +%dmgMin% - %dmgMax% DMG when equipped ",
+				"desc" : "A sharpened piece of fish bone. Clearly whoever made this was significantly luckier than whomever it came from.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 1,
 				"maxLevelRange" : 4,
-				"minDmgPctOfAvg" : 0.5,
-				"maxDmgPctOfAvg" : 1.0
+				"pctOfNormalDmg" : 0.8,
+				"genericName" : "Shiv"
 			},
-			"melee_weapon_02" : {
-				"id" : "melee_weapon_02",
-				"name" : "Razor Sharp Dagger (1H)",
+			"dagger" : {
+				"id" : "dagger",
+				"name" : "Dagger (1H)",
 				"type" : "weapon",
 				"subtype" : "slashing",
-				"desc" : "A shiny dagger. You could fillet someone with this. Careful not to cut yourself on the blade. +%dmgMin% - %dmgMax% DMG when equipped.",
+				"desc" : "A shiny dagger. You could fillet someone with this. Careful not to cut yourself on the blade.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 1,
 				"maxLevelRange" : 4,
 				"minDmgPctOfAvg" : 0.6,
-				"maxDmgPctOfAvg" : 1.2
+				"maxDmgPctOfAvg" : 1.2,
+				"genericName" : "Dagger"
 			},
-			"melee_weapon_03" : {
-				"id" : "melee_weapon_03",
+			"short_sword" : {
+				"id" : "short_sword",
 				"name" : "Short Sword (1H)",
 				"type" : "weapon",
 				"subtype" : "slashing",
-				"desc" : "It's like a dagger, but longer. +%dmgMin% - %dmgMax% DMG when equipped. STAB ALL THE THINGS.",
+				"desc" : "It's like a dagger, but longer. STAB ALL THE THINGS.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
-				"handsRequired" : 1
+				"handsRequired" : 1,
+				"genericName" : "Short Sword"
 			},
-			"melee_weapon_04" : {
-				"id" : "melee_weapon_04",
+			"greatsword" : {
+				"id" : "greatsword",
 				"name" : "Greatsword (2H)",
 				"type" : "weapon",
 				"subtype" : "slashing",
-				"desc" : "A very large sword. Requires both fins to wield. Good news, though: it does +%dmgMin% - %dmgMax% DMG when equipped. Enjoy your murder spree!",
+				"desc" : "A very large sword. Requires great strength, and both fins to wield. Notoriously difficult to remove when lodged in stones.",
 				"slotsRequired" : 2,
 				"stackable" : 0,
 				"handsRequired" : 2,
 				"minDmgPctOfAvg" : 0.9,
-				"maxDmgPctOfAvg" : 1.4
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Greatsword"
 			},
-			"melee_weapon_05" : {
-				"id" : "melee_weapon_05",
+			"misericorde" : {
+				"id" : "misericorde",
 				"name" : "Misericorde (1H)",
 				"type" : "weapon",
 				"subtype" : "thrusting",
-				"desc" : "A knife with a long, narrow blade. Stick them with the pointy end. +%dmgMin% - %dmgMax% DMG when equipped.",
+				"desc" : "A knife with a long, narrow blade. Mainly used to slide between the gaps in armor. Stick them with the pointy end.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
-				"handsRequired" : 1
+				"handsRequired" : 1,
+				"genericName" : "Misericorde"
 			},
-			"melee_weapon_06" : {
-				"id" : "melee_weapon_06",
+			"longsword" : {
+				"id" : "longsword",
 				"name" : "Longsword (2H)",
 				"type" : "weapon",
 				"subtype" : "slashing",
-				"desc" : "A two-finned weapon with a straight, 43-inch long, double-edged steel blade. Only a foot shorter than Peter Dinklage, and much deadlier. Although Peter is a much better actor, so there's that. +%dmgMin% - %dmgMax% DMG when equipped.",
+				"desc" : "A two-finned weapon with a straight, 43-inch long, double-edged steel blade. Only a foot shorter than Peter Dinklage, and much deadlier. Although Peter is a much better actor, so there's that.",
 				"slotsRequired" : 1,
 				"stackable" : 0,
 				"handsRequired" : 2,
 				"minDmgPctOfAvg" : 0.9,
-				"maxDmgPctOfAvg" : 1.4
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Longsword"
 			},
-			"melee_weapon_07" : {
-				"id" : "melee_weapon_07",
+			"swordchucks" : {
+				"id" : "swordchucks",
 				"name" : "Swordchucks (2H)",
 				"type" : "weapon",
 				"subtype" : "bashing",
-				"desc" : "\"Swordchucks, yo! I'd be like Bruce Lee meets Musashi! Only Better! God, I'm so BRILLIANT!\" +%dmgMin% - %dmgMax% DMG when equipped.",
-				"slotsRequired" : 1,
+				"desc" : "Nunchucks that someone has modified to feature swords on the ends. Truly a bizarre (yet effective) weapon. \"Swordchucks, yo! I'd be like Bruce Lee meets Musashi! Only Better! God, I'm so BRILLIANT!\"",
+				"slotsRequired" : 2,
 				"stackable" : 0,
 				"handsRequired" : 2,
 				"minDmgPctOfAvg" : 0.9,
-				"maxDmgPctOfAvg" : 1.4
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Nunchucks"
+			},
+			"bastard_sword" : {
+				"id" : "bastard_sword",
+				"name" : "Bastard Sword (2H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A sword that is midway in length between a short sword and a long sword. Little-known fact: the blade of this type of sword is honed in one of the harshest fashions known to fish-kind: Middle School.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 2,
+				"minDmgPctOfAvg" : 0.8,
+				"maxDmgPctOfAvg" : 1.2,
+				"genericName" : "Bastard Sword"
+			},
+			"claymore" : {
+				"id" : "claymore",
+				"name" : "Claymore (2H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A very large two-finned sword of Scottish origin. Requires great strength to wield, strength which can only come from someone who is tough enough to eat Haggis on a regular basis.",
+				"slotsRequired" : 2,
+				"stackable" : 0,
+				"handsRequired" : 2,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Claymore"
+			},
+			"rapier" : {
+				"id" : "rapier",
+				"name" : "Rapier (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A slender, sharply pointed sword, best suited for thrusting attacks. Favored by officers and gentlemen alike.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Rapier"
+			},
+			"naginata" : {
+				"id" : "naginata",
+				"name" : "Naginata (2H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A polearm which has a curved single-edged blade on the end. Originally used by the samurai class of feudal Japan. You look inarguably badass when you hold this.",
+				"slotsRequired" : 2,
+				"stackable" : 0,
+				"handsRequired" : 2,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Naginata"
+			},
+			"gladius" : {
+				"id" : "gladius",
+				"name" : "Gladius (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "The primary sword of Ancient Roman foot soldiers. Gladii are two-edged for cutting, and have a tapered point for stabbing during thrusting. See? It's a deadly weapon AND a history lesson.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Gladius"
+			},
+			"cavalry_saber" : {
+				"id" : "cavalry_saber",
+				"name" : "Cavalry Saber (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "Also spelled \"sabre\", but not to be confused with a Buick LeSabre. Sure, you don't want to be hit by either one, but only one of them can be wielded with a single hand. Unless you are The Incredible Hulk.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Cavalry Saber"
+			},
+			"dirk" : {
+				"id" : "dirk",
+				"name" : "Dirk (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A long thrusting dagger. Historically it has been the personal weapon of naval officers. The fact that one is now in your possession suggests that at least one of those officers had slippery hands.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Dirk"
+			},
+			"bowie_knife" : {
+				"id" : "bowie_knife",
+				"name" : "Bowie Knife (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "This is apparently considered a type of \"fighting knife\". As opposed to what, a tickling knife? A putting knife? See also: \"That's not a knife. Now THAT'S a knife.\"",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Bowie Knife"
+			},
+			"kopis" : {
+				"id" : "kopis",
+				"name" : "Kopis (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "An Ancient Greek word describing a heavy knife with a forward curving blade. That's it. I don't have anything else to say about this. Other than that it sounds really cool. Man, those Greeks had a lot of neat words for stuff, huh?",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Kopis"
+			},
+			"cleaver" : {
+				"id" : "cleaver",
+				"name" : "Cleaver (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A large knife that is largely used as a kitchen or butcher knife intended for hacking through bone. The knife's broad side can also be used for crushing in food preparation. See? It's a winner in combat AND in the kitchen!",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Cleaver"
+			},
+			"kukri" : {
+				"id" : "kukri",
+				"name" : "Kukri (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A Nepalese knife with an inwardly curved blade, similar to a machete. Used as both a tool and as a weapon in Nepal. Bishnu Shrestha, a retired Indian Army Gurkha soldier, alone and armed only with a kukri, defeated 40 bandits who attacked a passenger train he was on in India. That probably speaks more to his bravery and his training than the kukri itself, I just wanted to include that tidbit because it is totally badass.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Kukri"
+			},
+			"falchion" : {
+				"id" : "falchion",
+				"name" : "Falchion (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A large-bladed weapon of Medieval origin. Looks sort of like a machete with a hilt. Not to be confused with the Finnish heavy metal band of the same name. I'm not making that part up, Google it if you don't believe me!",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Falchion"
+			},
+			"cutlass" : {
+				"id" : "cutlass",
+				"name" : "Cutlass (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "The favored weapon of both honest sailors and scurvy pirates. In accordance with International Maritime Law, Section 17, Subsection 8, Paragraph 92, you are required to yell \"YARRRRR!\" every time you swing this.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Cutlass"
+			},
+			"scimitar" : {
+				"id" : "scimitar",
+				"name" : "Scimitar (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "A saber with a long curved blade. The name is thought to come from a Persian word which literally translates as \"paw claw.\" I do NOT want to meet the animal that inspired that name.",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Scimitar"
+			},
+			"falcata" : {
+				"id" : "falcata",
+				"name" : "Falcata (1H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "The falcata was used to great effect by the armies of Carthage in their wars against Rome. The name seems to have been coined by Fernando Fulgosio in 1872. This superceded its earlier name of \"Sharpey-Pokey-Ouchie\"",
+				"slotsRequired" : 1,
+				"stackable" : 0,
+				"handsRequired" : 1,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Falcata"
+			},
+			"flamberge" : {
+				"id" : "flamberge",
+				"name" : "Flamberge (2H)",
+				"type" : "weapon",
+				"subtype" : "slashing",
+				"desc" : "The name roughly means \"flame-bladed\", and has a characteristically undulating style of blade. It is not actually on fire. Which is good, because if you found a way to start a fire under water, you would make lots of physicists very cross with you.",
+				"slotsRequired" : 2,
+				"stackable" : 0,
+				"handsRequired" : 2,
+				"minDmgPctOfAvg" : 0.9,
+				"maxDmgPctOfAvg" : 1.4,
+				"genericName" : "Flamberge"
 			}
 
 		},

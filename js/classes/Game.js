@@ -1430,7 +1430,7 @@ define([
 			var numLootsFound = self.numBattlesWon() + self.numItemSquaresLooted();
 			var scheduledLootIdx = numLootsFound - 1;
 			var initialLootSchedule = [
-				"melee_weapon_01",
+				"shiv",
 				"tail_armor_01",
 				"head_armor_01",
 				"body_armor_01",
@@ -1484,7 +1484,7 @@ define([
 			
 			var scheduledLootIdx;
 			var initialLootSchedule = [
-				"melee_weapon_01",
+				"shiv",
 				"tail_armor_01",
 				"head_armor_01",
 				"body_armor_01",
@@ -4115,9 +4115,9 @@ define([
 		}
 
 		this.testScalingWeapon = function(levelNum, quality){
-			var itemOne = self.getAvailableItemById("melee_weapon_01", "weapon", 1),
-				itemTwo = self.getAvailableItemById("melee_weapon_02", "weapon", 1),
-				itemThree = self.getAvailableItemById("melee_weapon_04", "weapon", 1);
+			var itemOne = self.getAvailableItemById("shiv", "weapon", 1),
+				itemTwo = self.getAvailableItemById("dagger", "weapon", 1),
+				itemThree = self.getAvailableItemById("claymore", "weapon", 1);
 
 			quality = quality || "poor";
 
@@ -4741,6 +4741,7 @@ CODE CHANGES:
 
 
 GAME IDEAS:
+- Add a weapon-crafting skill that uses scraps?
 - Add a bit more variance in armor stats (+/- 10%)
 - Attack stances? Purchase with talent points, more dmg + less defense etc.
 - Re-tool/re-balance numbers (player HP, player stats, player dmg, monster HP, monster dmg, armor, etc)

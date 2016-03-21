@@ -36,6 +36,7 @@ define([
 			self.subtype = data.subtype;
 			
 			if(self.fullyDynamicStats && self.isScaled() == 0){
+				var qualityNames = Utils.getWeaponQualityDescriptors();
 				var averages = Utils.calculateAveragesForLevel(self.level());
 				var avgDmgPerHit = averages.avgPlayerDmg;
 
@@ -67,6 +68,8 @@ define([
 
 					self.desc = magicDesc;
 				}
+
+				self.name = qualityNames[self.quality()] + " " + self.name;
 
 				/*if(self.quality() == "exceptional"){
 					var bonusDmg = Utils.doRand(1, (self.level() + 1));

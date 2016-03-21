@@ -448,11 +448,11 @@
 							<!-- start inventory/equipment/merchant item description area -->
 							<div class="item-desc" data-bind="css: { hidden: centerColContent() != 'item_desc' }">
 
-								<!-- ko if: rightColContent() == "container" -->
+								<!-- ko if: rightColContent() == "container" && currentContainer.length() > 0 -->
 								<button class="btn btn-default take-all" type="button" data-bind="click: takeAllFromContainer, css: { hidden: rightColContent() != 'container', disabled : currentContainer.length() == 0 }"><span>Take All</span></button>
 								<!-- /ko -->
 
-								<button class="btn btn-default back" type="button" data-bind="click: showContentArea, css: { disabled: player().inventorySlotsOccupied() > player().inventoryMaxSlots(), rightfloat : rightColContent() == 'container' }"><span data-bind="text: backButtonLabel()"></span></button>
+								<button class="btn btn-default back" type="button" data-bind="click: showContentArea, css: { disabled: player().inventorySlotsOccupied() > player().inventoryMaxSlots(), rightfloat : rightColContent() == 'container' && currentContainer.length() > 0 }"><span data-bind="text: backButtonLabel()"></span></button>
 
 								<div class="clear"></div>
 
@@ -625,10 +625,10 @@
 										<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
 										<span class="button-label"></span>
 									</div>
-									<div class="line">
+									<!--<div class="line">
 										<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
 										<span class="button-label"></span>
-									</div>
+									</div>-->
 									<!-- ko if: !$root.currentEnemy().isDead() && !$root.player().isDead() -->
 
 										<!-- ko foreach: $root.player().combatAbilitiesIterable() -->
