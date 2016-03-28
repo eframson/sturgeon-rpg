@@ -15,7 +15,7 @@ define([
 	'Utils',
 ], function($, ko, Entity, ItemCollection, Item, Consumable, Armor, Shield, Weapon, Accessory, DataCollection, skillDataFile, Utils){
 
-	function Player(data){
+	function Player(data, onFinishedLoadingCallback){
 
 		//Init
 		var self = this;
@@ -28,6 +28,7 @@ define([
 		this.init = function(data){
 
 			self.skillDataCollection = new DataCollection(skillDataFile);
+			self.numActiveRequests = 0;
 
 			self.level = ko.observable(data.level || 1);
 			self.hp = ko.observable(data.hp || 0);
@@ -366,14 +367,16 @@ define([
 
 			var className = abilityData.className;
 
+			self.registerRequest();
 			require(["classes/ActiveAbilities/" + className], function(newClassDefinition){
 				self.activeAbilities()[abilityData.id] = new newClassDefinition(abilityData);
 				self.activeAbilities.valueHasMutated();
+				self.deregisterRequest();
 			});
 
 		}
 
-		this.addCombatAbility = function(ability_id, abilityData){
+		this.addCombatAbility = function(ability_id, abilityData, callback){
 
 			if(Utils.isEmptyObject(abilityData)){
 				abilityData = self.skillDataCollection.getNode(["combat_abilities", ability_id]);
@@ -381,9 +384,14 @@ define([
 
 			var className = abilityData.className;
 
+			self.registerRequest();
 			require(["classes/CombatAbilities/" + className], function(newClassDefinition){
 				self.combatAbilities()[abilityData.id] = new newClassDefinition(abilityData);
 				self.combatAbilities.valueHasMutated();
+				self.deregisterRequest();
+				if(callback !== undefined && typeof callback === 'function'){
+					callback( self.combatAbilities()[abilityData.id] );
+				}
 			});
 
 		}
@@ -396,9 +404,11 @@ define([
 
 			var className = abilityData.className;
 
+			self.registerRequest();
 			require(["classes/PassiveAbilities/" + className], function(newClassDefinition){
 				self.passiveAbilities()[abilityData.id] = new newClassDefinition(abilityData);
 				self.passiveAbilities.valueHasMutated();
+				self.deregisterRequest();
 			});
 
 		}
@@ -642,6 +652,13 @@ define([
 			return false;
 		}
 
+		this.hasCombatAbility = function(ability_id){
+			if( self.combatAbilities()[ability_id] !== undefined ){
+				return true;
+			}
+			return false;
+		}
+
 		this.levelUp = function(){
 			//Add stats
 			self.hasLeveledUp(true);
@@ -774,6 +791,23 @@ define([
 
 		this._instantiateObservableIfSet = function(obj, className){
 			return ko.observable(obj !== undefined && !Utils.isEmptyObject(obj) ? new className(obj) : {});
+		}
+
+		this.registerRequest = function(){
+			self.numActiveRequests++;
+		}
+
+		this.deregisterRequest = function(){
+
+			self.numActiveRequests--;
+
+			if(self.numActiveRequests == 0){
+				if(onFinishedLoadingCallback !== undefined && typeof onFinishedLoadingCallback === 'function' && self.onFinishedLoadingCallbackFired == 0){
+					self.onFinishedLoadingCallbackFired = 1;
+					onFinishedLoadingCallback(self);
+				}
+			}
+
 		}
 
 		self.init(data);

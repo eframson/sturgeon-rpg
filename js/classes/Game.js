@@ -1112,15 +1112,18 @@ define([
 			}
 		}
 
-		this.getGoesFirst = function(){
+		this.getGoesFirst = function(playerObj, monsterObj){
+
+			playerObj = playerObj || self.player();
+			monsterObj = monsterObj || self.currentEnemy();
 
 			if( self._goesFirst == undefined ){
 
 				var goesFirst;
 
-				if( self.player().speed() > self.currentEnemy().speed() ){
+				if( playerObj.speed() > monsterObj.speed() ){
 					goesFirst = "player";
-				}else if( self.player().speed() < self.currentEnemy().speed() ){
+				}else if( playerObj.speed() < monsterObj.speed() ){
 					goesFirst = "enemy";
 				}else{
 					goesFirst = (Utils.doRand(0,2) == 1) ? "enemy" : "player" ;
@@ -1146,13 +1149,16 @@ define([
 			self.doCombatRound("pass");
 		}
 
-		this.doCombatRound = function(playerAbilityId){
+		this.doCombatRound = function(playerAbilityId, playerObj, monsterObj){
 
-			var goesFirst = self.getGoesFirst();
-			var attacker = (goesFirst == "player") ? self.player() : self.currentEnemy() ;
-			var defender = (goesFirst == "player") ? self.currentEnemy() : self.player() ;
+			playerObj = playerObj || self.player();
+			monsterObj = monsterObj || self.currentEnemy();
 
-			var monsterAbilityId = self.currentEnemy().selectCombatAbility();
+			var goesFirst = self.getGoesFirst(playerObj, monsterObj);
+			var attacker = (goesFirst == "player") ? playerObj : monsterObj ;
+			var defender = (goesFirst == "player") ? monsterObj : playerObj ;
+
+			var monsterAbilityId = monsterObj.selectCombatAbility();
 
 			var abilityId = (goesFirst == "player") ? playerAbilityId : monsterAbilityId ;
 
@@ -1174,10 +1180,11 @@ define([
 				
 			}
 
-			if( self.player().isDead() ){
+			if( playerObj.isDead() ){
 				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
 			}
 
+			//Deliberately leaving this set to self.currentEnemy...
 			if( self.currentEnemy().isDead() ){
 				//"Done" the square if it's not an exit square
 
@@ -2403,18 +2410,19 @@ define([
 
 		}
 
-		this._equipItem = function(item) {
+		this._equipItem = function(item, playerObj) {
 			var type = item.type;
 			var equippedItem;
+			playerObj = playerObj || self.player();
 
 			if(type == "weapon"){
-				equippedItem = self.player().equipWeapon(item);
+				equippedItem = playerObj.equipWeapon(item);
 			}else if(type == "shield"){
-				equippedItem = self.player().equipShield(item);
+				equippedItem = playerObj.equipShield(item);
 			}else if(type == "armor"){
-				equippedItem = self.player().equipArmor(item);
+				equippedItem = playerObj.equipArmor(item);
 			}else if(type == "accessory"){
-				equippedItem = self.player().equipAccessory(item);
+				equippedItem = playerObj.equipAccessory(item);
 			}
 
 			return equippedItem;
@@ -4360,10 +4368,11 @@ define([
 
 		}
 
-		this.testEquipmentSetForLevel = function(level, quality, equip2H){
+		this.testEquipmentSetForLevel = function(level, quality, equip2H, playerObj){
 			level = level || 1;
 			quality = quality || "good";
 			equip2H = equip2H || 0;
+			playerObj = playerObj || self.player();
 
 			var	itemToAdd;
 			var newItem;
@@ -4372,7 +4381,7 @@ define([
 			var weaponId;
 
 			//1H
-			weaponId = "melee_weapon_03";
+			weaponId = "shiv";
 			itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
 			itemToAdd.fullyDynamicStats = 1;
@@ -4381,13 +4390,13 @@ define([
 			newItem = new Weapon(itemToAdd);
 
 			if(!equip2H){
-				self._equipItem(newItem);
+				self._equipItem(newItem, playerObj);
 			}else{
-				self.player().addItemToInventory( newItem, 1 );
+				playerObj.addItemToInventory( newItem, 1 );
 			}
 
 			//2H
-			weaponId = "melee_weapon_04";
+			weaponId = "greatsword";
 			itemToAdd = self.getAvailableItemById(weaponId, "weapon", 1);
 
 			itemToAdd.fullyDynamicStats = 1;
@@ -4396,9 +4405,9 @@ define([
 			newItem = new Weapon(itemToAdd);
 
 			if(equip2H){
-				self._equipItem(newItem);
+				self._equipItem(newItem, playerObj);
 			}else{
-				self.player().addItemToInventory( newItem, 1 );
+				playerObj.addItemToInventory( newItem, 1 );
 			}
 			
 			// --- Add shield ---
@@ -4411,9 +4420,9 @@ define([
 			newItem = new Shield(itemToAdd);
 
 			if(!equip2H){
-				self._equipItem(newItem);
+				self._equipItem(newItem, playerObj);
 			}else{
-				self.player().addItemToInventory( newItem, 1 );
+				playerObj.addItemToInventory( newItem, 1 );
 			}
 
 			// --- Add armor ---
@@ -4440,7 +4449,7 @@ define([
 				newItem = new Armor(itemToAdd);
 
 				//self.player().addItemToInventory( newItem, 1 );
-				self._equipItem(newItem);
+				self._equipItem(newItem, playerObj);
 			}
 		}
 
@@ -4506,41 +4515,46 @@ define([
 			}
 		}
 
-		this.testAddLevels = function(numLevels, logStats){
+		this.testAddLevels = function(numLevels, logStats, playerObj){
+			playerObj = playerObj || self.player();
 			if(logStats){
-				console.log('Level: ' + self.player().level());
-				console.log('Max HP: ' + self.player().maxHp());
+				console.log('Level: ' + playerObj.level());
+				console.log('Max HP: ' + playerObj.maxHp());
 			}
 			numLevels = numLevels || 10;
 			for(var i = 0; i < numLevels; i++){
-				self.player().level( self.player().level() + 1 );
-				self.player().levelUp();
+				playerObj.level( playerObj.level() + 1 );
+				playerObj.levelUp();
 				if(logStats){
-					console.log('Level: ' + self.player().level());
-					console.log('Max HP: ' + self.player().maxHp());
+					console.log('Level: ' + playerObj.level());
+					console.log('Max HP: ' + playerObj.maxHp());
 				}
 			}
 		}
 
-		this.testPlayerStatsWithGearForLevel = function(level, gearQuality, showAverages) {
+		this.testPlayerStatsWithGearForLevel = function(level, gearQuality, showAverages, playerObj, equip2H) {
 			gearQuality = gearQuality || "good";
 			showAverages = showAverages || 0 ;
-			var levelsToAdd = level - self.player().level();
-			if(levelsToAdd > 0){
-				self.testAddLevels(levelsToAdd);
-			}
-			self.testEquipmentSetForLevel(level, gearQuality);
+			playerObj = playerObj || self.player();
+			equip2H = equip2H || 0;
+			averages = [];
 
-			var armorWithShield = self.player().totalArmor();
-			self.player().unEquipShield();
-			var armorWithoutShield = self.player().totalArmor();
-			console.log("HP: " + self.player().maxHp());
-			console.log("AC: " + armorWithoutShield + " - " + armorWithShield);
+			var levelsToAdd = level - playerObj.level();
+			if(levelsToAdd > 0){
+				self.testAddLevels(levelsToAdd, 0, playerObj);
+			}
+			self.testEquipmentSetForLevel(level, gearQuality, equip2H, playerObj);
+
+			var armorWithShield = playerObj.totalArmor();
+			playerObj.unEquipShield();
+			var armorWithoutShield = playerObj.totalArmor();
+			averages.push("HP: " + playerObj.maxHp());
+			averages.push("AC: " + armorWithoutShield + " - " + armorWithShield);
 			var avgArmor = Math.round((armorWithoutShield + armorWithShield) / 2);
-			console.log("AC (AVG): " + avgArmor);
-			console.log("DMG: " + self.player().minDmg() + ' - ' + self.player().maxDmg() + ( self.player().bonusDmg() > 0 ? ' (+' + self.player().bonusDmg() + ')' : '' ));
-			var avgDmg = Math.round(( (self.player().minDmg() + self.player().maxDmg()) / 2 ) + self.player().bonusDmg());
-			console.log("DMG (AVG): " + avgDmg);
+			averages.push("AC (AVG): " + avgArmor);
+			averages.push("DMG: " + playerObj.minDmg() + ' - ' + playerObj.maxDmg() + ( playerObj.bonusDmg() > 0 ? ' (+' + playerObj.bonusDmg() + ')' : '' ));
+			var avgDmg = Math.round(( (playerObj.minDmg() + playerObj.maxDmg()) / 2 ) + playerObj.bonusDmg());
+			averages.push("DMG (AVG): " + avgDmg);
 
 			var averages = Utils.calculateAveragesForLevel(level);
 
@@ -4689,6 +4703,117 @@ define([
 
 			console.log(output);
 
+		}
+
+		this.testSimulateCombat = function(numCombats, monsterArchetype, playerLevel, monsterLevel, playerGearQuality, applyNerfingLogic, use2H, encounterType, playerHpPercentage, playerAttackPriority){
+			numCombats = numCombats || 10;
+			monsterArchetype = monsterArchetype || "basic";
+			playerLevel = playerLevel || self.player().level();
+			monsterLevel = monsterLevel || self.level().levelNum();
+			playerGearQuality = playerGearQuality || "good";
+			playerHpPercentage = playerHpPercentage || 1;
+			encounterType = encounterType || "normal";
+			applyNerfingLogic = applyNerfingLogic || 0;
+			use2H = use2H || 0;
+			playerAttackPriority = playerAttackPriority || [
+				"basic_attack",
+			];
+			var playerObjIsLoading = 1;
+
+			var combatAbilities = {};
+			$.each(playerAttackPriority, function(idx, ability_id){
+				combatAbilities[ability_id] = undefined;
+			});
+
+			//Set up the player object
+			var player = new Player( {str: 3, dex: 2, end: 2, combatAbilities : combatAbilities}, function(){
+				playerObjIsLoading == 0;
+			} );
+
+			while(playerObjIsLoading == 1){
+				//Do nothing, hope this works...
+			}
+
+			self.testPlayerStatsWithGearForLevel(playerLevel, playerGearQuality, 0, player, use2H);
+
+			//Set up the monster (duplicated from startCombat(
+			console.log(player.combatAbilities());
+			player.resetActiveAbilityCooldowns();
+			player.resetCombatEffects();
+
+			var availableMonsters = self.getAvailableMonsterIdsByMonsterCategory("regular");
+			
+			//Pick a monster ID randomly
+			var newMonsterID = Utils.chooseRandomly( availableMonsters );
+
+			//Get our base monster data
+			var baseMonsterObj = self.getMonsterDataByIdAndCategory(newMonsterID, "regular");
+
+			//Get some extra stuff we might want to set on our monster
+			var extraParamObj = {
+				level : monsterLevel,
+				fullyDynamicStats : 1,
+				archetypeId : (encounterType == "boss" ? "boss" : undefined),
+				archetypeClass : (encounterType == "boss" ? "special" : undefined)
+			};
+
+			//DO NOT SPECIALIZE MONSTER ARCHETYPES YET
+			if( encounterType != "boss"){
+				extraParamObj.doNotSpecializeArchetype = 1;
+			}
+
+			//Set up a new object to merge everything else into, otherwise VERY BAD THINGS HAPPEN (because JS passing objects by reference)
+			var newObj = {};
+			$.extend(
+				newObj,
+				baseMonsterObj
+			);
+			$.extend(
+				newObj,
+				extraParamObj
+			);
+
+			var monster = new Monster(newObj);
+
+			//Reset our "goes first" tracker
+			self._goesFirst = undefined;
+
+			if(applyNerfingLogic){
+				//Let's sneak in some selective nerfing here...
+				if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 6){
+					monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.5) );
+					monster.hp( self.currentEnemy().maxHp() );
+					monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.3) );
+					monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.3) );
+				} else if( monsterLevel < 2 ){
+					monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
+					monster.hp( self.currentEnemy().maxHp() );
+					monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
+					monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
+				}
+			}
+
+			//Okay, player and monster have been set up now
+
+			while( !player.isDead() && !monster.isDead() ){
+
+				if( !player.canAct() ){
+					self.doCombatRound("pass");
+				}else{
+					$.each(playerAttackPriority, function(idx, ability_id){
+						console.log( player.combatAbilities() );
+						var combatAbility = player.combatAbilities()[ability_id];
+						if(combatAbility.cooldown() == 0){
+							self.doCombatRound(ability_id, player, monster);
+							return false;
+						}
+					});
+				}
+
+			}
+
+			console.log("Player HP: " + player.hp());
+			console.log("Monster HP: " + monster.hp());
 		}
 
 		self.init();
