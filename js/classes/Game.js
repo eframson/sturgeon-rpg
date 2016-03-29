@@ -4718,7 +4718,6 @@ define([
 			playerAttackPriority = playerAttackPriority || [
 				"basic_attack",
 			];
-			var playerObjIsLoading = 1;
 
 			var combatAbilities = {};
 			$.each(playerAttackPriority, function(idx, ability_id){
@@ -4727,93 +4726,89 @@ define([
 
 			//Set up the player object
 			var player = new Player( {str: 3, dex: 2, end: 2, combatAbilities : combatAbilities}, function(){
-				playerObjIsLoading == 0;
+				
+				self.testPlayerStatsWithGearForLevel(playerLevel, playerGearQuality, 0, player, use2H);
+
+				//Set up the monster (duplicated from startCombat(
+				console.log(player.combatAbilities());
+				player.resetActiveAbilityCooldowns();
+				player.resetCombatEffects();
+
+				var availableMonsters = self.getAvailableMonsterIdsByMonsterCategory("regular");
+				
+				//Pick a monster ID randomly
+				var newMonsterID = Utils.chooseRandomly( availableMonsters );
+
+				//Get our base monster data
+				var baseMonsterObj = self.getMonsterDataByIdAndCategory(newMonsterID, "regular");
+
+				//Get some extra stuff we might want to set on our monster
+				var extraParamObj = {
+					level : monsterLevel,
+					fullyDynamicStats : 1,
+					archetypeId : (encounterType == "boss" ? "boss" : undefined),
+					archetypeClass : (encounterType == "boss" ? "special" : undefined)
+				};
+
+				//DO NOT SPECIALIZE MONSTER ARCHETYPES YET
+				if( encounterType != "boss"){
+					extraParamObj.doNotSpecializeArchetype = 1;
+				}
+
+				//Set up a new object to merge everything else into, otherwise VERY BAD THINGS HAPPEN (because JS passing objects by reference)
+				var newObj = {};
+				$.extend(
+					newObj,
+					baseMonsterObj
+				);
+				$.extend(
+					newObj,
+					extraParamObj
+				);
+
+				var monster = new Monster(newObj);
+
+				//Reset our "goes first" tracker
+				self._goesFirst = undefined;
+
+				if(applyNerfingLogic){
+					//Let's sneak in some selective nerfing here...
+					if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 6){
+						monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.5) );
+						monster.hp( self.currentEnemy().maxHp() );
+						monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.3) );
+						monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.3) );
+					} else if( monsterLevel < 2 ){
+						monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
+						monster.hp( self.currentEnemy().maxHp() );
+						monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
+						monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
+					}
+				}
+
+				//Okay, player and monster have been set up now
+
+				while( !player.isDead() && !monster.isDead() ){
+
+					if( !player.canAct() ){
+						self.doCombatRound("pass");
+					}else{
+						$.each(playerAttackPriority, function(idx, ability_id){
+							console.log( player.combatAbilities() );
+							var combatAbility = player.combatAbilities()[ability_id];
+							if(combatAbility.cooldown() == 0){
+								self.doCombatRound(ability_id, player, monster);
+								return false;
+							}
+						});
+					}
+
+				}
+
+				console.log("Player HP: " + player.hp());
+				console.log("Monster HP: " + monster.hp());
+
 			} );
-
-			while(playerObjIsLoading == 1){
-				//Do nothing, hope this works...
-			}
-
-			self.testPlayerStatsWithGearForLevel(playerLevel, playerGearQuality, 0, player, use2H);
-
-			//Set up the monster (duplicated from startCombat(
-			console.log(player.combatAbilities());
-			player.resetActiveAbilityCooldowns();
-			player.resetCombatEffects();
-
-			var availableMonsters = self.getAvailableMonsterIdsByMonsterCategory("regular");
-			
-			//Pick a monster ID randomly
-			var newMonsterID = Utils.chooseRandomly( availableMonsters );
-
-			//Get our base monster data
-			var baseMonsterObj = self.getMonsterDataByIdAndCategory(newMonsterID, "regular");
-
-			//Get some extra stuff we might want to set on our monster
-			var extraParamObj = {
-				level : monsterLevel,
-				fullyDynamicStats : 1,
-				archetypeId : (encounterType == "boss" ? "boss" : undefined),
-				archetypeClass : (encounterType == "boss" ? "special" : undefined)
-			};
-
-			//DO NOT SPECIALIZE MONSTER ARCHETYPES YET
-			if( encounterType != "boss"){
-				extraParamObj.doNotSpecializeArchetype = 1;
-			}
-
-			//Set up a new object to merge everything else into, otherwise VERY BAD THINGS HAPPEN (because JS passing objects by reference)
-			var newObj = {};
-			$.extend(
-				newObj,
-				baseMonsterObj
-			);
-			$.extend(
-				newObj,
-				extraParamObj
-			);
-
-			var monster = new Monster(newObj);
-
-			//Reset our "goes first" tracker
-			self._goesFirst = undefined;
-
-			if(applyNerfingLogic){
-				//Let's sneak in some selective nerfing here...
-				if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 6){
-					monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.5) );
-					monster.hp( self.currentEnemy().maxHp() );
-					monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.3) );
-					monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.3) );
-				} else if( monsterLevel < 2 ){
-					monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
-					monster.hp( self.currentEnemy().maxHp() );
-					monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
-					monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
-				}
-			}
-
-			//Okay, player and monster have been set up now
-
-			while( !player.isDead() && !monster.isDead() ){
-
-				if( !player.canAct() ){
-					self.doCombatRound("pass");
-				}else{
-					$.each(playerAttackPriority, function(idx, ability_id){
-						console.log( player.combatAbilities() );
-						var combatAbility = player.combatAbilities()[ability_id];
-						if(combatAbility.cooldown() == 0){
-							self.doCombatRound(ability_id, player, monster);
-							return false;
-						}
-					});
-				}
-
-			}
-
-			console.log("Player HP: " + player.hp());
-			console.log("Monster HP: " + monster.hp());
 		}
 
 		self.init();

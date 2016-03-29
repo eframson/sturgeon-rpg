@@ -36,6 +36,7 @@ define([
 			self.exp = ko.observable(data.exp || 0);
 			self.inventory = new ItemCollection(Array());
 			self.inventoryMaxSlots = ko.observable(data.inventoryMaxSlots || 5);
+			self.onFinishedLoadingCallbackFired = 0;
 			self.equipment = ko.observable({
 
 				armor : ko.observable({
