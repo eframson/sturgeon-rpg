@@ -563,7 +563,6 @@
 				"stackable" : 0,
 				"handsRequired" : 1,
 				"maxLevelRange" : 4,
-				"pctOfNormalDmg" : 0.8,
 				"genericName" : "Shiv"
 			},
 			"dagger" : {

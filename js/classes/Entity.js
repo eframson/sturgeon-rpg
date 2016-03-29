@@ -8,7 +8,7 @@ define([
 	'Utils',
 ], function($, ko, DataCollection, SaveableObject, skillDataFile, Utils){
 
-	function Entity(data){
+	function Entity(data, onFinishedLoadingCallback){
 
 		//Init
 		var self = this;
@@ -20,6 +20,9 @@ define([
 		SaveableObject.call(this);
 
 		this.init = function(data){
+
+			self.numActiveRequests = 0;
+			self.onFinishedLoadingCallbackFired = 0;
 
 			self.nextRoundAction = ko.observable(undefined);
 			self.nextRoundActionType = ko.observable(undefined);
@@ -185,6 +188,23 @@ define([
 
 		this.getEquippedWeapon = function(){
 			return false;
+		}
+
+		this.registerRequest = function(){
+			self.numActiveRequests++;
+		}
+
+		this.deregisterRequest = function(){
+
+			self.numActiveRequests--;
+
+			if(self.numActiveRequests == 0){
+				if(onFinishedLoadingCallback !== undefined && typeof onFinishedLoadingCallback === 'function' && self.onFinishedLoadingCallbackFired == 0){
+					self.onFinishedLoadingCallbackFired = 1;
+					onFinishedLoadingCallback(self);
+				}
+			}
+
 		}
 
 		self.init(data);

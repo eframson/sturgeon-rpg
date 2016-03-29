@@ -21,14 +21,13 @@ define([
 		var self = this;
 		data = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {}, combatAbilities : {}, passiveAbilities : {} }, data);
 
-		Entity.call(this, data);
+		Entity.call(this, data, onFinishedLoadingCallback);
 
 		this.noExportProps.push("skillDataCollection");
 
 		this.init = function(data){
 
 			self.skillDataCollection = new DataCollection(skillDataFile);
-			self.numActiveRequests = 0;
 
 			self.level = ko.observable(data.level || 1);
 			self.hp = ko.observable(data.hp || 0);
@@ -36,7 +35,6 @@ define([
 			self.exp = ko.observable(data.exp || 0);
 			self.inventory = new ItemCollection(Array());
 			self.inventoryMaxSlots = ko.observable(data.inventoryMaxSlots || 5);
-			self.onFinishedLoadingCallbackFired = 0;
 			self.equipment = ko.observable({
 
 				armor : ko.observable({
@@ -792,23 +790,6 @@ define([
 
 		this._instantiateObservableIfSet = function(obj, className){
 			return ko.observable(obj !== undefined && !Utils.isEmptyObject(obj) ? new className(obj) : {});
-		}
-
-		this.registerRequest = function(){
-			self.numActiveRequests++;
-		}
-
-		this.deregisterRequest = function(){
-
-			self.numActiveRequests--;
-
-			if(self.numActiveRequests == 0){
-				if(onFinishedLoadingCallback !== undefined && typeof onFinishedLoadingCallback === 'function' && self.onFinishedLoadingCallbackFired == 0){
-					self.onFinishedLoadingCallbackFired = 1;
-					onFinishedLoadingCallback(self);
-				}
-			}
-
 		}
 
 		self.init(data);

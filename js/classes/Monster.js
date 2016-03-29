@@ -9,13 +9,13 @@ define([
 	'Utils',
 ], function($, ko, Entity, DataCollection, monsterArchetypeDataFile, skillDataFile, Utils){
 
-	function Monster(monsterData){
+	function Monster(monsterData, onFinishedLoadingCallback){
 
 		//Init
 		var self = this;
 		monsterData = monsterData || {};
 
-		Entity.call(this, monsterData);
+		Entity.call(this, monsterData, onFinishedLoadingCallback);
 
 		var monsterArchetypeDataCollection = new DataCollection(monsterArchetypeDataFile);
 		var skillDataCollection = new DataCollection(skillDataFile);
@@ -78,6 +78,8 @@ define([
 				self.hp( self.maxHp() );
 				self.minDmg( Math.round(stats.monster.baseDmg * 0.9) );
 				self.maxDmg( Math.round(stats.monster.baseDmg * 1.1) );
+				//self.minDmg( Math.round(stats.monster.baseDmg * 1.0) );
+				//self.maxDmg( Math.round(stats.monster.baseDmg * 1.0) );
 				self.speed( self.level() );
 				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
 				
@@ -143,9 +145,11 @@ define([
 
 				var className = elem.className;
 
+				self.registerRequest();
 				require(["classes/CombatAbilities/" + className], function(newClassDefinition){
 					self.combatAbilities()[elem.id] = new newClassDefinition(elem);
 					self.combatAbilities.valueHasMutated();
+					self.deregisterRequest();
 				});
 
 			});

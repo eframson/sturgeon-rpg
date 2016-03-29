@@ -48,6 +48,10 @@ define([
 		this.monsterDataCollection = new DataCollection(monsterDataFile);
 		this.skillDataCollection = new DataCollection(skillDataFile);
 
+		//This is SO not the best way to do this, but I'm doing it for now...
+		this._testCombatResults = [];
+		this._numActiveRounds = 0;
+
 		this.player = undefined;
 		this.slides = {
 			start: {
@@ -1099,7 +1103,7 @@ define([
 			self.enemyHpBarWidth(self.hpBarBaseWidth);
 
 			//Let's sneak in some selective nerfing here...
-			if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 6){
+			if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 5){
 				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.5) );
 				self.currentEnemy().hp( self.currentEnemy().maxHp() );
 				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.3) );
@@ -1185,7 +1189,7 @@ define([
 			}
 
 			//Deliberately leaving this set to self.currentEnemy...
-			if( self.currentEnemy().isDead() ){
+			if( self.currentEnemy() && self.currentEnemy().isDead() ){
 				//"Done" the square if it's not an exit square
 
 				var square = self.level().getActiveSquare();
@@ -4532,18 +4536,20 @@ define([
 			}
 		}
 
-		this.testPlayerStatsWithGearForLevel = function(level, gearQuality, showAverages, playerObj, equip2H) {
+		this.testPlayerStatsWithGearForLevel = function(playerLevel, playerGearLevel, gearQuality, showAverages, playerObj, equip2H) {
+			playerLevel = playerLevel || 1;
+			playerGearLevel = playerGearLevel || 1;
 			gearQuality = gearQuality || "good";
 			showAverages = showAverages || 0 ;
 			playerObj = playerObj || self.player();
 			equip2H = equip2H || 0;
 			averages = [];
 
-			var levelsToAdd = level - playerObj.level();
+			var levelsToAdd = playerLevel - playerObj.level();
 			if(levelsToAdd > 0){
 				self.testAddLevels(levelsToAdd, 0, playerObj);
 			}
-			self.testEquipmentSetForLevel(level, gearQuality, equip2H, playerObj);
+			self.testEquipmentSetForLevel(playerGearLevel, gearQuality, equip2H, playerObj);
 
 			var armorWithShield = playerObj.totalArmor();
 			playerObj.unEquipShield();
@@ -4556,9 +4562,9 @@ define([
 			var avgDmg = Math.round(( (playerObj.minDmg() + playerObj.maxDmg()) / 2 ) + playerObj.bonusDmg());
 			averages.push("DMG (AVG): " + avgDmg);
 
-			var averages = Utils.calculateAveragesForLevel(level);
+			var averages = Utils.calculateAveragesForLevel(playerGearLevel);
 
-			var actualDmgPerMonsterHit = Utils.calculateDmgForArmorAndLevel(Math.round(averages.avgMonsterDmg * 1), avgArmor, level);
+			var actualDmgPerMonsterHit = Utils.calculateDmgForArmorAndLevel(Math.round(averages.avgMonsterDmg * 1), avgArmor, playerGearLevel);
 
 			averages.actualDmgPerMonsterHit = actualDmgPerMonsterHit;
 
@@ -4654,30 +4660,39 @@ define([
 			//self.lootEnemy();
 		}
 
-		this.testGoToNextLevel = function(){
+		this.testGoToNextLevel = function(toLevel){
 
-			var nextLevel = self.getLevelById( self.level().nextLevelID() );
-			var currentLevel = self.level();
+			toLevel = toLevel || 2;
 
-			if(self.level().nextLevelID() == undefined){
+			var levelsToAdvance = toLevel - self.level().levelNum();
 
-				var newLevel = self.level().generateNextLevelIfNotSet(self._getNewLevelParams());
+			var i;
+			for(i = 0; i < levelsToAdvance; i++){
 
-				if( newLevel ){
-					self.levels.push(newLevel);
-					nextLevel = newLevel;
+				var nextLevel = self.getLevelById( self.level().nextLevelID() );
+				var currentLevel = self.level();
+
+				if(self.level().nextLevelID() == undefined){
+
+					var newLevel = self.level().generateNextLevelIfNotSet(self._getNewLevelParams());
+
+					if( newLevel ){
+						self.levels.push(newLevel);
+						nextLevel = newLevel;
+					}
+
 				}
 
-			}
+				nextLevel.isActive(true);
+				currentLevel.isActive(false);
+				nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
+				nextLevel.revealSquaresNearPlayer(1);
+				self.level().scanSquaresNearPlayer(0);
+				nextLevel.drawMap();
+				self.temporarilyDisableActiveSquare(0);
+				self.testVisionRange();
 
-			nextLevel.isActive(true);
-			currentLevel.isActive(false);
-			nextLevel.setPlayerPos( nextLevel.entranceSquare()[0], nextLevel.entranceSquare()[1] );
-			nextLevel.revealSquaresNearPlayer(1);
-			self.level().scanSquaresNearPlayer(0);
-			nextLevel.drawMap();
-			self.temporarilyDisableActiveSquare(0);
-			self.testVisionRange();
+			}
 
 		}
 
@@ -4705,10 +4720,11 @@ define([
 
 		}
 
-		this.testSimulateCombat = function(numCombats, monsterArchetype, playerLevel, monsterLevel, playerGearQuality, applyNerfingLogic, use2H, encounterType, playerHpPercentage, playerAttackPriority){
+		this.testSimulateCombat = function(numCombats, monsterArchetype, playerLevel, monsterLevel, playerGearLevel, playerGearQuality, applyNerfingLogic, use2H, encounterType, playerHpPercentage, playerAttackPriority){
 			numCombats = numCombats || 10;
 			monsterArchetype = monsterArchetype || "basic";
 			playerLevel = playerLevel || self.player().level();
+			playerGearLevel = playerGearLevel || playerLevel;
 			monsterLevel = monsterLevel || self.level().levelNum();
 			playerGearQuality = playerGearQuality || "good";
 			playerHpPercentage = playerHpPercentage || 1;
@@ -4724,13 +4740,43 @@ define([
 				combatAbilities[ability_id] = undefined;
 			});
 
+			var combatResults = {};
+			var player;
+			var monster;
+
+			var i;
+			for(i = 0; i < numCombats; i++){
+				self._numActiveRounds++;
+				self._simulateARound(monsterArchetype, playerLevel, playerGearLevel, monsterLevel, playerGearQuality, playerHpPercentage, encounterType, applyNerfingLogic, use2H, playerAttackPriority, combatAbilities,
+					function(combatResults){
+						self._testCombatResults.push(combatResults);
+						/*console.log("--- Round results ---");
+						console.log("Player HP: " + combatResults.playerHp + "/" + combatResults.playerMaxHp);
+						console.log("Monster HP: " + combatResults.monsterHp + "/" + combatResults.monsterMaxHp);
+						console.log("--- End Round results ---");*/
+						self._numActiveRounds--;
+						self.testAssessCombatResults();
+					}
+				);
+			}
+		}
+
+		this._simulateARound = function(monsterArchetype, playerLevel, playerGearLevel, monsterLevel, playerGearQuality, playerHpPercentage, encounterType, applyNerfingLogic, use2H, playerAttackPriority, combatAbilities, callback){
+
 			//Set up the player object
 			var player = new Player( {str: 3, dex: 2, end: 2, combatAbilities : combatAbilities}, function(){
-				
-				self.testPlayerStatsWithGearForLevel(playerLevel, playerGearQuality, 0, player, use2H);
+
+				var levelsToAdd = playerLevel - player.level();
+				if(levelsToAdd > 0){
+					self.testAddLevels(levelsToAdd, 0, player);
+				}
+				player.hp(Math.round(playerHpPercentage * player.maxHp()));
+
+				if(playerGearQuality != "NONE"){
+					self.testPlayerStatsWithGearForLevel(0, playerGearLevel, playerGearQuality, 0, player, use2H);	
+				}
 
 				//Set up the monster (duplicated from startCombat(
-				console.log(player.combatAbilities());
 				player.resetActiveAbilityCooldowns();
 				player.resetCombatEffects();
 
@@ -4766,49 +4812,119 @@ define([
 					extraParamObj
 				);
 
-				var monster = new Monster(newObj);
+				var monster = new Monster(newObj, function(){
 
-				//Reset our "goes first" tracker
-				self._goesFirst = undefined;
+					//Reset our "goes first" tracker
+					self._goesFirst = undefined;
 
-				if(applyNerfingLogic){
-					//Let's sneak in some selective nerfing here...
-					if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 6){
-						monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.5) );
-						monster.hp( self.currentEnemy().maxHp() );
-						monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.3) );
-						monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.3) );
-					} else if( monsterLevel < 2 ){
-						monster.maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
-						monster.hp( self.currentEnemy().maxHp() );
-						monster.minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
-						monster.maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
-					}
-				}
-
-				//Okay, player and monster have been set up now
-
-				while( !player.isDead() && !monster.isDead() ){
-
-					if( !player.canAct() ){
-						self.doCombatRound("pass");
-					}else{
-						$.each(playerAttackPriority, function(idx, ability_id){
-							console.log( player.combatAbilities() );
-							var combatAbility = player.combatAbilities()[ability_id];
-							if(combatAbility.cooldown() == 0){
-								self.doCombatRound(ability_id, player, monster);
-								return false;
-							}
-						});
+					if(applyNerfingLogic == 1){
+						monster.maxHp( Math.round(monster.maxHp() * 0.5) );
+						monster.hp( monster.maxHp() );
+						monster.minDmg( Math.round(monster.minDmg() * 0.3) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.3) );
+					} else if(applyNerfingLogic == 2){
+						monster.maxHp( Math.round(monster.maxHp() * 0.6) );
+						monster.hp( monster.maxHp() );
+						monster.minDmg( Math.round(monster.minDmg() * 0.7) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
+					} else if(applyNerfingLogic == 3){
+						monster.maxHp( Math.round(monster.maxHp() * 0.7) );
+						monster.hp( monster.maxHp() );
+						monster.minDmg( Math.round(monster.minDmg() * 0.8) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.8) );
+					} else if(applyNerfingLogic == 4){
+						monster.maxHp( Math.round(monster.maxHp() * 0.8) );
+						monster.hp( monster.maxHp() );
+						monster.minDmg( Math.round(monster.minDmg() * 0.9) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.9) );
+					} else if(applyNerfingLogic == 5){
+						monster.maxHp( Math.round(monster.maxHp() * 0.85) );
+						monster.hp( monster.maxHp() );
+						monster.minDmg( Math.round(monster.minDmg() * 0.95) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.95) );
+					} else if(applyNerfingLogic == 6){
+						monster.maxHp( Math.round(monster.maxHp() * 0.9) );
+						monster.hp( monster.maxHp() );
 					}
 
-				}
+					//Okay, player and monster have been set up now
 
-				console.log("Player HP: " + player.hp());
-				console.log("Monster HP: " + monster.hp());
+					while( !player.isDead() && !monster.isDead() ){
+
+						if( !player.canAct() ){
+							self.doCombatRound("pass");
+						}else{
+							$.each(playerAttackPriority, function(idx, ability_id){
+								var combatAbility = player.combatAbilities()[ability_id];
+								if(combatAbility.cooldown() == 0){
+									self.doCombatRound(ability_id, player, monster);
+									return false;
+								}
+							});
+						}
+
+					}
+
+					combatResults = {
+						playerHp : player.hp(),
+						monsterHp : monster.hp(),
+						playerMaxHp : player.maxHp(),
+						monsterMaxHp : monster.maxHp(),
+					};
+
+					callback(combatResults);
+
+				});
 
 			} );
+
+		}
+
+		this.testAssessCombatResults = function(){
+			var numRoundsPlayerWon = 0;
+			var numRoundsMonsterWon = 0;
+			var numRoundsPlayerLose = 0;
+			var numRoundsMonsterLose = 0;
+			var avgSurvivingPlayerHP = 0;
+			var avgSurvivingMonsterHP = 0;
+			var avgLosingPlayerHP = 0;
+			var avgLosingMonsterHP = 0;
+			var numTies = 0;
+
+			if( self._numActiveRounds == 0 ){
+
+				$.each(self._testCombatResults, function(idx, resultsObj){
+					if(resultsObj.playerHp > 0){
+						numRoundsPlayerWon++;
+						numRoundsMonsterLose++;
+						avgSurvivingPlayerHP += (resultsObj.playerHp / resultsObj.playerMaxHp);
+						avgLosingMonsterHP += (resultsObj.monsterHp / resultsObj.monsterMaxHp);
+					}else if(resultsObj.monsterHp > 0){
+						numRoundsMonsterWon++;
+						numRoundsPlayerLose++;
+						avgSurvivingMonsterHP += (resultsObj.monsterHp / resultsObj.monsterMaxHp);
+						avgLosingPlayerHP += (resultsObj.playerHp / resultsObj.playerMaxHp);
+					}else {
+						numTies++;
+					}
+				});
+
+				console.log("=== TOTALS ===");
+				console.log("Player won: " + numRoundsPlayerWon + "/" + self._testCombatResults.length);
+				console.log("Monster won: " + numRoundsMonsterWon + "/" + self._testCombatResults.length);
+				console.log("Avg Player HP: " + Math.round(((avgSurvivingPlayerHP / numRoundsPlayerWon) || 0) * 100) + "%" );
+				console.log("Avg Monster HP: " + Math.round(((avgSurvivingMonsterHP / numRoundsMonsterWon) || 0) * 100) + "%" );
+				console.log("Avg Failing Player HP: " + Math.round(((avgLosingPlayerHP / numRoundsPlayerLose) || 0) * 100) + "%" );
+				console.log("Avg Failing Monster HP: " + Math.round(((avgLosingMonsterHP / numRoundsMonsterLose) || 0) * 100) + "%" );
+				if(numTies > 0){
+					console.log("Ties??: " + numTies + "/" + self._testCombatResults.length);
+				}
+				console.log("=== TOTALS ===");
+
+				//Reset this
+				self._testCombatResults = [];
+
+			}
 		}
 
 		self.init();
