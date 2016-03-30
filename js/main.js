@@ -1,4 +1,4 @@
-const BUILD_VERSION = 1458324679;
+const BUILD_VERSION = 1459377890;
 var game = undefined;
 var ko_global = undefined;
 
@@ -98,6 +98,7 @@ require([
 		if( window.location.hash == '#konami' ){
 			game.manageTransitionToView("fullscreen","mainscreen");
 			game.isNew(false);
+			game.equipInitialLootItems();
 		}
 
 		if( window.location.hash == '#logsave' ){

@@ -1103,17 +1103,28 @@ define([
 			self.enemyHpBarWidth(self.hpBarBaseWidth);
 
 			//Let's sneak in some selective nerfing here...
-			if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 5){
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.5) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.3) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.3) );
-			} else if( self.level().levelNum() < 2 ){
+			if( self.level().levelNum() < 2 ){
 				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
 				self.currentEnemy().hp( self.currentEnemy().maxHp() );
 				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
 				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
+			} else if( self.level().levelNum() < 3 ){
+				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.65) );
+				self.currentEnemy().hp( self.currentEnemy().maxHp() );
+				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.75) );
+				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.75) );
+			} else if( self.level().levelNum() < 4 ){
+				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.7) );
+				self.currentEnemy().hp( self.currentEnemy().maxHp() );
+				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.8) );
+				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.8) );
+			} else {
+				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.75) );
+				self.currentEnemy().hp( self.currentEnemy().maxHp() );
+				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.85) );
+				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.85) );
 			}
+
 		}
 
 		this.getGoesFirst = function(playerObj, monsterObj){
@@ -2731,9 +2742,10 @@ define([
 					self._resetActiveItem();
 				}
 
-				$.each(self.player().activeAbilities(), function(idx, skill){
+				/*$.each(self.player().activeAbilities(), function(idx, skill){
 					skill.cooldown(0);
-				});
+				});*/
+				self.player().addAp(2);
 
 				self.logMessage("Much like Madeline Kahn in Blazing Saddles, you feel 'wefweshed.'", "player");
 
@@ -4828,21 +4840,31 @@ define([
 						monster.minDmg( Math.round(monster.minDmg() * 0.7) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
 					} else if(applyNerfingLogic == 3){
+						monster.maxHp( Math.round(monster.maxHp() * 0.65) );
+						monster.hp( monster.maxHp() );
+						monster.minDmg( Math.round(monster.minDmg() * 0.75) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.75) );
+					} else if(applyNerfingLogic == 4){
 						monster.maxHp( Math.round(monster.maxHp() * 0.7) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.8) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.8) );
-					} else if(applyNerfingLogic == 4){
+					} else if(applyNerfingLogic == 5){
+						monster.maxHp( Math.round(monster.maxHp() * 0.75) );
+						monster.hp( monster.maxHp() );
+						monster.minDmg( Math.round(monster.minDmg() * 0.85) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.85) );
+					} else if(applyNerfingLogic == 6){
 						monster.maxHp( Math.round(monster.maxHp() * 0.8) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.9) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.9) );
-					} else if(applyNerfingLogic == 5){
+					} else if(applyNerfingLogic == 7){
 						monster.maxHp( Math.round(monster.maxHp() * 0.85) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.95) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.95) );
-					} else if(applyNerfingLogic == 6){
+					} else if(applyNerfingLogic == 8){
 						monster.maxHp( Math.round(monster.maxHp() * 0.9) );
 						monster.hp( monster.maxHp() );
 					}
@@ -4852,7 +4874,7 @@ define([
 					while( !player.isDead() && !monster.isDead() ){
 
 						if( !player.canAct() ){
-							self.doCombatRound("pass");
+							self.doCombatRound("pass", player, monster);
 						}else{
 							$.each(playerAttackPriority, function(idx, ability_id){
 								var combatAbility = player.combatAbilities()[ability_id];
@@ -4916,9 +4938,6 @@ define([
 				console.log("Avg Monster HP: " + Math.round(((avgSurvivingMonsterHP / numRoundsMonsterWon) || 0) * 100) + "%" );
 				console.log("Avg Failing Player HP: " + Math.round(((avgLosingPlayerHP / numRoundsPlayerLose) || 0) * 100) + "%" );
 				console.log("Avg Failing Monster HP: " + Math.round(((avgLosingMonsterHP / numRoundsMonsterLose) || 0) * 100) + "%" );
-				if(numTies > 0){
-					console.log("Ties??: " + numTies + "/" + self._testCombatResults.length);
-				}
 				console.log("=== TOTALS ===");
 
 				//Reset this
@@ -5001,7 +5020,6 @@ GAME IDEAS:
 - Flurry might be OP
 - Bosses still might hit too hard
 - When necklace is equipped, increase current HP by appropriate amount, MAYBE (ask Matt)
-- Ask Matt about limiting back-and-forth spamming to run down the clock
 - Add in "skip to exit square" button, maybe costs 25% GP (maybe not), possibly unlocks after player is >1 level higher than current dungeon level
 - Add in gem merchants that accept gems as currency (ask Matt)
 - Make skill trainers cost less, OR improve base skill rather than progress
@@ -5040,7 +5058,6 @@ CODE IDEAS:
 - Save game version in localstorage; When loading, if version is different from current version, reload JSON files + classes from src
 - Make Gold a "stat" rather than an inventory item?
 - Maybe only redraw relevant sections of the map? i.e. - player vision/scan radius - write test to see if it's actually faster
-- Write combat simulator for testing balancing stuff
 
 GOOD IDEAS WITHOUT KNOWN IMPLEMENTATIONS:
 - Making the turn-based nature of combat more visually apparent (i.e. - you go, then they go, etc.),

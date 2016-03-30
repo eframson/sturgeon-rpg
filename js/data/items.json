@@ -236,7 +236,7 @@
 				"cooldown_potion" : {
 					"id" : "cooldown_potion",
 					"name" : "Reset Cooldowns Potion",
-					"desc" : "This vial contains a fizzy, light-blue liquid. Drinking it will instantly refresh you, resetting your ability cooldowns.",
+					"desc" : "This vial contains a fizzy, light-blue liquid. Drinking it will instantly refresh you, restoring 2 AP.",
 					"slotsRequired" : 1,
 					"stackable" : 1,
 					"buyValue" : 250,
