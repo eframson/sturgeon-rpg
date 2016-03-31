@@ -4996,6 +4996,7 @@ CODE CHANGES:
 
 
 GAME IDEAS:
+- Add quests
 - Add a weapon-crafting skill that uses scraps?
 - Add a bit more variance in armor stats (+/- 10%)
 - Attack stances? Purchase with talent points, more dmg + less defense etc.
@@ -5014,7 +5015,6 @@ GAME IDEAS:
 - Integrate keyboard shortcuts
 - Shell cracker doesn't seem that useful when speed is too low
 - Replace overworld cooldown system with a finite resource system
-- Add quests
 - Add some tutorial-type stuff in the intro slides
 - Speed necklaces might be OP
 - Flurry might be OP
@@ -5106,6 +5106,51 @@ http://dstromberg.com/2013/07/tutorial-random-maze-generation-algorithm-in-javas
 https://github.com/felipecsl/random-maze-generator
 http://stackoverflow.com/questions/16150255/javascript-maze-generator
 http://xefer.com//maze-generator
+
+//Just paste the whole damn thing
+Emmett: Okay, so you know what I was just thinking about? Games where you generally fight solo usually feature or at least allow movement, as part of the tactics (WoW does this actually a bit less, IMO, than other games). Frequently it's a very important, if not essential part. For games that do not allow or feature movement (e.g. - Pet battles, Final Fantasy VII, Skies of Arcadia maybe?) you have basically multiple people or "things" to control
+Emmett: Now granted, there's some turn-based vs. real-time stuff in there too
+Emmett: But I think otherwise that's the general gist. And I feel like a complete idiot for not noticing that before
+Emmett: Then there are things like chess or Civilization that are turn-based but do prominently feature movement, but in strategy games movement and positioning are core to the nature of the game itself, so they're not so much a "feature" as "part of the game's existence" lol
+Matt : Yeah, that makes a lot of sense
+Emmett: So if I'm not going to allow or feature movement in combat (which I'm 99% sure I'm not)
+Emmett: *and* I still want it to be a solo experience (rather than the idea of controlling multiple entities...although I *could* do that)...
+Emmett: I have to come up with different aspects that the player can control
+Emmett: Either make them constant (e.g. - you always have to choose these 2 or 3 things every time) or have more options consistently available and the player has to choose one as appropriate
+Emmett: (that made sense in my head)
+Emmett: Maybe a Magicka style system
+Emmett: Where the player chooses different attacks to combine
+Emmett: With different results
+Emmett: Setting aside the idea of how the fuck I explain that to the player
+Emmett: lol
+Emmett: So you could queue up 3 attack "things" and do mucho damage, or 2 attack "things" and 1 heal "thing" so you do less dmg, but some of the dmg you deal is returned to you as healing, or 1 attack thing and 2 heal things where it deals even less dmg but half of the dmg is healed instantly and half is healed over time or whatever
+Matt : Have you played Xenogears?
+Emmett: I have not
+Matt : Their combo system is pretty cool
+Emmett: And maybe the number of things you can queue up is your choice, but the more stuff you pile onto an attack the more attacks an enemy will get accordingly or something
+Emmett: And to sort of encourage risk-taking, the quicker you kill an enemy the more XP or loot or more epic loot or whatever you get
+Matt : Or you have a fixed combo size that increases with level
+Matt : So you can start simple and ease the player in
+Emmett: Good idea too
+Emmett: I like the idea of letting the players choose how powerful/fancy they want to make their attack, but making them more vulnerable somehow as a result
+Emmett: But simultaneously incentivize them to do so
+Emmett: Maybe make combo size increase with level
+Emmett: But base XP is pretty minimal
+Emmett: However the faster you kill an enemy the more XP you get
+Emmett: Maybe there could be gear enchants/effects which are like "has a chance of doing bonus <thing> on a successful <foo> combo"
+Emmett: And the fancier the combo is, the bigger the reward is
+Emmett: Unless that's already being incentivized enough
+Emmett: Or maybe the fancier the combo is, the greater chance there will be of it happening
+Emmett: Yeah, I like that one
+Emmett: Can you tell I've been watching game design videos today? lol
+Emmett: Is there something I can Google about Xenogears that will be likely to show me what you're talking about?
+Emmett: Unless you just want to Skype later and try and explain it
+Emmett: And if I really want to be a dick, I could implement a small XP penalty whenever the player's killed in combat :P
+Emmett: Errr, :O
+Emmett: And I could add an *optional* Ironman mode that automatically saves whenever the player dies
+Emmett: Holy shit, this is either brilliant or insane
+Emmett: Of course, to keep the player from just doing the same thing over and over again, it seems pretty essential to have different enemy types that are vulnerable or strong against certain attack elements or combos
+
 
 */
 
