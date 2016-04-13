@@ -179,38 +179,11 @@ define([
 					buttons: [
 						{
 							title : "No",
-							action : function(){
-								self.manageTransitionToView("fullscreen","mainscreen",function() {
-									self.freezeMovement(false);
-								});
-							}
+							action : "_btnFnResetLevelNo"
 						},
 						{
 							title : "Yes",
-							action : function(){
-
-								var gold = self.player().inventory.getItemByID("gold");
-								var cost = 0;
-								if(gold){
-									cost = Math.round(gold.qty() * .25);
-									gold.qty( gold.qty() - cost );
-								}
-
-								self.manageTransitionToView(
-									"fullscreen",
-									"mainscreen",
-									function() {
-										self.freezeMovement(false);
-									}, function(){
-										self.level().generateThisLevel(true);
-										self.level().revealSquaresNearPlayer(1);
-										self.level().drawMap();
-
-										self.logMessage("Level has been reset.", "player");
-									}
-								);
-
-							}
+							action : "_btnFnResetLevelYes"
 						}
 					]
 				});
@@ -274,6 +247,7 @@ define([
 		};
 
 		this.temporaryPreferenceStorage = {};
+		this.btnFnVars = {};
 
 		this.sortByPresets = {
 			"Type" : ["type", "qualityModifier", "name"],
@@ -1786,16 +1760,7 @@ define([
 				buttons: [
 					{
 						title : "Continue",
-						action : function(){
-							self.manageTransitionToView("fullscreen","combat");
-
-							/*self.spcAction = function(){
-								buttons[0].action();
-								self.spcAction = function(){ return 1 };
-							}*/
-
-							self.startCombat();
-						}
+						action : "_btnFnStartCombat"
 					}
 				]
 			});
@@ -1855,9 +1820,7 @@ define([
 			buttons = new Array(
 				{
 					title : "Continue",
-					action : function(){
-						self.manageTransitionToView("fullscreen", "mainscreen", function(){ self.freezeMovement(false) });
-					},
+					action : "_btnFnContinueAfterSquareEventMessage"
 				}
 			);
 
@@ -4008,6 +3971,58 @@ define([
 			//It would be nice if the max width could be dynamically calculated...
 			var progressBarWidth = hpBarTargetPercent * self.hpBarBaseWidth;
 			return progressBarWidth;
+		}
+
+		this.handleDynamicButtonAction = function(btnData, e){
+			if(typeof self[btnData.action] === 'function'){
+				self[btnData.action]();
+			}else{
+				console.log("Could not find btn fn '" + btnData.action + "'");
+			}
+		}
+
+		this._btnFnResetLevelNo = function(){
+			self.manageTransitionToView("fullscreen","mainscreen",function() {
+				self.freezeMovement(false);
+			});
+		}
+
+		this._btnFnResetLevelYes = function(){
+			var gold = self.player().inventory.getItemByID("gold");
+			var cost = 0;
+			if(gold){
+				cost = Math.round(gold.qty() * .25);
+				gold.qty( gold.qty() - cost );
+			}
+
+			self.manageTransitionToView(
+				"fullscreen",
+				"mainscreen",
+				function() {
+					self.freezeMovement(false);
+				}, function(){
+					self.level().generateThisLevel(true);
+					self.level().revealSquaresNearPlayer(1);
+					self.level().drawMap();
+
+					self.logMessage("Level has been reset.", "player");
+				}
+			);
+		}
+
+		this._btnFnStartCombat = function(){
+			self.manageTransitionToView("fullscreen","combat");
+
+			/*self.spcAction = function(){
+				buttons[0].action();
+				self.spcAction = function(){ return 1 };
+			}*/
+
+			self.startCombat();
+		}
+
+		this._btnFnContinueAfterSquareEventMessage = function(){
+			self.manageTransitionToView("fullscreen", "mainscreen", function(){ self.freezeMovement(false) });
 		}
 
 		this.testPotion = function(){
