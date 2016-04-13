@@ -1144,6 +1144,10 @@ define([
 
 		}
 
+		this.queueAttack = function(entity, attack){
+			entity.queueAttack(attack);
+		}
+
 		this.playerFlee = function(game, event){
 			self.temporarilyDisableActiveSquare(1);
 			self.manageTransitionToView("combat","mainscreen", function(){ self.freezeMovement(false); });
@@ -5123,11 +5127,13 @@ Perk Ideas
 - Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
 - Sword 'n' Board (don't know what it does yet, but we need to have one called this!)
 
-Feedback
+Combat redesign attack ideas:
+- Dmg
+- Dmg over time
+- Heal
+- Heal over time
 
 Too easy. Contributing factors:
-- Monster strength is calculated based on an unarmored/unequipped player (I think)
-- Monster strength goes by dungeon level, regardless of what level the player is
 - Players get a lot of HP on level-up -- too much?
 - Monsters might reward too much XP?
 - Definitely add a difficulty selector
