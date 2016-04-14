@@ -672,7 +672,7 @@
 								</div>
 								<div class="notice-button">
 									<div data-bind="foreach: buttons">
-										<button type="button" class="btn btn-default" data-bind="click: $root.handleDynamicButtonAction, text: $data.title, css : ($data.css && typeof $data.css === 'function' ? $data.css() : '')"></button>
+										<button type="button" class="btn btn-default" data-bind="click: $root.handleDynamicButtonAction, text: $data.title, css : ($data.css != undefined ? (typeof $data.css == 'string' ? ( typeof $root[$data.css] == 'function' ? $root[$data.css]() : $data.css) : $data.css()) : '' )"></button>
 									</div>
 								</div>
 
