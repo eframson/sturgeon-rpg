@@ -260,6 +260,11 @@ define([
 			//return Math.round(actualDmg);
 			//2
 			//return Math.round( (actualDmg >= minDmg) ? actualDmg : minDmg );
+
+			//3
+			//log.07(25)
+			//log.024(75)
+			//log.002(900)
 		},
 
 		getObjectAsArrayIndexedByNumericalSortOrder : function(object, sortFieldName){

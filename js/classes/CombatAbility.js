@@ -37,6 +37,7 @@ define([
 			self.applyCombatEffectOnMiss = data.applyCombatEffectOnMiss || undefined;
 			self.sortOrder = data.sortOrder;
 			self.showLevelInformation = ko.observable(data.showLevelInformation !== undefined ? data.showLevelInformation : 1);
+			self.attackType = data.attackType;
 
 		}
 
@@ -139,6 +140,18 @@ define([
 					game.registerCombatEffectApplication(attacker, defender, combatEffectToApply);
 				}
 			}
+		}
+
+		this.isHeavyAttack = function(){
+			return (self.attackType == "heavy") ? true : false ;
+		}
+
+		this.isLightAttack = function(){
+			return (self.attackType == "light") ? true : false ;
+		}
+
+		this.isBasicAttackType = function(){
+			return (self.attackType == undefined) ? true : false ;
 		}
 
 	}

@@ -1144,10 +1144,6 @@ define([
 
 		}
 
-		this.queueAttack = function(entity, attack){
-			entity.queueAttack(attack);
-		}
-
 		this.playerFlee = function(game, event){
 			self.temporarilyDisableActiveSquare(1);
 			self.manageTransitionToView("combat","mainscreen", function(){ self.freezeMovement(false); });
@@ -5128,10 +5124,10 @@ Perk Ideas
 - Sword 'n' Board (don't know what it does yet, but we need to have one called this!)
 
 Combat redesign attack ideas:
-- Dmg
-- Dmg over time
-- Heal
-- Heal over time
+- Basic attack - doesn't do much damage, but it's dependable
+- Heavy attack - mucho damage, but skip next turn
+- Flurry - series of light attacks, not very good against armor
+- Monster armor: more effective against light attacks than heavy attacks
 
 Too easy. Contributing factors:
 - Players get a lot of HP on level-up -- too much?

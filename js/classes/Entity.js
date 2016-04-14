@@ -48,8 +48,6 @@ define([
 
 			self.combatAbilities = ko.observable(data.combatAbilities || {});
 
-			self.queuedAttacks = ko.observable(data.queuedAttacks || []);
-
 			self.activeCombatEffects = ko.computed(function(){
 				var combatEffectsArray = $.map(self.combatEffects(), function(elem, idx){
 					return elem;
@@ -165,14 +163,6 @@ define([
 			existingEffect.applyEffect();
 
 			self.combatEffects.valueHasMutated();
-		}
-
-		this.queueAttack = function(attack){
-			self.queuedAttacks().push(attack);
-		}
-
-		this.deQueueAttack = function(){
-			return self.queuedAttacks().pop();
 		}
 
 		this.takeDmg = function(dmg){
