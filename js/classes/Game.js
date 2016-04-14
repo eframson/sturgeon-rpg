@@ -3283,13 +3283,7 @@ define([
 		}
 
 		this.loadGame = function(){
-			self.loadGameFromData(JSON.parse(localStorage.getItem("saveData"), function(k, v){
-				if(v.constructor == String && v.match(/^function \(/)){
-					eval("var rehydratedFunction = " + v);
-					return rehydratedFunction;
-				}
-				return v;
-			}));
+			self.loadGameFromData(JSON.parse(localStorage.getItem("saveData")));
 		}
 
 		this.saveGame = function(){
