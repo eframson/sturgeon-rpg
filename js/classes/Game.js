@@ -55,7 +55,7 @@ define([
 		this.player = undefined;
 		this.slides = {
 			start: {
-				text: "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
+				text : "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
 				buttons: [
 					{
 						title: "Let's bust outta here!",
@@ -65,7 +65,7 @@ define([
 				location: "Unknown",
 			},
 			d1: {
-				text: "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
+				text : "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
 				buttons: [
 					{
 						title: "OH YEAH!!!",
@@ -75,7 +75,7 @@ define([
 				location: "Unknown",
 			},
 			d2: {
-				text: "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
+				text : "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
 				buttons: [
 					{
 						title: "Continue",
@@ -175,7 +175,7 @@ define([
 				self.freezeMovement(true);
 
 				self.fullScreenContent({
-					text: "Would you like to reset the current dungeon level? Costs 25% of your current GP.",
+					text : "Would you like to reset the current dungeon level? Costs 25% of your current GP.",
 					buttons: [
 						{
 							title : "No",
@@ -247,7 +247,7 @@ define([
 		};
 
 		this.temporaryPreferenceStorage = {};
-		this.btnFnVars = {};
+		this.btnFnVars = ko.observable({});
 
 		this.sortByPresets = {
 			"Type" : ["type", "qualityModifier", "name"],
@@ -383,6 +383,15 @@ define([
 				return false;
 			});
 
+			self.getCssForTrainSkillButton = ko.computed(function(){
+				if(self.player != undefined && self.player() && self.btnFnVars().trainCost != undefined){
+					if( self.player().gp() < self.btnFnVars().trainCost() ){
+						return "disabled";
+					}
+				}
+				return "";
+			});
+
 			self.activeItemButtons = ko.computed(function(){
 				var buttons = new Array();
 				var defaultCss = "btn-default";
@@ -392,47 +401,47 @@ define([
 
 					if( self.activeItem().canEquip() ){
 						buttons.push({
-							css: defaultCss,
-							text: "Equip",
-							click: self.equipActiveItem
+							css : defaultCss,
+							text : "Equip",
+							click : self.equipActiveItem
 						});
 					}
 
 					if( self.activeItem().canUnEquip() ){
 						buttons.push({
-							css: defaultCss,
-							text: "Un-Equip",
-							click: self.unEquipActiveItem
+							css : defaultCss,
+							text : "Un-Equip",
+							click : self.unEquipActiveItem
 						});
 					}
 
 					if( self.activeItem().canUpgrade() ){
 
 						buttons.push({
-							css: defaultCss + ((self._activeItemCanBeUpgraded()) ? "" : " disabled"),
-							text: "Upgrade (" + actualItem.costForNextUpgradeLevel() + " scrap)",
-							click: self.upgradeActiveItem
+							css : defaultCss + ((self._activeItemCanBeUpgraded()) ? "" : " disabled"),
+							text : "Upgrade (" + actualItem.costForNextUpgradeLevel() + " scrap)",
+							click : self.upgradeActiveItem
 						});
 
 					}
 
 					if( self.activeItem().canBreakdown() ){
 						buttons.push({
-							css: "btn-danger",
-							text: "Salvage" + ( (self.activeItem().actualItem().isEquipped()) ? " (equipped!)" : "" ),
-							click: self.salvageActiveItem
+							css : "btn-danger",
+							text : "Salvage" + ( (self.activeItem().actualItem().isEquipped()) ? " (equipped!)" : "" ),
+							click : self.salvageActiveItem
 						});
 					}
 
 					if( self.activeItem().canUse() ){
 						buttons.push({
 							//@TODO: Put this logic in a function somewhere instead of here or check for a "restoresHealth" property or something
-							css: defaultCss + (
+							css : defaultCss + (
 								(self.activeItem().actualItem().isFood || self.activeItem().actualItem().id == "health_potion")
 									&& (self.player().hp() == self.player().maxHp()) ? ' disabled' : ''
 							),
-							text: "Use",
-							click: self.useActiveItem
+							text : "Use",
+							click : self.useActiveItem
 						});
 					}
 
@@ -447,17 +456,17 @@ define([
 						if( actualItem.qty() == 1 ){
 
 							buttons.push({
-								css: defaultCss + (( self.player().gp() < actualItemCost ) ? " disabled" : ""),
-								text: "Buy (" + actualItemCost + " GP)",
-								click: self.buyActiveItem
+								css : defaultCss + (( self.player().gp() < actualItemCost ) ? " disabled" : ""),
+								text : "Buy (" + actualItemCost + " GP)",
+								click : self.buyActiveItem
 							});
 
 						}else if( actualItem.qty() > 1 ){
 
 							buttons.push({
-								css: defaultCss + (( self.player().gp() < actualItemCost ) ? " disabled" : ""),
-								text: "Buy 1x (" + actualItemCost + " GP)",
-								click: self.buyActiveItem
+								css : defaultCss + (( self.player().gp() < actualItemCost ) ? " disabled" : ""),
+								text : "Buy 1x (" + actualItemCost + " GP)",
+								click : self.buyActiveItem
 							});
 
 							var numPurchasable = Math.floor( self.player().gp() / actualItem.buyValue() );
@@ -466,9 +475,9 @@ define([
 							if(actualPurchasable > 1 && actualItem.qty() > 0){
 
 								buttons.push({
-									css: defaultCss + (( self.player().gp() < (actualPurchasable * actualItemCost) ) ? " disabled" : ""),
-									text: "Buy " + actualPurchasable + "x (" + (actualPurchasable * actualItemCost) + " GP)",
-									click: self.buyMaxActiveItem
+									css : defaultCss + (( self.player().gp() < (actualPurchasable * actualItemCost) ) ? " disabled" : ""),
+									text : "Buy " + actualPurchasable + "x (" + (actualPurchasable * actualItemCost) + " GP)",
+									click : self.buyMaxActiveItem
 								});
 
 							}
@@ -483,23 +492,23 @@ define([
 						if( self.activeItem().actualItem().qty() == 1 ){
 
 							buttons.push({
-								css: defaultCss,
-								text: "Sell (" + itemSellValue + " GP)",
-								click: self.sellActiveItem
+								css : defaultCss,
+								text : "Sell (" + itemSellValue + " GP)",
+								click : self.sellActiveItem
 							});
 
 						}else if( self.activeItem().actualItem().qty() > 1 ){
 
 							buttons.push({
-								css: defaultCss,
-								text: "Sell 1x (" + itemSellValue + " GP)",
-								click: self.sellActiveItem
+								css : defaultCss,
+								text : "Sell 1x (" + itemSellValue + " GP)",
+								click : self.sellActiveItem
 							});
 
 							buttons.push({
-								css: defaultCss,
-								text: "Sell All (" + (actualItem.qty() * itemSellValue) + " GP)",
-								click: self.sellAllActiveItem
+								css : defaultCss,
+								text : "Sell All (" + (actualItem.qty() * itemSellValue) + " GP)",
+								click : self.sellAllActiveItem
 							});
 
 						}
@@ -511,23 +520,23 @@ define([
 						if(actualItem.qty() > 1){
 
 							buttons.push({
-								css: defaultCss,
-								text: "Drop 1x",
-								click: self.dropActiveItem
+								css : defaultCss,
+								text : "Drop 1x",
+								click : self.dropActiveItem
 							});
 
 							buttons.push({
-								css: defaultCss,
-								text: "Drop All",
-								click: self.dropAllActiveItem
+								css : defaultCss,
+								text : "Drop All",
+								click : self.dropAllActiveItem
 							});
 
 						}else if(actualItem.qty() == 1){
 
 							buttons.push({
-								css: defaultCss,
-								text: "Drop",
-								click: self.dropActiveItem
+								css : defaultCss,
+								text : "Drop",
+								click : self.dropActiveItem
 							});
 
 						}
@@ -539,24 +548,24 @@ define([
 							//Quite frankly there's no reason to ever NOT take all gold...
 							if( actualItem.id != "gold" ){
 								buttons.push({
-									css: defaultCss,
-									text: "<< Take 1x",
-									click: self.takeActiveItem
+									css : defaultCss,
+									text : "<< Take 1x",
+									click : self.takeActiveItem
 								});
 							}
 
 							buttons.push({
-								css: defaultCss,
-								text: "<< Take All",
-								click: self.takeAllActiveItem
+								css : defaultCss,
+								text : "<< Take All",
+								click : self.takeAllActiveItem
 							});
 
 						}else if(actualItem.qty() == 1){
 
 							buttons.push({
-								css: defaultCss,
-								text: "<< Take",
-								click: self.takeActiveItem
+								css : defaultCss,
+								text : "<< Take",
+								click : self.takeActiveItem
 							});
 							
 						}
@@ -566,23 +575,23 @@ define([
 						if(actualItem.qty() > 1){
 
 							buttons.push({
-								css: defaultCss,
-								text: "Put 1x >>",
-								click: self.putActiveItem
+								css : defaultCss,
+								text : "Put 1x >>",
+								click : self.putActiveItem
 							});
 
 							buttons.push({
-								css: defaultCss,
-								text: "Put All >>",
-								click: self.putAllActiveItem
+								css : defaultCss,
+								text : "Put All >>",
+								click : self.putAllActiveItem
 							});
 
 						}else if(actualItem.qty() == 1){
 
 							buttons.push({
-								css: defaultCss,
-								text: "Put >>",
-								click: self.putActiveItem
+								css : defaultCss,
+								text : "Put >>",
+								click : self.putActiveItem
 							});
 							
 						}
@@ -863,6 +872,16 @@ define([
 
 				self.numBattlesWon( gameData.numBattlesWon || 0 );
 				self.numItemSquaresLooted( gameData.numItemSquaresLooted || 0 );
+
+				if(gameData.btnFnVars != undefined){
+					$.each(gameData.btnFnVars, function(idx, val){
+						if(idx == 'trainCost'){
+							self.btnFnVars()[idx] = ko.observable(val);
+						}else{
+							self.btnFnVars()[idx] = val;
+						}
+					});
+				}
 
 			}else{
 
@@ -1756,7 +1775,7 @@ define([
 			//self.logMessage(enemyMsg, "combat");
 
 			self.fullScreenContent({
-				text: enemyMsg,
+				text : enemyMsg,
 				buttons: [
 					{
 						title : "Continue",
@@ -1830,21 +1849,7 @@ define([
 				buttons = new Array(
 					{
 						title : "Continue",
-						action : function(){
-
-							self.currentContainer.removeAll();
-
-							var itemArray = Array();
-
-							var numItems = Utils.doRand(3,8);
-
-							for(var i = 0; i < numItems; i++){
-								self.currentContainer.addItem(self.generateRandomLootItem("trader"));
-							}
-
-							self.manageTransitionToView("fullscreen","merchant");
-
-						},
+						action : "_btnFnContinueToTraderScreen"
 					}
 				);
 
@@ -1930,50 +1935,23 @@ define([
 
 				text += " for " + trainCost + " GP";
 
+				self.btnFnVars({
+					trainCost : ko.observable(trainCost),
+					trainSkill : trainSkill,
+					trainSkillAmt : trainSkillAmt,
+					trainSkillSuccessDesc : trainSkillSuccessDesc,
+					skillOrStat : skillOrStat,
+				});
+
 				buttons = new Array(
 					{
 						title : "Buy (" + trainCost + " GP)",
-						action : function(){
-
-							var gold = self.player().inventory.getItemByID("gold");
-							var trainSkill;
-
-							gold.qty( gold.qty() - this.vars.trainCost );
-
-							if(this.vars.skillOrStat == 'skill'){
-								trainSkill = self.player().activeAbilities()[this.vars.trainSkill];
-								trainSkill.makeProgress();
-								self.logMessage("Your " + this.vars.trainSkillSuccessDesc + " has increased slightly" );
-							}else if(this.vars.skillOrStat == 'stat'){
-								trainSkill = self.player()[this.vars.trainSkill];
-								trainSkill( trainSkill() + this.vars.trainSkillAmt );
-								self.logMessage("Your " + this.vars.trainSkillSuccessDesc + " has increased to " + trainSkill() + ( this.vars.trainSkillMax ? "/" + this.vars.trainSkillMax : "" ));
-							}
-
-							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
-
-						},
-						css : function(){
-							if( self.player().gp() < this.vars.trainCost ){
-								return "disabled";
-							}
-							return "";
-						},
-						vars : {
-							trainCost : trainCost,
-							trainSkill : trainSkill,
-							trainSkillAmt : trainSkillAmt,
-							trainSkillSuccessDesc : trainSkillSuccessDesc,
-							skillOrStat : skillOrStat,
-						}
+						action : "_btnFnAcceptTraining",
+						css : "getCssForTrainSkillButton"
 					},
 					{
 						title : "Leave",
-						action : function(){
-
-							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
-
-						},
+						action : "_btnFnLeaveTrainerScreen"
 					}
 				);
 
@@ -2004,9 +1982,7 @@ define([
 				buttons = new Array(
 					{
 						title : "Continue",
-						action : function(){
-							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
-						},
+						action : "_btnFnContinueAfterCooldownEventMessage"
 					}
 				);
 
@@ -2063,9 +2039,7 @@ define([
 				buttons = new Array(
 					{
 						title : "Continue",
-						action : function(){
-							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
-						},
+						action : "_btnFnContinueAfterStatEventMessage"
 					}
 				);
 
@@ -2080,9 +2054,7 @@ define([
 				buttons = new Array(
 					{
 						title : "Continue",
-						action : function(){
-							self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
-						},
+						action : "_btnFnContinueAfterInventoryEventMessage"
 					}
 				);
 
@@ -2115,29 +2087,15 @@ define([
 
 			if(square.isChallengeActive()){
 				self.fullScreenContent({
-					text: "The water around you grows chilly, and you are filled with a sense of foreboding. You think something big is coming your way...",
+					text : "The water around you grows chilly, and you are filled with a sense of foreboding. You think something big is coming your way...",
 					buttons: [
 						{
 							title : "Actually, on second thought...",
-							action : function(){
-								self.manageTransitionToView("fullscreen","mainscreen");
-
-								self.freezeMovement(false);
-
-								self.temporarilyDisableActiveSquare(1);
-							}
+							action : "_btnFnLeaveFromBossMessage"
 						},
 						{
 							title : "Let's do this!",
-							action : function(){
-								self.manageTransitionToView("fullscreen","combat");
-
-								if(self.autoSaveBeforeBosses() == true){
-									self.saveGame();
-								}
-
-								self.startCombat("boss");
-							}
+							action : "_btnFnContinueAfterBossMessage"
 						}
 					]
 				});
@@ -3233,7 +3191,7 @@ define([
 		}
 
 		this.logMessage = function(msgText, cssClass){
-			self.logMessages.unshift( {text: msgText, cssClass: cssClass || "info"} );
+			self.logMessages.unshift( {text : msgText, cssClass: cssClass || "info"} );
 			$(".message-log").stop(false, true).effect("highlight", { color: "#BEBEBE" }, 400);
 		}
 
@@ -3382,30 +3340,31 @@ define([
 				$.extend(
 					exportObj,
 					{
-						player 				: self.player().getExportData(),
-						levels 				: Array(),
-						leftColContent 		: self.leftColContent(),
-						centerColContent 	: self.centerColContent(),
-						rightColContent		: self.rightColContent(),
-						fullScreenContent 	: self.fullScreenContent(),
-						isNew				: self.isNew(),
-						logMessages			: self.logMessages(),
-						wasdKeysControlPlayerPos : self.wasdKeysControlPlayerPos(),
-						freezeMovement		: self.freezeMovement(),
-						backButtonLabel : self.backButtonLabel(),
-						currentEnemy	: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
-						currentContainer : self.currentContainer.getExportData(),
-						playerHpBarWidth : self.playerHpBarWidth(),
-						enemyHpBarWidth : self.enemyHpBarWidth(),
-						goldGained : self.goldGained(),
-						inventorySortOrder : self.inventorySortOrder(),
-						containerSortOrder : self.containerSortOrder(),
-						merchantSortOrder : self.merchantSortOrder(),
-						inventoryEquipmentToggle : self.inventoryEquipmentToggle(),
-						showInventoryEquipmentToggle : self.showInventoryEquipmentToggle(),
-						numBattlesWon : self.numBattlesWon(),
-						numItemSquaresLooted : self.numItemSquaresLooted(),
-						savedBuildVersion : BUILD_VERSION,
+						player 						: self.player().getExportData(),
+						levels 						: Array(),
+						leftColContent 				: self.leftColContent(),
+						centerColContent 			: self.centerColContent(),
+						rightColContent				: self.rightColContent(),
+						fullScreenContent 			: Utils.getExportDataFromObject(self.fullScreenContent()),
+						isNew						: self.isNew(),
+						logMessages					: self.logMessages(),
+						wasdKeysControlPlayerPos 	: self.wasdKeysControlPlayerPos(),
+						freezeMovement				: self.freezeMovement(),
+						backButtonLabel 			: self.backButtonLabel(),
+						currentEnemy				: self.currentEnemy() ? self.currentEnemy().getExportData() : undefined,
+						currentContainer 			: self.currentContainer.getExportData(),
+						playerHpBarWidth 			: self.playerHpBarWidth(),
+						enemyHpBarWidth 			: self.enemyHpBarWidth(),
+						goldGained 					: self.goldGained(),
+						inventorySortOrder 			: self.inventorySortOrder(),
+						containerSortOrder 			: self.containerSortOrder(),
+						merchantSortOrder 			: self.merchantSortOrder(),
+						inventoryEquipmentToggle 	: self.inventoryEquipmentToggle(),
+						showInventoryEquipmentToggle: self.showInventoryEquipmentToggle(),
+						numBattlesWon 				: self.numBattlesWon(),
+						numItemSquaresLooted 		: self.numItemSquaresLooted(),
+						savedBuildVersion 			: BUILD_VERSION,
+						btnFnVars 					: Utils.getExportDataFromObject(self.btnFnVars()),
 					}
 				);
 
@@ -4024,6 +3983,79 @@ define([
 		this._btnFnContinueAfterSquareEventMessage = function(){
 			self.manageTransitionToView("fullscreen", "mainscreen", function(){ self.freezeMovement(false) });
 		}
+
+		this._btnFnContinueToTraderScreen = function(){
+
+			self.currentContainer.removeAll();
+
+			var itemArray = Array();
+
+			var numItems = Utils.doRand(3,8);
+
+			for(var i = 0; i < numItems; i++){
+				self.currentContainer.addItem(self.generateRandomLootItem("trader"));
+			}
+
+			self.manageTransitionToView("fullscreen","merchant");
+
+		}
+
+		this._btnFnLeaveTrainerScreen = function(){
+			self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
+		}
+
+		this._btnFnContinueAfterCooldownEventMessage = function(){
+			self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
+		}
+
+		this._btnFnContinueAfterStatEventMessage = function(){
+			self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
+		}
+
+		this._btnFnContinueAfterInventoryEventMessage = function(){
+			self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
+		}
+
+		this._btnFnAcceptTraining = function(){
+
+			var gold = self.player().inventory.getItemByID("gold");
+			var trainSkill;
+
+			gold.qty( gold.qty() - self.btnFnVars().trainCost() );
+
+			if(self.btnFnVars().skillOrStat == 'skill'){
+				trainSkill = self.player().activeAbilities()[self.btnFnVars().trainSkill];
+				trainSkill.makeProgress();
+				self.logMessage("Your " + self.btnFnVars().trainSkillSuccessDesc + " has increased slightly" );
+			}else if(self.btnFnVars().skillOrStat == 'stat'){
+				trainSkill = self.player()[self.btnFnVars().trainSkill];
+				trainSkill( trainSkill() + self.btnFnVars().trainSkillAmt );
+				self.logMessage("Your " + self.btnFnVars().trainSkillSuccessDesc + " has increased to " + trainSkill() + ( self.btnFnVars().trainSkillMax ? "/" + self.btnFnVars().trainSkillMax : "" ));
+			}
+
+			self.manageTransitionToView("fullscreen","mainscreen", function(){ self.freezeMovement(false); });
+
+		}
+
+		this._btnFnLeaveFromBossMessage = function() {
+			self.manageTransitionToView("fullscreen","mainscreen");
+
+			self.freezeMovement(false);
+
+			self.temporarilyDisableActiveSquare(1);
+		}
+
+		this._btnFnContinueAfterBossMessage = function() {
+			self.manageTransitionToView("fullscreen","combat");
+
+			if(self.autoSaveBeforeBosses() == true){
+				self.saveGame();
+			}
+
+			self.startCombat("boss");
+		}
+
+		/* ======================================================== BEGIN TEST FUNCTIONS =============================================================== */
 
 		this.testPotion = function(){
 
