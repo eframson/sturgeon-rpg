@@ -47,7 +47,6 @@ define([
 
 			if(self.fullyDynamicStats && !self.isScaled()){
 				
-				//Idea 1
 				var averages = Utils.calculateAveragesForLevel(self.level());
 				var avgMonsterHp = averages.avgMonsterHp;
 				var avgMonsterDmg = averages.avgMonsterDmg;
@@ -61,12 +60,13 @@ define([
 				self.archetypeId = newMonsterArchetypeId;
 				archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 
-				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient);
-				self.xpCoefficient = ko.observable(archetypeData.xpCoefficient);
+				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient || 1);
+				self.xpCoefficient = ko.observable(archetypeData.xpCoefficient || 1);
+				self.dmgCoefficient = ko.observable(archetypeData.dmgCoefficient || 1);
+				self.armorCoefficient = ko.observable(archetypeData.armorCoefficient);
 				self.chanceOfEpicLoot = ko.observable(archetypeData.chanceOfEpicLoot);
 				self.chanceToCrit = ko.observable(archetypeData.chanceToCrit);
 				self.chanceToHit = ko.observable(archetypeData.chanceToHit);
-				self.dmgCoefficient = ko.observable(archetypeData.dmgCoefficient);
 				self.lootCoefficient = ko.observable(archetypeData.lootCoefficient);
 				self.availableAttacks = archetypeData.attacks;
 
@@ -74,12 +74,14 @@ define([
 				var stats = Utils.projectedStatAllotmentsForLevel( self.level() );
 				self.maxHp(stats.monster.hp);
 				self.maxHp( Math.round((Utils.doRand(Math.ceil(stats.monster.hp * 0.9), Math.ceil(stats.monster.hp * 1.1))) ));
-				//self.maxHp( Math.round(self.maxHp() * self.hpCoefficient()) );
+				self.maxHp( Math.round(self.maxHp() * self.hpCoefficient()) );
 				self.hp( self.maxHp() );
 				self.minDmg( Math.round(stats.monster.baseDmg * 0.9) );
 				self.maxDmg( Math.round(stats.monster.baseDmg * 1.1) );
-				//self.minDmg( Math.round(stats.monster.baseDmg * 1.0) );
-				//self.maxDmg( Math.round(stats.monster.baseDmg * 1.0) );
+
+				self.minDmg( Math.round( self.minDmg() * self.dmgCoefficient() ) );
+				self.maxDmg( Math.round( self.maxDmg() * self.dmgCoefficient() ) );
+
 				self.speed( self.level() );
 				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
 				
@@ -87,20 +89,13 @@ define([
 				
 				self.name( self.name() + (archetypeData.displayString ? " " + archetypeData.displayString : "") );
 
-				//This should prevent monsters getting constantly re-scaled every time a game is loaded, lol
+				self.armor(self.level());
+				if(self.armorCoefficient() != undefined){
+					self.armor( self.armor() * self.armorCoefficient() );
+				}
+
+				//This should prevent monsters getting constantly re-scaled every time a game is loaded
 				self.isScaled(1);
-
-				/*console.log("Estimated base values");
-				console.log("Avg Player HP: " + avgPlayerHp);
-				console.log("Avg Monster HP: " + avgMonsterHp);
-				console.log("Avg Monster DMG: " + avgMonsterDmg);
-
-				console.log("Generated stats");
-				console.log("HP: " + self.hp());
-				console.log("Min DMG: " + self.minDmg());
-				console.log("Max DMG: " + self.maxDmg());
-				console.log("Speed: " + self.speed());
-				console.log("EXP value: " + self.expValue());*/
 
 			}
 

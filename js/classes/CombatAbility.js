@@ -48,6 +48,10 @@ define([
 			return true;
 		}
 
+		this.doAfterHit = function(attacker, defender){
+			return true;
+		}
+
 		this.doAbility = function(attacker, defender, game){
 
 			var i;
@@ -102,7 +106,7 @@ define([
 					}
 
 					//Calculate the actual damage done to the target, applying any armor/other mitigation effects
-					actualDmg = defender.calculateActualDmg(dmgObject.dmgDealt, game.level().levelNum());
+					actualDmg = defender.calculateActualDmg(dmgObject.dmgDealt, game.level().levelNum(), self.attackType);
 
 				}else{
 					hitType = "miss";
@@ -128,6 +132,7 @@ define([
 
 				if(hitType == "hit"){
 					combatEffectToApply = self.applyCombatEffectOnHit;
+					self.doAfterHit(attacker, defender);
 				}else if(hitType == "crit"){
 					combatEffectToApply = self.applyCombatEffectOnCrit;
 				}else{

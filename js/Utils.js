@@ -179,27 +179,27 @@ define([
 			//Full epic armor should reduce dmg taken to: 14% player HP
 
 			//AC of poor quality item: 1% of player HP
-			var armorBaseAC = .01 * output.player.hp;
+			var armorBaseAC = 0.25 * (levelNum * 10);
 			output.player.armor = {
-				poor : Math.round(1.0 * armorBaseAC),
+				poor : Math.round(0.5 * armorBaseAC),
 				//AC of good quality item: 1.9x poor quality item
-				good : Math.round(1.9 * armorBaseAC),
+				good : Math.round(1.0 * armorBaseAC),
 				//AC of great quality item: 3.2x poor quality item
-				great : Math.round(3.2 * armorBaseAC),
+				great : Math.round(1.5 * armorBaseAC),
 				//AC of epic quality item: 4.7x poor quality item
-				exceptional : Math.round(4.7 * armorBaseAC),
+				exceptional : Math.round(2.0 * armorBaseAC),
 			};
 
 			//AC of poor quality shield: .5% of player HP
-			var shieldBaseAC = .005 * output.player.hp;
+			var shieldBaseAC = armorBaseAC;
 			output.player.shield = {
-				poor : Math.round(1.0 * shieldBaseAC),
+				poor : Math.round(0.5 * shieldBaseAC),
 				//AC of good quality shield: 1.9x poor quality shield
-				good : Math.round(1.9 * shieldBaseAC),
+				good : Math.round(1.0 * shieldBaseAC),
 				//AC of great quality shield: 3.1x poor quality shield
-				great : Math.round(3.1 * shieldBaseAC),
+				great : Math.round(1.5 * shieldBaseAC),
 				//AC of epic quality shield: 4.5x poor quality shield
-				exceptional : Math.round(4.5 * shieldBaseAC),
+				exceptional : Math.round(2.0 * shieldBaseAC),
 			};
 
 			//Player can't reduce dmg below 5% of total HP
@@ -244,7 +244,7 @@ define([
 			return output;
 		},
 
-		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum){
+		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum, dmgType){
 			var actualDmg;
 			//2
 			//var minDmg = 0.20 * dmg;
@@ -253,8 +253,7 @@ define([
 			//actualDmg = dmg * ( (100 + ((levelNum - 5) * 0.65) ) / (100 + armor) );
 
 			//3
-			actualDmg = dmg - armor;
-			return actualDmg;
+			//actualDmg = dmg - armor;
 
 			//1
 			//return Math.round(actualDmg);
@@ -262,9 +261,26 @@ define([
 			//return Math.round( (actualDmg >= minDmg) ? actualDmg : minDmg );
 
 			//3
-			//log.07(25)
-			//log.024(75)
-			//log.002(900)
+			if(armor){
+				//This is how we're capping armor effectiveness for now
+				armor = (armor >= 1000) ? 1000 : armor ;
+				var pctDmgAbsorbed = Math.log(armor+1)/Math.log(3000);
+				//Armor is more effective against light attacks, and less effective against heavy attacks
+				if(dmgType == "light"){
+					pctDmgAbsorbed = pctDmgAbsorbed * 1.25;
+				}else if(dmgType == "heavy"){
+					pctDmgAbsorbed = pctDmgAbsorbed * 0.75;
+				}
+				pctDmgAbsorbed = (pctDmgAbsorbed < 0.85) ? pctDmgAbsorbed : 0.85 ;
+				actualDmg = Math.round( dmg * (1 - pctDmgAbsorbed) );
+			}else{
+				actualDmg = dmg;
+			}
+
+			//4
+			//ln(1x^n + 0) //n = 0.08
+
+			return actualDmg;
 		},
 
 		getObjectAsArrayIndexedByNumericalSortOrder : function(object, sortFieldName){

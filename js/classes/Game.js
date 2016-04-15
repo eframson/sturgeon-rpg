@@ -281,6 +281,12 @@ define([
 		this.sAction = function() { return self.movePlayerDown() };
 		this.dAction = function() { return self.movePlayerRight() };
 		this.spcAction = function(){ return 1 };
+		this.onShiftDown = function(){
+			self.shiftPressed(1);
+		};
+		this.onShiftUp = function(){
+			self.shiftPressed(0);
+		};
 
 		this.init = function(){
 			self.initObservables();
@@ -356,6 +362,8 @@ define([
 			self.numBattlesWon = ko.observable(0);
 			self.numItemSquaresLooted = ko.observable(0);
 
+			self.shiftPressed = ko.observable(0);
+
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
 
@@ -401,9 +409,9 @@ define([
 
 					if( self.activeItem().canEquip() ){
 						buttons.push({
-							css : defaultCss,
-							text : "Equip",
-							click : self.equipActiveItem
+							css : ((self.shiftPressed() == 1) ? "btn-danger" : defaultCss ),
+							text : ((self.shiftPressed() == 1) ? "Equip + Salv. curr." : "Equip" ),
+							click : ((self.shiftPressed() == 1) ? self.equipActiveItemAndSalvageExisting : self.equipActiveItem ),
 						});
 					}
 
@@ -1061,7 +1069,7 @@ define([
 			//Make sure first few encounters are basic monsters while player is starting out
 			//if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 5 && encounterType != "boss"){
 			//Okay, monster archetypes totally mess up our delicately calibrated system...everything is basic for now!
-			if( encounterType != "boss"){
+			if( (self.numBattlesWon() + self.numItemSquaresLooted() < 5) && encounterType != "boss"){
 				extraParamObj.doNotSpecializeArchetype = 1;
 			}
 
@@ -1111,7 +1119,7 @@ define([
 				self.currentEnemy().hp( self.currentEnemy().maxHp() );
 				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.8) );
 				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.8) );
-			} else {
+			} else if( self.level().levelNum() < 5 ) {
 				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.75) );
 				self.currentEnemy().hp( self.currentEnemy().maxHp() );
 				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.85) );
@@ -1172,7 +1180,11 @@ define([
 
 			if(abilityId !== undefined){
 				//Attacker does something (optionally) to the defender, and UI is updated accordingly
-				attacker.takeCombatAction(abilityId, defender, self);
+				if(attacker.numTurnsToSkip() > 0){
+					attacker.numTurnsToSkip( attacker.numTurnsToSkip() - 1 );
+				}else{
+					attacker.takeCombatAction(abilityId, defender, self);
+				}
 				attacker.updateCombatEffectsForRound();
 			}
 
@@ -1182,14 +1194,31 @@ define([
 				abilityId = (goesFirst == "player") ? monsterAbilityId : playerAbilityId ;
 
 				if( abilityId !== undefined ){
-					defender.takeCombatAction(abilityId, attacker, self);
+
+					if(defender.numTurnsToSkip() > 0){
+						defender.numTurnsToSkip( defender.numTurnsToSkip() - 1 );
+					}else{
+						defender.takeCombatAction(abilityId, attacker, self);
+					}
+
 					defender.updateCombatEffectsForRound();
+				}
+
+				if(defender.numTurnsToSkip() > 0){
+					defender.numTurnsToSkip( defender.numTurnsToSkip() - 1 );
 				}
 				
 			}
 
+			$.each([attacker,defender], function(idx, entity){
+				if(!entity.isDead()){
+					entity.updateActiveAbilityCooldownsForRound();
+				}
+			});
+
 			if( playerObj.isDead() ){
 				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
+				return;
 			}
 
 			//Deliberately leaving this set to self.currentEnemy...
@@ -1217,11 +1246,9 @@ define([
 				}
 			}
 
-			$.each([attacker,defender], function(idx, entity){
-				if(!entity.isDead()){
-					entity.updateActiveAbilityCooldownsForRound();
-				}
-			});
+			if(playerObj.numTurnsToSkip() > 0 && !monsterObj.isDead()){
+				self.doCombatRound("pass", playerObj, monsterObj);
+			}
 
 		}
 
@@ -2287,12 +2314,18 @@ define([
 
 		}
 
-		this.equipActiveItem = function(game, event){
+		this.equipActiveItemAndSalvageExisting = function(game, event){
+			self.equipActiveItem(game, event, 1);
+		}
+
+		this.equipActiveItem = function(game, event, salvageExistingEquipped){
 
 			var item = self.activeItem().actualItem(),
 				type = item.type;
 
 			var alreadyEquippedItem;
+
+			salvageExistingEquipped = salvageExistingEquipped || 0;
 
 			alreadyEquippedItem = self._equipItem(item);
 
@@ -2300,8 +2333,12 @@ define([
 
 			if( alreadyEquippedItem != undefined && !Utils.isEmptyObject(alreadyEquippedItem) ){
 				//Skip the normal slot-checking logic to account for 2H weaps or 1H + shield combos
-				self.player().inventory.addItem(alreadyEquippedItem);
-				alreadyEquippedItem.isEquipped(false);
+				if(salvageExistingEquipped){
+					self._salvageItem(alreadyEquippedItem);
+				}else{
+					self.player().inventory.addItem(alreadyEquippedItem);
+					alreadyEquippedItem.isEquipped(false);
+				}	
 			}
 
 			if( type == "weapon" && item.handsRequired == 2){ //We just equipped a 2H weapon, so unequip whatever shield we have equipped
@@ -2323,9 +2360,8 @@ define([
 			self._resetActiveItem();
 		}
 
-		this.unEquipActiveItem = function(game, event, doNotAddBackToInventory){
+		this._unEquipItem = function(item, doNotAddBackToInventory){
 
-			var item = self.activeItem().actualItem();
 			doNotAddBackToInventory = doNotAddBackToInventory || 0;
 
 			if(item.type == "weapon"){
@@ -2342,6 +2378,15 @@ define([
 			if(!doNotAddBackToInventory){
 				self.player().inventory.addItem(item);
 			}
+			
+		}
+
+		this.unEquipActiveItem = function(game, event, doNotAddBackToInventory){
+
+			doNotAddBackToInventory = doNotAddBackToInventory || 0;
+
+			self._unEquipItem(self.activeItem().actualItem(), doNotAddBackToInventory);			
+
 			self._resetActiveItem();
 
 		}
@@ -2466,10 +2511,9 @@ define([
 			return changeString;
 		}
 
-		this.salvageActiveItem = function(game, event){
+		this._salvageItem = function(item){
 
-			var item = self.activeItem().actualItem(),
-				itemToAdd,
+			var itemToAdd,
 				scrapQty = item.salvageValue() + (item.numUpgradesApplied() * 50);
 
 			if( item instanceof Armor ){
@@ -2479,16 +2523,22 @@ define([
 			}
 
 			if( item.isEquipped() == 1 ){
-				self.unEquipActiveItem(game, event, 1);
+				self._unEquipItem(item, 1);
 			}else{
 				self.srcCollection.removeItem(item);
 			}
 
-			self._resetActiveItem();
-
 			self.player().inventory.addItem(new Item(itemToAdd) );
 			var itemLogString = self._assembleLogMessageStringFromItem(item);
 			self.logMessage("You gain " + scrapQty + "x " + itemToAdd.name + " from salvaging " + itemLogString + ".","crafting");
+
+		}
+
+		this.salvageActiveItem = function(game, event){
+
+			self._salvageItem(self.activeItem().actualItem());
+
+			self._resetActiveItem();
 
 		}
 
@@ -3929,6 +3979,8 @@ define([
 		this.handleDynamicButtonAction = function(btnData, e){
 			if(typeof self[btnData.action] === 'function'){
 				self[btnData.action]();
+			}else if(typeof btnData.action === 'function'){
+				btnData.action();
 			}else{
 				console.log("Could not find btn fn '" + btnData.action + "'");
 			}
@@ -4870,44 +4922,26 @@ define([
 					//Reset our "goes first" tracker
 					self._goesFirst = undefined;
 
-					if(applyNerfingLogic == 1){
-						monster.maxHp( Math.round(monster.maxHp() * 0.5) );
-						monster.hp( monster.maxHp() );
-						monster.minDmg( Math.round(monster.minDmg() * 0.3) );
-						monster.maxDmg( Math.round(monster.maxDmg() * 0.3) );
-					} else if(applyNerfingLogic == 2){
+					if( (applyNerfingLogic == 1 && monsterLevel < 2) || applyNerfingLogic == 2 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.6) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.7) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
-					} else if(applyNerfingLogic == 3){
+					} else if( (applyNerfingLogic == 1 && monsterLevel < 3) || applyNerfingLogic == 3 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.65) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.75) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.75) );
-					} else if(applyNerfingLogic == 4){
+					} else if( (applyNerfingLogic == 1 && monsterLevel < 4) || applyNerfingLogic == 4 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.7) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.8) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.8) );
-					} else if(applyNerfingLogic == 5){
+					} else if( (applyNerfingLogic == 1 && monsterLevel < 5) || applyNerfingLogic == 5){
 						monster.maxHp( Math.round(monster.maxHp() * 0.75) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.85) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.85) );
-					} else if(applyNerfingLogic == 6){
-						monster.maxHp( Math.round(monster.maxHp() * 0.8) );
-						monster.hp( monster.maxHp() );
-						monster.minDmg( Math.round(monster.minDmg() * 0.9) );
-						monster.maxDmg( Math.round(monster.maxDmg() * 0.9) );
-					} else if(applyNerfingLogic == 7){
-						monster.maxHp( Math.round(monster.maxHp() * 0.85) );
-						monster.hp( monster.maxHp() );
-						monster.minDmg( Math.round(monster.minDmg() * 0.95) );
-						monster.maxDmg( Math.round(monster.maxDmg() * 0.95) );
-					} else if(applyNerfingLogic == 8){
-						monster.maxHp( Math.round(monster.maxHp() * 0.9) );
-						monster.hp( monster.maxHp() );
 					}
 
 					//Okay, player and monster have been set up now

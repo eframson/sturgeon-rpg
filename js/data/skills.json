@@ -137,6 +137,28 @@
 			"attackType" : "heavy"
 		},
 
+		"light_smash" : {
+			"className" : "LightSmash",
+			"id" : "light_smash",
+			"name" : "Light Smash",
+			"description" : "A Light attack that deals lots of damage, but you skip your next turn.",
+			"buttonLabel" : "Light Smash",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 2.2,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 2,
+			"showLevelInformation" : 0,
+			"attackType" : "light"
+		},
+
 		"light_flurry" : {
 			"className" : "LightFlurry",
 			"id" : "light_flurry",
@@ -147,14 +169,14 @@
 			"chanceToHitCoefficient" : 1,
 			"chanceToCritCoefficient" : 1,
 			"dmgCoefficient" : 0.3,
-			"baseCooldown" : 3,
+			"baseCooldown" : 0,
 			"cooldown" : 0,
 			"skillLevel" : 1,
 			"skillProgress" : 0,
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
-			"sortOrder" : 10,
+			"sortOrder" : 3,
 			"canPurchase" : 1,
 			"requiredLevel" : 0,
 			"attackType" : "light"

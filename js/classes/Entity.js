@@ -39,14 +39,11 @@ define([
 			self.chanceToCrit = ko.observable(data.chanceToCrit || 5);
 			self.dmgCoefficient = ko.observable(data.dmgCoefficient || 1);
 
-			self.cooldowns = ko.observable({
-				basic : ko.observable(data.cooldowns.basic || 0),
-				flurry : ko.observable(data.cooldowns.basic || 0)
-			});
-
 			self.combatEffects = ko.observable({});
 
 			self.combatAbilities = ko.observable(data.combatAbilities || {});
+
+			self.numTurnsToSkip = ko.observable(data.numTurnsToSkip || 0);
 
 			self.activeCombatEffects = ko.computed(function(){
 				var combatEffectsArray = $.map(self.combatEffects(), function(elem, idx){
@@ -89,8 +86,8 @@ define([
 
 		}
 
-		this.calculateActualDmg = function(dmg, levelNum, minDmg){
-			var baseDmg = Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum);
+		this.calculateActualDmg = function(dmg, levelNum, minDmg, dmgType){
+			var baseDmg = Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum, dmgType);
 
 			if( minDmg !== undefined ){
 				baseDmg = (baseDmg < minDmg) ? minDmg : baseDmg ;

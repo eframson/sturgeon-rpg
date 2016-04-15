@@ -5,7 +5,7 @@ define([
 	'Utils'
 ], function($, ko, CombatAbility, Utils){
 
-	function HeavySmash(data){
+	function LightSmash(data){
 
 		var self = this;
 
@@ -28,8 +28,8 @@ define([
 		this.init(data);
 	}
 
-	HeavySmash.prototype = Object.create(CombatAbility.prototype);
-	HeavySmash.prototype.constructor = HeavySmash;
+	LightSmash.prototype = Object.create(CombatAbility.prototype);
+	LightSmash.prototype.constructor = LightSmash;
 
-	return HeavySmash;
+	return LightSmash;
 });
