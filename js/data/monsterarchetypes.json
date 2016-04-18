@@ -99,6 +99,33 @@
 					"great"
 				]
 			}
+		},
+
+		"berserker" : {
+			"id" : "berserker",
+			"displayString" : "Berserker",
+			"hpCoefficient" : 1.0,
+			"dmgCoefficient" : 1.2,
+			"armorCoefficient" : 0,
+			"chanceToHit" : 100,
+			"chanceToCrit" : 20,
+			"xpCoefficient" : 1.3,
+			"lootCoefficient" : 1.3,
+			"chanceOfEpicLoot" : 0.0,
+			"availableCombatAbilities" : [
+				"basic_attack"
+			],
+			"attacks" : {
+				"basic_attack" : "100"
+			},
+			"appearsOnLevel" : 1,
+			"qualityOdds" : {
+				"20" : "poor",
+				"40" : [
+					"good",
+					"great"
+				]
+			}
 		}
 
 	},

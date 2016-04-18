@@ -23,7 +23,7 @@ define([
 			});
 
 			if(doExtraDmg){
-				hitData.dmgCoefficient = 1.5;
+				hitData.dmgCoefficient = 1.2;
 			}
 		}
 

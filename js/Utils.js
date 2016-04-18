@@ -267,7 +267,7 @@ define([
 				var pctDmgAbsorbed = Math.log(armor+1)/Math.log(3000);
 				//Armor is more effective against light attacks, and less effective against heavy attacks
 				if(dmgType == "light"){
-					pctDmgAbsorbed = pctDmgAbsorbed * 1.25;
+					pctDmgAbsorbed = pctDmgAbsorbed * 1.30;
 				}else if(dmgType == "heavy"){
 					pctDmgAbsorbed = pctDmgAbsorbed * 0.75;
 				}
