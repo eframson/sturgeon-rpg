@@ -30,6 +30,8 @@ define([
 	var $FAQ = $("#faq-content");
 	var $SAVED_NOTICE = $(".saved-notice");
 	var $SAVED_PREF_NOTICE = $(".saved-pref-notice");
+	var PLAYERHPBAR = "#playerhpbar .bar";
+	var ENEMYHPBAR = "#enemyhpbar .bar";
 	var BASE_FADEOUT_SPEED = 600;
 	var BASE_FADEIN_SPEED = 400;
 	var FAST_FADEOUT_SPEED = 300;
@@ -1126,6 +1128,14 @@ define([
 				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.85) );
 			}
 
+			var $ENEMYHPBAR = $(ENEMYHPBAR);
+			$ENEMYHPBAR.text(self.currentEnemy().hp());
+			$ENEMYHPBAR.width(self.enemyHpBarWidth());
+
+			var $PLAYERHPBAR = $(PLAYERHPBAR);
+			$PLAYERHPBAR.text(self.player().hp());
+			$PLAYERHPBAR.width(self.playerHpBarWidth());
+
 		}
 
 		this.getGoesFirst = function(playerObj, monsterObj){
@@ -1167,18 +1177,20 @@ define([
 
 		this.doCombatRound = function(playerAbilityId, playerObj, monsterObj){
 
+			self.disablePlayerCombatButtons(1);
 			playerObj = playerObj || self.player();
 			monsterObj = monsterObj || self.currentEnemy();
 
 			var goesFirst = self.getGoesFirst(playerObj, monsterObj);
 			var attacker = (goesFirst == "player") ? playerObj : monsterObj ;
 			var defender = (goesFirst == "player") ? monsterObj : playerObj ;
+			var attackerIsPlayer = (goesFirst == "player" ? true : false);
 
 			var monsterAbilityId = monsterObj.selectCombatAbility();
 
 			var abilityId = (goesFirst == "player") ? playerAbilityId : monsterAbilityId ;
 
-			if(abilityId !== undefined){
+			/*if(abilityId !== undefined){
 				//Attacker does something (optionally) to the defender, and UI is updated accordingly
 				if(attacker.numTurnsToSkip() > 0){
 					attacker.numTurnsToSkip( attacker.numTurnsToSkip() - 1 );
@@ -1186,70 +1198,172 @@ define([
 					attacker.takeCombatAction(abilityId, defender, self);
 				}
 				attacker.updateCombatEffectsForRound();
-			}
+			}*/
+			self._animateAttack(attacker, defender, abilityId, attackerIsPlayer).then(function(){
+				//No args I think?
+				//To chain another .then onto the end, this function must return a Promise object too
 
-			//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
-			if(!defender.isDead()){
+				//Do the other attack now
+				console.log("first attack all done");
+				
 
-				abilityId = (goesFirst == "player") ? monsterAbilityId : playerAbilityId ;
+				//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
+				if(!defender.isDead()){
 
-				if( abilityId !== undefined ){
+					abilityId = (goesFirst == "player") ? monsterAbilityId : playerAbilityId ;
+
+					if( abilityId !== undefined ){
+
+						if(defender.numTurnsToSkip() > 0){
+							defender.numTurnsToSkip( defender.numTurnsToSkip() - 1 );
+						}else{
+							defender.takeCombatAction(abilityId, attacker, self);
+						}
+
+						defender.updateCombatEffectsForRound();
+					}
 
 					if(defender.numTurnsToSkip() > 0){
 						defender.numTurnsToSkip( defender.numTurnsToSkip() - 1 );
-					}else{
-						defender.takeCombatAction(abilityId, attacker, self);
+					}
+					
+				}
+
+
+
+
+				//@TODO FIX THIS CRAP
+				var barToAnimate = !(attackerIsPlayer == true) ? ENEMYHPBAR : PLAYERHPBAR ;
+				var barWidth = !(attackerIsPlayer == true) ? self.enemyHpBarWidth : self.playerHpBarWidth ;
+				var barNumber = !(attackerIsPlayer == true) ? self.currentEnemy().hp : self.player().hp ;
+
+				var animationArray = [
+					self._animateBarWidth(barToAnimate, barWidth),
+					self._animateBarNumber(barToAnimate, barNumber),
+				];
+				//Animate the thing
+				Promise.all(animationArray).then(function(){
+
+
+					$.each([attacker,defender], function(idx, entity){
+						if(!entity.isDead()){
+							entity.updateActiveAbilityCooldownsForRound();
+						}
+					});
+
+					if( playerObj.isDead() ){
+						self.logMessage("You were defeated in combat! Better luck next time...", "combat");
+						return;
 					}
 
-					defender.updateCombatEffectsForRound();
-				}
+					//Deliberately leaving this set to self.currentEnemy...
+					if( self.currentEnemy() && self.currentEnemy().isDead() ){
+						//"Done" the square if it's not an exit square
 
-				if(defender.numTurnsToSkip() > 0){
-					defender.numTurnsToSkip( defender.numTurnsToSkip() - 1 );
-				}
+						var square = self.level().getActiveSquare();
+
+						if(square.type != "exit"){
+							square.setDone(true);
+						}else{
+							square.isChallengeActive(0);
+						}
+
+						self.player().addExp(self.currentEnemy().expValue());
+						var apToAdd = ( self.player().ap() == 0 ) ? 2 : 1 ;
+						self.player().addAp(apToAdd);
+						self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP and " + apToAdd + " AP!", "combat");
+						self.numBattlesWon( self.numBattlesWon() + 1 );
+
+						if( self.player().hasLeveledUp() ){
+							self.player().hasLeveledUp(false);
+							self.showLevelUpModal();
+							self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
+						}
+					}
+
+					if(playerObj.numTurnsToSkip() > 0 && !monsterObj.isDead()){
+						self.doCombatRound("pass", playerObj, monsterObj);
+					}else{
+						self.disablePlayerCombatButtons(0);
+					}
+
+
+
+				});
+
+
+
+
+
+
+
 				
-			}
 
-			$.each([attacker,defender], function(idx, entity){
-				if(!entity.isDead()){
-					entity.updateActiveAbilityCooldownsForRound();
-				}
+
 			});
 
-			if( playerObj.isDead() ){
-				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
-				return;
-			}
+		}
 
-			//Deliberately leaving this set to self.currentEnemy...
-			if( self.currentEnemy() && self.currentEnemy().isDead() ){
-				//"Done" the square if it's not an exit square
+		this._animateAttack = function(attacker, defender, abilityId, attackerIsPlayer){
+			var promise = new Promise(function(resolve, reject){
+				//Do the thing
+				var barToAnimate = (attackerIsPlayer == true) ? ENEMYHPBAR : PLAYERHPBAR ;
+				var barWidth = (attackerIsPlayer == true) ? self.enemyHpBarWidth : self.playerHpBarWidth ;
+				var barNumber = (attackerIsPlayer == true) ? self.player().hp : self.currentEnemy().hp ;
 
-				var square = self.level().getActiveSquare();
-
-				if(square.type != "exit"){
-					square.setDone(true);
+				//Attacker does something (optionally) to the defender, and UI is updated accordingly
+				if(attacker.numTurnsToSkip() > 0){
+					attacker.numTurnsToSkip( attacker.numTurnsToSkip() - 1 );
 				}else{
-					square.isChallengeActive(0);
+					attacker.takeCombatAction(abilityId, defender, self);
 				}
+				attacker.updateCombatEffectsForRound();
+				console.log("actual attack done");
 
-				self.player().addExp(self.currentEnemy().expValue());
-				var apToAdd = ( self.player().ap() == 0 ) ? 2 : 1 ;
-				self.player().addAp(apToAdd);
-				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP and " + apToAdd + " AP!", "combat");
-				self.numBattlesWon( self.numBattlesWon() + 1 );
+				var animationArray = [
+					self._animateBarWidth(barToAnimate, barWidth),
+					self._animateBarNumber(barToAnimate, barNumber),
+				];
+				//Animate the thing
+				Promise.all(animationArray).then(function(){
+					console.log("animations done");
+					//Don't pass it any params, I guess?
+					setTimeout(resolve(), 300);
+					
+					/*if(1==1){ //For now we're just assuming everything works
+						resolve(); //Don't pass it any params, I guess?
+					}else{
+						reject(Error("It broke")); //Put in more helpful error messages later
+					}*/
+				});
 
-				if( self.player().hasLeveledUp() ){
-					self.player().hasLeveledUp(false);
-					self.showLevelUpModal();
-					self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
-				}
-			}
+			});
 
-			if(playerObj.numTurnsToSkip() > 0 && !monsterObj.isDead()){
-				self.doCombatRound("pass", playerObj, monsterObj);
-			}
+			return promise;
+		}
 
+		this._animateBarWidth = function(bar, barWidthObservable){
+			var promise = new Promise(function(resolve, reject){
+				var $bar = $(bar);
+
+				$bar.animate({ width: barWidthObservable() }, 500, undefined, function(){
+					resolve();
+				});
+			});
+
+			return promise;
+		}
+
+		this._animateBarNumber = function(bar, barNumberObservable){
+			var promise = new Promise(function(resolve, reject){
+				var $bar = $(bar);
+
+				$bar.animateNumbers(barNumberObservable(), false, 500, undefined, function(){
+					resolve();
+				});
+			});
+
+			return promise;
 		}
 
 		this.registerCombatEffectApplication = function(attacker, defender, combatEffectToApply){

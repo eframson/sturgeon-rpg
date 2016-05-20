@@ -280,7 +280,7 @@
 											<!--<span class="value hp" data-bind="animateNumbers: $root.player().hp()"></span>-->
 										</div>
 										<div class="line">
-											<div id="playerhpbar" class="hpbar"><div data-bind="animateWidth: $root.playerHpBarWidth(), animateNumbers: $root.player().hp()"></div></div>
+											<div id="playerhpbar" class="hpbar"><!--<div data-bind="animateWidth: $root.playerHpBarWidth(), animateNumbers: $root.player().hp()"></div>--><div class="bar"></div></div>
 										</div>
 										<div class="line">
 											<span class="stat">Speed:</span>
@@ -625,10 +625,6 @@
 										<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.lootEnemy">Loot</button>
 										<span class="button-label"></span>
 									</div>
-									<!--<div class="line">
-										<button type="button" class="btn btn-default" data-bind="css: { hidden: $root.currentEnemy() == undefined || !$root.currentEnemy().isDead() }, click: $root.leaveCombat">Leave</button>
-										<span class="button-label"></span>
-									</div>-->
 									<!-- ko if: !$root.currentEnemy().isDead() && !$root.player().isDead() -->
 
 										<!-- ko foreach: $root.player().combatAbilitiesIterable() -->
@@ -798,7 +794,7 @@
 											<!--<span class="value hp" data-bind="animateNumbers: $root.currentEnemy().hp()"></span>-->
 										</div>
 										<div class="line">
-											<div id="enemyhpbar" class="hpbar"><div data-bind="animateWidth: $root.enemyHpBarWidth(), animateNumbers: $root.currentEnemy().hp()"></div></div>
+											<div id="enemyhpbar" class="hpbar"><!--<div data-bind="animateWidth: $root.enemyHpBarWidth(), animateNumbers: $root.currentEnemy().hp()"></div>--><div class="bar"></div></div>
 										</div>
 										<div class="line">
 											<span class="stat">Speed:</span>
