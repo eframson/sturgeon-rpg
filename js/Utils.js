@@ -4,14 +4,14 @@ define([
 	'md5',
 ], function($, ko){
 
-	var Utils = {
+	class Utils {
 
 		//Returns number between min (inclusive) and max (exclusive)
-		doRand : function(min, max){
+		static doRand(min, max){
 			return Math.floor(Math.random() * (max - min)) + min;
-		},
+		}
 		
-		doBasedOnPercent : function(percentageActions, finallyAction){
+		static doBasedOnPercent(percentageActions, finallyAction){
 			var percents;
 			if(percentageActions == undefined){
 				return false;
@@ -79,29 +79,29 @@ define([
 			console.log("percents:");
 			console.log(percents);*/
 			return false;
-		},
+		}
 
-		chooseRandomly : function( opts ){
+		static chooseRandomly( opts ){
 			var randIdx = this.doRand(0, opts.length);
 			return opts[randIdx];
-		},
+		}
 		
 		//Commented out until I actually use it
-		/*failureMsg : function(messageString){
+		/*failureMsg(messageString){
 			displayMessage(messageString, "error", "Oh no!", 8000);
 		},
 		
-		successMsg : function(messageString){
+		successMsg(messageString){
 			displayMessage(messageString, "notice", "Success");
 		},
 		
-		displayMessage : function(messageString, type, growlHeader, duration){
+		displayMessage(messageString, type, growlHeader, duration){
 			type = type || "warning";
 		
 			$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
 		},*/
 
-		calculateAveragesForLevel : function(levelNum) {
+		static calculateAveragesForLevel(levelNum) {
 
 			//Avg. player HP
 			var avgPlayerHp = 20 + ((levelNum - 1) * 7);
@@ -157,9 +157,9 @@ define([
 			};
 
 			return averages;
-		},
+		}
 
-		projectedStatAllotmentsForLevel : function(levelNum){
+		static projectedStatAllotmentsForLevel(levelNum){
 			levelNum = levelNum || 1;
 
 			var output = {
@@ -242,9 +242,9 @@ define([
 			};
 
 			return output;
-		},
+		}
 
-		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum, dmgType){
+		static calculateDmgForArmorAndLevel(dmg, armor, levelNum, dmgType){
 			var actualDmg;
 			//2
 			//var minDmg = 0.20 * dmg;
@@ -281,9 +281,9 @@ define([
 			//ln(1x^n + 0) //n = 0.08
 
 			return actualDmg;
-		},
+		}
 
-		getObjectAsArrayIndexedByNumericalSortOrder : function(object, sortFieldName){
+		static getObjectAsArrayIndexedByNumericalSortOrder (object, sortFieldName){
 
 			sortFieldName = sortFieldName || "sortOrder";
 
@@ -307,18 +307,14 @@ define([
 				left = parseInt(left);
 				right = parseInt(right);
 
-				return (left > right) ? 1 : -1 ;
-
-				if(left == right){
-					return 0;
-				}
+				return (left > right) ? 1 : (left < right) ? -1 : 0 ;
 			});
 
 			return outputArray;
 
-		},
+		}
 
-		getPossibleQualities : function(){
+		static getPossibleQualities(){
 			var qualities = [
 				"poor",
 				"good",
@@ -326,9 +322,9 @@ define([
 				"exceptional"
 			];
 			return qualities;
-		},
+		}
 
-		getPossibleQualitiesWithPossibilities : function(){
+		static getPossibleQualitiesWithPossibilities(){
 			var qualities = {
 				35 : "poor",
 				45 : "good",
@@ -336,9 +332,9 @@ define([
 				5 : "exceptional"
 			};
 			return qualities;
-		},
+		}
 
-		getWeaponQualityDescriptors : function(){
+		static getWeaponQualityDescriptors(){
 			var qualities = {
 				"poor" : "Crude",
 				"good" : "Sturdy",
@@ -346,9 +342,9 @@ define([
 				"exceptional" : "Deadly",
 			};
 			return qualities;
-		},
+		}
 
-		getExportDataFromObject : function(obj){
+		static getExportDataFromObject(obj){
 
 			var exportObj;
 
@@ -386,21 +382,21 @@ define([
 
 			return exportObj;
 
-		},
+		}
 
-		scrapCostForUpgradeLevel : function(targetUpgradeLevel){
+		static scrapCostForUpgradeLevel(targetUpgradeLevel){
 			return targetUpgradeLevel * 100;
-		},
+		}
 
-		isEmptyObject : function(obj){
+		static isEmptyObject(obj){
 			if(obj == undefined || obj == null || typeof obj !== 'object'){
 				//Not sure why we were encountering this error...
 				return true;
 			}
 			return Object.keys(obj).length === 0;
-		},
+		}
 		
-		cloneObject : function(obj, genNewUniqueID){
+		static cloneObject(obj, genNewUniqueID){
 			
 			var newItemData = ko.mapping.toJS(obj);
 			
@@ -420,19 +416,19 @@ define([
 			}
 			
 			return newObj;
-		},
+		}
 
-		microtime : function(get_as_float) {
+		static microtime(get_as_float) {
 			var unixtime_ms = (new Date).getTime();
 			var sec = Math.floor(unixtime_ms/1000);
 			return get_as_float ? (unixtime_ms/1000) : (unixtime_ms - (sec * 1000))/1000 + ' ' + sec;
-		},
+		}
 
-		uniqueID : function(){
+		static uniqueID(){
 			return md5(this.microtime());
-		},
+		}
 
-		makeMagicReplacements : function(string, objectsToCheck) {
+		static makeMagicReplacements(string, objectsToCheck) {
 
 			if(string == undefined || objectsToCheck == undefined || (Array.isArray(objectsToCheck) && objectsToCheck.length == 0) ){
 				return false;
@@ -466,7 +462,7 @@ define([
 			}
 
 			return magicDesc;
-		},
+		}
 
 	}
 

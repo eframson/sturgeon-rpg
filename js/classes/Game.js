@@ -16,11 +16,11 @@ define([
 	'json!data/items.json',
 	'json!data/monsters.json',
 	'json!data/skills.json',
-	'Utils',
 	'classes/Grid',
+	'Utils',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, Accessory, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils, Grid) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, Accessory, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Grid, Utils) {
 
 	//Can these be knockout custom bindings? Some of them, surely...
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
@@ -277,6 +277,7 @@ define([
 		this.ignoreSquareActions = 0;
 		this.srcCollection = undefined;
 		this.equipItemCallback = undefined;
+		this.isLooting = false;
 		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
@@ -1347,6 +1348,11 @@ define([
 		}
 
 		this.lootEnemy = function(){
+
+			if(self.isLooting){
+				return true;
+			}
+			self.isLooting = true;
 			
 			var square = self.level().getActiveSquare();
 			var lootTable = "monster";
@@ -1400,6 +1406,8 @@ define([
 			self.manageTransitionToView("combat","container", function(){ self.logMessage(foundItemString, "item"); });
 
 			self.level().drawMap();
+
+			self.isLooting = false;
 		}
 
 		this.leaveCombat = function(){
@@ -5100,7 +5108,6 @@ define([
 PROBLEMS NEEDING SOLUTIONS:
 
 BUGS:
-- "Loot" button can be clicked multiple times
 - When buying/selling scraps from merchant, inventory and merchant items are both highlighted
 - Reset skill appears on the list of levelable abilities
 - When a skill's level is improved as a result of player leveling, it says the skill proficiency has improved to 0
