@@ -96,6 +96,11 @@ define([
 			return baseDmg;
 		}
 
+		this.takeStaggerDmg = function(){
+			//Do nothing, this is only something Monsters can actually do,
+			//but this is just here so nothing explodes
+		}
+
 		this.takeCombatAction = function(abilityId, target, game){
 
 			if(self.canAct() && abilityId != 'pass'){

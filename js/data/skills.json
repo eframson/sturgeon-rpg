@@ -115,6 +115,28 @@
 			"showLevelInformation" : 0
 		},
 
+		"basic_staggering_attack" : {
+			"className" : "BasicAttack",
+			"id" : "basic_staggering_attack",
+			"name" : "Basic Stagger",
+			"description" : "Strike your enemy with your currently equipped weapon (if any).",
+			"buttonLabel" : "Attack!",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 1,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 1,
+			"showLevelInformation" : 0,
+			"staggerDmg" : 30
+		},
+
 		"heavy_attack" : {
 			"className" : "HeavySmash",
 			"id" : "heavy_attack",

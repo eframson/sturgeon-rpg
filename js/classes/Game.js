@@ -5235,6 +5235,14 @@ https://github.com/felipecsl/random-maze-generator
 http://stackoverflow.com/questions/16150255/javascript-maze-generator
 http://xefer.com//maze-generator
 
+THOUGHTS ON COMBAT REDESIGN
+- Not going to incorporate movement/positioning, yet
+- 3 basic attacks (which can be combined/customized)
+- A "stagger" gauge (some enemies stagger more easily than others)
+- 1 attack does heavy HP damage to staggered enemies or very small HP dmg and very small stagger DMG to non-staggered enemies
+- 1 attack does good stagger damage and very little HP damage
+- 1 attack does small HP and small stagger dmg but has <some other effect>
+
 */
 
 });

@@ -27,6 +27,8 @@ define([
 			/*self.chanceToHit = data.chanceToHit || undefined;
 			self.chanceToCrit = data.chanceToCrit || undefined;*/
 			self.dmg = data.dmg || undefined;
+			self.staggerDmg = data.staggerDmg || undefined;
+			self.ultCharge = data.ultCharge || 0;
 			self.dmgCoefficient = data.dmgCoefficient !== undefined ? data.dmgCoefficient : 1;
 			self.chanceToHitCoefficient = data.chanceToHitCoefficient || 1;
 			self.chanceToCritCoefficient = data.chanceToCritCoefficient || 1;

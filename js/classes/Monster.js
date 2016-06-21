@@ -41,6 +41,12 @@ define([
 			self.lootCoefficient = ko.observable(monsterData.lootCoefficient || 1);
 			self.chanceToCrit = ko.observable(monsterData.chanceToCrit || 0);
 
+			self.stagger = ko.observable(monsterData.stagger || 0);
+			self.staggerPoint = ko.observable(monsterData.staggerPoint || 0);
+			self.staggerDefense = ko.observable(monsterData.staggerDefense || 0);
+			self.staggerRecoveryPerTurn = ko.observable(monsterData.staggerRecoveryPerTurn || 0);
+			self.staggerDuration = ko.observable(monsterData.staggerDuration || 0);
+
 			self.availableAttacks = monsterData.availableAttacks || {};
 
 			var archetypeData;
@@ -258,6 +264,11 @@ define([
 				return undefined;
 			}
 
+		}
+
+		this.takeStaggerDmg = function(baseDmg){
+			//Increase current stagger by (baseDmg less stagger resistance)
+			//If current stagger > stagger point
 		}
 
 		this.getMonsterArchetypeById = function(archetypeID, archetypeClass){

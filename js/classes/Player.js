@@ -111,6 +111,7 @@ define([
 			self.baseArmor = ko.observable(data.baseArmor || 0);
 			self.ap = ko.observable(data.ap || 2);
 			self.maxAp = ko.observable(data.maxAp || 10);
+			self.ultGauge = ko.observable(data.ultGauge || 0);
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
