@@ -1093,6 +1093,10 @@ define([
 				newObj
 			));
 
+			self.currentEnemy().applyCombatEffect(
+				new CombatEffect(self.skillDataCollection.getNode(["combat_effects", "stagger_recovery"]))
+			);
+
 			/*console.log("Init new monster. Monster has:");
 			console.log("minDmg: " + self.currentEnemy().minDmg());
 			console.log("maxDmg: " + self.currentEnemy().maxDmg());
@@ -1106,32 +1110,37 @@ define([
 			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
 			self.playerHpBarWidth(playerHpBarWidth);
 			self.enemyHpBarWidth(self.hpBarBaseWidth);
+			var monster = self.currentEnemy();
 
 			//Let's sneak in some selective nerfing here...
 			if( self.level().levelNum() < 2 ){
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
+				monster.maxHp( Math.round(monster.maxHp() * 0.6) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.7) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.25));
 			} else if( self.level().levelNum() < 3 ){
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.65) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.75) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.75) );
+				monster.maxHp( Math.round(monster.maxHp() * 0.65) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.75) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.75) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.45));
 			} else if( self.level().levelNum() < 4 ){
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.7) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.8) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.8) );
+				monster.maxHp( Math.round(monster.maxHp() * 0.7) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.8) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.8) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.65));
 			} else if( self.level().levelNum() < 5 ) {
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.75) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.85) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.85) );
+				monster.maxHp( Math.round(monster.maxHp() * 0.75) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.85) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.85) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.85));
 			}
 
 			var $ENEMYHPBAR = $(ENEMYHPBAR);
-			$ENEMYHPBAR.text(self.currentEnemy().hp());
+			$ENEMYHPBAR.text(monster.hp());
 			$ENEMYHPBAR.width(self.enemyHpBarWidth());
 
 			var $PLAYERHPBAR = $(PLAYERHPBAR);
@@ -4974,6 +4983,10 @@ define([
 
 				var monster = new Monster(newObj, function(){
 
+					monster.applyCombatEffect(
+						new CombatEffect(self.skillDataCollection.getNode(["combat_effects", "stagger_recovery"]))
+					);
+
 					//Reset our "goes first" tracker
 					self._goesFirst = undefined;
 
@@ -4982,21 +4995,25 @@ define([
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.7) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.25));
 					} else if( (applyNerfingLogic == 1 && monsterLevel < 3) || applyNerfingLogic == 3 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.65) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.75) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.75) );
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.45));
 					} else if( (applyNerfingLogic == 1 && monsterLevel < 4) || applyNerfingLogic == 4 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.7) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.8) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.8) );
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.65));
 					} else if( (applyNerfingLogic == 1 && monsterLevel < 5) || applyNerfingLogic == 5){
 						monster.maxHp( Math.round(monster.maxHp() * 0.75) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.85) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.85) );
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.85));
 					}
 
 					//Okay, player and monster have been set up now

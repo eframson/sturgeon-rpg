@@ -17,14 +17,15 @@ define([
 			self.baseDuration = data.baseDuration || 0;
 			self.delayUntilNextApplication = ko.observable(data.delayUntilNextApplication || 0);
 			self.baseDelayUntilNextApplication = data.baseDelayUntilNextApplication || 0;
+			self.display = (data.display != undefined) ? data.display : 1 ;
 			
 			self.isActive = ko.computed(function(){
-				return self.duration() > 0;
+				return self.duration() > 0 || self.duration() < 0;
 			});
 
 		}
 
-		this.doRound = function(){
+		this.doRound = function(entity){
 
 			if(self.duration() > 0){
 
@@ -33,6 +34,10 @@ define([
 				}
 
 				self.duration( self.duration() - 1 );
+
+				if(self.duration() == 0 && entity.customCombatEffectExpiryHandlers[self.id] != undefined){
+					entity.customCombatEffectExpiryHandlers[self.id](self);
+				}
 			}
 
 			if( self.isActive() == 0 && self.delayUntilNextApplication() > 0 ){

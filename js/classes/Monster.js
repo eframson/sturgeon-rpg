@@ -3,11 +3,12 @@ define([
 	'knockout',
 	'classes/Entity',
 	'classes/DataCollection',
+	'classes/CombatEffect',
 
 	'json!data/monsterarchetypes.json',
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, Entity, DataCollection, monsterArchetypeDataFile, skillDataFile, Utils){
+], function($, ko, Entity, DataCollection, CombatEffect, monsterArchetypeDataFile, skillDataFile, Utils){
 
 	function Monster(monsterData, onFinishedLoadingCallback){
 
@@ -42,10 +43,12 @@ define([
 			self.chanceToCrit = ko.observable(monsterData.chanceToCrit || 0);
 
 			self.stagger = ko.observable(monsterData.stagger || 0);
+			//To make monsters more or less resistant to being staggered, just raise/lower the staggerPoint
 			self.staggerPoint = ko.observable(monsterData.staggerPoint || 0);
-			self.staggerDefense = ko.observable(monsterData.staggerDefense || 0);
-			self.staggerRecoveryPerTurn = ko.observable(monsterData.staggerRecoveryPerTurn || 0);
-			self.staggerDuration = ko.observable(monsterData.staggerDuration || 0);
+			self.pctDmgToIgnoreWhenUnstaggered = monsterData.pctDmgToIgnoreWhenUnstaggered || 0.5;
+			self.staggerRecoveryPerTurn = monsterData.staggerRecoveryPerTurn || 0.1;
+			self.staggerDuration = ko.observable(monsterData.staggerDuration || 4);
+			self.pctExtraDmgTakenWhenStaggered = monsterData.pctExtraDmgTakenWhenStaggered || 0.25;
 
 			self.availableAttacks = monsterData.availableAttacks || {};
 
@@ -82,6 +85,7 @@ define([
 				self.maxHp( Math.round((Utils.doRand(Math.ceil(stats.monster.hp * 0.9), Math.ceil(stats.monster.hp * 1.1))) ));
 				self.maxHp( Math.round(self.maxHp() * self.hpCoefficient()) );
 				self.hp( self.maxHp() );
+				self.staggerPoint(self.hp());
 				self.minDmg( Math.round(stats.monster.baseDmg * 0.9) );
 				self.maxDmg( Math.round(stats.monster.baseDmg * 1.1) );
 
@@ -193,6 +197,23 @@ define([
 
 		}
 
+		self.customCombatEffectRoundHandlers = {
+			"stagger_recovery" : function(combatEffect){
+				var isStaggered = self.hasActiveCombatEffect("stagger");
+				if(isStaggered){
+					//Do nothing
+				}else{
+					var setStaggerTo = Math.round( self.stagger() - (self.staggerRecoveryPerTurn * self.staggerPoint()));
+					self.stagger( (setStaggerTo < 0) ? 0 : setStaggerTo );
+				}
+			}
+		};
+		self.customCombatEffectExpiryHandlers = {
+			"stagger" : function(combatEffect){
+				self.stagger(0);
+			}
+		};
+
 		this.selectCombatAbility = function(){
 
 			var baseAvailableAttacks = {};
@@ -266,9 +287,47 @@ define([
 
 		}
 
-		this.takeStaggerDmg = function(baseDmg){
-			//Increase current stagger by (baseDmg less stagger resistance)
-			//If current stagger > stagger point
+		this.calculateActualDmg = function(dmg, levelNum, minDmg, dmgType){
+			return dmg;
+		}
+
+		this.takeDmg = function(hpDmg, staggerDmg){
+
+			//For now let's just forget about armor...
+			//Attempted HP dmg = attempted dmg * pct of HP dmg done by ability (rounded)
+			//Attempted stagger dmg = attempted dmg * pct of stagger dmg done by ability (rounded)
+			//If monster is staggered, monster takes full HP dmg (or more than full???)
+			//If monster is not staggered, monster takes less HP dmg (varies by monster?)
+			var isStaggered = self.hasActiveCombatEffect("stagger");
+			console.log("Raw HP dmg: " + hpDmg);
+			if(isStaggered){
+				hpDmg = Math.round(hpDmg * (1 + self.pctExtraDmgTakenWhenStaggered));
+			}else{
+				hpDmg = Math.round(hpDmg * (1 - self.pctDmgToIgnoreWhenUnstaggered));
+			}
+			console.log("Modified HP dmg: " + hpDmg);
+
+			self.hp( self.hp() - hpDmg );
+			var didStagger = self.takeStaggerDmg(staggerDmg);
+			return didStagger;
+		}
+
+		this.takeStaggerDmg = function(staggerDmg){
+			var isStaggered = self.hasActiveCombatEffect("stagger");
+			if(!isStaggered){
+				staggerDmg = Math.round(staggerDmg);
+				staggerDmg = (staggerDmg > (self.staggerPoint() - self.stagger())) ? self.staggerPoint() - self.stagger() : staggerDmg ;
+				console.log("Taking stagger dmg: " + staggerDmg);
+				self.stagger( self.stagger() + staggerDmg );
+
+				if(self.stagger() >= self.staggerPoint()){
+					var staggerEffect = new CombatEffect(skillDataCollection.getNode(["combat_effects", "stagger"]));
+					staggerEffect.baseDuration = self.staggerDuration();
+					self.applyCombatEffect(staggerEffect);
+					return staggerEffect;
+				}
+			}
+			return false;
 		}
 
 		this.getMonsterArchetypeById = function(archetypeID, archetypeClass){

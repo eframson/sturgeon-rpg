@@ -57,6 +57,14 @@ define([
 				return activeEffects;
 			});
 
+			self.displayCombatEffects = ko.computed(function(){
+				var activeEffects = $.grep(self.activeCombatEffects(), function(elem, idx){
+					return elem.display;
+				});
+
+				return activeEffects;
+			});
+
 			self.immuneCombatEffects = ko.computed(function(){
 				var combatEffectsArray = $.map(self.combatEffects(), function(elem, idx){
 					return elem;
@@ -85,6 +93,9 @@ define([
 			});
 
 		}
+
+		self.customCombatEffectRoundHandlers = {};
+		self.customCombatEffectExpiryHandlers = {};
 
 		this.calculateActualDmg = function(dmg, levelNum, minDmg, dmgType){
 			var baseDmg = Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum, dmgType);
@@ -118,12 +129,15 @@ define([
 
 		this.updateCombatEffectsForRound = function(){
 			
-			$.each(self.combatEffects(), function(idx, effect){
-
-				effect.doRound();
-
+			$.each(self.activeCombatEffects(), function(idx, effect){
+				effect.doRound(self);
 			});
-
+			//Make sure all effects have been evaluated before doing "special" things
+			$.each(self.activeCombatEffects(), function(idx, effect){
+				if(self.customCombatEffectRoundHandlers[effect.id] != undefined){
+					self.customCombatEffectRoundHandlers[effect.id](effect);
+				}
+			});
 		}
 
 		this.updateActiveAbilityCooldownsForRound = function(){
@@ -169,7 +183,6 @@ define([
 
 		this.takeDmg = function(dmg){
 			self.hp( self.hp() - dmg );
-			return self.hp();
 		}
 
 		this.hasArmor = function(){
@@ -182,7 +195,7 @@ define([
 
 		this.hasActiveCombatEffect = function(effect_id){
 			var activeEffect = $.grep(self.activeCombatEffects(), function(elem, idx){
-				return elem.id == effect_id;
+				return elem.id == effect_id && elem.isActive();
 			});
 
 			return activeEffect.length > 0;

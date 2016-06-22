@@ -62,10 +62,11 @@ define([
 
 			if(Utils.isEmptyObject(data.combatAbilities)){
 				data.combatAbilities = {
-					basic_attack: {},
-					heavy_attack : {},
+					basic_stagger_attack: {},
+					basic_hp_attack : {},
+					basic_ult_builder : {},
 					//light_smash : {},
-					light_flurry : {},
+					//light_flurry : {},
 					//stun : {},
 					//mighty : {},
 					//flurry: {}
@@ -111,7 +112,8 @@ define([
 			self.baseArmor = ko.observable(data.baseArmor || 0);
 			self.ap = ko.observable(data.ap || 2);
 			self.maxAp = ko.observable(data.maxAp || 10);
-			self.ultGauge = ko.observable(data.ultGauge || 0);
+			self.currentUltCharge = ko.observable(data.currentUltCharge || 0);
+			self.maxUltCharge = 100;
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){

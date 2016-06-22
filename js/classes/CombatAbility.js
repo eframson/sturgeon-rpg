@@ -27,8 +27,9 @@ define([
 			/*self.chanceToHit = data.chanceToHit || undefined;
 			self.chanceToCrit = data.chanceToCrit || undefined;*/
 			self.dmg = data.dmg || undefined;
-			self.staggerDmg = data.staggerDmg || undefined;
+			self.staggerDmg = data.staggerDmg || 0.0;
 			self.ultCharge = data.ultCharge || 0;
+			self.pctHPDmg = data.pctHPDmg || (1 - self.staggerDmg);
 			self.dmgCoefficient = data.dmgCoefficient !== undefined ? data.dmgCoefficient : 1;
 			self.chanceToHitCoefficient = data.chanceToHitCoefficient || 1;
 			self.chanceToCritCoefficient = data.chanceToCritCoefficient || 1;
@@ -101,13 +102,16 @@ define([
 					dmgObject.dmgDealt = Math.ceil(dmgObject.dmgDealt);
 
 					//Add any +x damage from the attacker's equipped weapon
+					//@TODO get rid of the "extra damage" concept, unfortunately
 					dmgObject.dmgDealt += attacker.hasWeapon() ? attacker.getEquippedWeapon().extraDamage() : 0 ;
 
-					if( defender.hasActiveCombatEffect("cracked") ){
+					//As we introduce staggering mechanics, keep it simple for now
+					/*if( defender.hasActiveCombatEffect("cracked") ){
 						dmgObject.dmgDealt = Math.round(dmgObject.dmgDealt * 1.2);
-					}
+					}*/
 
 					//Calculate the actual damage done to the target, applying any armor/other mitigation effects
+					//This is where the player has damage reduced
 					actualDmg = defender.calculateActualDmg(dmgObject.dmgDealt, game.level().levelNum(), self.attackType);
 
 				}else{
@@ -121,9 +125,28 @@ define([
 					attackType : self.name,
 				};
 
+				//For now let's just forget about armor...
+				//Attempted HP dmg = attempted dmg * pct of HP dmg done by ability (rounded)
+				//Attempted stagger dmg = attempted dmg * pct of stagger dmg done by ability (rounded)
+				//If monster is staggered, monster takes full HP dmg (or more than full???)
+				//If monster is not staggered, monster takes less HP dmg (varies by monster?)
+
 				//Apply our actual damage amount to the defender (if any damage should be received)
+				var staggerEffect;
 				if(actualDmg > 0){
-					defender.takeDmg(actualDmg);
+					var hpDmg = Math.round(self.pctHPDmg * actualDmg);
+					var staggerDmg = Math.round(self.staggerDmg * actualDmg);
+					//This is where monsters have damage reduced
+					staggerEffect = defender.takeDmg(hpDmg, staggerDmg);
+				}
+				if(staggerEffect){
+					//An enemy was just hit, and it was staggered
+					game.registerCombatEffectApplication(attacker, defender, staggerEffect);
+				}
+				//@TODO This is pretty screwy, we should fix it...
+				if(staggerEffect || staggerEffect == false){
+					abilityResults.attemptedDmg = actualDmg;
+					abilityResults.actualDmg = hpDmg;
 				}
 
 				//Set the ability on cooldown if applicable

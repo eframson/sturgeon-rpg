@@ -293,27 +293,27 @@
 								<div class="active-effects-section">
 									<div class="effects-header">
 										<div class="header">Active Effects</div>
-										<!-- ko if: $root.player().activeCombatEffects().length > 0 -->
+										<!-- ko if: $root.player().displayCombatEffects().length > 0 -->
 											<div class="small">(Mouseover to see description)</div>
 										<!-- /ko -->
 									</div>
 									<div class="lines active-effects">
 
-										<!-- ko if: $root.player().activeCombatEffects().length > 0 -->
+										<!-- ko if: $root.player().displayCombatEffects().length > 0 -->
 										<div class="line empty section-header">
 											<span class="item">Name</span>
 											<span class="value">Duration</span>
 										</div>
 										<!-- /ko -->
 										
-										<!-- ko foreach: $root.player().activeCombatEffects() -->
+										<!-- ko foreach: $root.player().displayCombatEffects() -->
 										<div class="line" data-bind="tooltip: {title : $data.description, placement: 'top', container : 'body'}">
 											<span class="item" data-bind="html: $data.name"></span>
 											<span class="value" data-bind="text: $data.duration()"></span>
 										</div>
 										<!-- /ko -->
 
-										<!-- ko if: $root.player().activeCombatEffects().length == 0 -->
+										<!-- ko if: $root.player().displayCombatEffects().length == 0 -->
 										<div class="line empty">
 											<span class="item">(No combat effects are currently active)</span>
 										</div>
@@ -800,9 +800,13 @@
 											<span class="stat">Speed:</span>
 											<span class="value" data-bind="text: $root.currentEnemy().speed()"></span>
 										</div>
-										<div class="line">
+										<!-- <div class="line">
 											<span class="stat">AC:</span>
 											<span class="value" data-bind="text: $root.currentEnemy().armor()"></span>
+										</div> -->
+										<div class="line">
+											<span class="stat">Stagger:</span>
+											<span class="value" data-bind="text: $root.currentEnemy().stagger() + ' / ' + $root.currentEnemy().staggerPoint()"></span>
 										</div>
 										
 									</div>
@@ -812,27 +816,27 @@
 								<div class="active-effects-section">
 									<div class="effects-header">
 										<div class="header">Active Effects</div>
-										<!-- ko if: $root.currentEnemy().activeCombatEffects().length > 0 -->
+										<!-- ko if: $root.currentEnemy().displayCombatEffects().length > 0 -->
 											<div class="small">(Mouseover to see description)</div>
 										<!-- /ko -->
 									</div>
 									<div class="lines active-effects">
 
-										<!-- ko if: $root.currentEnemy().activeCombatEffects().length > 0 -->
+										<!-- ko if: $root.currentEnemy().displayCombatEffects().length > 0 -->
 										<div class="line empty section-header">
 											<span class="item">Name</span>
 											<span class="value">Duration</span>
 										</div>
 										<!-- /ko -->
 										
-										<!-- ko foreach: $root.currentEnemy().activeCombatEffects() -->
+										<!-- ko foreach: $root.currentEnemy().displayCombatEffects() -->
 										<div class="line" data-bind="tooltip: {title : $data.description, placement: 'top', container : 'body'}">
 											<span class="item" data-bind="html: $data.name"></span>
 											<span class="value" data-bind="text: $data.duration()"></span>
 										</div>
 										<!-- /ko -->
 
-										<!-- ko if: $root.currentEnemy().activeCombatEffects().length == 0 -->
+										<!-- ko if: $root.currentEnemy().displayCombatEffects().length == 0 -->
 										<div class="line empty">
 											<span class="item">(No combat effects are currently active)</span>
 										</div>

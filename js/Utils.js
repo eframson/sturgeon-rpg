@@ -20,11 +20,11 @@ define([
 			var discretePercents = Object.keys(percentageActions);
 			var percents = Array();
 
-			for(i = 0; i < discretePercents.length; i++){
+			for(var i = 0; i < discretePercents.length; i++){
 
 				if( percentageActions[discretePercents[i]].constructor == Array ){
 
-					for(j=0; j < percentageActions[discretePercents[i]].length; j++){
+					for(var j=0; j < percentageActions[discretePercents[i]].length; j++){
 						percents.push(discretePercents[i]);
 					}
 
@@ -362,7 +362,7 @@ define([
 						exportObj = this.getExportDataFromObject(obj.getExportData());
 					}else{
 						exportObj= {};
-						for(prop in obj){
+						for(var prop in obj){
 							exportObj[prop] = this.getExportDataFromObject(obj[prop]);
 						}
 					}
@@ -445,7 +445,7 @@ define([
 				for(var i = 0; i < matches.length; i++){
 					var trimmedMatch = matches[i].replace(/%/g, "");
 
-					for(j = 0; j < objectsToCheck.length; j++){
+					for(var j = 0; j < objectsToCheck.length; j++){
 						var object = objectsToCheck[j];
 
 						if(object == undefined || object[trimmedMatch] == undefined){

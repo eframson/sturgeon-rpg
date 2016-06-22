@@ -115,12 +115,12 @@
 			"showLevelInformation" : 0
 		},
 
-		"basic_staggering_attack" : {
+		"basic_stagger_attack" : {
 			"className" : "BasicAttack",
-			"id" : "basic_staggering_attack",
+			"id" : "basic_stagger_attack",
 			"name" : "Basic Stagger",
-			"description" : "Strike your enemy with your currently equipped weapon (if any).",
-			"buttonLabel" : "Attack!",
+			"description" : "Deals a lot of staggering damage but not much HP damage.",
+			"buttonLabel" : "Basic Stag. Atk.",
 			"numAttempts" : 1,
 			"chanceToHitCoefficient" : 1,
 			"chanceToCritCoefficient" : 1,
@@ -134,7 +134,55 @@
 			"canTrainNextLevel" : 0,
 			"sortOrder" : 1,
 			"showLevelInformation" : 0,
-			"staggerDmg" : 30
+			"staggerDmg" : 0.7,
+			"ultCharge" : 5
+		},
+
+		"basic_hp_attack" : {
+			"className" : "BasicAttack",
+			"id" : "basic_hp_attack",
+			"name" : "Basic Attack",
+			"description" : "Deals a lot of HP damage and a little staggering damage.",
+			"buttonLabel" : "Basic Atk.",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 1,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 1,
+			"showLevelInformation" : 0,
+			"staggerDmg" : 0.2,
+			"ultCharge" : 5
+		},
+
+		"basic_ult_builder" : {
+			"className" : "BasicAttack",
+			"id" : "basic_ult_builder",
+			"name" : "Basic Ult Gauge Builder",
+			"description" : "Deals little HP damage and little staggering damage, but builds ult gauge quickly.",
+			"buttonLabel" : "Basic Ult. Builder",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 1,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 1,
+			"showLevelInformation" : 0,
+			"staggerDmg" : 0.2,
+			"pctHPDmg" : 0.2,
+			"ultCharge" : 15
 		},
 
 		"heavy_attack" : {
@@ -278,8 +326,7 @@
 			"baseDuration" : 2,
 			"duration" : 0,
 			"baseDelayUntilNextApplication" : 4,
-			"delayUntilNextApplication" : 0,
-			"isActive" : 0
+			"delayUntilNextApplication" : 0
 		},
 		"cracked" : {
 			"id" : "cracked",
@@ -288,8 +335,26 @@
 			"baseDuration" : 3,
 			"duration" : 0,
 			"baseDelayUntilNextApplication" : 4,
+			"delayUntilNextApplication" : 0
+		},
+		"stagger" : {
+			"id" : "stagger",
+			"name" : "Staggered",
+			"description" : "Staggered. Takes increased damage from all abilities.",
+			"baseDuration" : 0,
+			"duration" : 0,
+			"baseDelayUntilNextApplication" : 0,
+			"delayUntilNextApplication" : 0
+		},
+		"stagger_recovery" : {
+			"id" : "stagger_recovery",
+			"name" : "Stagger Recovery",
+			"description" : "Slowly recovering Stagger",
+			"baseDuration" : -1,
+			"duration" : -1,
+			"baseDelayUntilNextApplication" : 0,
 			"delayUntilNextApplication" : 0,
-			"isActive" : 0
+			"display" : 0
 		}
 	},
 
