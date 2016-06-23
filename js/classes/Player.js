@@ -78,21 +78,15 @@ define([
 			self.passiveAbilities = ko.observable({});
 
 			$.each(data.activeAbilities, function(idx, elem){
-
 				self.addActiveAbility(idx, elem);
-
 			});
 
 			$.each(data.combatAbilities, function(idx, elem){
-
 				self.addCombatAbility(idx, elem);
-
 			});
 
 			$.each(data.passiveAbilities, function(idx, elem){
-
 				self.addPassiveAbility(idx, elem);
-
 			});
 
 			self.levelUpChanges = {}
@@ -118,6 +112,24 @@ define([
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
 				return self.hp() < 1;
+			});
+
+			self.ultReady = ko.computed(function(){
+				return self.currentUltCharge() == self.maxUltCharge;
+			});
+
+			self.ultBarColor = ko.computed(function(){
+				var h = 39;
+				var s = 100;
+				var lMax = 78;
+				var lMin = 50;
+
+				var pctOfUlt = self.currentUltCharge() / self.maxUltCharge;
+				var l = lMax - (Math.round(pctOfUlt * (lMax - lMin)));
+
+				var hexVal = Utils.hslToHex(h, s, l);
+
+				return "#" + hexVal;
 			});
 
 			var itemArray = Array();
@@ -754,6 +766,12 @@ define([
 			apToSub = (apAmt > self.ap()) ? self.ap() : apAmt;
 			self.ap( self.ap() - apToSub );
 			return apToSub;
+		}
+
+		this.chargeUlt = function(chargeAmt){
+			var setUltChargeTo = self.currentUltCharge() + chargeAmt;
+			setUltChargeTo = (setUltChargeTo > self.maxUltCharge) ? self.maxUltCharge : setUltChargeTo ;
+			self.currentUltCharge(setUltChargeTo);
 		}
 
 		this.customSaveHandlers = {

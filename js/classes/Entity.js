@@ -3,10 +3,11 @@ define([
 	'knockout',
 	'classes/DataCollection',
 	'classes/SaveableObject',
+	'classes/CombatEffect',
 
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, DataCollection, SaveableObject, skillDataFile, Utils){
+], function($, ko, DataCollection, SaveableObject, CombatEffect, skillDataFile, Utils){
 
 	function Entity(data, onFinishedLoadingCallback){
 
@@ -44,6 +45,14 @@ define([
 			self.combatAbilities = ko.observable(data.combatAbilities || {});
 
 			self.numTurnsToSkip = ko.observable(data.numTurnsToSkip || 0);
+
+			if(data.combatEffects){
+				var effects = {};
+				$.each(data.combatEffects, function(idx, effect){
+					effects[idx] = new CombatEffect(effect);
+				});
+				self.combatEffects(effects);
+			}
 
 			self.activeCombatEffects = ko.computed(function(){
 				var combatEffectsArray = $.map(self.combatEffects(), function(elem, idx){
@@ -109,6 +118,11 @@ define([
 
 		this.takeStaggerDmg = function(){
 			//Do nothing, this is only something Monsters can actually do,
+			//but this is just here so nothing explodes
+		}
+
+		this.chargeUlt = function(chargeAmt){
+			//Do nothing, this is only something Players can actually do,
 			//but this is just here so nothing explodes
 		}
 

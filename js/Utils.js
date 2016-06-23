@@ -1,8 +1,9 @@
 define([
 	'jquery',
 	'knockout',
-	'md5',
-], function($, ko){
+	'tinycolor-min',
+	'md5'
+], function($, ko, tinycolor){
 
 	class Utils {
 
@@ -464,6 +465,10 @@ define([
 			return magicDesc;
 		}
 
+		static hslToHex (h, s, l){
+			var colorObj = tinycolor("hsl(" + h + ", " + s + "%, " + l + "%)"); 
+			return colorObj.toHex();
+		}
 	}
 
 	String.prototype.toProperCase = function () {

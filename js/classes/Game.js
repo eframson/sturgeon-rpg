@@ -32,6 +32,8 @@ define([
 	var $SAVED_PREF_NOTICE = $(".saved-pref-notice");
 	var PLAYERHPBAR = "#playerhpbar .bar";
 	var ENEMYHPBAR = "#enemyhpbar .bar";
+	var PLAYERULTBAR = "#playerultbar .bar";
+	var ENEMYSTAGGERBAR = "#enemystaggerbar .bar";
 	var BASE_FADEOUT_SPEED = 600;
 	var BASE_FADEIN_SPEED = 400;
 	var FAST_FADEOUT_SPEED = 300;
@@ -356,6 +358,9 @@ define([
 			self.hpBarBaseWidth = 368;
 			self.playerHpBarWidth = ko.observable(self.hpBarBaseWidth);
 			self.enemyHpBarWidth = ko.observable(self.hpBarBaseWidth);
+			self.playerUltBarWidth = ko.observable(0);
+			self.enemyStaggerBarWidth = ko.observable(0);
+			self.ultBarText = ko.observable("");
 
 			self.inventorySortOrder = ko.observable("Type");
 			self.containerSortOrder = ko.observable("Type");
@@ -835,6 +840,8 @@ define([
 				self.backButtonLabel(gameData.backButtonLabel);
 				self.playerHpBarWidth(gameData.playerHpBarWidth);
 				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
+				self.playerUltBarWidth(gameData.playerUltBarWidth);
+				self.enemyStaggerBarWidth(gameData.enemyStaggerBarWidth);
 				self.goldGained(gameData.goldGained);
 
 				// These "if" statements are really only necessary to accomodate beta testers (i.e. - anyone loading a game from a previous "version")
@@ -911,6 +918,12 @@ define([
 			}
 
 			self.player(player);
+
+			self.player().currentUltCharge.subscribe(function(newVal){
+				var width = self._calculateHpBarWidthForGivenCurrentAndMaxHp(newVal, self.player().maxUltCharge);
+				self._animateBarWidth(PLAYERULTBAR, width);
+				self.ultBarText(self.player().ultReady() ? "READY" : "")
+			});
 
 			self.level().revealSquaresNearPlayer(1);
 			self.level().drawMap();
@@ -1093,23 +1106,25 @@ define([
 				newObj
 			));
 
+			self.currentEnemy().stagger.subscribe(function(newVal){
+				var width = self._calculateHpBarWidthForGivenCurrentAndMaxHp(newVal, self.currentEnemy().staggerPoint());
+				self._animateBarWidth(ENEMYSTAGGERBAR, width);
+			});
+
 			self.currentEnemy().applyCombatEffect(
 				new CombatEffect(self.skillDataCollection.getNode(["combat_effects", "stagger_recovery"]))
 			);
 
-			/*console.log("Init new monster. Monster has:");
-			console.log("minDmg: " + self.currentEnemy().minDmg());
-			console.log("maxDmg: " + self.currentEnemy().maxDmg());
-			console.log("hit chance: " + self.currentEnemy().chanceToHit());
-			console.log("crit chance: " + self.currentEnemy().chanceToCrit());
-			console.log("max hp: " + self.currentEnemy().maxHp());*/
-
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
 
+			//Set/reset our bars properly
 			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
 			self.playerHpBarWidth(playerHpBarWidth);
+			var playerUltBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().currentUltCharge(), self.player().maxUltCharge);
+			self.playerUltBarWidth(playerUltBarWidth);
 			self.enemyHpBarWidth(self.hpBarBaseWidth);
+			self.enemyStaggerBarWidth(0);
 			var monster = self.currentEnemy();
 
 			//Let's sneak in some selective nerfing here...
@@ -1146,6 +1161,14 @@ define([
 			var $PLAYERHPBAR = $(PLAYERHPBAR);
 			$PLAYERHPBAR.text(self.player().hp());
 			$PLAYERHPBAR.width(self.playerHpBarWidth());
+
+			var $PLAYERULTBAR = $(PLAYERULTBAR);
+			//$PLAYERULTBAR.text(self.player().currentUltCharge());
+			$PLAYERULTBAR.width(self.playerUltBarWidth());
+
+			var $ENEMYSTAGGERBAR = $(ENEMYSTAGGERBAR);
+			//$ENEMYSTAGGERBAR.text(monster.stagger());
+			$ENEMYSTAGGERBAR.width(self.enemyStaggerBarWidth());
 
 		}
 
@@ -1288,8 +1311,9 @@ define([
 		this._animateBarWidth = function(bar, barWidthObservable){
 			var promise = new Promise(function(resolve, reject){
 				var $bar = $(bar);
+				var barWidth = (ko.isObservable(barWidthObservable)) ? barWidthObservable() : barWidthObservable ;
 
-				$bar.animate({ width: barWidthObservable() }, COMBAT_ANIMATION_DURATION, undefined, function(){
+				$bar.animate({ width: barWidth }, COMBAT_ANIMATION_DURATION, undefined, function(){
 					resolve();
 				});
 			});
@@ -4037,7 +4061,7 @@ define([
 			var hpBarTargetPercent = current / max;
 			//It would be nice if the max width could be dynamically calculated...
 			var progressBarWidth = hpBarTargetPercent * self.hpBarBaseWidth;
-			return progressBarWidth;
+			return Math.round(progressBarWidth);
 		}
 
 		this.handleDynamicButtonAction = function(btnData, e){

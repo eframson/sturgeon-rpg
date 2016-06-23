@@ -286,7 +286,13 @@
 											<span class="stat">Speed:</span>
 											<span class="value" data-bind="text: $root.player().speed()"></span>
 										</div>
-										
+										<div class="line">
+											<span class="stat">Ult Charge:</span>
+											<!--<span class="value" data-bind="text: $root.player().currentUltCharge() + ' / ' + $root.player().maxUltCharge"></span>-->
+										</div>
+										<div class="line">
+											<div id="playerultbar" class="ultbar"><div class="bar" data-bind="css: { 'animated-background' : $root.player().ultReady()}, style: { backgroundColor : $root.player().ultBarColor() }, text : $root.ultBarText()"></div></div>
+										</div>										
 									</div>
 								</div>
 
@@ -806,9 +812,12 @@
 										</div> -->
 										<div class="line">
 											<span class="stat">Stagger:</span>
-											<span class="value" data-bind="text: $root.currentEnemy().stagger() + ' / ' + $root.currentEnemy().staggerPoint()"></span>
+											<!--<span class="value" data-bind="text: $root.currentEnemy().stagger() + ' / ' + $root.currentEnemy().staggerPoint()"></span>-->
 										</div>
-										
+										<div class="line">
+											<!--<div id="enemystaggerbar" class="staggerbar" data-bind="style: { backgroundColor : $root.player().ultBarColor() }"><div class="bar"></div></div>-->
+											<div id="enemystaggerbar" class="staggerbar"><div class="bar"></div></div>
+										</div>	
 									</div>
 									<div class="desc" data-bind="text: $root.currentEnemy().desc()"></div>
 								</div>

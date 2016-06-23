@@ -155,7 +155,7 @@
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
-			"sortOrder" : 1,
+			"sortOrder" : 2,
 			"showLevelInformation" : 0,
 			"staggerDmg" : 0.2,
 			"ultCharge" : 5
@@ -178,7 +178,7 @@
 			"nextSkillLevelAtProgress" : 10,
 			"resetProgressOnSkillLevelUp" : 1,
 			"canTrainNextLevel" : 0,
-			"sortOrder" : 1,
+			"sortOrder" : 3,
 			"showLevelInformation" : 0,
 			"staggerDmg" : 0.2,
 			"pctHPDmg" : 0.2,

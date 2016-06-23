@@ -139,6 +139,7 @@ define([
 					//This is where monsters have damage reduced
 					staggerEffect = defender.takeDmg(hpDmg, staggerDmg);
 				}
+				attacker.chargeUlt(self.ultCharge);
 				if(staggerEffect){
 					//An enemy was just hit, and it was staggered
 					game.registerCombatEffectApplication(attacker, defender, staggerEffect);
