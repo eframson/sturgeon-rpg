@@ -1131,8 +1131,8 @@ define([
 			if( self.level().levelNum() < 2 ){
 				monster.maxHp( Math.round(monster.maxHp() * 0.6) );
 				monster.hp( monster.maxHp() );
-				monster.minDmg( Math.round(monster.minDmg() * 0.7) );
-				monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
+				monster.minDmg( Math.round(monster.minDmg() * 0.3) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.3) );
 				monster.staggerPoint(Math.round(monster.maxHp() * 0.25));
 			} else if( self.level().levelNum() < 3 ){
 				monster.maxHp( Math.round(monster.maxHp() * 0.65) );
@@ -1205,6 +1205,11 @@ define([
 			self.doCombatRound(ability.id);
 		}
 
+		this.useUltimate = function(){
+			self.doCombatRound(self.player().ultAbility().id);
+			self.player().currentUltCharge(0);
+		}
+
 		this.playerPass = function(){
 			self.doCombatRound("pass");
 		}
@@ -1241,6 +1246,7 @@ define([
 
 				//Deliberately leaving this set to self.currentEnemy...
 				if( self.currentEnemy() && self.currentEnemy().isDead() ){
+					self.currentEnemy().stagger(0);
 					//"Done" the square if it's not an exit square
 					self.player().numTurnsToSkip(0);
 
@@ -5017,8 +5023,8 @@ define([
 					if( (applyNerfingLogic == 1 && monsterLevel < 2) || applyNerfingLogic == 2 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.6) );
 						monster.hp( monster.maxHp() );
-						monster.minDmg( Math.round(monster.minDmg() * 0.7) );
-						monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
+						monster.minDmg( Math.round(monster.minDmg() * 0.3) );
+						monster.maxDmg( Math.round(monster.maxDmg() * 0.3) );
 						monster.staggerPoint(Math.round(monster.maxHp() * 0.25));
 					} else if( (applyNerfingLogic == 1 && monsterLevel < 3) || applyNerfingLogic == 3 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.65) );

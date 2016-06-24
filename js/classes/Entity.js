@@ -136,7 +136,12 @@ define([
 
 		this.makeAttack = function(abilityId, target, game){
 
-			var combatAbility = self.combatAbilities()[abilityId];
+			var combatAbility;
+			if(self.ultAbility !== undefined && self.ultAbility().id == abilityId){
+				combatAbility = self.ultAbility();
+			}else{
+				combatAbility = self.combatAbilities()[abilityId];
+			}
 			combatAbility.doAbility(self, target, game);
 
 		}

@@ -633,6 +633,17 @@
 									</div>
 									<!-- ko if: !$root.currentEnemy().isDead() && !$root.player().isDead() -->
 
+										<!-- ko if: $root.player().ultReady() -->
+											<div class="line">
+												<button type="button" class="btn btn-default" data-bind="
+													click: useUltimate,
+													text: player().ultAbility().buttonLabel,
+													css: { disabled : disablePlayerCombatButtons() == 1 || player().canAct() == 0 }
+												"></button>
+												<span class="button-label" data-bind="text: player().ultAbility().description"></span>
+											</div>
+										<!-- /ko -->
+
 										<!-- ko foreach: $root.player().combatAbilitiesIterable() -->
 										<div class="line">
 											<button type="button" class="btn btn-default" data-bind="
@@ -816,7 +827,7 @@
 										</div>
 										<div class="line">
 											<!--<div id="enemystaggerbar" class="staggerbar" data-bind="style: { backgroundColor : $root.player().ultBarColor() }"><div class="bar"></div></div>-->
-											<div id="enemystaggerbar" class="staggerbar"><div class="bar"></div></div>
+											<div id="enemystaggerbar" class="staggerbar"><div class="bar" data-bind="css: { 'animated-stagger-background' : $root.currentEnemy().stagger() == $root.currentEnemy().staggerPoint()}"></div></div>
 										</div>	
 									</div>
 									<div class="desc" data-bind="text: $root.currentEnemy().desc()"></div>

@@ -314,6 +314,30 @@
 			"sortOrder" : 10,
 			"canPurchase" : 1,
 			"requiredLevel" : 0
+		},
+
+		"ult_1k_cuts" : {
+			"className" : "BasicAttack",
+			"id" : "ult_1k_cuts",
+			"name" : "One Thousand* Cuts",
+			"description" : "* Actual number of cuts may vary. Consult your doctor before use. Limit one per household. Not valid in combination with other offers.",
+			"buttonLabel" : "One Thousand* Cuts",
+			"numAttempts" : 1,
+			"chanceToHitCoefficient" : 1,
+			"chanceToCritCoefficient" : 1,
+			"dmgCoefficient" : 6,
+			"baseCooldown" : 0,
+			"cooldown" : 0,
+			"skillLevel" : 1,
+			"skillProgress" : 0,
+			"nextSkillLevelAtProgress" : 10,
+			"resetProgressOnSkillLevelUp" : 1,
+			"canTrainNextLevel" : 0,
+			"sortOrder" : 10,
+			"canPurchase" : 0,
+			"requiredLevel" : 0,
+			"staggerDmg" : 1.0,
+			"pctHPDmg" : 1.0
 		}
 
 	},

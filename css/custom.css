@@ -938,6 +938,14 @@ button:focus {
 	-webkit-animation-iteration-count: infinite;
 }
 
+.animated-stagger-background {
+	animation: stagger_colorchange 3s; /* animation-name followed by duration in seconds*/
+		/* you could also use milliseconds (ms) or something like 2.5s */
+	-webkit-animation: stagger_colorchange 3s; /* Chrome and Safari */
+	animation-iteration-count: infinite;
+	-webkit-animation-iteration-count: infinite;
+}
+
 @keyframes colorchange
 {
 	0%   {background: #FF6C00;}
@@ -966,6 +974,20 @@ button:focus {
 	80% {background: #FFBE00;}
 	90% {background: #FFC600;}
 	100% {background: #FF6C00;}
+}
+
+@keyframes stagger_colorchange
+{
+	0%   {background: #5a9595;}
+	50% {background: #78C778;}
+	100% {background: #5a9595;}
+}
+
+@-webkit-keyframes stagger_colorchange /* Safari and Chrome - necessary duplicate */
+{
+	0%   {background: #5a9595;}
+	50% {background: #78C778;}
+	100% {background: #5a9595;}
 }
 
 /*

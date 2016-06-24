@@ -64,18 +64,20 @@ define([
 				data.combatAbilities = {
 					basic_stagger_attack: {},
 					basic_hp_attack : {},
-					basic_ult_builder : {},
-					//light_smash : {},
-					//light_flurry : {},
-					//stun : {},
-					//mighty : {},
-					//flurry: {}
+					basic_ult_builder : {}
 				};
+			}
+
+			if(data.ultAbility == undefined || Utils.isEmptyObject(data.ultAbility)){
+				self.setNewUltAbility("ult_1k_cuts");
+			}else{
+				self.setUltAbility(data.ultAbility);
 			}
 
 			self.activeAbilities = ko.observable({});
 			self.combatAbilities = ko.observable({});
 			self.passiveAbilities = ko.observable({});
+			self.ultAbility = ko.observable({});
 
 			$.each(data.activeAbilities, function(idx, elem){
 				self.addActiveAbility(idx, elem);
@@ -428,6 +430,21 @@ define([
 				self.deregisterRequest();
 			});
 
+		}
+
+		this.setNewUltAbility = function(ability_id){
+			var abilityData = self.skillDataCollection.getNode(["combat_abilities", ability_id]);
+			self.setUltAbility(abilityData);
+		}
+
+		this.setUltAbility = function(abilityData) {
+			var className = abilityData.className;
+
+			self.registerRequest();
+			require(["classes/CombatAbilities/" + className], function(newClassDefinition){
+				self.ultAbility(new newClassDefinition(abilityData));
+				self.deregisterRequest();
+			});
 		}
 
 		this.addItemToInventory = function(itemToAdd, ignoreInventoryConstraints){
