@@ -283,11 +283,7 @@ define([
 			});
 
 			self.expRequiredForNextLevel = ko.computed(function(){
-				if(self.level() < 5){
-					return self.level() * 100;
-				}else{
-					return self.level() * 150;
-				}
+				return self.level() * 100;
 			});
 
 			self.numPotionsAvailable = ko.computed(function(){

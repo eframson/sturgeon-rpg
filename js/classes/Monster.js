@@ -93,7 +93,7 @@ define([
 				self.maxDmg( Math.round( self.maxDmg() * self.dmgCoefficient() ) );
 
 				self.speed( self.level() );
-				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
+				self.expValue( Math.floor( (self.level() * 100) * .25 ) );
 				
 				monsterData.availableCombatAbilities = archetypeData.availableCombatAbilities;
 				

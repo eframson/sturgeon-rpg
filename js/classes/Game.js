@@ -1708,20 +1708,16 @@ define([
 
 			if(itemType == "gold"){
 
-				var baseGoldPerLevel = 50;
-				var pctGoldVariance = 0.25;
-				var unRandomizedGoldPerLevel = baseGoldPerLevel * levelNum;
+				var pctGoldVariance = 0.10;
+				var unRandomizedGoldPerLevel = Math.round( (levelNum * 100) * 0.5 );
 				var lowerGoldBounds = Math.round(unRandomizedGoldPerLevel - (unRandomizedGoldPerLevel * pctGoldVariance)),
 					upperGoldBounds = Math.round(unRandomizedGoldPerLevel + (unRandomizedGoldPerLevel * pctGoldVariance));
 
 				var goldAmt = Utils.doRand(lowerGoldBounds, upperGoldBounds + 1);
 
-				if(lootSet == "monster" || lootSet == "boss"){
-					goldAmt = Math.round(goldAmt * self.currentEnemy().lootCoefficient());
-				}else{
-					if( self.player().hasPassiveAbility("improved_gold_finding") ){
-						goldAmt = goldAmt * 2;
-					}
+				goldAmt = Math.round(goldAmt);
+				if(!lootSet == "monster" && !lootSet == "boss" && self.player().hasPassiveAbility("improved_gold_finding")){
+					goldAmt = goldAmt * 2;
 				}
 
 				itemToAdd = self.getAvailableItemById("gold", "misc", goldAmt);
@@ -4131,9 +4127,11 @@ define([
 			var itemArray = Array();
 
 			var numItems = Utils.doRand(3,8);
+			var baseLevel = self.level().levelNum();
+			var maxLevelBonus = 2;
 
 			for(var i = 0; i < numItems; i++){
-				self.currentContainer.addItem(self.generateRandomLootItem("trader"));
+				self.currentContainer.addItem(self.generateRandomLootItem("trader", undefined, undefined, baseLevel + Utils.doRand(0, maxLevelBonus + 1)));
 			}
 
 			self.manageTransitionToView("fullscreen","merchant");
@@ -4809,14 +4807,17 @@ define([
 		}
 
 		this.testMerchantSquare = function(levelNum, numItems){
+			levelNum = levelNum || self.level().levelNum();
 			self.currentContainer.removeAll();
 
 			var itemArray = Array();
 
 			var numItems = numItems || Utils.doRand(3,8);
+			var baseLevel = levelNum;
+			var maxLevelBonus = 2;
 
 			for(var i = 0; i < numItems; i++){
-				self.currentContainer.addItem(self.generateRandomLootItem("trader", undefined, undefined, levelNum));
+				self.currentContainer.addItem(self.generateRandomLootItem("trader", undefined, undefined, baseLevel + Utils.doRand(0, maxLevelBonus + 1)));
 			}
 
 			self.manageTransitionToView("fullscreen","merchant");

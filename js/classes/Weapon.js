@@ -54,7 +54,8 @@ define([
 				//Shouldn't ever happen, but just to be on the safe side...
 				self.dmgMax( (self.dmgMax() < self.dmgMin()) ? self.dmgMin() : self.dmgMax() );
 				
-				self._buyValue = Math.round( (avgDmgPerHit * 3) + (self.qualityModifier * 10) );
+				//How much it costs to buy this item from a merchant
+				self._buyValue = Math.round( (self.level() * 100) * self.qualityModifier );
 				self._forceRecalculate.valueHasMutated();
 
 				var magicDesc = self.desc;
