@@ -64,7 +64,7 @@ define([
 				buttons: [
 					{
 						title: "Let's bust outta here!",
-						action: function(){ self.transitionFullscreenContentToSlideId("d1"); }
+						action: "_btnFnStartButton"
 					},
 				],
 				location: "Unknown",
@@ -74,7 +74,7 @@ define([
 				buttons: [
 					{
 						title: "OH YEAH!!!",
-						action: function(){ self.transitionFullscreenContentToSlideId("d2"); }
+						action: "_btnFnD1Button"
 					},
 				],
 				location: "Unknown",
@@ -84,13 +84,7 @@ define([
 				buttons: [
 					{
 						title: "Continue",
-						action: function(){
-							//Show the main game now
-							self.manageTransitionToView("fullscreen","mainscreen");
-
-							self.isNew(false);
-							self.equipInitialLootItems();
-						}
+						action: "_btnFnD2Button"
 					},
 				],
 				location: "Unknown",
@@ -4074,6 +4068,22 @@ define([
 			}else{
 				console.log("Could not find btn fn '" + btnData.action + "'");
 			}
+		}
+
+		this._btnFnStartButton = function(){
+			self.transitionFullscreenContentToSlideId("d1");
+		}
+
+		this._btnFnD1Button = function(){
+			self.transitionFullscreenContentToSlideId("d2");
+		}
+
+		this._btnFnD2Button = function(){
+			//Show the main game now
+			self.manageTransitionToView("fullscreen","mainscreen");
+
+			self.isNew(false);
+			self.equipInitialLootItems();
 		}
 
 		this._btnFnResetLevelNo = function(){
