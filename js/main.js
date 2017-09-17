@@ -1,4 +1,4 @@
-const BUILD_VERSION = 1459377890;
+const BUILD_VERSION = 1505621349;
 var game = undefined;
 var ko_global = undefined;
 
@@ -24,7 +24,7 @@ var requireJSConfig = {
 		//"jquery.caret.min" : ["jquery"],
 		//"jquery.growl" : ["jquery"],
 	},
-	waitSeconds : 10,
+	waitSeconds : 20,
 };
 
 if(!window.DEBUG){
