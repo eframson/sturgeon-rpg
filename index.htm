@@ -633,16 +633,14 @@
 									</div>
 									<!-- ko if: !$root.currentEnemy().isDead() && !$root.player().isDead() -->
 
-										<!-- ko if: $root.player().ultReady() -->
-											<div class="line">
-												<button type="button" class="btn btn-default" data-bind="
-													click: useUltimate,
-													text: player().ultAbility().buttonLabel,
-													css: { disabled : disablePlayerCombatButtons() == 1 || player().canAct() == 0 }
-												"></button>
-												<span class="button-label" data-bind="text: player().ultAbility().description"></span>
-											</div>
-										<!-- /ko -->
+										<div class="line">
+											<button type="button" class="btn btn-default" data-bind="
+												click: useUltimate,
+												text: player().ultAbility().buttonLabel,
+												css: { disabled : $root.player().ultReady() == 0 || disablePlayerCombatButtons() == 1 || player().canAct() == 0 }
+											"></button>
+											<span class="button-label" data-bind="text: player().ultAbility().description"></span>
+										</div>
 
 										<!-- ko foreach: $root.player().combatAbilitiesIterable() -->
 										<div class="line">
