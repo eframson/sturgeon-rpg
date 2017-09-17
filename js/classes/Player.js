@@ -62,33 +62,33 @@ define([
 
 			if(Utils.isEmptyObject(data.combatAbilities)){
 				data.combatAbilities = {
-					basic_attack: {},
-					//stun : {},
-					//mighty : {},
-					//flurry: {}
+					basic_stagger_attack: {},
+					basic_hp_attack : {},
+					basic_ult_builder : {}
 				};
+			}
+
+			if(data.ultAbility == undefined || Utils.isEmptyObject(data.ultAbility)){
+				self.setNewUltAbility("ult_1k_cuts");
+			}else{
+				self.setUltAbility(data.ultAbility);
 			}
 
 			self.activeAbilities = ko.observable({});
 			self.combatAbilities = ko.observable({});
 			self.passiveAbilities = ko.observable({});
+			self.ultAbility = ko.observable({});
 
 			$.each(data.activeAbilities, function(idx, elem){
-
 				self.addActiveAbility(idx, elem);
-
 			});
 
 			$.each(data.combatAbilities, function(idx, elem){
-
 				self.addCombatAbility(idx, elem);
-
 			});
 
 			$.each(data.passiveAbilities, function(idx, elem){
-
 				self.addPassiveAbility(idx, elem);
-
 			});
 
 			self.levelUpChanges = {}
@@ -108,10 +108,30 @@ define([
 			self.baseArmor = ko.observable(data.baseArmor || 0);
 			self.ap = ko.observable(data.ap || 2);
 			self.maxAp = ko.observable(data.maxAp || 10);
+			self.currentUltCharge = ko.observable(data.currentUltCharge || 0);
+			self.maxUltCharge = 100;
 
 			//Why is this necessary??
 			self.isDead = ko.computed(function(){
 				return self.hp() < 1;
+			});
+
+			self.ultReady = ko.computed(function(){
+				return self.currentUltCharge() == self.maxUltCharge;
+			});
+
+			self.ultBarColor = ko.computed(function(){
+				var h = 39;
+				var s = 100;
+				var lMax = 78;
+				var lMin = 50;
+
+				var pctOfUlt = self.currentUltCharge() / self.maxUltCharge;
+				var l = lMax - (Math.round(pctOfUlt * (lMax - lMin)));
+
+				var hexVal = Utils.hslToHex(h, s, l);
+
+				return "#" + hexVal;
 			});
 
 			var itemArray = Array();
@@ -263,11 +283,7 @@ define([
 			});
 
 			self.expRequiredForNextLevel = ko.computed(function(){
-				if(self.level() < 5){
-					return self.level() * 100;
-				}else{
-					return self.level() * 150;
-				}
+				return self.level() * 100;
 			});
 
 			self.numPotionsAvailable = ko.computed(function(){
@@ -410,6 +426,21 @@ define([
 				self.deregisterRequest();
 			});
 
+		}
+
+		this.setNewUltAbility = function(ability_id){
+			var abilityData = self.skillDataCollection.getNode(["combat_abilities", ability_id]);
+			self.setUltAbility(abilityData);
+		}
+
+		this.setUltAbility = function(abilityData) {
+			var className = abilityData.className;
+
+			self.registerRequest();
+			require(["classes/CombatAbilities/" + className], function(newClassDefinition){
+				self.ultAbility(new newClassDefinition(abilityData));
+				self.deregisterRequest();
+			});
 		}
 
 		this.addItemToInventory = function(itemToAdd, ignoreInventoryConstraints){
@@ -748,6 +779,12 @@ define([
 			apToSub = (apAmt > self.ap()) ? self.ap() : apAmt;
 			self.ap( self.ap() - apToSub );
 			return apToSub;
+		}
+
+		this.chargeUlt = function(chargeAmt){
+			var setUltChargeTo = self.currentUltCharge() + chargeAmt;
+			setUltChargeTo = (setUltChargeTo > self.maxUltCharge) ? self.maxUltCharge : setUltChargeTo ;
+			self.currentUltCharge(setUltChargeTo);
 		}
 
 		this.customSaveHandlers = {

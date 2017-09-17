@@ -15,7 +15,7 @@
 ***********/
 
 (function($) {
-    $.fn.animateNumbers = function(stop, commas, duration, ease) {
+    $.fn.animateNumbers = function(stop, commas, duration, ease, onCompleteCallback) {
         return this.each(function() {
             var $this = $(this);
             var start = parseInt($this.text().replace(/,/g, ""));
@@ -32,6 +32,9 @@
             	       $this.text(stop);
 					   if (commas) { $this.text($this.text().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,")); }
             	   }
+                    if(onCompleteCallback && typeof onCompleteCallback == "function"){
+                        onCompleteCallback();
+                    }
             	}
             });
         });

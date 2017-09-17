@@ -4,10 +4,9 @@
 		"basic" : {
 			"id" : "basic",
 			"displayString" : "",
-			"hpCoefficient" : 1,
-			"dmgCoefficient" : 1,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 5,
+			"armorCoefficient" : 0,
 			"xpCoefficient" : 1.0,
 			"lootCoefficient" : 1.0,
 			"chanceOfEpicLoot" : 0.0,
@@ -29,8 +28,6 @@
 		"heavy" : {
 			"id" : "heavy",
 			"displayString" : "Thug",
-			"hpCoefficient" : 1,
-			"dmgCoefficient" : 1,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 0,
 			"xpCoefficient" : 1.5,
@@ -56,7 +53,7 @@
 			"id" : "scout",
 			"displayString" : "Assassin",
 			"hpCoefficient" : 0.8,
-			"dmgCoefficient" : 1.5,
+			"dmgCoefficient" : 1.15,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 20,
 			"xpCoefficient" : 1.3,
@@ -81,7 +78,7 @@
 		"tank" : {
 			"id" : "tank",
 			"displayString" : "Brute",
-			"hpCoefficient" : 1.5,
+			"hpCoefficient" : 1.15,
 			"dmgCoefficient" : 0.5,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 0,
@@ -107,25 +104,24 @@
 		"berserker" : {
 			"id" : "berserker",
 			"displayString" : "Berserker",
-			"hpCoefficient" : 1,
-			"dmgCoefficient" : 0.7,
+			"hpCoefficient" : 1.0,
+			"dmgCoefficient" : 1.2,
+			"armorCoefficient" : 0,
 			"chanceToHit" : 100,
-			"chanceToCrit" : 0,
-			"xpCoefficient" : 2.0,
-			"lootCoefficient" : 1.0,
+			"chanceToCrit" : 20,
+			"xpCoefficient" : 1.3,
+			"lootCoefficient" : 1.3,
 			"chanceOfEpicLoot" : 0.0,
 			"availableCombatAbilities" : [
-				"basic_attack",
-				"flurry"
+				"basic_attack"
 			],
 			"attacks" : {
-				"basic_attack" : "50",
-				"flurry" : "50"
+				"basic_attack" : "100"
 			},
-			"appearsOnLevel" : 2,
+			"appearsOnLevel" : 1,
 			"qualityOdds" : {
-				"10" : "poor",
-				"45" : [
+				"20" : "poor",
+				"40" : [
 					"good",
 					"great"
 				]
@@ -163,8 +159,7 @@
 		"boss" : {
 			"id" : "boss",
 			"displayString" : "Boss",
-			"hpCoefficient" : 2.8,
-			"dmgCoefficient" : 1.8,
+			"hpCoefficient" : 1.15,
 			"chanceToHit" : 100,
 			"chanceToCrit" : 10,
 			"xpCoefficient" : 2.0,

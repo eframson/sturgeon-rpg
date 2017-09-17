@@ -89,6 +89,16 @@ require([
 					game.sAction();
 				}
 			}
+
+			if(e.keyCode == 16){
+				game.onShiftDown();
+			}
+		});
+
+		$(document).keyup(function(e){
+			if(e.keyCode == 16){
+				game.onShiftUp();
+			}
 		});
 
 		$("button.btn").click(function(){

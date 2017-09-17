@@ -16,11 +16,11 @@ define([
 	'json!data/items.json',
 	'json!data/monsters.json',
 	'json!data/skills.json',
-	'Utils',
 	'classes/Grid',
+	'Utils',
 
 	'jquery.animateNumbers'
-], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, Accessory, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Utils, Grid) {
+], function($, ko, Player, Level, Item, Consumable, Weapon, Armor, Shield, Accessory, ItemCollection, DataCollection, Monster, CombatEffect, itemDataFile, monsterDataFile, skillDataFile, Grid, Utils) {
 
 	//Can these be knockout custom bindings? Some of them, surely...
 	var $FULL_SCREEN_NOTICE_DIV = $(".full-screen-row");
@@ -30,10 +30,15 @@ define([
 	var $FAQ = $("#faq-content");
 	var $SAVED_NOTICE = $(".saved-notice");
 	var $SAVED_PREF_NOTICE = $(".saved-pref-notice");
+	var PLAYERHPBAR = "#playerhpbar .bar";
+	var ENEMYHPBAR = "#enemyhpbar .bar";
+	var PLAYERULTBAR = "#playerultbar .bar";
+	var ENEMYSTAGGERBAR = "#enemystaggerbar .bar";
 	var BASE_FADEOUT_SPEED = 600;
 	var BASE_FADEIN_SPEED = 400;
 	var FAST_FADEOUT_SPEED = 300;
 	var FAST_FADEIN_SPEED = 300;
+	var COMBAT_ANIMATION_DURATION = 400;
 
 	function Game() {
 
@@ -268,6 +273,7 @@ define([
 		this.ignoreSquareActions = 0;
 		this.srcCollection = undefined;
 		this.equipItemCallback = undefined;
+		this.isLooting = false;
 		
 		this._goesFirst;
 		this.wAction = function() { return self.movePlayerUp() };
@@ -275,6 +281,12 @@ define([
 		this.sAction = function() { return self.movePlayerDown() };
 		this.dAction = function() { return self.movePlayerRight() };
 		this.spcAction = function(){ return 1 };
+		this.onShiftDown = function(){
+			self.shiftPressed(1);
+		};
+		this.onShiftUp = function(){
+			self.shiftPressed(0);
+		};
 
 		this.init = function(){
 			self.initObservables();
@@ -340,6 +352,9 @@ define([
 			self.hpBarBaseWidth = 368;
 			self.playerHpBarWidth = ko.observable(self.hpBarBaseWidth);
 			self.enemyHpBarWidth = ko.observable(self.hpBarBaseWidth);
+			self.playerUltBarWidth = ko.observable(0);
+			self.enemyStaggerBarWidth = ko.observable(0);
+			self.ultBarText = ko.observable("");
 
 			self.inventorySortOrder = ko.observable("Type");
 			self.containerSortOrder = ko.observable("Type");
@@ -349,6 +364,8 @@ define([
 
 			self.numBattlesWon = ko.observable(0);
 			self.numItemSquaresLooted = ko.observable(0);
+
+			self.shiftPressed = ko.observable(0);
 
 			self.level = ko.computed(function(){
 				if(self.levels() && self.levels().length > 0){
@@ -395,9 +412,9 @@ define([
 
 					if( self.activeItem().canEquip() ){
 						buttons.push({
-							css : defaultCss,
-							text : "Equip",
-							click : self.equipActiveItem
+							css : ((self.shiftPressed() == 1) ? "btn-danger" : defaultCss ),
+							text : ((self.shiftPressed() == 1) ? "Equip + Salv. curr." : "Equip" ),
+							click : ((self.shiftPressed() == 1) ? self.equipActiveItemAndSalvageExisting : self.equipActiveItem ),
 						});
 					}
 
@@ -817,6 +834,8 @@ define([
 				self.backButtonLabel(gameData.backButtonLabel);
 				self.playerHpBarWidth(gameData.playerHpBarWidth);
 				self.enemyHpBarWidth(gameData.enemyHpBarWidth);
+				self.playerUltBarWidth(gameData.playerUltBarWidth);
+				self.enemyStaggerBarWidth(gameData.enemyStaggerBarWidth);
 				self.goldGained(gameData.goldGained);
 
 				// These "if" statements are really only necessary to accomodate beta testers (i.e. - anyone loading a game from a previous "version")
@@ -893,6 +912,12 @@ define([
 			}
 
 			self.player(player);
+
+			self.player().currentUltCharge.subscribe(function(newVal){
+				var width = self._calculateHpBarWidthForGivenCurrentAndMaxHp(newVal, self.player().maxUltCharge);
+				self._animateBarWidth(PLAYERULTBAR, width);
+				self.ultBarText(self.player().ultReady() ? "READY" : "")
+			});
 
 			self.level().revealSquaresNearPlayer(1);
 			self.level().drawMap();
@@ -1055,7 +1080,7 @@ define([
 			//Make sure first few encounters are basic monsters while player is starting out
 			//if( (self.numBattlesWon() + self.numItemSquaresLooted()) < 5 && encounterType != "boss"){
 			//Okay, monster archetypes totally mess up our delicately calibrated system...everything is basic for now!
-			if( encounterType != "boss"){
+			if( (self.numBattlesWon() + self.numItemSquaresLooted() < 5) && encounterType != "boss"){
 				extraParamObj.doNotSpecializeArchetype = 1;
 			}
 
@@ -1075,42 +1100,69 @@ define([
 				newObj
 			));
 
-			/*console.log("Init new monster. Monster has:");
-			console.log("minDmg: " + self.currentEnemy().minDmg());
-			console.log("maxDmg: " + self.currentEnemy().maxDmg());
-			console.log("hit chance: " + self.currentEnemy().chanceToHit());
-			console.log("crit chance: " + self.currentEnemy().chanceToCrit());
-			console.log("max hp: " + self.currentEnemy().maxHp());*/
+			self.currentEnemy().stagger.subscribe(function(newVal){
+				var width = self._calculateHpBarWidthForGivenCurrentAndMaxHp(newVal, self.currentEnemy().staggerPoint());
+				self._animateBarWidth(ENEMYSTAGGERBAR, width);
+			});
+
+			self.currentEnemy().applyCombatEffect(
+				new CombatEffect(self.skillDataCollection.getNode(["combat_effects", "stagger_recovery"]))
+			);
 
 			//Reset our "goes first" tracker
 			self._goesFirst = undefined;
 
+			//Set/reset our bars properly
 			var playerHpBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().hp(), self.player().maxHp());
 			self.playerHpBarWidth(playerHpBarWidth);
+			var playerUltBarWidth = self._calculateHpBarWidthForGivenCurrentAndMaxHp(self.player().currentUltCharge(), self.player().maxUltCharge);
+			self.playerUltBarWidth(playerUltBarWidth);
 			self.enemyHpBarWidth(self.hpBarBaseWidth);
+			self.enemyStaggerBarWidth(0);
+			var monster = self.currentEnemy();
 
 			//Let's sneak in some selective nerfing here...
 			if( self.level().levelNum() < 2 ){
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.6) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.7) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.7) );
+				monster.maxHp( Math.round(monster.maxHp() * 0.6) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.3) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.3) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.25));
 			} else if( self.level().levelNum() < 3 ){
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.65) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.75) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.75) );
+				monster.maxHp( Math.round(monster.maxHp() * 0.65) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.75) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.75) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.45));
 			} else if( self.level().levelNum() < 4 ){
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.7) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.8) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.8) );
-			} else {
-				self.currentEnemy().maxHp( Math.round(self.currentEnemy().maxHp() * 0.75) );
-				self.currentEnemy().hp( self.currentEnemy().maxHp() );
-				self.currentEnemy().minDmg( Math.round(self.currentEnemy().minDmg() * 0.85) );
-				self.currentEnemy().maxDmg( Math.round(self.currentEnemy().maxDmg() * 0.85) );
+				monster.maxHp( Math.round(monster.maxHp() * 0.7) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.8) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.8) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.65));
+			} else if( self.level().levelNum() < 5 ) {
+				monster.maxHp( Math.round(monster.maxHp() * 0.75) );
+				monster.hp( monster.maxHp() );
+				monster.minDmg( Math.round(monster.minDmg() * 0.85) );
+				monster.maxDmg( Math.round(monster.maxDmg() * 0.85) );
+				monster.staggerPoint(Math.round(monster.maxHp() * 0.85));
 			}
+
+			var $ENEMYHPBAR = $(ENEMYHPBAR);
+			$ENEMYHPBAR.text(monster.hp());
+			$ENEMYHPBAR.width(self.enemyHpBarWidth());
+
+			var $PLAYERHPBAR = $(PLAYERHPBAR);
+			$PLAYERHPBAR.text(self.player().hp());
+			$PLAYERHPBAR.width(self.playerHpBarWidth());
+
+			var $PLAYERULTBAR = $(PLAYERULTBAR);
+			//$PLAYERULTBAR.text(self.player().currentUltCharge());
+			$PLAYERULTBAR.width(self.playerUltBarWidth());
+
+			var $ENEMYSTAGGERBAR = $(ENEMYSTAGGERBAR);
+			//$ENEMYSTAGGERBAR.text(monster.stagger());
+			$ENEMYSTAGGERBAR.width(self.enemyStaggerBarWidth());
 
 		}
 
@@ -1147,76 +1199,138 @@ define([
 			self.doCombatRound(ability.id);
 		}
 
+		this.useUltimate = function(){
+			self.doCombatRound(self.player().ultAbility().id);
+			self.player().currentUltCharge(0);
+		}
+
 		this.playerPass = function(){
 			self.doCombatRound("pass");
 		}
 
 		this.doCombatRound = function(playerAbilityId, playerObj, monsterObj){
 
+			self.disablePlayerCombatButtons(1);
 			playerObj = playerObj || self.player();
 			monsterObj = monsterObj || self.currentEnemy();
 
 			var goesFirst = self.getGoesFirst(playerObj, monsterObj);
 			var attacker = (goesFirst == "player") ? playerObj : monsterObj ;
 			var defender = (goesFirst == "player") ? monsterObj : playerObj ;
+			var attackerIsPlayer = (goesFirst == "player" ? true : false);
 
 			var monsterAbilityId = monsterObj.selectCombatAbility();
 
 			var abilityId = (goesFirst == "player") ? playerAbilityId : monsterAbilityId ;
 
-			if(abilityId !== undefined){
-				//Attacker does something (optionally) to the defender, and UI is updated accordingly
-				attacker.takeCombatAction(abilityId, defender, self);
-				attacker.updateCombatEffectsForRound();
-			}
+			self._animateAttack(attacker, defender, abilityId, attackerIsPlayer).then(function(){
 
-			//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
-			if(!defender.isDead()){
-
+				//Do the other attack now
+				//If defender is alive, defender does something (optionally) to the attacker, and UI is updated accordingly
 				abilityId = (goesFirst == "player") ? monsterAbilityId : playerAbilityId ;
+				attackerIsPlayer = (goesFirst == "player" ? false : true);
+				return self._animateAttack(defender, attacker, abilityId, attackerIsPlayer);
 
-				if( abilityId !== undefined ){
-					defender.takeCombatAction(abilityId, attacker, self);
-					defender.updateCombatEffectsForRound();
+			}).then(function(){
+
+				if( playerObj.isDead() ){
+					self.logMessage("You were defeated in combat! Better luck next time...", "combat");
+					return;
 				}
-				
-			}
 
-			if( playerObj.isDead() ){
-				self.logMessage("You were defeated in combat! Better luck next time...", "combat");
-			}
+				//Deliberately leaving this set to self.currentEnemy...
+				if( self.currentEnemy() && self.currentEnemy().isDead() ){
+					self.currentEnemy().stagger(0);
+					//"Done" the square if it's not an exit square
+					self.player().numTurnsToSkip(0);
 
-			//Deliberately leaving this set to self.currentEnemy...
-			if( self.currentEnemy() && self.currentEnemy().isDead() ){
-				//"Done" the square if it's not an exit square
+					var square = self.level().getActiveSquare();
 
-				var square = self.level().getActiveSquare();
+					if(square.type != "exit"){
+						square.setDone(true);
+					}else{
+						square.isChallengeActive(0);
+					}
 
-				if(square.type != "exit"){
-					square.setDone(true);
+					self.player().addExp(self.currentEnemy().expValue());
+					var apToAdd = ( self.player().ap() == 0 ) ? 2 : 1 ;
+					self.player().addAp(apToAdd);
+					self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP and " + apToAdd + " AP!", "combat");
+					self.numBattlesWon( self.numBattlesWon() + 1 );
+
+					if( self.player().hasLeveledUp() ){
+						self.player().hasLeveledUp(false);
+						self.showLevelUpModal();
+						self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
+					}
+				}
+
+				if(playerObj.numTurnsToSkip() > 0 && !monsterObj.isDead()){
+					self.doCombatRound("pass", playerObj, monsterObj);
 				}else{
-					square.isChallengeActive(0);
+					self.disablePlayerCombatButtons(0);
 				}
 
-				self.player().addExp(self.currentEnemy().expValue());
-				var apToAdd = ( self.player().ap() == 0 ) ? 2 : 1 ;
-				self.player().addAp(apToAdd);
-				self.logMessage("You defeated the enemy! You gain " + self.currentEnemy().expValue() + " EXP and " + apToAdd + " AP!", "combat");
-				self.numBattlesWon( self.numBattlesWon() + 1 );
+			});
 
-				if( self.player().hasLeveledUp() ){
-					self.player().hasLeveledUp(false);
-					self.showLevelUpModal();
-					self.logMessage("You leveled up! Your stats have improved accordingly.", "combat");
-				}
-			}
+		}
 
-			$.each([attacker,defender], function(idx, entity){
-				if(!entity.isDead()){
-					entity.updateActiveAbilityCooldownsForRound();
+		this._animateAttack = function(attacker, defender, abilityId, attackerIsPlayer){
+			var promise = new Promise(function(resolve, reject){
+				//Do the thing
+				var barToAnimate = (attackerIsPlayer == true) ? ENEMYHPBAR : PLAYERHPBAR ;
+				var barWidth = (attackerIsPlayer == true) ? self.enemyHpBarWidth : self.playerHpBarWidth ;
+				var barNumber = (attackerIsPlayer == true) ? self.currentEnemy().hp : self.player().hp ;
+
+				//Attacker does something (optionally) to the defender, and UI is updated accordingly
+				if(!attacker.isDead() && !defender.isDead()){
+					if(attacker.numTurnsToSkip() > 0){
+						attacker.numTurnsToSkip( attacker.numTurnsToSkip() - 1 );
+					}else{
+						attacker.takeCombatAction(abilityId, defender, self);
+					}
+					attacker.updateCombatEffectsForRound();
+					attacker.updateActiveAbilityCooldownsForRound();
+
+					var animationArray = [
+						self._animateBarWidth(barToAnimate, barWidth),
+						self._animateBarNumber(barToAnimate, barNumber),
+					];
+					//Animate the thing
+					Promise.all(animationArray).then(function(){
+						setTimeout(resolve(), 200);
+					});
+				}else{
+					resolve();
 				}
 			});
 
+			return promise;
+		}
+
+		this._animateBarWidth = function(bar, barWidthObservable){
+			var promise = new Promise(function(resolve, reject){
+				var $bar = $(bar);
+				var barWidth = (ko.isObservable(barWidthObservable)) ? barWidthObservable() : barWidthObservable ;
+
+				$bar.animate({ width: barWidth }, COMBAT_ANIMATION_DURATION, undefined, function(){
+					resolve();
+				});
+			});
+
+			return promise;
+		}
+
+		this._animateBarNumber = function(bar, barNumberObservable){
+			var promise = new Promise(function(resolve, reject){
+				var $bar = $(bar);
+
+				$bar.animateNumbers(barNumberObservable(), false, COMBAT_ANIMATION_DURATION, undefined, function(){
+					resolve();
+				});
+			});
+
+			return promise;
 		}
 
 		this.registerCombatEffectApplication = function(attacker, defender, combatEffectToApply){
@@ -1267,6 +1381,11 @@ define([
 		}
 
 		this.lootEnemy = function(){
+
+			if(self.isLooting){
+				return true;
+			}
+			self.isLooting = true;
 			
 			var square = self.level().getActiveSquare();
 			var lootTable = "monster";
@@ -1320,6 +1439,8 @@ define([
 			self.manageTransitionToView("combat","container", function(){ self.logMessage(foundItemString, "item"); });
 
 			self.level().drawMap();
+
+			self.isLooting = false;
 		}
 
 		this.leaveCombat = function(){
@@ -1581,20 +1702,16 @@ define([
 
 			if(itemType == "gold"){
 
-				var baseGoldPerLevel = 50;
-				var pctGoldVariance = 0.25;
-				var unRandomizedGoldPerLevel = baseGoldPerLevel * levelNum;
+				var pctGoldVariance = 0.10;
+				var unRandomizedGoldPerLevel = Math.round( (levelNum * 100) * 0.5 );
 				var lowerGoldBounds = Math.round(unRandomizedGoldPerLevel - (unRandomizedGoldPerLevel * pctGoldVariance)),
 					upperGoldBounds = Math.round(unRandomizedGoldPerLevel + (unRandomizedGoldPerLevel * pctGoldVariance));
 
 				var goldAmt = Utils.doRand(lowerGoldBounds, upperGoldBounds + 1);
 
-				if(lootSet == "monster" || lootSet == "boss"){
-					goldAmt = Math.round(goldAmt * self.currentEnemy().lootCoefficient());
-				}else{
-					if( self.player().hasPassiveAbility("improved_gold_finding") ){
-						goldAmt = goldAmt * 2;
-					}
+				goldAmt = Math.round(goldAmt);
+				if(!lootSet == "monster" && !lootSet == "boss" && self.player().hasPassiveAbility("improved_gold_finding")){
+					goldAmt = goldAmt * 2;
 				}
 
 				itemToAdd = self.getAvailableItemById("gold", "misc", goldAmt);
@@ -2281,12 +2398,18 @@ define([
 
 		}
 
-		this.equipActiveItem = function(game, event){
+		this.equipActiveItemAndSalvageExisting = function(game, event){
+			self.equipActiveItem(game, event, 1);
+		}
+
+		this.equipActiveItem = function(game, event, salvageExistingEquipped){
 
 			var item = self.activeItem().actualItem(),
 				type = item.type;
 
 			var alreadyEquippedItem;
+
+			salvageExistingEquipped = salvageExistingEquipped || 0;
 
 			alreadyEquippedItem = self._equipItem(item);
 
@@ -2294,8 +2417,12 @@ define([
 
 			if( alreadyEquippedItem != undefined && !Utils.isEmptyObject(alreadyEquippedItem) ){
 				//Skip the normal slot-checking logic to account for 2H weaps or 1H + shield combos
-				self.player().inventory.addItem(alreadyEquippedItem);
-				alreadyEquippedItem.isEquipped(false);
+				if(salvageExistingEquipped){
+					self._salvageItem(alreadyEquippedItem);
+				}else{
+					self.player().inventory.addItem(alreadyEquippedItem);
+					alreadyEquippedItem.isEquipped(false);
+				}	
 			}
 
 			if( type == "weapon" && item.handsRequired == 2){ //We just equipped a 2H weapon, so unequip whatever shield we have equipped
@@ -2317,9 +2444,8 @@ define([
 			self._resetActiveItem();
 		}
 
-		this.unEquipActiveItem = function(game, event, doNotAddBackToInventory){
+		this._unEquipItem = function(item, doNotAddBackToInventory){
 
-			var item = self.activeItem().actualItem();
 			doNotAddBackToInventory = doNotAddBackToInventory || 0;
 
 			if(item.type == "weapon"){
@@ -2336,6 +2462,15 @@ define([
 			if(!doNotAddBackToInventory){
 				self.player().inventory.addItem(item);
 			}
+			
+		}
+
+		this.unEquipActiveItem = function(game, event, doNotAddBackToInventory){
+
+			doNotAddBackToInventory = doNotAddBackToInventory || 0;
+
+			self._unEquipItem(self.activeItem().actualItem(), doNotAddBackToInventory);			
+
 			self._resetActiveItem();
 
 		}
@@ -2460,10 +2595,9 @@ define([
 			return changeString;
 		}
 
-		this.salvageActiveItem = function(game, event){
+		this._salvageItem = function(item){
 
-			var item = self.activeItem().actualItem(),
-				itemToAdd,
+			var itemToAdd,
 				scrapQty = item.salvageValue() + (item.numUpgradesApplied() * 50);
 
 			if( item instanceof Armor ){
@@ -2473,16 +2607,22 @@ define([
 			}
 
 			if( item.isEquipped() == 1 ){
-				self.unEquipActiveItem(game, event, 1);
+				self._unEquipItem(item, 1);
 			}else{
 				self.srcCollection.removeItem(item);
 			}
 
-			self._resetActiveItem();
-
 			self.player().inventory.addItem(new Item(itemToAdd) );
 			var itemLogString = self._assembleLogMessageStringFromItem(item);
 			self.logMessage("You gain " + scrapQty + "x " + itemToAdd.name + " from salvaging " + itemLogString + ".","crafting");
+
+		}
+
+		this.salvageActiveItem = function(game, event){
+
+			self._salvageItem(self.activeItem().actualItem());
+
+			self._resetActiveItem();
 
 		}
 
@@ -3917,12 +4057,14 @@ define([
 			var hpBarTargetPercent = current / max;
 			//It would be nice if the max width could be dynamically calculated...
 			var progressBarWidth = hpBarTargetPercent * self.hpBarBaseWidth;
-			return progressBarWidth;
+			return Math.round(progressBarWidth);
 		}
 
 		this.handleDynamicButtonAction = function(btnData, e){
 			if(typeof self[btnData.action] === 'function'){
 				self[btnData.action]();
+			}else if(typeof btnData.action === 'function'){
+				btnData.action();
 			}else{
 				console.log("Could not find btn fn '" + btnData.action + "'");
 			}
@@ -3996,8 +4138,11 @@ define([
 
 			var numItems = Utils.doRand(3,8);
 
+			var baseLevel = self.level().levelNum();
+			var maxLevelBonus = 2;
+
 			for(var i = 0; i < numItems; i++){
-				self.currentContainer.addItem(self.generateRandomLootItem("trader"));
+				self.currentContainer.addItem(self.generateRandomLootItem("trader", undefined, undefined, baseLevel + Utils.doRand(0, maxLevelBonus + 1)));
 			}
 
 			self.manageTransitionToView("fullscreen","merchant");
@@ -4673,14 +4818,17 @@ define([
 		}
 
 		this.testMerchantSquare = function(levelNum, numItems){
+			levelNum = levelNum || self.level().levelNum();
 			self.currentContainer.removeAll();
 
 			var itemArray = Array();
 
 			var numItems = numItems || Utils.doRand(3,8);
+			var baseLevel = levelNum;
+			var maxLevelBonus = 2;
 
 			for(var i = 0; i < numItems; i++){
-				self.currentContainer.addItem(self.generateRandomLootItem("trader", undefined, undefined, levelNum));
+				self.currentContainer.addItem(self.generateRandomLootItem("trader", undefined, undefined, baseLevel + Utils.doRand(0, maxLevelBonus + 1)));
 			}
 
 			self.manageTransitionToView("fullscreen","merchant");
@@ -4877,47 +5025,37 @@ define([
 
 				var monster = new Monster(newObj, function(){
 
+					monster.applyCombatEffect(
+						new CombatEffect(self.skillDataCollection.getNode(["combat_effects", "stagger_recovery"]))
+					);
+
 					//Reset our "goes first" tracker
 					self._goesFirst = undefined;
 
-					if(applyNerfingLogic == 1){
-						monster.maxHp( Math.round(monster.maxHp() * 0.5) );
+					if( (applyNerfingLogic == 1 && monsterLevel < 2) || applyNerfingLogic == 2 ){
+						monster.maxHp( Math.round(monster.maxHp() * 0.6) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.3) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.3) );
-					} else if(applyNerfingLogic == 2){
-						monster.maxHp( Math.round(monster.maxHp() * 0.6) );
-						monster.hp( monster.maxHp() );
-						monster.minDmg( Math.round(monster.minDmg() * 0.7) );
-						monster.maxDmg( Math.round(monster.maxDmg() * 0.7) );
-					} else if(applyNerfingLogic == 3){
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.25));
+					} else if( (applyNerfingLogic == 1 && monsterLevel < 3) || applyNerfingLogic == 3 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.65) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.75) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.75) );
-					} else if(applyNerfingLogic == 4){
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.45));
+					} else if( (applyNerfingLogic == 1 && monsterLevel < 4) || applyNerfingLogic == 4 ){
 						monster.maxHp( Math.round(monster.maxHp() * 0.7) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.8) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.8) );
-					} else if(applyNerfingLogic == 5){
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.65));
+					} else if( (applyNerfingLogic == 1 && monsterLevel < 5) || applyNerfingLogic == 5){
 						monster.maxHp( Math.round(monster.maxHp() * 0.75) );
 						monster.hp( monster.maxHp() );
 						monster.minDmg( Math.round(monster.minDmg() * 0.85) );
 						monster.maxDmg( Math.round(monster.maxDmg() * 0.85) );
-					} else if(applyNerfingLogic == 6){
-						monster.maxHp( Math.round(monster.maxHp() * 0.8) );
-						monster.hp( monster.maxHp() );
-						monster.minDmg( Math.round(monster.minDmg() * 0.9) );
-						monster.maxDmg( Math.round(monster.maxDmg() * 0.9) );
-					} else if(applyNerfingLogic == 7){
-						monster.maxHp( Math.round(monster.maxHp() * 0.85) );
-						monster.hp( monster.maxHp() );
-						monster.minDmg( Math.round(monster.minDmg() * 0.95) );
-						monster.maxDmg( Math.round(monster.maxDmg() * 0.95) );
-					} else if(applyNerfingLogic == 8){
-						monster.maxHp( Math.round(monster.maxHp() * 0.9) );
-						monster.hp( monster.maxHp() );
+						monster.staggerPoint(Math.round(monster.maxHp() * 0.85));
 					}
 
 					//Okay, player and monster have been set up now
@@ -5029,7 +5167,6 @@ define([
 PROBLEMS NEEDING SOLUTIONS:
 
 BUGS:
-- "Loot" button can be clicked multiple times
 - When buying/selling scraps from merchant, inventory and merchant items are both highlighted
 - Reset skill appears on the list of levelable abilities
 - When a skill's level is improved as a result of player leveling, it says the skill proficiency has improved to 0
@@ -5101,7 +5238,6 @@ UI IDEAS:
 - Keyboard shortcuts for "continue" buttons
 
 CODE IDEAS:
-- Don't save and rehydrate functions
 - Improve the skill training stuff somehow so it doesn't always break whenever a new skill is added
 - Fix testAddLevel function so it properly increases skill progress
 - Put a cap on leveling
@@ -5116,10 +5252,8 @@ GOOD IDEAS WITHOUT KNOWN IMPLEMENTATIONS:
 	player from just attacking as fast as they like (i.e. - attack button spam if they're in a hurry)
 
 POSSIBLE IDEAS/FEEDBACK:
-- Some sort of "penalty" to prevent players from just running down the clock by going back and forth between squares
-- Always have exit square visible? (to always give player a general guide as to direction)
 - Make food quality independent of name (e.g. - you can have poor quality scampi or medium or whatever) (discuss with Matt)
-- Balance item value + dmg/armor + num salvage (discuss with Matt)
+- Balance item value + dmg/armor + num salvage
 - Think about floor as a whole instead of just fight-to-fight
 
 Perk Ideas
@@ -5133,11 +5267,13 @@ Perk Ideas
 - Improve min weapon dmg when crafting instead of just max (change so it's just max by default)
 - Sword 'n' Board (don't know what it does yet, but we need to have one called this!)
 
-Feedback
+Combat redesign attack ideas:
+- Basic attack - doesn't do much damage, but it's dependable
+- Heavy attack - mucho damage, but skip next turn
+- Flurry - series of light attacks, not very good against armor
+- Monster armor: more effective against light attacks than heavy attacks
 
 Too easy. Contributing factors:
-- Monster strength is calculated based on an unarmored/unequipped player (I think)
-- Monster strength goes by dungeon level, regardless of what level the player is
 - Players get a lot of HP on level-up -- too much?
 - Monsters might reward too much XP?
 - Definitely add a difficulty selector
@@ -5158,50 +5294,13 @@ https://github.com/felipecsl/random-maze-generator
 http://stackoverflow.com/questions/16150255/javascript-maze-generator
 http://xefer.com//maze-generator
 
-//Just paste the whole damn thing
-Emmett: Okay, so you know what I was just thinking about? Games where you generally fight solo usually feature or at least allow movement, as part of the tactics (WoW does this actually a bit less, IMO, than other games). Frequently it's a very important, if not essential part. For games that do not allow or feature movement (e.g. - Pet battles, Final Fantasy VII, Skies of Arcadia maybe?) you have basically multiple people or "things" to control
-Emmett: Now granted, there's some turn-based vs. real-time stuff in there too
-Emmett: But I think otherwise that's the general gist. And I feel like a complete idiot for not noticing that before
-Emmett: Then there are things like chess or Civilization that are turn-based but do prominently feature movement, but in strategy games movement and positioning are core to the nature of the game itself, so they're not so much a "feature" as "part of the game's existence" lol
-Matt : Yeah, that makes a lot of sense
-Emmett: So if I'm not going to allow or feature movement in combat (which I'm 99% sure I'm not)
-Emmett: *and* I still want it to be a solo experience (rather than the idea of controlling multiple entities...although I *could* do that)...
-Emmett: I have to come up with different aspects that the player can control
-Emmett: Either make them constant (e.g. - you always have to choose these 2 or 3 things every time) or have more options consistently available and the player has to choose one as appropriate
-Emmett: (that made sense in my head)
-Emmett: Maybe a Magicka style system
-Emmett: Where the player chooses different attacks to combine
-Emmett: With different results
-Emmett: Setting aside the idea of how the fuck I explain that to the player
-Emmett: lol
-Emmett: So you could queue up 3 attack "things" and do mucho damage, or 2 attack "things" and 1 heal "thing" so you do less dmg, but some of the dmg you deal is returned to you as healing, or 1 attack thing and 2 heal things where it deals even less dmg but half of the dmg is healed instantly and half is healed over time or whatever
-Matt : Have you played Xenogears?
-Emmett: I have not
-Matt : Their combo system is pretty cool
-Emmett: And maybe the number of things you can queue up is your choice, but the more stuff you pile onto an attack the more attacks an enemy will get accordingly or something
-Emmett: And to sort of encourage risk-taking, the quicker you kill an enemy the more XP or loot or more epic loot or whatever you get
-Matt : Or you have a fixed combo size that increases with level
-Matt : So you can start simple and ease the player in
-Emmett: Good idea too
-Emmett: I like the idea of letting the players choose how powerful/fancy they want to make their attack, but making them more vulnerable somehow as a result
-Emmett: But simultaneously incentivize them to do so
-Emmett: Maybe make combo size increase with level
-Emmett: But base XP is pretty minimal
-Emmett: However the faster you kill an enemy the more XP you get
-Emmett: Maybe there could be gear enchants/effects which are like "has a chance of doing bonus <thing> on a successful <foo> combo"
-Emmett: And the fancier the combo is, the bigger the reward is
-Emmett: Unless that's already being incentivized enough
-Emmett: Or maybe the fancier the combo is, the greater chance there will be of it happening
-Emmett: Yeah, I like that one
-Emmett: Can you tell I've been watching game design videos today? lol
-Emmett: Is there something I can Google about Xenogears that will be likely to show me what you're talking about?
-Emmett: Unless you just want to Skype later and try and explain it
-Emmett: And if I really want to be a dick, I could implement a small XP penalty whenever the player's killed in combat :P
-Emmett: Errr, :O
-Emmett: And I could add an *optional* Ironman mode that automatically saves whenever the player dies
-Emmett: Holy shit, this is either brilliant or insane
-Emmett: Of course, to keep the player from just doing the same thing over and over again, it seems pretty essential to have different enemy types that are vulnerable or strong against certain attack elements or combos
-
+THOUGHTS ON COMBAT REDESIGN
+- Not going to incorporate movement/positioning, yet
+- 3 basic attacks (which can be combined/customized)
+- A "stagger" gauge (some enemies stagger more easily than others)
+- 1 attack does heavy HP damage to staggered enemies or very small HP dmg and very small stagger DMG to non-staggered enemies
+- 1 attack does good stagger damage and very little HP damage
+- 1 attack does small HP and small stagger dmg but has <some other effect>
 
 */
 

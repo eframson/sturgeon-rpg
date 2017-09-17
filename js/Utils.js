@@ -1,17 +1,18 @@
 define([
 	'jquery',
 	'knockout',
-	'md5',
-], function($, ko){
+	'tinycolor-min',
+	'md5'
+], function($, ko, tinycolor){
 
-	var Utils = {
+	class Utils {
 
 		//Returns number between min (inclusive) and max (exclusive)
-		doRand : function(min, max){
+		static doRand(min, max){
 			return Math.floor(Math.random() * (max - min)) + min;
-		},
+		}
 		
-		doBasedOnPercent : function(percentageActions, finallyAction){
+		static doBasedOnPercent(percentageActions, finallyAction){
 			var percents;
 			if(percentageActions == undefined){
 				return false;
@@ -20,11 +21,11 @@ define([
 			var discretePercents = Object.keys(percentageActions);
 			var percents = Array();
 
-			for(i = 0; i < discretePercents.length; i++){
+			for(var i = 0; i < discretePercents.length; i++){
 
 				if( percentageActions[discretePercents[i]].constructor == Array ){
 
-					for(j=0; j < percentageActions[discretePercents[i]].length; j++){
+					for(var j=0; j < percentageActions[discretePercents[i]].length; j++){
 						percents.push(discretePercents[i]);
 					}
 
@@ -79,29 +80,29 @@ define([
 			console.log("percents:");
 			console.log(percents);*/
 			return false;
-		},
+		}
 
-		chooseRandomly : function( opts ){
+		static chooseRandomly( opts ){
 			var randIdx = this.doRand(0, opts.length);
 			return opts[randIdx];
-		},
+		}
 		
 		//Commented out until I actually use it
-		/*failureMsg : function(messageString){
+		/*failureMsg(messageString){
 			displayMessage(messageString, "error", "Oh no!", 8000);
 		},
 		
-		successMsg : function(messageString){
+		successMsg(messageString){
 			displayMessage(messageString, "notice", "Success");
 		},
 		
-		displayMessage : function(messageString, type, growlHeader, duration){
+		displayMessage(messageString, type, growlHeader, duration){
 			type = type || "warning";
 		
 			$.growl[type]({ message: messageString, title: growlHeader, duration: duration });
 		},*/
 
-		calculateAveragesForLevel : function(levelNum) {
+		static calculateAveragesForLevel(levelNum) {
 
 			//Avg. player HP
 			var avgPlayerHp = 20 + ((levelNum - 1) * 7);
@@ -157,9 +158,9 @@ define([
 			};
 
 			return averages;
-		},
+		}
 
-		projectedStatAllotmentsForLevel : function(levelNum){
+		static projectedStatAllotmentsForLevel(levelNum){
 			levelNum = levelNum || 1;
 
 			var output = {
@@ -179,27 +180,27 @@ define([
 			//Full epic armor should reduce dmg taken to: 14% player HP
 
 			//AC of poor quality item: 1% of player HP
-			var armorBaseAC = .01 * output.player.hp;
+			var armorBaseAC = 0.25 * (levelNum * 10);
 			output.player.armor = {
-				poor : Math.round(1.0 * armorBaseAC),
+				poor : Math.round(0.5 * armorBaseAC),
 				//AC of good quality item: 1.9x poor quality item
-				good : Math.round(1.9 * armorBaseAC),
+				good : Math.round(1.0 * armorBaseAC),
 				//AC of great quality item: 3.2x poor quality item
-				great : Math.round(3.2 * armorBaseAC),
+				great : Math.round(1.5 * armorBaseAC),
 				//AC of epic quality item: 4.7x poor quality item
-				exceptional : Math.round(4.7 * armorBaseAC),
+				exceptional : Math.round(2.0 * armorBaseAC),
 			};
 
 			//AC of poor quality shield: .5% of player HP
-			var shieldBaseAC = .005 * output.player.hp;
+			var shieldBaseAC = armorBaseAC;
 			output.player.shield = {
-				poor : Math.round(1.0 * shieldBaseAC),
+				poor : Math.round(0.5 * shieldBaseAC),
 				//AC of good quality shield: 1.9x poor quality shield
-				good : Math.round(1.9 * shieldBaseAC),
+				good : Math.round(1.0 * shieldBaseAC),
 				//AC of great quality shield: 3.1x poor quality shield
-				great : Math.round(3.1 * shieldBaseAC),
+				great : Math.round(1.5 * shieldBaseAC),
 				//AC of epic quality shield: 4.5x poor quality shield
-				exceptional : Math.round(4.5 * shieldBaseAC),
+				exceptional : Math.round(2.0 * shieldBaseAC),
 			};
 
 			//Player can't reduce dmg below 5% of total HP
@@ -242,9 +243,9 @@ define([
 			};
 
 			return output;
-		},
+		}
 
-		calculateDmgForArmorAndLevel : function(dmg, armor, levelNum){
+		static calculateDmgForArmorAndLevel(dmg, armor, levelNum, dmgType){
 			var actualDmg;
 			//2
 			//var minDmg = 0.20 * dmg;
@@ -253,16 +254,37 @@ define([
 			//actualDmg = dmg * ( (100 + ((levelNum - 5) * 0.65) ) / (100 + armor) );
 
 			//3
-			actualDmg = dmg - armor;
-			return actualDmg;
+			//actualDmg = dmg - armor;
 
 			//1
 			//return Math.round(actualDmg);
 			//2
 			//return Math.round( (actualDmg >= minDmg) ? actualDmg : minDmg );
-		},
 
-		getObjectAsArrayIndexedByNumericalSortOrder : function(object, sortFieldName){
+			//3
+			if(armor){
+				//This is how we're capping armor effectiveness for now
+				armor = (armor >= 1000) ? 1000 : armor ;
+				var pctDmgAbsorbed = Math.log(armor+1)/Math.log(3000);
+				//Armor is more effective against light attacks, and less effective against heavy attacks
+				if(dmgType == "light"){
+					pctDmgAbsorbed = pctDmgAbsorbed * 1.30;
+				}else if(dmgType == "heavy"){
+					pctDmgAbsorbed = pctDmgAbsorbed * 0.75;
+				}
+				pctDmgAbsorbed = (pctDmgAbsorbed < 0.85) ? pctDmgAbsorbed : 0.85 ;
+				actualDmg = Math.round( dmg * (1 - pctDmgAbsorbed) );
+			}else{
+				actualDmg = dmg;
+			}
+
+			//4
+			//ln(1x^n + 0) //n = 0.08
+
+			return actualDmg;
+		}
+
+		static getObjectAsArrayIndexedByNumericalSortOrder (object, sortFieldName){
 
 			sortFieldName = sortFieldName || "sortOrder";
 
@@ -286,18 +308,14 @@ define([
 				left = parseInt(left);
 				right = parseInt(right);
 
-				return (left > right) ? 1 : -1 ;
-
-				if(left == right){
-					return 0;
-				}
+				return (left > right) ? 1 : (left < right) ? -1 : 0 ;
 			});
 
 			return outputArray;
 
-		},
+		}
 
-		getPossibleQualities : function(){
+		static getPossibleQualities(){
 			var qualities = [
 				"poor",
 				"good",
@@ -305,9 +323,9 @@ define([
 				"exceptional"
 			];
 			return qualities;
-		},
+		}
 
-		getPossibleQualitiesWithPossibilities : function(){
+		static getPossibleQualitiesWithPossibilities(){
 			var qualities = {
 				35 : "poor",
 				45 : "good",
@@ -315,9 +333,9 @@ define([
 				5 : "exceptional"
 			};
 			return qualities;
-		},
+		}
 
-		getWeaponQualityDescriptors : function(){
+		static getWeaponQualityDescriptors(){
 			var qualities = {
 				"poor" : "Crude",
 				"good" : "Sturdy",
@@ -325,9 +343,9 @@ define([
 				"exceptional" : "Deadly",
 			};
 			return qualities;
-		},
+		}
 
-		getExportDataFromObject : function(obj){
+		static getExportDataFromObject(obj){
 
 			var exportObj;
 
@@ -345,7 +363,7 @@ define([
 						exportObj = this.getExportDataFromObject(obj.getExportData());
 					}else{
 						exportObj= {};
-						for(prop in obj){
+						for(var prop in obj){
 							exportObj[prop] = this.getExportDataFromObject(obj[prop]);
 						}
 					}
@@ -365,21 +383,21 @@ define([
 
 			return exportObj;
 
-		},
+		}
 
-		scrapCostForUpgradeLevel : function(targetUpgradeLevel){
+		static scrapCostForUpgradeLevel(targetUpgradeLevel){
 			return targetUpgradeLevel * 100;
-		},
+		}
 
-		isEmptyObject : function(obj){
+		static isEmptyObject(obj){
 			if(obj == undefined || obj == null || typeof obj !== 'object'){
 				//Not sure why we were encountering this error...
 				return true;
 			}
 			return Object.keys(obj).length === 0;
-		},
+		}
 		
-		cloneObject : function(obj, genNewUniqueID){
+		static cloneObject(obj, genNewUniqueID){
 			
 			var newItemData = ko.mapping.toJS(obj);
 			
@@ -399,19 +417,19 @@ define([
 			}
 			
 			return newObj;
-		},
+		}
 
-		microtime : function(get_as_float) {
+		static microtime(get_as_float) {
 			var unixtime_ms = (new Date).getTime();
 			var sec = Math.floor(unixtime_ms/1000);
 			return get_as_float ? (unixtime_ms/1000) : (unixtime_ms - (sec * 1000))/1000 + ' ' + sec;
-		},
+		}
 
-		uniqueID : function(){
+		static uniqueID(){
 			return md5(this.microtime());
-		},
+		}
 
-		makeMagicReplacements : function(string, objectsToCheck) {
+		static makeMagicReplacements(string, objectsToCheck) {
 
 			if(string == undefined || objectsToCheck == undefined || (Array.isArray(objectsToCheck) && objectsToCheck.length == 0) ){
 				return false;
@@ -428,7 +446,7 @@ define([
 				for(var i = 0; i < matches.length; i++){
 					var trimmedMatch = matches[i].replace(/%/g, "");
 
-					for(j = 0; j < objectsToCheck.length; j++){
+					for(var j = 0; j < objectsToCheck.length; j++){
 						var object = objectsToCheck[j];
 
 						if(object == undefined || object[trimmedMatch] == undefined){
@@ -445,8 +463,12 @@ define([
 			}
 
 			return magicDesc;
-		},
+		}
 
+		static hslToHex (h, s, l){
+			var colorObj = tinycolor("hsl(" + h + ", " + s + "%, " + l + "%)"); 
+			return colorObj.toHex();
+		}
 	}
 
 	String.prototype.toProperCase = function () {

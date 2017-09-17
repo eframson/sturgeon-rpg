@@ -3,11 +3,12 @@ define([
 	'knockout',
 	'classes/Entity',
 	'classes/DataCollection',
+	'classes/CombatEffect',
 
 	'json!data/monsterarchetypes.json',
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, Entity, DataCollection, monsterArchetypeDataFile, skillDataFile, Utils){
+], function($, ko, Entity, DataCollection, CombatEffect, monsterArchetypeDataFile, skillDataFile, Utils){
 
 	function Monster(monsterData, onFinishedLoadingCallback){
 
@@ -41,13 +42,20 @@ define([
 			self.lootCoefficient = ko.observable(monsterData.lootCoefficient || 1);
 			self.chanceToCrit = ko.observable(monsterData.chanceToCrit || 0);
 
+			self.stagger = ko.observable(monsterData.stagger || 0);
+			//To make monsters more or less resistant to being staggered, just raise/lower the staggerPoint
+			self.staggerPoint = ko.observable(monsterData.staggerPoint || 0);
+			self.pctDmgToIgnoreWhenUnstaggered = monsterData.pctDmgToIgnoreWhenUnstaggered || 0.5;
+			self.staggerRecoveryPerTurn = monsterData.staggerRecoveryPerTurn || 0.1;
+			self.staggerDuration = ko.observable(monsterData.staggerDuration || 4);
+			self.pctExtraDmgTakenWhenStaggered = monsterData.pctExtraDmgTakenWhenStaggered || 0.25;
+
 			self.availableAttacks = monsterData.availableAttacks || {};
 
 			var archetypeData;
 
 			if(self.fullyDynamicStats && !self.isScaled()){
 				
-				//Idea 1
 				var averages = Utils.calculateAveragesForLevel(self.level());
 				var avgMonsterHp = averages.avgMonsterHp;
 				var avgMonsterDmg = averages.avgMonsterDmg;
@@ -61,12 +69,13 @@ define([
 				self.archetypeId = newMonsterArchetypeId;
 				archetypeData = self.getMonsterArchetypeById(newMonsterArchetypeId, self.archetypeClass);
 
-				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient);
-				self.xpCoefficient = ko.observable(archetypeData.xpCoefficient);
+				self.hpCoefficient = ko.observable(archetypeData.hpCoefficient || 1);
+				self.xpCoefficient = ko.observable(archetypeData.xpCoefficient || 1);
+				self.dmgCoefficient = ko.observable(archetypeData.dmgCoefficient || 1);
+				self.armorCoefficient = ko.observable(archetypeData.armorCoefficient);
 				self.chanceOfEpicLoot = ko.observable(archetypeData.chanceOfEpicLoot);
 				self.chanceToCrit = ko.observable(archetypeData.chanceToCrit);
 				self.chanceToHit = ko.observable(archetypeData.chanceToHit);
-				self.dmgCoefficient = ko.observable(archetypeData.dmgCoefficient);
 				self.lootCoefficient = ko.observable(archetypeData.lootCoefficient);
 				self.availableAttacks = archetypeData.attacks;
 
@@ -74,33 +83,29 @@ define([
 				var stats = Utils.projectedStatAllotmentsForLevel( self.level() );
 				self.maxHp(stats.monster.hp);
 				self.maxHp( Math.round((Utils.doRand(Math.ceil(stats.monster.hp * 0.9), Math.ceil(stats.monster.hp * 1.1))) ));
-				//self.maxHp( Math.round(self.maxHp() * self.hpCoefficient()) );
+				self.maxHp( Math.round(self.maxHp() * self.hpCoefficient()) );
 				self.hp( self.maxHp() );
+				self.staggerPoint(self.hp());
 				self.minDmg( Math.round(stats.monster.baseDmg * 0.9) );
 				self.maxDmg( Math.round(stats.monster.baseDmg * 1.1) );
-				//self.minDmg( Math.round(stats.monster.baseDmg * 1.0) );
-				//self.maxDmg( Math.round(stats.monster.baseDmg * 1.0) );
+
+				self.minDmg( Math.round( self.minDmg() * self.dmgCoefficient() ) );
+				self.maxDmg( Math.round( self.maxDmg() * self.dmgCoefficient() ) );
+
 				self.speed( self.level() );
-				self.expValue( Math.ceil((avgMonsterHp * 3) * self.xpCoefficient()) );
+				self.expValue( Math.floor( (self.level() * 100) * .25 ) );
 				
 				monsterData.availableCombatAbilities = archetypeData.availableCombatAbilities;
 				
 				self.name( self.name() + (archetypeData.displayString ? " " + archetypeData.displayString : "") );
 
-				//This should prevent monsters getting constantly re-scaled every time a game is loaded, lol
+				self.armor(self.level());
+				if(self.armorCoefficient() != undefined){
+					self.armor( self.armor() * self.armorCoefficient() );
+				}
+
+				//This should prevent monsters getting constantly re-scaled every time a game is loaded
 				self.isScaled(1);
-
-				/*console.log("Estimated base values");
-				console.log("Avg Player HP: " + avgPlayerHp);
-				console.log("Avg Monster HP: " + avgMonsterHp);
-				console.log("Avg Monster DMG: " + avgMonsterDmg);
-
-				console.log("Generated stats");
-				console.log("HP: " + self.hp());
-				console.log("Min DMG: " + self.minDmg());
-				console.log("Max DMG: " + self.maxDmg());
-				console.log("Speed: " + self.speed());
-				console.log("EXP value: " + self.expValue());*/
 
 			}
 
@@ -192,6 +197,23 @@ define([
 
 		}
 
+		self.customCombatEffectRoundHandlers = {
+			"stagger_recovery" : function(combatEffect){
+				var isStaggered = self.hasActiveCombatEffect("stagger");
+				if(isStaggered){
+					//Do nothing
+				}else{
+					var setStaggerTo = Math.round( self.stagger() - (self.staggerRecoveryPerTurn * self.staggerPoint()));
+					self.stagger( (setStaggerTo < 0) ? 0 : setStaggerTo );
+				}
+			}
+		};
+		self.customCombatEffectExpiryHandlers = {
+			"stagger" : function(combatEffect){
+				self.stagger(0);
+			}
+		};
+
 		this.selectCombatAbility = function(){
 
 			var baseAvailableAttacks = {};
@@ -263,6 +285,49 @@ define([
 				return undefined;
 			}
 
+		}
+
+		this.calculateActualDmg = function(dmg, levelNum, minDmg, dmgType){
+			return dmg;
+		}
+
+		this.takeDmg = function(hpDmg, staggerDmg){
+
+			//For now let's just forget about armor...
+			//Attempted HP dmg = attempted dmg * pct of HP dmg done by ability (rounded)
+			//Attempted stagger dmg = attempted dmg * pct of stagger dmg done by ability (rounded)
+			//If monster is staggered, monster takes full HP dmg (or more than full???)
+			//If monster is not staggered, monster takes less HP dmg (varies by monster?)
+			var isStaggered = self.hasActiveCombatEffect("stagger");
+			console.log("Raw HP dmg: " + hpDmg);
+			if(isStaggered){
+				hpDmg = Math.round(hpDmg * (1 + self.pctExtraDmgTakenWhenStaggered));
+			}else{
+				hpDmg = Math.round(hpDmg * (1 - self.pctDmgToIgnoreWhenUnstaggered));
+			}
+			console.log("Modified HP dmg: " + hpDmg);
+
+			self.hp( self.hp() - hpDmg );
+			var didStagger = self.takeStaggerDmg(staggerDmg);
+			return didStagger;
+		}
+
+		this.takeStaggerDmg = function(staggerDmg){
+			var isStaggered = self.hasActiveCombatEffect("stagger");
+			if(!isStaggered){
+				staggerDmg = Math.round(staggerDmg);
+				staggerDmg = (staggerDmg > (self.staggerPoint() - self.stagger())) ? self.staggerPoint() - self.stagger() : staggerDmg ;
+				console.log("Taking stagger dmg: " + staggerDmg);
+				self.stagger( self.stagger() + staggerDmg );
+
+				if(self.stagger() >= self.staggerPoint()){
+					var staggerEffect = new CombatEffect(skillDataCollection.getNode(["combat_effects", "stagger"]));
+					staggerEffect.baseDuration = self.staggerDuration();
+					self.applyCombatEffect(staggerEffect);
+					return staggerEffect;
+				}
+			}
+			return false;
 		}
 
 		this.getMonsterArchetypeById = function(archetypeID, archetypeClass){

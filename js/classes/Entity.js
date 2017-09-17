@@ -3,10 +3,11 @@ define([
 	'knockout',
 	'classes/DataCollection',
 	'classes/SaveableObject',
+	'classes/CombatEffect',
 
 	'json!data/skills.json',
 	'Utils',
-], function($, ko, DataCollection, SaveableObject, skillDataFile, Utils){
+], function($, ko, DataCollection, SaveableObject, CombatEffect, skillDataFile, Utils){
 
 	function Entity(data, onFinishedLoadingCallback){
 
@@ -39,14 +40,19 @@ define([
 			self.chanceToCrit = ko.observable(data.chanceToCrit || 5);
 			self.dmgCoefficient = ko.observable(data.dmgCoefficient || 1);
 
-			self.cooldowns = ko.observable({
-				basic : ko.observable(data.cooldowns.basic || 0),
-				flurry : ko.observable(data.cooldowns.basic || 0)
-			});
-
 			self.combatEffects = ko.observable({});
 
 			self.combatAbilities = ko.observable(data.combatAbilities || {});
+
+			self.numTurnsToSkip = ko.observable(data.numTurnsToSkip || 0);
+
+			if(data.combatEffects){
+				var effects = {};
+				$.each(data.combatEffects, function(idx, effect){
+					effects[idx] = new CombatEffect(effect);
+				});
+				self.combatEffects(effects);
+			}
 
 			self.activeCombatEffects = ko.computed(function(){
 				var combatEffectsArray = $.map(self.combatEffects(), function(elem, idx){
@@ -55,6 +61,14 @@ define([
 
 				var activeEffects = $.grep(combatEffectsArray, function(elem, idx){
 					return elem.isActive();
+				});
+
+				return activeEffects;
+			});
+
+			self.displayCombatEffects = ko.computed(function(){
+				var activeEffects = $.grep(self.activeCombatEffects(), function(elem, idx){
+					return elem.display;
 				});
 
 				return activeEffects;
@@ -89,14 +103,27 @@ define([
 
 		}
 
-		this.calculateActualDmg = function(dmg, levelNum, minDmg){
-			var baseDmg = Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum);
+		self.customCombatEffectRoundHandlers = {};
+		self.customCombatEffectExpiryHandlers = {};
+
+		this.calculateActualDmg = function(dmg, levelNum, minDmg, dmgType){
+			var baseDmg = Utils.calculateDmgForArmorAndLevel(dmg, self.armor(), levelNum, dmgType);
 
 			if( minDmg !== undefined ){
 				baseDmg = (baseDmg < minDmg) ? minDmg : baseDmg ;
 			}
 
 			return baseDmg;
+		}
+
+		this.takeStaggerDmg = function(){
+			//Do nothing, this is only something Monsters can actually do,
+			//but this is just here so nothing explodes
+		}
+
+		this.chargeUlt = function(chargeAmt){
+			//Do nothing, this is only something Players can actually do,
+			//but this is just here so nothing explodes
 		}
 
 		this.takeCombatAction = function(abilityId, target, game){
@@ -109,19 +136,27 @@ define([
 
 		this.makeAttack = function(abilityId, target, game){
 
-			var combatAbility = self.combatAbilities()[abilityId];
+			var combatAbility;
+			if(self.ultAbility !== undefined && self.ultAbility().id == abilityId){
+				combatAbility = self.ultAbility();
+			}else{
+				combatAbility = self.combatAbilities()[abilityId];
+			}
 			combatAbility.doAbility(self, target, game);
 
 		}
 
 		this.updateCombatEffectsForRound = function(){
 			
-			$.each(self.combatEffects(), function(idx, effect){
-
-				effect.doRound();
-
+			$.each(self.activeCombatEffects(), function(idx, effect){
+				effect.doRound(self);
 			});
-
+			//Make sure all effects have been evaluated before doing "special" things
+			$.each(self.activeCombatEffects(), function(idx, effect){
+				if(self.customCombatEffectRoundHandlers[effect.id] != undefined){
+					self.customCombatEffectRoundHandlers[effect.id](effect);
+				}
+			});
 		}
 
 		this.updateActiveAbilityCooldownsForRound = function(){
@@ -167,7 +202,6 @@ define([
 
 		this.takeDmg = function(dmg){
 			self.hp( self.hp() - dmg );
-			return self.hp();
 		}
 
 		this.hasArmor = function(){
@@ -180,7 +214,7 @@ define([
 
 		this.hasActiveCombatEffect = function(effect_id){
 			var activeEffect = $.grep(self.activeCombatEffects(), function(elem, idx){
-				return elem.id == effect_id;
+				return elem.id == effect_id && elem.isActive();
 			});
 
 			return activeEffect.length > 0;
