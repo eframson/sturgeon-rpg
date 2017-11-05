@@ -7,8 +7,8 @@ window.DEBUG = ((window.location.href.indexOf("localhost") || window.location.hr
 var requireJSConfig = {
 	baseUrl : 'js',
 	paths : {
-		knockout : 'knockout-3.3.0.debug',
-		jquery : 'jquery-2.1.3.min',
+		knockout : 'knockout-3.4.2',
+		jquery : 'jquery-3.2.1.min',
 		jqueryui : 'jquery-ui.min',
 		bootstrap : 'bootstrap.min',
 		text : 'text',
@@ -27,7 +27,10 @@ var requireJSConfig = {
 	waitSeconds : 20,
 };
 
-if(!window.DEBUG){
+if(window.DEBUG){
+	requireJSConfig.paths.knockout += ".debug";
+	requireJSConfig.paths.jquery = "jquery-3.2.1";
+}else{
 	requireJSConfig.urlArgs = "bust=" + BUILD_VERSION;
 }
 
