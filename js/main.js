@@ -110,6 +110,7 @@ require([
 
 		if( window.location.hash == '#konami' ){
 			game.manageTransitionToView("fullscreen","mainscreen");
+			game.player().playerClass("warrior");
 			game.isNew(false);
 			game.equipInitialLootItems();
 		}

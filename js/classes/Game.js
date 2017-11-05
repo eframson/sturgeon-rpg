@@ -409,6 +409,7 @@ define([
 			self.playerUltBarWidth = ko.observable(0);
 			self.enemyStaggerBarWidth = ko.observable(0);
 			self.ultBarText = ko.observable("");
+			self.staggerBarText = ko.observable("");
 
 			self.inventorySortOrder = ko.observable("Type");
 			self.containerSortOrder = ko.observable("Type");
@@ -1154,9 +1155,18 @@ define([
 				newObj
 			));
 
+			//Preload the stagger text (right?)
+			self.staggerBarText("50% damage reduction");
+
 			self.currentEnemy().stagger.subscribe(function(newVal){
 				var width = self._calculateHpBarWidthForGivenCurrentAndMaxHp(newVal, self.currentEnemy().staggerPoint());
 				self._animateBarWidth(ENEMYSTAGGERBAR, width);
+
+				if(newVal == self.currentEnemy().staggerPoint()){
+					self.staggerBarText("Taking full damage!");
+				}else{
+					self.staggerBarText("50% damage reduction");
+				}
 			});
 
 			self.currentEnemy().applyCombatEffect(
@@ -1295,11 +1305,13 @@ define([
 				//Deliberately leaving this set to self.currentEnemy...
 				if( self.currentEnemy() && self.currentEnemy().isDead() ){
 					self.currentEnemy().stagger(0);
-					//"Done" the square if it's not an exit square
+					self.staggerBarText("");
+					
+					//Clear any leftover stun effects
 					self.player().numTurnsToSkip(0);
 
+					//"Done" the square if it's not an exit square
 					var square = self.level().getActiveSquare();
-
 					if(square.type != "exit"){
 						square.setDone(true);
 					}else{
@@ -3427,6 +3439,34 @@ define([
 			}else{
 				return "N/A";
 			}
+		}
+
+		this._getNumPlussesString = function(num, cssClass){
+			var plusString = "<span class=\"glyphicon glyphicon-plus "
+				+ cssClass + "\"></span>";
+			var output = "";
+			for(var i = 0; i < num; i++){
+				output += plusString;
+			}
+			return output;
+		}
+
+		this._getPlusDescriptionForCombatAbility = function(combatAbility){
+			var output = [];
+
+			if(combatAbility.getNumHPPlusses() > 0){
+				output.push(self._getNumPlussesString(combatAbility.getNumHPPlusses(), "hp_emphasis") + " HP dmg");
+			}
+
+			if(combatAbility.getNumStaggerPlusses() > 0){
+				output.push(self._getNumPlussesString(combatAbility.getNumStaggerPlusses(), "stagger_emphasis") + " Stagger dmg");
+			}
+
+			if(combatAbility.getNumUltPlusses() > 0){
+				output.push(self._getNumPlussesString(combatAbility.getNumUltPlusses(), "ultimate_emphasis") + " Ult charge");
+			}
+			
+			return output.join(", ");
 		}
 
 		this._makeMagicReplacementsForItem = function(string, item){

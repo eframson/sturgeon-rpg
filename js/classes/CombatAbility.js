@@ -174,6 +174,21 @@ define([
 			}
 		}
 
+		this.getNumHPPlusses = function(){
+			var numPlus = Math.floor(self.pctHPDmg / 0.2);
+			return (numPlus < 1 && self.pctHPDmg > 0) ? 1 : numPlus;
+		}
+
+		this.getNumStaggerPlusses = function(){
+			var numPlus = Math.floor(self.staggerDmg / 0.2);
+			return (numPlus < 1 && self.staggerDmg > 0) ? 1 : numPlus;
+		}
+
+		this.getNumUltPlusses = function(){
+			var numPlus = Math.floor(self.ultCharge / 5);
+			return (numPlus < 1 && self.ultCharge > 0) ? 1 : numPlus;
+		}
+
 		this.isHeavyAttack = function(){
 			return (self.attackType == "heavy") ? true : false ;
 		}

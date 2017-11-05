@@ -68,6 +68,18 @@ button:focus {
 	color: #5cb85c;
 }
 
+.stagger_emphasis {
+	color: #5a9595;
+}
+
+.ultimate_emphasis {
+	color: #FF6C00;
+}
+
+.hp_emphasis {
+	color: #ff3d3d;
+}
+
 .desc {
 	font-style: italic;
 	margin-bottom: 10px;
@@ -691,6 +703,10 @@ button:focus {
 	margin-top: 3px;
 }
 
+.combat-buttons .line span.glyphicon {
+	display: inline;
+}
+
 .combat .header {
 	font-size: 20px;
 	line-height: 20px;
@@ -831,6 +847,17 @@ button:focus {
 		 1px -1px 0 #e8c2c2,
 		 -1px 1px 0 #e8c2c2,
 		  1px 1px 0 #e8c2c2;
+}
+
+.combat .lines .staggerbar .bar div.stagger-text {
+	width: 370px;
+	background-color: transparent;
+	text-shadow:
+		-1px -1px 0 #ffffff,
+		 1px -1px 0 #ffffff,
+		 -1px 1px 0 #ffffff,
+		  1px 1px 0 #ffffff;
+	font-weight: bold;
 }
 
 .combat.player .lines .staggerbar div {
