@@ -135,7 +135,16 @@
 			"sortOrder" : 1,
 			"showLevelInformation" : 0,
 			"staggerDmg" : 0.7,
-			"ultCharge" : 5
+			"ultCharge" : 5,
+			"playerClassAlias" : {
+				"warrior" : "Overwhelming Slam",
+				"barbarian" : "Thundering Smash",
+				"wizard" : "Storm Bolt",
+				"rogue" : "Kidney Punch",
+				"cultist" : "Eldritch Blast",
+				"hunter" : "Pistol Whip",
+				"duelist" : "Hilt Strike" 
+			}
 		},
 
 		"basic_hp_attack" : {
@@ -158,7 +167,16 @@
 			"sortOrder" : 2,
 			"showLevelInformation" : 0,
 			"staggerDmg" : 0.2,
-			"ultCharge" : 5
+			"ultCharge" : 5,
+			"playerClassAlias" : {
+				"warrior" : "Crushing Blow",
+				"barbarian" : "Bloody Cleave",
+				"wizard" : "Molten Blast",
+				"rogue" : "Eviscerate",
+				"cultist" : "Necrotize",
+				"hunter" : "Headshot",
+				"duelist" : "Lunging Skewer"
+			}
 		},
 
 		"basic_ult_builder" : {
@@ -182,7 +200,16 @@
 			"showLevelInformation" : 0,
 			"staggerDmg" : 0.2,
 			"pctHPDmg" : 0.2,
-			"ultCharge" : 15
+			"ultCharge" : 15,
+			"playerClassAlias" : {
+				"warrior" : "Inspiring Shout",
+				"barbarian" : "Battle Rage",
+				"wizard" : "Arcane Empower",
+				"rogue" : "Discard Remorse",
+				"cultist" : "Dark Whispers",
+				"hunter" : "Research Weaknesses",
+				"duelist" : "Tighten Grip"
+			}
 		},
 
 		"heavy_attack" : {

@@ -20,6 +20,36 @@ define([
 		//Init
 		var self = this;
 		data = $.extend({equipment: { armor: {}, }, inventory : Array(), activeAbilities : {}, combatAbilities : {}, passiveAbilities : {} }, data);
+		var classUltimates = {
+			"warrior" : {
+				name : "Execute",
+				description : "Deftly run your opponent through",
+			},
+			"barbarian" : {
+				name : "Primal Rage",
+				description : "Go berserk and hack your foe into tiny pieces",
+			},
+			"wizard" : {
+				name : "Electric Firestorm",
+				description : "Electrocute your enemy, then incinerate what remains",
+			},
+			"rogue" : {
+				name : "Assassinate",
+				description : "Stab every vital organ your foe has",
+			},
+			"cultist" : {
+				name : "Manifest Doom",
+				description : "Sacrifice your enemy to the Elder Gods",
+			},
+			"hunter" : {
+				name : "Exorcise Soul",
+				description : "Forcibly separate your opponent's soul from their body",
+			},
+			"duelist" : {
+				name : "Broadside",
+				description : "Unleash your ship's cannons on your foe",
+			}
+		};
 
 		Entity.call(this, data, onFinishedLoadingCallback);
 
@@ -29,6 +59,7 @@ define([
 
 			self.skillDataCollection = new DataCollection(skillDataFile);
 
+			self.playerClass = ko.observable(data.playerClass || "");
 			self.level = ko.observable(data.level || 1);
 			self.hp = ko.observable(data.hp || 0);
 			self.baseHp = ko.observable(data.baseHp || 100);
@@ -132,6 +163,13 @@ define([
 				var hexVal = Utils.hslToHex(h, s, l);
 
 				return "#" + hexVal;
+			});
+
+			self.ultData = ko.computed(function(){
+				if(self.playerClass() != ""){
+					return classUltimates[self.playerClass()];
+				}
+				return {name: "", description: ""};
 			});
 
 			var itemArray = Array();
@@ -485,6 +523,14 @@ define([
 		this.getInventoryItemByID = function(itemID){
 
 			return self.inventory.getItemByID(itemID);
+
+		}
+
+		this.setPlayerClass = function(classID) {
+			self.playerClass(classID);
+		}
+
+		this.getClassUltimate = function(){
 
 		}
 

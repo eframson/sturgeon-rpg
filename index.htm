@@ -636,17 +636,17 @@
 										<div class="line">
 											<button type="button" class="btn btn-default" data-bind="
 												click: useUltimate,
-												text: player().ultAbility().buttonLabel,
+												text: player().ultData().name + ' (ULTIMATE)',
 												css: { disabled : $root.player().ultReady() == 0 || disablePlayerCombatButtons() == 1 || player().canAct() == 0 }
 											"></button>
-											<span class="button-label" data-bind="text: player().ultAbility().description"></span>
+											<span class="button-label" data-bind="text: player().ultData().description"></span>
 										</div>
 
 										<!-- ko foreach: $root.player().combatAbilitiesIterable() -->
 										<div class="line">
 											<button type="button" class="btn btn-default" data-bind="
 												click: $root.playerAttacks,
-												text: buttonLabel + ( cooldown() > 0 ? ' (' + cooldown() + ')' : '' ),
+												text: (playerClassAlias != undefined ? playerClassAlias[$root.player().playerClass()] : buttonLabel)  + ( cooldown() > 0 ? ' (' + cooldown() + ')' : '' ),
 												css: { disabled : cooldown() > 0 || $root.disablePlayerCombatButtons() == 1 || $root.player().canAct() == 0 }
 											"></button>
 											<span class="button-label" data-bind="text: $data.description"></span>
@@ -676,7 +676,7 @@
 							<!-- end combat button area -->
 
 							<!-- start fullscreen content area -->
-							<div class="full-screen-row full-screen-notice x-wide-center" data-bind="with: fullScreenContent, css: { hidden: centerColContent() != 'fullscreen_content' }">
+							<div class="full-screen-row full-screen-notice double-x-wide-center" data-bind="with: fullScreenContent, css: { hidden: centerColContent() != 'fullscreen_content' }">
 
 								<div class="notice-text">
 									<div data-bind="html: text"></div>

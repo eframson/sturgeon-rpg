@@ -41,6 +41,7 @@ define([
 			self.sortOrder = data.sortOrder;
 			self.showLevelInformation = ko.observable(data.showLevelInformation !== undefined ? data.showLevelInformation : 1);
 			self.attackType = data.attackType;
+			self.playerClassAlias = data.playerClassAlias || undefined;
 
 		}
 

@@ -59,32 +59,86 @@ define([
 
 		this.player = undefined;
 		this.slides = {
-			start: {
-				text : "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed. It is a comfortable 16 degrees Celsius. You've been in here for a week already. You are bored.</p>",
+			d0: {
+				text : "<p>You are in an egg, nestled in a layer of rocks at the bottom of a creek bed.</p>",
 				buttons: [
 					{
-						title: "Let's bust outta here!",
-						action: "_btnFnStartButton"
+						title: "Develop senses",
+						action: "_btnFnAdvanceToD1"
 					},
 				],
 				location: "Unknown",
 			},
 			d1: {
-				text : "<p>With a loud crack, you emerge from your egg like the Kool-Aid man through a brick wall.</p>",
+				text : "<p>You learn about temperature. It is a comfortable 16 degrees Celsius.</p>",
 				buttons: [
 					{
-						title: "OH YEAH!!!",
-						action: "_btnFnD1Button"
+						title: "Form thoughts",
+						action: "_btnFnAdvanceToD2"
 					},
 				],
 				location: "Unknown",
 			},
 			d2: {
+				text : "<p>Finally grasping the concept of time, you feel that you've been in your egg for a week. Growing restless, your thoughts start to drift.</p>",
+				buttons: [
+					{
+						title: "Daydream",
+						action: "_btnFnAdvanceToD3"
+					},
+				],
+				location: "Unknown",
+			},
+			d3: {
+				text : "<p>Your imagination takes hold, and you envision...</p>",
+				buttons: [
+					{
+						title: "A mighty warrior, steel plate armor shimmering in gloomy depths",
+						action: "_btnFnChooseClassWarrior"
+					},
+					{
+						title: "A fierce barbarian queen, sitting atop a throne adorned with the skulls of her enemies",
+						action: "_btnFnChooseClassBarbarian"
+					},
+					{
+						title: "A hooded wizard, fingers crackling menacingly with electricity and flame",
+						action: "_btnFnChooseClassWizard"
+					},
+					{
+						title: "A leather-clad assassin, bearing blades dripping with cruel poisons, skulking through shadow",
+						action: "_btnFnChooseClassRogue"
+					},
+					{
+						title: "A robed zealot, tightly clutching a book emblazoned with eldritch symbols",
+						action: "_btnFnChooseClassCultist"
+					},
+					{
+						title: "A tattooed hunter, bedecked with an assortment of mysterious vials and wielding an ornate blunderbuss inlaid with silver",
+						action: "_btnFnChooseClassHunter"
+					},
+					{
+						title: "A brilliantly garbed duelist, whose disarming smile belies the golden rapiers firmly affixed at her side",
+						action: "_btnFnChooseClassDuelist"
+					},
+				],
+				location: "Unknown",
+			},
+			d4: {
+				text : "<p>Soul brimming with newfound purpose, you emerge from your egg with a loud crack like the Kool-Aid man smashing through a brick wall.</p>",
+				buttons: [
+					{
+						title: "OH YEAH!!!",
+						action: "_btnFnAdvanceToD5"
+					},
+				],
+				location: "Unknown",
+			},
+			d5: {
 				text : "<p>You feel cool water rush past your face like a refreshing breeze.</p>",
 				buttons: [
 					{
-						title: "Continue",
-						action: "_btnFnD2Button"
+						title: "Go forth and seek your destiny!",
+						action: "_btnFnFinishIntro"
 					},
 				],
 				location: "Unknown",
@@ -926,7 +980,7 @@ define([
 
 			//Initialize our intro slides if this is a brand new game
 			if(self.fullScreenContent() == undefined && self.isNew()){
-				self.setFullscreenContentFromSlideId("start");
+				self.setFullscreenContentFromSlideId("d0");
 			}
 
 			if(!self.isNew()){
@@ -3326,6 +3380,10 @@ define([
 
 		this.logMessage = function(msgText, cssClass){
 			self.logMessages.unshift( {text : msgText, cssClass: cssClass || "info"} );
+			if(self.logMessages().length > 20){
+				//Remove the last entry and just throw it away
+				self.logMessages.pop();
+			}
 			$(".message-log").stop(false, true).effect("highlight", { color: "#BEBEBE" }, 400);
 		}
 
@@ -4070,21 +4128,70 @@ define([
 			}
 		}
 
-		this._btnFnStartButton = function(){
+		/* ======================================================== START BUTTON FUNCTIONS =============================================================== */
+
+		/* ------ START INTRO SLIDE BUTTON FUNCTIONS ------ */
+
+		this._btnFnAdvanceToD1 = function(){
 			self.transitionFullscreenContentToSlideId("d1");
 		}
 
-		this._btnFnD1Button = function(){
+		this._btnFnAdvanceToD2 = function(){
 			self.transitionFullscreenContentToSlideId("d2");
 		}
 
-		this._btnFnD2Button = function(){
+		this._btnFnAdvanceToD3 = function(){
+			self.transitionFullscreenContentToSlideId("d3");
+		}
+
+		this._btnFnAdvanceToD5 = function(){
+			self.transitionFullscreenContentToSlideId("d5");
+		}
+
+		this._btnFnChooseClassWarrior = function(){
+			self.player().setPlayerClass("warrior");
+			self.transitionFullscreenContentToSlideId("d4");
+		}
+
+		this._btnFnChooseClassBarbarian = function(){
+			self.player().setPlayerClass("barbarian");
+			self.transitionFullscreenContentToSlideId("d4");
+		}
+
+		this._btnFnChooseClassWizard = function(){
+			self.player().setPlayerClass("wizard");
+			self.transitionFullscreenContentToSlideId("d4");
+		}
+
+		this._btnFnChooseClassRogue = function(){
+			self.player().setPlayerClass("rogue");
+			self.transitionFullscreenContentToSlideId("d4");
+		}
+
+		this._btnFnChooseClassCultist = function(){
+			self.player().setPlayerClass("cultist");
+			self.transitionFullscreenContentToSlideId("d4");
+		}
+
+		this._btnFnChooseClassHunter = function(){
+			self.player().setPlayerClass("hunter");
+			self.transitionFullscreenContentToSlideId("d4");
+		}
+
+		this._btnFnChooseClassDuelist = function(){
+			self.player().setPlayerClass("duelist");
+			self.transitionFullscreenContentToSlideId("d4");
+		}
+
+		this._btnFnFinishIntro = function(){
 			//Show the main game now
 			self.manageTransitionToView("fullscreen","mainscreen");
 
 			self.isNew(false);
 			self.equipInitialLootItems();
 		}
+
+		/* ------ END INTRO SLIDE BUTTON FUNCTIONS ------ */
 
 		this._btnFnResetLevelNo = function(){
 			self.manageTransitionToView("fullscreen","mainscreen",function() {
@@ -4203,6 +4310,8 @@ define([
 
 			self.startCombat("boss");
 		}
+
+		/* ======================================================== END BUTTON FUNCTIONS =============================================================== */
 
 		/* ======================================================== BEGIN TEST FUNCTIONS =============================================================== */
 

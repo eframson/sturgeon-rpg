@@ -845,6 +845,9 @@ button:focus {
 .full-screen-notice {
 	margin-top: 20px;
 	margin-bottom: 20px;
+	/*background-color: rgba(250,250,250,0.5);*/
+	background-color: rgba(253,253,253,0.4);
+	border-radius: 5px;
 }
 
 .full-screen-notice .notice-text {
@@ -877,6 +880,11 @@ button:focus {
 .x-wide-center {
 	width: 500px;
 	margin-left: -75px;
+}
+
+.double-x-wide-center {
+	width: 800px;
+	margin-left: -225px;
 }
 
 .poor {
