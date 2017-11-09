@@ -113,6 +113,24 @@
 			"id" : "monster_19",
 			"name" : "\"Spearer\" Mantis Shrimp",
 			"desc" : "The mantis shrimp is a type of marine crustacean. They sport powerful claws that they use to attack and kill prey by spearing, stunning, or dismemberment. These aggressive and typically solitary sea creatures spend most of their time hiding in rock formations or burrowing intricate passageways in the sea bed. They rarely exit their homes except to feed and relocate. Spearers are armed with spiny appendages topped with barbed tips, which used to stab and snag prey. They strike by rapidly unfolding and swinging their raptorial claws at the prey, and are capable of inflicting serious damage. \"The mantis shrimp is the harbinger of blood-soaked rainbows.\" - The Oatmeal"
+		},
+
+		"monster_20" : {
+			"id" : "monster_20",
+			"name" : "Bananagator",
+			"desc" : "\"Well obviously it's wrong to pervert natural law and create a hideous monster for no reason other than because we can\" said no mad scientist ever"
+		},
+
+		"monster_21" : {
+			"id" : "monster_21",
+			"name" : "Laserfish",
+			"desc" : "It's like an electric eel but with lasers. What more do you need to know?"
+		},
+
+		"monster_22" : {
+			"id" : "monster_22",
+			"name" : "Malfunctioning Sonar Probe",
+			"desc" : "Instead of pings, it now emits a series of electronic warbles and beeps. Seawater has oxidized and degraded its casing so it has taken on a burnished bronze sheen and its exposed circuits have started to glow with a cerulean hue."
 		}
 	},
 

@@ -120,6 +120,10 @@ define([
 						title: "A brilliantly garbed duelist, whose disarming smile belies the golden rapiers firmly affixed at her side",
 						action: "_btnFnChooseClassDuelist"
 					},
+					{
+						title: "A clever game designer, typing away furiously at a keyboard and planning the next playtest",
+						action: "_btnFnChooseHeroDesigner"
+					},
 				],
 				location: "Unknown",
 			},
@@ -4189,37 +4193,39 @@ define([
 		}
 
 		this._btnFnChooseClassWarrior = function(){
-			self.player().setPlayerClass("warrior");
-			self.transitionFullscreenContentToSlideId("d4");
+			self._chooseClass("warrior");
 		}
 
 		this._btnFnChooseClassBarbarian = function(){
-			self.player().setPlayerClass("barbarian");
-			self.transitionFullscreenContentToSlideId("d4");
+			self._chooseClass("barbarian");
 		}
 
 		this._btnFnChooseClassWizard = function(){
-			self.player().setPlayerClass("wizard");
-			self.transitionFullscreenContentToSlideId("d4");
+			self._chooseClass("wizard");
 		}
 
 		this._btnFnChooseClassRogue = function(){
-			self.player().setPlayerClass("rogue");
-			self.transitionFullscreenContentToSlideId("d4");
+			self._chooseClass("rogue");
 		}
 
 		this._btnFnChooseClassCultist = function(){
-			self.player().setPlayerClass("cultist");
-			self.transitionFullscreenContentToSlideId("d4");
+			self._chooseClass("cultist");
 		}
 
 		this._btnFnChooseClassHunter = function(){
-			self.player().setPlayerClass("hunter");
-			self.transitionFullscreenContentToSlideId("d4");
+			self._chooseClass("hunter");
 		}
 
 		this._btnFnChooseClassDuelist = function(){
-			self.player().setPlayerClass("duelist");
+			self._chooseClass("duelist");
+		}
+
+		this._btnFnChooseHeroDesigner = function(){
+			self._chooseClass("designer");
+		}
+
+		this._chooseClass = function(playerClass){
+			self.player().setPlayerClass(playerClass);
 			self.transitionFullscreenContentToSlideId("d4");
 		}
 

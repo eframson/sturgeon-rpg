@@ -48,6 +48,10 @@ define([
 			"duelist" : {
 				name : "Broadside",
 				description : "Unleash your ship's cannons on your foe",
+			},
+			"designer" : {
+				name : "Compile and Deploy",
+				description : "Release your finished idea directly into your opponent's tender facemeats",
 			}
 		};
 

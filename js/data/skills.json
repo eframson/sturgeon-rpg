@@ -143,7 +143,8 @@
 				"rogue" : "Kidney Punch",
 				"cultist" : "Eldritch Blast",
 				"hunter" : "Pistol Whip",
-				"duelist" : "Hilt Strike" 
+				"duelist" : "Hilt Strike",
+				"designer" : "Third Leg Slap"
 			}
 		},
 
@@ -175,7 +176,8 @@
 				"rogue" : "Eviscerate",
 				"cultist" : "Necrotize",
 				"hunter" : "Headshot",
-				"duelist" : "Lunging Skewer"
+				"duelist" : "Lunging Skewer",
+				"designer" : "Deconstructive Feedback"
 			}
 		},
 
@@ -204,11 +206,12 @@
 			"playerClassAlias" : {
 				"warrior" : "Inspiring Shout",
 				"barbarian" : "Battle Rage",
-				"wizard" : "Arcane Empower",
+				"wizard" : "Absord Arcane Energies",
 				"rogue" : "Discard Remorse",
-				"cultist" : "Dark Whispers",
+				"cultist" : "Dark Whispering",
 				"hunter" : "Research Weaknesses",
-				"duelist" : "Tighten Grip"
+				"duelist" : "Shout Catchphrase",
+				"designer" : "Playtest New Idea"
 			}
 		},
 
