@@ -471,9 +471,9 @@ define([
 
 					if( self.activeItem().canEquip() ){
 						buttons.push({
-							css : ((self.shiftPressed() == 1) ? "btn-danger" : defaultCss ),
-							text : ((self.shiftPressed() == 1) ? "Equip + Salv. curr." : "Equip" ),
-							click : ((self.shiftPressed() == 1) ? self.equipActiveItemAndSalvageExisting : self.equipActiveItem ),
+							css : ((self.shiftPressed() == 1 && self.activeItem().canBreakdown()) ? "btn-danger" : defaultCss ),
+							text : ((self.shiftPressed() == 1 && self.activeItem().canBreakdown()) ? "Equip + Salv. curr." : "Equip" ),
+							click : ((self.shiftPressed() == 1 && self.activeItem().canBreakdown()) ? self.equipActiveItemAndSalvageExisting : self.equipActiveItem ),
 						});
 					}
 
