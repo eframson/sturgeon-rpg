@@ -134,6 +134,13 @@ require([
 
 		}
 
+		window.onblur = function(event){
+			game.onShiftUp();
+		}
+
+		//window.onfocus = function(event){
+		//}
+
 	});
 
 });
