@@ -2404,7 +2404,6 @@ define([
 			self.equipItemCallback = undefined;
 
 			if( !Utils.isEmptyObject(item) ){
-				item.isEquipped(true);
 				self._setAsActiveItem(displayOpts, item);
 			}
 		}
@@ -2491,7 +2490,6 @@ define([
 					self._salvageItem(alreadyEquippedItem);
 				}else{
 					self.player().inventory.addItem(alreadyEquippedItem);
-					alreadyEquippedItem.isEquipped(false);
 				}	
 			}
 
@@ -2504,6 +2502,7 @@ define([
 				}
 			}else if( type == "shield" && !Utils.isEmptyObject(self.player().getEquippedWeapon()) && self.player().getEquippedWeapon().handsRequired == 2){
 				self.player().inventory.addItem(self.player().getEquippedWeapon());
+				self.player().getEquippedWeapon().isEquipped(false);
 				self.player().unEquipWeapon();
 			}
 
@@ -2550,6 +2549,8 @@ define([
 			var equippedItem;
 			playerObj = playerObj || self.player();
 
+			item.isEquipped(true);
+
 			if(type == "weapon"){
 				equippedItem = playerObj.equipWeapon(item);
 			}else if(type == "shield"){
@@ -2558,6 +2559,10 @@ define([
 				equippedItem = playerObj.equipArmor(item);
 			}else if(type == "accessory"){
 				equippedItem = playerObj.equipAccessory(item);
+			}
+
+			if( !Utils.isEmptyObject(equippedItem) ){
+				equippedItem.isEquipped(false);
 			}
 
 			return equippedItem;
